@@ -6,7 +6,7 @@
 
 # Project files #
 #################
-
+*/__pycache__/*
 
 # Packages #
 ############
