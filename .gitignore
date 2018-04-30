@@ -6,7 +6,7 @@
 
 # Project files #
 #################
-
+*/__pycache__/*
 
 # Packages #
 ############
@@ -41,7 +41,8 @@
 
 # compiled source #
 ###################
-/*.pyc
-*.pyc/
+**/*.pyc
+*/*.pyc
+*.pyc
 
 
