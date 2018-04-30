@@ -1,0 +1,47 @@
+# Untracked files:
+
+# Logs and databases #
+######################
+*/db.sqlite3
+
+# Project files #
+#################
+
+
+# Packages #
+############
+# it's better to unpack these files and commit the raw source
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Pycharm generated files #
+###########################
+../*.idea
+../*.idea/
+.idea/*
+.idea/
+.idea
+*.idea/
+*/.idea
+*.idea
+/*.idea
+**/.idea
+
+.idea/frontend-ui.iml
+.idea/misc.xml
+.idea/modules.xml
+.idea/vcs.xml
+.idea/workspace.xml
+
+# compiled source #
+###################
+/*.pyc
+*.pyc/
+
+
