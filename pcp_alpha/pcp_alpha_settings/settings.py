@@ -28,12 +28,12 @@ DEBUG = True
 
 
 # Will add host ip address to ALLOWED_HOST list
-s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-s.connect(("8.8.8.8", 80))
+# s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+# s.connect(("8.8.8.8", 80))
 
 
-ALLOWED_HOSTS = ['127.0.0.1', ''.join(s.getsockname()[0]),]
-s.close()
+ALLOWED_HOSTS = ['127.0.0.1']
+# s.close()
 
 
 # Application definition
@@ -136,3 +136,5 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'Frontend/static'),
 )
+
+# pytet
