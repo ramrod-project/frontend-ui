@@ -13,3 +13,4 @@ def test_home_page(client):
 
     if user is not None:
         assert 'Success' in client.get('/').content
+
