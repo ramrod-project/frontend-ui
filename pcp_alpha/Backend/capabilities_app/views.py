@@ -19,8 +19,7 @@ def get_capability_list(request):
     if request.method == 'GET':
         user_select = request.GET.get('plugin_name')
         capability_list_str = str(CapabilitiesModel.objects.get(plugin_capability_name=user_select)).split("-")[1]
-        return HttpResponse(
-                            json.dumps(capability_list_str),
+        return HttpResponse(json.dumps(capability_list_str),
                             content_type="application/json")
 
 

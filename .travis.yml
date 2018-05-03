@@ -1,0 +1,35 @@
+sudo: required
+
+language: python
+
+python:
+  - "3.6"
+
+services:
+  - docker
+
+before_install:
+  - git clone  https://github.com/ramrod-project/frontend-ui.git
+
+install:
+  - pip install django==2.0.1 pytest
+
+# For when we have unit tests
+# before_script:
+#   - pytest
+
+script:
+  - docker build -t ramrodpcp/frontend-ui .
+  - docker run -d --rm --name frontend -p 8080:8080 ramrodpcp/frontend-ui
+  # This will eventually be for more integration testing
+  - sleep 5
+  # Check to see if page is up
+  - curl http://127.0.0.1:8080
+  - docker stop frontend
+
+after_success:
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker push ramrodpcp/frontend-ui
+
+notifications:
+  slack: ramrod-project:GDF82rRYDg3KSekrT3GA24qO

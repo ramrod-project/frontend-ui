@@ -16,4 +16,3 @@ class CapabilitiesModel(models.Model):
         """
         return "{}-{}".format(self.plugin_capability_name, self.capability_name)
 
-
