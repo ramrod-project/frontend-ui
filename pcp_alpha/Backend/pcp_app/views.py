@@ -4,7 +4,7 @@ from django.shortcuts import render
 from .forms import CapabilitiesForm
 from .models import CapabilitiesModel
 from Backend.index_app.views import host_dict
-from Backend.capabilities_app.custom_data import get_plugin_num, get_capability_num
+from Backend.pcp_app.custom_data import get_plugin_num, get_capability_num
 
 import json
 
@@ -33,7 +33,7 @@ def new_capability_form(request):
     :return: user to form page, number of plugins, number of capabilities
     """
     return render(request,
-                  'capabilities_app/capability_form.html',
+                  'pcp_app/capability_form.html',
                   context={'plugin_num': get_plugin_num(),
                            'capability_num': get_capability_num(), })
 
@@ -73,7 +73,7 @@ def val_capability_form(request):
     else:
         form = CapabilitiesForm()
     return render(request,
-                  'capabilities_app/capability_form.html',
+                  'pcp_app/capability_form.html',
                   context={'plugin_num': get_plugin_num(),
                            'capability_num': get_capability_num(), })
 

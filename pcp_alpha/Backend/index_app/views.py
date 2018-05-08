@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from Backend.capabilities_app.custom_data import get_plugin_num, get_capability_num
+from Backend.pcp_app.custom_data import get_plugin_num, get_capability_num
 
 
 # host_dict is replicating Brain.Targets table

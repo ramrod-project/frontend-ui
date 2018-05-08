@@ -1,4 +1,4 @@
-from Backend.capabilities_app.models import CapabilitiesModel
+from Backend.pcp_app.models import CapabilitiesModel
 
 # Global Queryset of CapabilitiesModel
 mod = CapabilitiesModel.objects.all()

@@ -3,6 +3,7 @@
 # Logs and databases #
 ######################
 */db.sqlite3
+*/migrations
 
 # Project files #
 #################
