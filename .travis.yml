@@ -19,8 +19,15 @@ before_script:
   - pytest pcp_alpha
 
 script:
-  - docker build -t ramrodpcp/frontend-ui .
-  - docker run -d --rm --name frontend -p 8080:8080 ramrodpcp/frontend-ui
+  - if [ "$TRAVIS_BRANCH" != "master"  ];
+    then docker build -t ramrodpcp/frontend-ui:$TRAVIS_BRANCH . ;
+    else docker build -t ramrodpcp/frontend-ui:latest . ;
+    fi
+  - if [ "$TRAVIS_BRANCH" != "master"  ];
+    then docker run -d --rm --name frontend -p 8080:8080 ramrodpcp/frontend-ui:$TRAVIS_BRANCH ;
+    else docker run -d --rm --name frontend -p 8080:8080 ramrodpcp/frontend-ui:latest ;
+    fi
+
   # This will eventually be for more integration testing
   - sleep 5
   # Check to see if page is up
@@ -28,8 +35,12 @@ script:
   - docker stop frontend
 
 after_success:
-  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-  - docker push ramrodpcp/frontend-ui
+  - if [ "$TRAVIS_BRANCH" = "qa"  ] || [ "$TRAVIS_BRANCH" = "master"  ];
+    echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin; fi
+  - if [ "$TRAVIS_BRANCH" = "QA"  ];
+    then docker push ramrodpcp/frontend-ui:$TRAVIS_BRANCH; fi
+  - if [ "$TRAVIS_BRANCH" = "master"  ];
+    then docker push ramrodpcp/frontend-ui:latest; fi
 
 notifications:
   slack: ramrod-project:GDF82rRYDg3KSekrT3GA24qO
