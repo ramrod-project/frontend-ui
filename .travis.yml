@@ -12,7 +12,7 @@ before_install:
   - git clone  https://github.com/ramrod-project/frontend-ui.git
 
 install:
-  - pip install django==2.0.1 pytest
+  - pip install -r requirements.txt
 
 # For when we have unit tests
 before_script:
