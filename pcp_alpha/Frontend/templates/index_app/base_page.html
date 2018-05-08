@@ -101,21 +101,21 @@ desired effect
       <ul class="sidebar-menu" data-widget="tree">
         <li class="header">HEADER</li>
         <!-- Links on the sidebar -->
-        <li class="active"><a href="#"><i class="fa fa-link text-aqua"></i> <span>Index</span></a></li>
-        <li><a href="/capability_form/"><i class="fa fa-send text-aqua"></i> <span>Add Capability</span></a></li>
-        <li><a href="#"><i class="fa fa-laptop text-aqua"></i> <span>Dashboard2</span></a></li>
-        <li class="treeview">
-          <a href="#"><i class="fa fa-fighter-jet text-aqua"></i> <span>Capabilities</span>
-            <span class="pull-right-container">
-                <i class="fa fa-angle-left pull-right"></i>
-              </span>
-          </a>
-          <ul class="treeview-menu">
-            <li><a href="#">Form One</a></li>
-            <li><a href="#">Form Two</a></li>
-            <li><a href="#">Form Three</a></li>
-          </ul>
-        </li>
+        <li class="active"><a href="/"><i class="fa fa-home text-aqua"></i> <span>Home Page</span></a></li>
+        <li><a href="/new_target_form/"><i class="fa fa-send text-aqua"></i> <span>Add Target</span></a></li>
+        <!--<li><a href="#"><i class="fa fa-laptop text-aqua"></i> <span>Dashboard2</span></a></li>-->
+        <!--<li class="treeview">-->
+          <!--<a href="#"><i class="fa fa-fighter-jet text-aqua"></i> <span>Capabilities</span>-->
+            <!--<span class="pull-right-container">-->
+                <!--<i class="fa fa-angle-left pull-right"></i>-->
+              <!--</span>-->
+          <!--</a>-->
+          <!--<ul class="treeview-menu">-->
+            <!--<li><a href="#">Form One</a></li>-->
+            <!--<li><a href="#">Form Two</a></li>-->
+            <!--<li><a href="#">Form Three</a></li>-->
+          <!--</ul>-->
+        <!--</li>-->
       </ul>
       <!-- /.sidebar-menu -->
     </section>
@@ -130,10 +130,10 @@ desired effect
         PCP Dashboard
         <small>Home page</small>
       </h1>
-      <ol class="breadcrumb">
-        <li><a href="#"><i class="fa fa-dashboard"></i> Main</a></li>
-        <li class="active">Here</li>
-      </ol>
+      <!--<ol class="breadcrumb">-->
+        <!--<li><a href="#"><i class="fa fa-dashboard"></i> Main</a></li>-->
+        <!--<li class="active">Here</li>-->
+      <!--</ol>-->
     </section>
 
     <!-- Main content -->
@@ -141,88 +141,27 @@ desired effect
       <!--------------------------
         | Your Page Content Here |
         -------------------------->
-      <!--Small boxes (Stat boxes)-->
-      <div class="col-lg-3 col-xs-6">
-          <!-- small box -->
-          <div class="small-box bg-aqua">
-            <div class="inner">
-              <h3>{{ capability_num }}</h3>
-              <p>Capabilities</p>
-            </div>
-            <div class="icon">
-              <i class="fa fa-fighter-jet"></i>
-            </div>
-            <a href="#" class="small-box-footer">
-              More info <i class="fa fa-arrow-circle-right"></i>
-            </a>
-          </div>
-      </div>
-
-      <div class="col-lg-3 col-xs-6">
-          <!-- small box -->
-          <div class="small-box bg-red">
-            <div class="inner">
-              <h3>80</h3>
-
-              <p>Hosts or Clients</p>
-            </div>
-            <div class="icon">
-              <i class="fa fa-laptop"></i>
-            </div>
-            <a href="#" class="small-box-footer">
-              More info <i class="fa fa-arrow-circle-right"></i>
-            </a>
-          </div>
-      </div>
-
-      <div class="col-lg-3 col-xs-6">
-          <!-- small box -->
-          <div class="small-box bg-green">
-            <div class="inner">
-              <h3>150</h3>
-
-              <p>Commands</p>
-            </div>
-            <div class="icon">
-              <i class="fa fa-exchange"></i>
-            </div>
-            <a href="#" class="small-box-footer">
-              More info <i class="fa fa-arrow-circle-right"></i>
-            </a>
-          </div>
-      </div>
-
-      <div class="col-lg-3 col-xs-6">
-          <!-- small box -->
-          <div class="small-box bg-yellow">
-            <div class="inner">
-              <h3>{{ plugin_num }}</h3>
-
-              <p>Plugins</p>
-            </div>
-            <div class="icon">
-              <i class="fa fa-terminal"></i>
-            </div>
-            <a href="#" class="small-box-footer">
-              More info <i class="fa fa-arrow-circle-right"></i>
-            </a>
-          </div>
-      </div>
-
-      <!--/Small boxes (Stat boxes)-->
 
       <!--Content-->
       <!--First Row-->
       <div class="row">
-          <!--W1-->
+        <!--W1-->
         <div class="col-md-6">
-            <div class="nav-tabs-custom">
-
+            <div class="nav-tabs-custom box-success">
             <!-- Left box TABS HERE -->
                 <ul class="nav nav-tabs">
                     <li class="pull-left header"><i class="fa fa-laptop"></i> Host List</li>
-                    <li class="active"><a href="#tab_1" data-toggle="tab">tab 1 here</a></li>
-                    <li><a href="#tab_3" data-toggle="tab">tab 2 here</a></li>
+                    <!--<li class="active"><a href="#tab_1" data-toggle="tab">tab 1 here</a></li>-->
+                    <!--<li><a href="#tab_3" data-toggle="tab">tab 2 here</a></li>-->
+
+                    <!--Minimize and Maximize buttons-->
+                    <!--<li class="pull-right">-->
+                        <!--<button type="button" class="btn bg-grey btn-sm" data-widget="collapse"><i class="fa fa-minus"></i>-->
+                        <!--</button>-->
+                        <!--<button type="button" class="btn bg-grey btn-sm" data-widget="remove"><i class="fa fa-times"></i>-->
+                        <!--</button>-->
+                    <!--</li>-->
+                    <!--/Minimize and Maximize buttons-->
 
                     <!-- Search button -->
                     <li class="pull-right">
@@ -235,10 +174,10 @@ desired effect
                     </li>
                     <!-- /Search button -->
                 </ul>
-            <!-- /Left box TABS HERE -->
+                <!-- /Left box TABS HERE -->
                 <form action="/action/get_capability_list/" method="get">
                 <div class="tab-content">
-                  <div class="box">
+                  <div class="box box-primary">
                     <!--box body-->
                     <div class="box-body">
                       <div id="example2_wrapper" class="dataTables_wrapper form-inline dt-bootstrap"><div class="row"><div class="col-sm-6"></div><div class="col-sm-6"></div></div><div class="row"><div class="col-sm-12"><table id="example2" class="table table-bordered table-hover dataTable" role="grid" aria-describedby="example2_info">
@@ -247,11 +186,11 @@ desired effect
                         </thead>
                         <tbody>
                         {% if host_dict %}
-                            {% for key, value in host_dict.items %}
+                            {% for items in host_dict %}
                                 <a name="name_tag_name">
                                 <tr role="row" class="odd clickable-row" onclick="#" draggable="true" ondragstart="drag(event)">
-                                  <td id="name_tag_id{{ forloop.counter0 }}"><a href="#"><span>{{ value }}</span></a></td>
-                                  <td id="address_tag_id{{ forloop.counter0 }}"><a href="#"><span>{{ key }} </span></a></td>
+                                  <td id="name_tag_id{{ forloop.counter0 }}"><a href="#"><span>{{ items.PluginName }}</span></a></td>
+                                  <td id="address_tag_id{{ forloop.counter0 }}"><a href="#"><span>{{ items.Location }} </span></a></td>
                                 </tr></a>
                             {% endfor %}
                         {% endif %}
@@ -282,24 +221,46 @@ desired effect
         <!-- W2 Tabs -->
             <ul class="nav nav-tabs">
                 <li class="pull-left header"><i class="fa fa-exchange"></i> Command Builder</li>
-                <li class="active"><a href="#tab_1" data-toggle="tab">tab 1 here</a></li>
-                <li><a href="#tab_3" data-toggle="tab">tab 2 here</a></li>
+                <!--<li class="active"><a href="#tab_1" data-toggle="tab">tab 1 here</a></li>-->
+                <!--<li><a href="#tab_3" data-toggle="tab">tab 2 here</a></li>-->
+
+                <!--Minimize and Maximize buttons-->
+                <!--<li class="pull-right">-->
+                    <!--<button type="button" class="btn bg-grey btn-sm" data-widget="collapse"><i class="fa fa-minus"></i>-->
+                    <!--</button>-->
+                    <!--<button type="button" class="btn bg-grey btn-sm" data-widget="remove"><i class="fa fa-times"></i>-->
+                    <!--</button>-->
+                <!--</li>-->
+                <!--/Minimize and Maximize buttons-->
             </ul>
         <!-- /W2 Tabs -->
-            <div class="box">
+            <div class="box box-primary">
                 <div class="box-body">
-                    <div class="box-header theContentHeader">
-                    </div>
+                    <div class="row">
+                        <div class="col-xs-4">
+                            <div class="box-header theContentHeader">
+                            </div>
 
-                    <div class="tab-content theContent">
-                        <div class="tab-pane active" id="tab1">
-                        </div>
-                        <div class="tab-pane" id="tab_4" name="tab_2">
-                            <ul>
+                            <div class="tab-content theContent">
+                                <div class="tab-pane active" id="tab1">
+                                </div>
+                                <div class="tab-pane" id="tab_4" name="tab_2">
+                                    <ul>
 
-                            </ul>
+                                    </ul>
+                                </div>
+                                <div class="tab-pane" id="tab_5">
+                                </div>
+                            </div>
                         </div>
-                        <div class="tab-pane" id="tab_5">
+
+                        <div class="col-xs-8">
+                            <div class="box-header">
+                                <p><b>Tooltip:</b></p>
+                            </div>
+                            <div class="tab-content tooltipContent">
+
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -324,10 +285,20 @@ desired effect
                     <li class="active"><a href="#tab_1" data-toggle="tab">Seq A</a></li>
                     <!--<li><a href="#tab_3" data-toggle="tab">Seq B</a></li>-->
                     <li><a href="#tab_4" data-toggle="tab" class="fa fa-plus"></a></li>
+
+                    <!--Minimize and Maximize buttons-->
+                    <!--<li class="pull-right">-->
+                        <!--<button type="button" class="btn bg-grey btn-sm" data-widget="collapse"><i class="fa fa-minus"></i>-->
+                        <!--</button>-->
+                        <!--<button type="button" class="btn bg-grey btn-sm" data-widget="remove"><i class="fa fa-times"></i>-->
+                        <!--</button>-->
+                    <!--</li>-->
+                    <!--/Minimize and Maximize buttons-->
+
                     <li class="pull-right"><button type="submit" class="btn btn-default" id="clear_buttonid">Clear</button></li>
                 </ul>
                 <!-- /W3 Tabs -->
-                <div class="box">
+                <div class="box box-primary">
                     <div class="box-body">
                         <div class="tab-content">
                             <div id="example3_wrapper" class="dataTables_wrapper form-inline dt-bootstrap"><div class="row"><div class="col-sm-6"></div><div class="col-sm-6"></div></div><div class="row"><div class="col-sm-12"><table id="example3" class="table table-bordered table-hover dataTable" role="grid" aria-describedby="example2_info">
@@ -364,10 +335,19 @@ desired effect
                     <li class="pull-left header"><i class="fa fa-check-square-o"></i> Job Output</li>
                     <li class="active"><a href="#tab_1" data-toggle="tab">tab 1 here</a></li>
                     <li><a href="#tab_3" data-toggle="tab">tab 2 here</a></li>
+
+                    <!--Minimize and Maximize buttons-->
+                    <!--<li class="pull-right">-->
+                        <!--<button type="button" class="btn bg-grey btn-sm" data-widget="collapse"><i class="fa fa-minus"></i>-->
+                        <!--</button>-->
+                        <!--<button type="button" class="btn bg-grey btn-sm" data-widget="remove"><i class="fa fa-times"></i>-->
+                        <!--</button>-->
+                    <!--</li>-->
+                    <!--/Minimize and Maximize buttons-->
                 </ul>
-                <!-- /W2 Tabs -->
+                <!-- /W4 Tabs -->
                 <!--Content-->
-                <div class="box">
+                <div class="box box-primary">
                     <div class="box-body">
                         <table class="table table-bordered text-center">
                             <tbody>
@@ -405,7 +385,7 @@ desired effect
   <footer class="main-footer">
     <!-- To the right -->
     <div class="pull-right hidden-xs">
-	    <strong>Version 0.1.0</strong>
+	    <strong>Version 0.1.1</strong>
     </div>
     <!-- Default to the left -->
     <strong>Alpha Version for the <a href="http://nooooooooooooooo.com/">PCP Project</a></strong> :)

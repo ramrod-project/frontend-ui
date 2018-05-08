@@ -23,7 +23,7 @@ def get_capability_list(request):
                             content_type="application/json")
 
 
-def new_capability_form(request):
+def new_target_form(request):
     """
     new_capability_form function get's called when a user clicks on
     'Add Capability' on the left side panel and will render a form
@@ -33,7 +33,7 @@ def new_capability_form(request):
     :return: user to form page, number of plugins, number of capabilities
     """
     return render(request,
-                  'pcp_app/capability_form.html',
+                  'pcp_app/target_form.html',
                   context={'plugin_num': get_plugin_num(),
                            'capability_num': get_capability_num(), })
 
@@ -73,7 +73,7 @@ def val_capability_form(request):
     else:
         form = CapabilitiesForm()
     return render(request,
-                  'pcp_app/capability_form.html',
+                  'pcp_app/target_form.html',
                   context={'plugin_num': get_plugin_num(),
                            'capability_num': get_capability_num(), })
 
