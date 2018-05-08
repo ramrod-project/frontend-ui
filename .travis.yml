@@ -16,7 +16,7 @@ install:
 
 # For when we have unit tests
 before_script:
-  - pytest
+  - pytest pcp_alpha
 
 script:
   - docker build -t ramrodpcp/frontend-ui .
