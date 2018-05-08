@@ -4,14 +4,15 @@ from django.shortcuts import render
 from .forms import CapabilitiesForm
 from .models import CapabilitiesModel
 from Backend.index_app.views import host_dict
-from Backend.pcp_app.custom_data import get_plugin_num, get_capability_num
+# Not using imports that give the # of plugins and # of capabilities
+# from Backend.db_dir.custom_data import get_plugin_num, get_capability_num
 
 import json
 
 
-def get_capability_list(request):
+def get_command_list(request):
     """
-    get_capability_list function returns a specific list of capabilities
+    get_command_list function returns a specific list of capabilities
     as a json depending on the plugin name the user clicked.
     :param request: user request
     :return: list of capabilities as a json
@@ -34,13 +35,15 @@ def new_target_form(request):
     """
     return render(request,
                   'pcp_app/target_form.html',
-                  context={'plugin_num': get_plugin_num(),
-                           'capability_num': get_capability_num(), })
+                  context={
+                           # 'plugin_num': get_plugin_num(),
+                           # 'capability_num': get_capability_num(),
+                           })
 
 
-def val_capability_form(request):
+def val_target_form(request):
     """
-    val_capability_form function is validating the user input from adding
+    val_target_form function is validating the user input from adding
     a list of capabilities tied with a plugin name form.  If the validation
     is success, the new list of capabilities that belong to a certain plugin
     name is added to the database.
@@ -68,12 +71,15 @@ def val_capability_form(request):
             return render(request,
                           'index_app/base_page.html',
                           context={'host_dict': host_dict,
-                                   'plugin_num': get_plugin_num(),
-                                   'capability_num': get_capability_num(), })
+                                   # 'plugin_num': get_plugin_num(),
+                                   # 'capability_num': get_capability_num(),
+                                   })
     else:
         form = CapabilitiesForm()
     return render(request,
                   'pcp_app/target_form.html',
-                  context={'plugin_num': get_plugin_num(),
-                           'capability_num': get_capability_num(), })
+                  context={
+                           # 'plugin_num': get_plugin_num(),
+                           # 'capability_num': get_capability_num(),
+                          })
 

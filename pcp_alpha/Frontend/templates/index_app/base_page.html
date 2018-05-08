@@ -2,7 +2,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>PCP-Alpha</title>
+    <title>PCP-Demo</title>
     <!--Static root directory-->
     {% load static %}
     <!-- Tell the browser to be responsive to screen width -->
@@ -71,7 +71,7 @@ desired effect
       <!-- mini logo for sidebar mini 50x50 pixels -->
       <span class="logo-mini"><b>P</b>CP</span>
       <!-- logo for regular state and mobile devices -->
-      <span class="logo-lg"><b>PCP-</b>ALPHA</span>
+      <span class="logo-lg"><b>PCP-</b>DEMO</span>
     </a>
 
     <!-- Header Navbar -->
@@ -150,7 +150,7 @@ desired effect
             <div class="nav-tabs-custom box-success">
             <!-- Left box TABS HERE -->
                 <ul class="nav nav-tabs">
-                    <li class="pull-left header"><i class="fa fa-laptop"></i> Host List</li>
+                    <li class="pull-left header"><i class="fa fa-laptop"></i> Target List</li>
                     <!--<li class="active"><a href="#tab_1" data-toggle="tab">tab 1 here</a></li>-->
                     <!--<li><a href="#tab_3" data-toggle="tab">tab 2 here</a></li>-->
 
@@ -175,14 +175,14 @@ desired effect
                     <!-- /Search button -->
                 </ul>
                 <!-- /Left box TABS HERE -->
-                <form action="/action/get_capability_list/" method="get">
+                <form action="/action/get_command_list/" method="get">
                 <div class="tab-content">
                   <div class="box box-primary">
                     <!--box body-->
                     <div class="box-body">
                       <div id="example2_wrapper" class="dataTables_wrapper form-inline dt-bootstrap"><div class="row"><div class="col-sm-6"></div><div class="col-sm-6"></div></div><div class="row"><div class="col-sm-12"><table id="example2" class="table table-bordered table-hover dataTable" role="grid" aria-describedby="example2_info">
                         <thead>
-                        <tr role="row"><th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Rendering engine: activate to sort column descending">Plugin</th><th class="sorting" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">Address</th></tr>
+                        <tr role="row"><th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Rendering engine: activate to sort column descending">Plugin Name</th><th class="sorting" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">Location</th></tr>
                         </thead>
                         <tbody>
                         {% if host_dict %}
@@ -196,7 +196,7 @@ desired effect
                         {% endif %}
                         </tbody>
                         <tfoot>
-                        <tr><th rowspan="1" colspan="1">Capability</th><th rowspan="1" colspan="1">Capability Type</th></tr>
+                        <tr><th rowspan="1" colspan="1">Plugin Name</th><th rowspan="1" colspan="1">Location</th></tr>
                         </tfoot>
                       </table></div></div><div class="row"><div class="col-sm-5"><div class="dataTables_info" id="example2_info" role="status" aria-live="polite">Showing 1 to 10 of 57 entries</div></div><div class="col-sm-7"><div class="dataTables_paginate paging_simple_numbers" id="example2_paginate"><ul class="pagination"><li class="paginate_button previous disabled" id="example2_previous"><a href="#" aria-controls="example2" data-dt-idx="0" tabindex="0">Previous</a></li><li class="paginate_button active"><a href="#" aria-controls="example2" data-dt-idx="1" tabindex="0">1</a></li><li class="paginate_button "><a href="#" aria-controls="example2" data-dt-idx="2" tabindex="0">2</a></li><li class="paginate_button "><a href="#" aria-controls="example2" data-dt-idx="3" tabindex="0">3</a></li><li class="paginate_button "><a href="#" aria-controls="example2" data-dt-idx="4" tabindex="0">4</a></li><li class="paginate_button "><a href="#" aria-controls="example2" data-dt-idx="5" tabindex="0">5</a></li><li class="paginate_button "><a href="#" aria-controls="example2" data-dt-idx="6" tabindex="0">6</a></li><li class="paginate_button next" id="example2_next"><a href="#" aria-controls="example2" data-dt-idx="7" tabindex="0">Next</a></li></ul></div></div></div></div>
                     </div>
@@ -303,7 +303,7 @@ desired effect
                         <div class="tab-content">
                             <div id="example3_wrapper" class="dataTables_wrapper form-inline dt-bootstrap"><div class="row"><div class="col-sm-6"></div><div class="col-sm-6"></div></div><div class="row"><div class="col-sm-12"><table id="example3" class="table table-bordered table-hover dataTable" role="grid" aria-describedby="example2_info">
                                 <thead>
-                                <tr role="row"><th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Rendering engine: activate to sort column descending">Sequence #</th><th class="sorting" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">Plugin</th><th class="sorting" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">Host</th><th class="sorting" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">Command</th></tr>
+                                <tr role="row"><th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Rendering engine: activate to sort column descending">Sequence #</th><th class="sorting" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">Plugin Name</th><th class="sorting" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">Host</th><th class="sorting" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">Command</th></tr>
                                 </thead>
                                 <tbody class="thirdBoxContent">
                                 <a name="thirdboxname">
@@ -388,7 +388,7 @@ desired effect
 	    <strong>Version 0.1.1</strong>
     </div>
     <!-- Default to the left -->
-    <strong>Alpha Version for the <a href="http://nooooooooooooooo.com/">PCP Project</a></strong> :)
+    <strong>Demo Version for the <a href="http://nooooooooooooooo.com/">PCP Project</a></strong> :)
   </footer>
 
   <!-- Control Sidebar -->
