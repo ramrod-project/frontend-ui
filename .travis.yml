@@ -15,8 +15,8 @@ install:
   - pip install django==2.0.1 pytest
 
 # For when we have unit tests
-# before_script:
-#   - pytest
+ before_script:
+   - pytest
 
 script:
   - docker build -t ramrodpcp/frontend-ui .
