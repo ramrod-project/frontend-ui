@@ -49,6 +49,7 @@ PREREQ_APPS = [
 PROJECT_APPS = [
     'Backend.index_app',
     'Backend.pcp_app',
+    'Backend.db_app',
 ]
 
 INSTALLED_APPS = PREREQ_APPS + PROJECT_APPS
