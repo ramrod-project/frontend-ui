@@ -27,7 +27,7 @@ function get_capabilities_func(){
 
     $.ajax({
         type: "GET",
-        url: "/action/get_capability_list/",
+        url: "/action/get_command_list/",
         data: {"plugin_name": plugin_name_var},
         datatype: 'json',
         success: function(data) {
@@ -38,17 +38,17 @@ function get_capabilities_func(){
         	$(".theContentHeader").empty();
         	$(".tooltipContent").empty();
 
-            // display capabilities in w2
+            // display command(s) in w2
         	for(var i = 0; i < data.length; i++) {
 //                console.log(data[i]);
-                $(".theContent").append($("<li id='capabilityid' class='capabilityclass' onclick='#'/>").append($("<a id='acapabilityid' class='acapabilityclass' href='#'/>").text(data[i].CommandName)));
+                $(".theContent").append($("<li id='commandid' class='commandclass' onclick='#'/>").append($("<a id='acommandid' class='acommandclass' href='#'/>").text(data[i].CommandName)));
             }
             $(".theContent").append("<div/>").attr({"style": "width:250px"});
 
-            $(".theContentHeader").append("<h2 class='box-title'/>").text(plugin_name_var + "  capability list");
+            $(".theContentHeader").append("<h2 class='box-title'/>").text(plugin_name_var + "  command list");
             $(".theContentArgument").append("<input id='argumentid' placeholder='Argument Here'/>");
-//            $("a.acapabilityclass").click(get_capability);  // replicate capability name onto footer
-            $("a.acapabilityclass").click(function(){
+//            $("a.acommandclass").click(get_command);  // replicate command name onto footer
+            $("a.acommandclass").click(function(){
                 //footer
                 $(".theContentArgument").empty();
                 $(".theContentArgument").append("<a id='commandIdBuilder'>" +$(this)[0].text + "</a>" + " &nbsp;&nbsp; " + "<input id='argumentid' placeholder='Argument Here'/>");
@@ -70,8 +70,8 @@ function get_capabilities_func(){
     })
 }
 
-// Capability name display on footer depending which capability the user clicked
-function get_capability(){
+// Capability name display on footer depending which command the user clicked
+function get_command(){
     $(".theContentArgument").empty();
     $(".theContentArgument").append("<a id='commandIdBuilder'>" +$(this)[0].text + "</a>" + " &nbsp;&nbsp; " + "<input id='argumentid' placeholder='Argument Here'/>");
 }
