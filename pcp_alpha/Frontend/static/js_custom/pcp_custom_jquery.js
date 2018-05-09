@@ -1,6 +1,6 @@
 var inc = 1;
 $(document).ready(function() {
-	$("tr.clickable-row").click(get_capabilities_func);   // displays capabilities in w2
+	$("tr.clickable-row").click(get_capabilities_func);   // displays commands in w2
 	$("#addjob_button").click(add_new_job);               // add new job in w3 
 	$("#addjob_button").click(function(){
 	    inc++;
@@ -18,7 +18,7 @@ Functions down below are for w2
 -----------------------------------------------------------------------------------------------------
 */
 
-// List of capabilities based off of plugin name
+// List of commands based off of plugin name
 function get_capabilities_func(){
 
     // plugin name the user clicked
