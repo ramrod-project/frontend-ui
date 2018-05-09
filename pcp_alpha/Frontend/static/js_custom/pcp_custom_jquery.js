@@ -36,18 +36,31 @@ function get_capabilities_func(){
         	$(".theContent").empty();
         	$(".theContentArgument").empty();
         	$(".theContentHeader").empty();
+        	$(".tooltipContent").empty();
 
             // display capabilities in w2
-            data_split = data.split(',');
-        	for(var i = 0; i < data_split.length; i++) {
-                console.log(data_split[i]);
-                $(".theContent").append($("<li id='capabilityid' class='capabilityclass' onclick='#'/>").append($("<a id='acapabilityid' class='acapabilityclass' href='#'/>").text(data_split[i])));
+        	for(var i = 0; i < data.length; i++) {
+//                console.log(data[i]);
+                $(".theContent").append($("<li id='capabilityid' class='capabilityclass' onclick='#'/>").append($("<a id='acapabilityid' class='acapabilityclass' href='#'/>").text(data[i].CommandName)));
             }
             $(".theContent").append("<div/>").attr({"style": "width:250px"});
 
             $(".theContentHeader").append("<h2 class='box-title'/>").text(plugin_name_var + "  capability list");
             $(".theContentArgument").append("<input id='argumentid' placeholder='Argument Here'/>");
-            $("a.acapabilityclass").click(get_capability);  // replicate capability name onto footer
+//            $("a.acapabilityclass").click(get_capability);  // replicate capability name onto footer
+            $("a.acapabilityclass").click(function(){
+                //footer
+                $(".theContentArgument").empty();
+                $(".theContentArgument").append("<a id='commandIdBuilder'>" +$(this)[0].text + "</a>" + " &nbsp;&nbsp; " + "<input id='argumentid' placeholder='Argument Here'/>");
+
+                //tooltip
+                $(".tooltipContent").empty();
+                for(var i = 0; i < data.length; i++) {
+                    if(data[i].CommandName == $(this)[0].text){
+                        $(".tooltipContent").append("<pre>" + data[i].Tooltip + "</pre>");
+                    }
+                }
+            });
 
         },
         error: function (data) {
@@ -55,6 +68,12 @@ function get_capabilities_func(){
         	console.log(data);
         }
     })
+}
+
+// Capability name display on footer depending which capability the user clicked
+function get_capability(){
+    $(".theContentArgument").empty();
+    $(".theContentArgument").append("<a id='commandIdBuilder'>" +$(this)[0].text + "</a>" + " &nbsp;&nbsp; " + "<input id='argumentid' placeholder='Argument Here'/>");
 }
 
 /*
@@ -103,12 +122,6 @@ function clear_new_jobs(){
     $(".thirdBoxContent").empty();
     inc = 1;
     $("#addjob_button")[0].value = 0;
-}
-
-// Capability name display on footer depending which capability the user clicked
-function get_capability(){
-    $(".theContentArgument").empty();
-    $(".theContentArgument").append("<a id='commandIdBuilder'>" +$(this)[0].text + "</a>" + "  " + "<input id='argumentid' placeholder='Argument Here'/>");
 }
 
 /*
