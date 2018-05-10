@@ -40,7 +40,7 @@ script:
 #    then docker run -d --rm --name frontend -p 8080:8080 ramrodpcp/frontend-ui:$TRAVIS_BRANCH;
 #    else docker run -d --rm --name frontend -p 8080:8080 ramrodpcp/frontend-ui:latest; fi
 
-  - docker build -t ramrodpcp/frontend-ui
+#  - docker build -t ramrodpcp/frontend-ui .
   - docker run -d --rm --name frontend -p 8080:8080 ramrodpcp/frontend-ui
 #    fi
 
