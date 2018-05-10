@@ -208,5 +208,6 @@ def confirm_plugin_db_info():
 def confirm_db_info():
     print("\nlog: ###### DB Logs ######")
     confirm_brain_db_info()
+    confirm_plugin_db_info()
     # confirm_plugin_db_info()
 

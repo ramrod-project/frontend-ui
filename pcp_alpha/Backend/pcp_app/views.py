@@ -16,7 +16,6 @@ def get_command_list(request):
     """
     if request.method == 'GET':
         user_select = request.GET.get('plugin_name')
-
         return HttpResponse(json.dumps(get_specific_commands(user_select)),
                             content_type="application/json")
 

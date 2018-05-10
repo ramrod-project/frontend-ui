@@ -23,9 +23,7 @@ def get_specific_commands(user_selection):
     """
     command_list = list()
 
-    cur = rtdb.db("plugin_db").table(user_selection).filter(rtdb.row['CommandName']).run(db_connection())
-    print("#"*28)
+    cur = rtdb.db("Plugins").table(user_selection).filter(rtdb.row['CommandName']).run(db_connection())
     for item_cur in cur:
-        print(item_cur)
         command_list.append(dict(item_cur))
     return command_list
