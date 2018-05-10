@@ -120,7 +120,7 @@ def confirm_plugin_db_info():
 
     if check_dev_env() != 1:  # For Production Environment
         if rtdb.db_list().contains("Plugins").run():
-            print("log: db Plugins exist")
+            print("\nlog: db Plugins exist")
 
             # Checking any tables exist within Plugins db
             if rtdb.db("Plugins").table_list().run():
@@ -128,10 +128,10 @@ def confirm_plugin_db_info():
             else:
                 print("log: Plugins tables don't exist\n")
         else:
-            print("log: db Plugins DOESN'T exist\n")
+            print("\nlog: db Plugins DOESN'T exist\n")
     else:  # if Plugins does exit locally
         if rtdb.db_list().contains("Plugins").run() is not True:  # if Plugins doesn't exist locally
-            print("log: db Plugins doesn't exist locally")
+            print("\nlog: db Plugins doesn't exist locally")
             rtdb.db_create("Plugins").run()
             print("log: db Plugins was created to locally since it didn't exist")
 
@@ -139,7 +139,7 @@ def confirm_plugin_db_info():
             rtdb.db("Plugins").table_create("Plugin1").run()
             print("log: db Plugins.Plugin1 table was created to locally")
         else:  # if Plugins does exit locally
-            print("log: db Plugins exist locally")
+            print("\nlog: db Plugins exist locally")
             if rtdb.db("Plugins").table_list().contains("Plugin1").run():
 
                 try:
@@ -158,7 +158,7 @@ def confirm_plugin_db_info():
 
         # insert dummy data
         rtdb.db("Plugins").table("Plugin1").insert([
-            {"CommandName": "get_file",
+            {"CommandName": "read_file",
              "Tooltip": read_file_tt,
              "Output": True,
              "Inputs": [
@@ -184,7 +184,7 @@ def confirm_plugin_db_info():
                 "OptionalInputs": []
             },
 
-            {"CommandName": "put_file",
+            {"CommandName": "send_file",
              "Tooltip": write_file_tt,
              "Output": True,
              "Inputs": [

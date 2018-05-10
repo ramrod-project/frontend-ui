@@ -31,7 +31,6 @@ function get_capabilities_func(){
         data: {"plugin_name": plugin_name_var},
         datatype: 'json',
         success: function(data) {
-
             // empty content in w2
         	$(".theContent").empty();
         	$(".theContentArgument").empty();
@@ -43,11 +42,11 @@ function get_capabilities_func(){
 //                console.log(data[i]);
                 $(".theContent").append($("<li id='commandid' class='commandclass' onclick='#'/>").append($("<a id='acommandid' class='acommandclass' href='#'/>").text(data[i].CommandName)));
             }
+            $(".tooltipHeader").append($("<p/>").append($("<b/>").text("Tooltip:")));
             $(".theContent").append("<div/>").attr({"style": "width:250px"});
-
             $(".theContentHeader").append("<h2 class='box-title'/>").text(plugin_name_var + "  command list");
             $(".theContentArgument").append("<input id='argumentid' placeholder='Argument Here'/>");
-//            $("a.acommandclass").click(get_command);  // replicate command name onto footer
+
             $("a.acommandclass").click(function(){
                 //footer
                 $(".theContentArgument").empty();
@@ -61,7 +60,6 @@ function get_capabilities_func(){
                     }
                 }
             });
-
         },
         error: function (data) {
         	console.log("ERROR FUNCTION CALLED");
