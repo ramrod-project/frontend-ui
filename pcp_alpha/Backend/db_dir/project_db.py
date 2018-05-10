@@ -4,7 +4,13 @@ import docker
 import sys
 
 
+# May need to modify in the future to check environments
 def check_dev_env():
+    """
+    check_dev_env function check's which environment (prod or dev)
+    to connect to the brain.
+    :return: 0 (prod env) or 1 (dev env)
+    """
     client = docker.from_env()
     if len(client.containers.list()) != 0:
         return_int = 0
@@ -16,14 +22,10 @@ def check_dev_env():
 def db_connection():
     """
     Function db_connection open's a connection with rethinkdb
-    check production first then development
+    check production environment or development environment
     :return: db connection
     """
-    client = docker.from_env()
-
-    # Open a connection with rethinkdb either using docker image or local
-    # Note: May need to modify later
-    if len(client.containers.list()) != 0:
+    if check_dev_env() != 1:
         dbconn = rtdb.connect().repl()
         print("log: connection to the Brain from docker image is connected")
     else:

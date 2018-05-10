@@ -1,6 +1,4 @@
 from django.shortcuts import render
-
-from .forms import CapabilitiesForm
 from Backend.db_dir.custom_queries import get_brain_targets
 
 
