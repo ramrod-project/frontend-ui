@@ -31,7 +31,7 @@ script:
     fi
 
   # This will eventually be for more integration testing
-  - sleep 10
+  - sleep 5
 #  - docker ps
   # Check to see if page is up
   - curl http://127.0.0.1:8080
