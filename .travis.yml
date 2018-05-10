@@ -16,6 +16,7 @@ install:
 
 # For when we have unit tests
 before_script:
+  - docker run -d -p 28015:28015 ramrodpcp/database-brain
   - pytest pcp_alpha
 
 script:

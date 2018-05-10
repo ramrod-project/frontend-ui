@@ -2,6 +2,7 @@ from .custom_data import location_generated_num
 import rethinkdb as rtdb
 import docker
 import sys
+# from time import sleep
 
 
 # May need to modify in the future to check environments
@@ -11,6 +12,7 @@ def check_dev_env():
     to connect to the brain.
     :return: 0 (prod env) or 1 (dev env)
     """
+    # sleep(9)
     client = docker.from_env()
     if len(client.containers.list()) != 0:
         return_int = 0
@@ -25,11 +27,12 @@ def db_connection():
     check production environment or development environment
     :return: db connection
     """
+    # sleep(9)
     if check_dev_env() != 1:
         dbconn = rtdb.connect().repl()
         print("log: connection to the Brain from docker image is connected")
     else:
-        dbconn = rtdb.connect("localhost", 28015).repl()
+        dbconn = rtdb.connect("127.0.0.1", 28015).repl()
         print("log: connection to the Brain from local is connected")
 
     return dbconn
@@ -129,5 +132,5 @@ def confirm_plugin_db_info():
 def confirm_db_info():
     print("\nlog: ###### DB Logs ######")
     confirm_brain_db_info()
-    confirm_plugin_db_info()
+    # confirm_plugin_db_info()
 
