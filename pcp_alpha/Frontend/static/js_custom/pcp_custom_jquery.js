@@ -38,6 +38,8 @@ function get_capabilities_func(){
         	$(".theContentHeader").empty();
         	$(".tooltipContent").empty();
 
+        	console.log(data);
+
             // display command(s) in w2
         	for(var i = 0; i < data.length; i++) {
 //                console.log(data[i]);

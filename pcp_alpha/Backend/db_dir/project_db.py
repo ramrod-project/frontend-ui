@@ -1,4 +1,4 @@
-from .custom_data import location_generated_num
+from .custom_data import location_generated_num, read_file_tt, delete_file_tt, write_file_tt
 import rethinkdb as rtdb
 import docker
 import sys
@@ -101,7 +101,7 @@ def confirm_brain_db_info():
 
         # insert dummy data
         rtdb.db("Brain").table("Targets").insert([
-            {"PluginName": "plugin1",
+            {"PluginName": "Plugin1",
              "Location": location_generated_num("172.16.5."),
              "Port": "8002",
              "Optional": "Document Here"}
@@ -117,16 +117,92 @@ def confirm_plugin_db_info():
     Plugins db
     :return: nothing at the moment
     """
-    if rtdb.db_list().contains("Plugins").run():
-        print("log: db Plugins exist")
 
-        # Checking any tables exist within Plugins db
-        if rtdb.db("Plugins").table_list().run():
-            print("log: Plugins tables are listed down below:\n{}".format(rtdb.db("Plugins").table_list().run()))
+    if check_dev_env() != 1:  # For Production Environment
+        if rtdb.db_list().contains("Plugins").run():
+            print("log: db Plugins exist")
+
+            # Checking any tables exist within Plugins db
+            if rtdb.db("Plugins").table_list().run():
+                print("log: Plugins tables are listed down below:\n{}".format(rtdb.db("Plugins").table_list().run()))
+            else:
+                print("log: Plugins tables don't exist\n")
         else:
-            print("log: Plugins tables don't exist\n")
-    else:
-        print("log: db Plugins DOESN'T exist\n")
+            print("log: db Plugins DOESN'T exist\n")
+    else:  # if Plugins does exit locally
+        if rtdb.db_list().contains("Plugins").run() is not True:  # if Plugins doesn't exist locally
+            print("log: db Plugins doesn't exist locally")
+            rtdb.db_create("Plugins").run()
+            print("log: db Plugins was created to locally since it didn't exist")
+
+            # create local Plugins.Plugin1 table
+            rtdb.db("Plugins").table_create("Plugin1").run()
+            print("log: db Plugins.Plugin1 table was created to locally")
+        else:  # if Plugins does exit locally
+            print("log: db Plugins exist locally")
+            if rtdb.db("Plugins").table_list().contains("Plugin1").run():
+
+                try:
+                    rtdb.db("Plugins").table_drop("Plugin1").run()
+                    print("log: db Plugins.Plugin1 table has been dropped from Plugins to insert new data")
+
+                    rtdb.db("Plugins").table_create("Plugin1").run()
+                    print("log: db Plugins.Plugin1 table was created to locally since they were drop to add new data")
+                except:
+                    e = sys.exc_info()[0]
+                    print("EXCEPT == {}".format(e))
+            else:
+                print("log: db Plugins.Plugin1 doesnt exist")
+                rtdb.db("Plugins").table_create("Plugin1").run()
+                print("log: db Plugins.Plugin1 table was created to locally since it didn't exist")
+
+        # insert dummy data
+        rtdb.db("Plugins").table("Plugin1").insert([
+            {"CommandName": "get_file",
+             "Tooltip": read_file_tt,
+             "Output": True,
+             "Inputs": [
+                 {"Name": "FilePath",
+                  "Type": "textbox",
+                  "Tooltip": "Must be the fully qualified path",
+                  "Value": "remote filename"
+                  },
+             ],
+             "OptionalInputs": []
+             },
+
+            {"CommandName": "delete_file",
+             "Tooltip": delete_file_tt,
+             "Output": True,
+             "Inputs": [
+                 {"Name": "FilePath",
+                  "Type": "textbox",
+                  "Tooltip": "Must be the fully qualified path",
+                  "Value": "remote filename"
+                  },
+                ],
+                "OptionalInputs": []
+            },
+
+            {"CommandName": "put_file",
+             "Tooltip": write_file_tt,
+             "Output": True,
+             "Inputs": [
+                 {"Name": "SourceFilePath",
+                  "Type": "textbox",
+                  "Tooltip": "Must be uploaded here first",
+                  "Value": "File"
+                  },
+                 {"Name": "DestinationFilePath",
+                  "Type": "textbox",
+                  "Tooltip": "Must be the fully qualified path",
+                  "Value": "remote filename"
+                  },
+             ],
+             "OptionalInputs": []
+             },
+        ]).run()
+        print("log: db Dummy data was inserted to Plugins.Plugin1 locally")
 
 
 def confirm_db_info():
