@@ -35,12 +35,10 @@ script:
 
   - if [ "$TRAVIS_BRANCH" != "master"  ];
     then docker build -t ramrodpcp/frontend-ui:$TRAVIS_BRANCH . ;
-    else docker build -t ramrodpcp/frontend-ui:latest . ;
-    fi
+    else docker build -t ramrodpcp/frontend-ui:latest . ; fi
   - if [ "$TRAVIS_BRANCH" != "master"  ];
     then docker run -d --rm --name frontend -p 8080:8080 ramrodpcp/frontend-ui:$TRAVIS_BRANCH;
-    else docker run -d --rm --name frontend -p 8080:8080 ramrodpcp/frontend-ui:latest;
-    fi
+    else docker run -d --rm --name frontend -p 8080:8080 ramrodpcp/frontend-ui:latest; fi
 
 #  - docker build -t ramrodpcp/frontend-ui .
 #  - docker run -d --rm --name frontend -p 8080:8080 ramrodpcp/frontend-ui
@@ -54,7 +52,7 @@ script:
   - docker stop frontend
 
 after_success:
-  - if [ "$TRAVIS_BRANCH" = "qa"  ] || [ "$TRAVIS_BRANCH" = "master"  ];
+  - if [ "$TRAVIS_BRANCH" = "QA"  ] || [ "$TRAVIS_BRANCH" = "master"  ];
     echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin; fi
   - if [ "$TRAVIS_BRANCH" = "QA"  ];
     then docker push ramrodpcp/frontend-ui:$TRAVIS_BRANCH; fi
