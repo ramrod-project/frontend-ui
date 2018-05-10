@@ -2,7 +2,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>PCP-Alpha</title>
+    <title>PCP-Demo</title>
     <!--Static root directory-->
     {% load static %}
     <!-- Tell the browser to be responsive to screen width -->
@@ -70,7 +70,7 @@ desired effect
       <!-- mini logo for sidebar mini 50x50 pixels -->
       <span class="logo-mini"><b>P</b>CP</span>
       <!-- logo for regular state and mobile devices -->
-      <span class="logo-lg"><b>PCP-</b>ALPHA</span>
+      <span class="logo-lg"><b>PCP-</b>DEMO</span>
     </a>
 
     <!-- Header Navbar -->
@@ -99,22 +99,22 @@ desired effect
       <!-- Sidebar Menu -->
       <ul class="sidebar-menu" data-widget="tree">
         <li class="header">HEADER</li>
-        <!-- Optionally, you can add icons to the links -->
-        <li><a href="#"><i class="fa fa-link text-aqua"></i> <span>Index</span></a></li>
-        <li class="active"><a href="#"><i class="fa fa-send text-aqua"></i> <span>Add Capability</span></a></li>
-        <li><a href="#"><i class="fa fa-laptop text-aqua"></i> <span>Dashboard2</span></a></li>
-        <li class="treeview">
-          <a href="#"><i class="fa fa-fighter-jet text-aqua"></i> <span>Capabilities</span>
-            <span class="pull-right-container">
-                <i class="fa fa-angle-left pull-right"></i>
-              </span>
-          </a>
-          <ul class="treeview-menu">
-            <li><a href="#">Form One</a></li>
-            <li><a href="#">Form Two</a></li>
-            <li><a href="#">Form Three</a></li>
-          </ul>
-        </li>
+        <!-- Links on the sidebar -->
+        <li><a href="/"><i class="fa fa-home text-aqua"></i> <span>Home Page</span></a></li>
+        <li class="active"><a href="/new_target_form/"><i class="fa fa-send text-aqua"></i> <span>Add Target</span></a></li>
+        <!--<li><a href="#"><i class="fa fa-laptop text-aqua"></i> <span>Dashboard2</span></a></li>-->
+        <!--<li class="treeview">-->
+          <!--<a href="#"><i class="fa fa-fighter-jet text-aqua"></i> <span>Capabilities</span>-->
+            <!--<span class="pull-right-container">-->
+                <!--<i class="fa fa-angle-left pull-right"></i>-->
+              <!--</span>-->
+          <!--</a>-->
+          <!--<ul class="treeview-menu">-->
+            <!--<li><a href="#">Form One</a></li>-->
+            <!--<li><a href="#">Form Two</a></li>-->
+            <!--<li><a href="#">Form Three</a></li>-->
+          <!--</ul>-->
+        <!--</li>-->
       </ul>
       <!-- /.sidebar-menu -->
     </section>
@@ -126,8 +126,7 @@ desired effect
     <!-- Content Header (Page header) -->
     <section class="content-header">
       <h1>
-        New Plugin Form
-        <small>Plugin form here</small>
+        New Target Form
       </h1>
       <ol class="breadcrumb">
         <li><a href="#"><i class="fa fa-dashboard"></i> Main</a></li>
@@ -140,76 +139,76 @@ desired effect
       <!--------------------------
         | Your Page Content Here |
         -------------------------->
-      <!--Small boxes (Stat boxes)-->
-      <div class="col-lg-3 col-xs-6">
-          <!-- small box -->
-          <div class="small-box bg-aqua">
-            <div class="inner">
-              <h3>{{ capability_num }}</h3>
-              <p>Capabilities</p>
-            </div>
-            <div class="icon">
-              <i class="fa fa-fighter-jet"></i>
-            </div>
-            <a href="#" class="small-box-footer">
-              More info <i class="fa fa-arrow-circle-right"></i>
-            </a>
-          </div>
-      </div>
+      <!--&lt;!&ndash;Small boxes (Stat boxes)&ndash;&gt;-->
+      <!--<div class="col-lg-3 col-xs-6">-->
+          <!--&lt;!&ndash; small box &ndash;&gt;-->
+          <!--<div class="small-box bg-aqua">-->
+            <!--<div class="inner">-->
+              <!--<h3>{{ capability_num }}</h3>-->
+              <!--<p>Capabilities</p>-->
+            <!--</div>-->
+            <!--<div class="icon">-->
+              <!--<i class="fa fa-fighter-jet"></i>-->
+            <!--</div>-->
+            <!--<a href="#" class="small-box-footer">-->
+              <!--More info <i class="fa fa-arrow-circle-right"></i>-->
+            <!--</a>-->
+          <!--</div>-->
+      <!--</div>-->
 
-      <div class="col-lg-3 col-xs-6">
-          <!-- small box -->
-          <div class="small-box bg-red">
-            <div class="inner">
-              <h3>80</h3>
+      <!--<div class="col-lg-3 col-xs-6">-->
+          <!--&lt;!&ndash; small box &ndash;&gt;-->
+          <!--<div class="small-box bg-red">-->
+            <!--<div class="inner">-->
+              <!--<h3>80</h3>-->
 
-              <p>Hosts or Clients</p>
-            </div>
-            <div class="icon">
-              <i class="fa fa-laptop"></i>
-            </div>
-            <a href="#" class="small-box-footer">
-              More info <i class="fa fa-arrow-circle-right"></i>
-            </a>
-          </div>
-      </div>
+              <!--<p>Hosts or Clients</p>-->
+            <!--</div>-->
+            <!--<div class="icon">-->
+              <!--<i class="fa fa-laptop"></i>-->
+            <!--</div>-->
+            <!--<a href="#" class="small-box-footer">-->
+              <!--More info <i class="fa fa-arrow-circle-right"></i>-->
+            <!--</a>-->
+          <!--</div>-->
+      <!--</div>-->
 
-      <div class="col-lg-3 col-xs-6">
-          <!-- small box -->
-          <div class="small-box bg-green">
-            <div class="inner">
-              <h3>150</h3>
+      <!--<div class="col-lg-3 col-xs-6">-->
+          <!--&lt;!&ndash; small box &ndash;&gt;-->
+          <!--<div class="small-box bg-green">-->
+            <!--<div class="inner">-->
+              <!--<h3>150</h3>-->
 
-              <p>Commands</p>
-            </div>
-            <div class="icon">
-              <i class="fa fa-exchange"></i>
-            </div>
-            <a href="#" class="small-box-footer">
-              More info <i class="fa fa-arrow-circle-right"></i>
-            </a>
-          </div>
-      </div>
+              <!--<p>Commands</p>-->
+            <!--</div>-->
+            <!--<div class="icon">-->
+              <!--<i class="fa fa-exchange"></i>-->
+            <!--</div>-->
+            <!--<a href="#" class="small-box-footer">-->
+              <!--More info <i class="fa fa-arrow-circle-right"></i>-->
+            <!--</a>-->
+          <!--</div>-->
+      <!--</div>-->
 
-      <div class="col-lg-3 col-xs-6">
-          <!-- small box -->
-          <div class="small-box bg-yellow">
-            <div class="inner">
-              <h3>{{ plugin_num }}</h3>
+      <!--<div class="col-lg-3 col-xs-6">-->
+          <!--&lt;!&ndash; small box &ndash;&gt;-->
+          <!--<div class="small-box bg-yellow">-->
+            <!--<div class="inner">-->
+              <!--<h3>{{ plugin_num }}</h3>-->
 
-              <p>Plugins</p>
-            </div>
-            <div class="icon">
-              <i class="fa fa-terminal"></i>
-            </div>
-            <a href="#" class="small-box-footer">
-              More info <i class="fa fa-arrow-circle-right"></i>
-            </a>
-          </div>
-      </div>
-      <!--/Small boxes (Stat boxes)-->
+              <!--<p>Plugins</p>-->
+            <!--</div>-->
+            <!--<div class="icon">-->
+              <!--<i class="fa fa-terminal"></i>-->
+            <!--</div>-->
+            <!--<a href="#" class="small-box-footer">-->
+              <!--More info <i class="fa fa-arrow-circle-right"></i>-->
+            <!--</a>-->
+          <!--</div>-->
+      <!--</div>-->
+      <!--&lt;!&ndash;/Small boxes (Stat boxes)&ndash;&gt;-->
 
-      <form action="/action/val_capability_form/" method="post">
+      <form action="/action/val_target_form/" method="post">
           {% csrf_token %}
           <div class="row">
               <div class="col-md-6">
@@ -217,28 +216,28 @@ desired effect
                   <div class="box box-info">
                       <!-- box-header -->
                       <div class="box-header with-border">
-                          <h3 class="box-title">New Capability Form</h3>
+                          <h3 class="box-title">New Target Form</h3>
                       </div>
                       <!-- /.box-header -->
                       <!-- box-body -->
                       <form class="form-horizontal">
                           <div class="box-body">
                               <div class="form-group">
-                                  <label for="plugin_capability_name" class="col-sm-3 control-label">Plugin Name</label>
+                                  <label for="plugin_capability_name" class="col-sm-3 control-label">Target Name</label>
 
                                   <div class="col-sm-10">
-                                      <input class="form-control" id="plugin_capability_name" name="plugin_capability_name" placeholder="Plugin Name Here">
+                                      <input class="form-control" id="plugin_capability_name" name="plugin_capability_name" placeholder="Target Name Here">
                                   </div>
                               </div>
 
                               <div class="form-group">
-                                  <label for="capability_name" class="col-sm-12 control-label content-header">Capability Name
-                                      <small>(if more than one capability separate them by comma)</small>
-                                  </label>
+                                  <!--<label for="capability_name" class="col-sm-12 control-label content-header">Capability Name-->
+                                      <!--<small>(if more than one capability separate them by comma)</small>-->
+                                  <!--</label>-->
 
-                                  <div class="col-sm-10">
-                                      <input class="form-control" type="text" id="capability_name" name="capability_name" maxlength="200" placeholder="Capability Name Here">
-                                  </div>
+                                  <!--<div class="col-sm-10">-->
+                                      <!--<input class="form-control" type="text" id="capability_name" name="capability_name" maxlength="200" placeholder="Capability Name Here">-->
+                                  <!--</div>-->
                               </div>
 
                           </div>
@@ -269,7 +268,7 @@ desired effect
 	    <strong>Version 0.1.0</strong>
     </div>
     <!-- Default to the left -->
-    <strong>Alpha Version for the <a href="http://nooooooooooooooo.com/">PCP Project</a></strong> :)
+    <strong>Demo Version for the <a href="http://nooooooooooooooo.com/">PCP Project</a></strong> :)
   </footer>
 
   <!-- Control Sidebar -->

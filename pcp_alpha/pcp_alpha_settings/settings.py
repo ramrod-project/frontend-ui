@@ -32,7 +32,7 @@ DEBUG = True
 # s.connect(("8.8.8.8", 80))
 
 
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = ['127.0.0.1', '192.168.43.83']
 # s.close()
 
 
@@ -48,7 +48,7 @@ PREREQ_APPS = [
 
 PROJECT_APPS = [
     'Backend.index_app',
-    'Backend.capabilities_app',
+    'Backend.pcp_app',
 ]
 
 INSTALLED_APPS = PREREQ_APPS + PROJECT_APPS

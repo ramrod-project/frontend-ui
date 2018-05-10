@@ -1,6 +1,6 @@
 var inc = 1;
 $(document).ready(function() {
-	$("tr.clickable-row").click(get_capabilities_func);   // displays capabilities in w2
+	$("tr.clickable-row").click(get_capabilities_func);   // displays commands in w2
 	$("#addjob_button").click(add_new_job);               // add new job in w3 
 	$("#addjob_button").click(function(){
 	    inc++;
@@ -18,7 +18,7 @@ Functions down below are for w2
 -----------------------------------------------------------------------------------------------------
 */
 
-// List of capabilities based off of plugin name
+// List of commands based off of plugin name
 function get_capabilities_func(){
 
     // plugin name the user clicked
@@ -27,7 +27,7 @@ function get_capabilities_func(){
 
     $.ajax({
         type: "GET",
-        url: "/action/get_capability_list/",
+        url: "/action/get_command_list/",
         data: {"plugin_name": plugin_name_var},
         datatype: 'json',
         success: function(data) {
@@ -36,18 +36,31 @@ function get_capabilities_func(){
         	$(".theContent").empty();
         	$(".theContentArgument").empty();
         	$(".theContentHeader").empty();
+        	$(".tooltipContent").empty();
 
-            // display capabilities in w2
-            data_split = data.split(',');
-        	for(var i = 0; i < data_split.length; i++) {
-                console.log(data_split[i]);
-                $(".theContent").append($("<li id='capabilityid' class='capabilityclass' onclick='#'/>").append($("<a id='acapabilityid' class='acapabilityclass' href='#'/>").text(data_split[i])));
+            // display command(s) in w2
+        	for(var i = 0; i < data.length; i++) {
+//                console.log(data[i]);
+                $(".theContent").append($("<li id='commandid' class='commandclass' onclick='#'/>").append($("<a id='acommandid' class='acommandclass' href='#'/>").text(data[i].CommandName)));
             }
             $(".theContent").append("<div/>").attr({"style": "width:250px"});
 
-            $(".theContentHeader").append("<h2 class='box-title'/>").text(plugin_name_var + "  capability list");
+            $(".theContentHeader").append("<h2 class='box-title'/>").text(plugin_name_var + "  command list");
             $(".theContentArgument").append("<input id='argumentid' placeholder='Argument Here'/>");
-            $("a.acapabilityclass").click(get_capability);  // replicate capability name onto footer
+//            $("a.acommandclass").click(get_command);  // replicate command name onto footer
+            $("a.acommandclass").click(function(){
+                //footer
+                $(".theContentArgument").empty();
+                $(".theContentArgument").append("<a id='commandIdBuilder'>" +$(this)[0].text + "</a>" + " &nbsp;&nbsp; " + "<input id='argumentid' placeholder='Argument Here'/>");
+
+                //tooltip
+                $(".tooltipContent").empty();
+                for(var i = 0; i < data.length; i++) {
+                    if(data[i].CommandName == $(this)[0].text){
+                        $(".tooltipContent").append("<pre>" + data[i].Tooltip + "</pre>");
+                    }
+                }
+            });
 
         },
         error: function (data) {
@@ -55,6 +68,12 @@ function get_capabilities_func(){
         	console.log(data);
         }
     })
+}
+
+// Capability name display on footer depending which command the user clicked
+function get_command(){
+    $(".theContentArgument").empty();
+    $(".theContentArgument").append("<a id='commandIdBuilder'>" +$(this)[0].text + "</a>" + " &nbsp;&nbsp; " + "<input id='argumentid' placeholder='Argument Here'/>");
 }
 
 /*
@@ -103,12 +122,6 @@ function clear_new_jobs(){
     $(".thirdBoxContent").empty();
     inc = 1;
     $("#addjob_button")[0].value = 0;
-}
-
-// Capability name display on footer depending which capability the user clicked
-function get_capability(){
-    $(".theContentArgument").empty();
-    $(".theContentArgument").append("<a id='commandIdBuilder'>" +$(this)[0].text + "</a>" + "  " + "<input id='argumentid' placeholder='Argument Here'/>");
 }
 
 /*
