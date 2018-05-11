@@ -35,7 +35,7 @@ script:
 
   # This will eventually be for more integration testing
   - sleep 10
-  - sudo curl http://frontend:8080
+  - curl http://127.0.0.1:8000
 #  - docker ps
 #  - docker logs frontend
   - docker stop frontend
