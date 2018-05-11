@@ -1,5 +1,4 @@
 pytest-django
 pytest
 django==2.0.1
-docker
 rethinkdb

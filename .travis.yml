@@ -26,12 +26,13 @@ script:
     else docker build -t ramrodpcp/frontend-ui:latest . ;
     fi
 
-  - if [ "$TRAVIS_BRANCH" != "master"  ];
-    then docker run -d --rm --name frontend -p 8080:8080 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG"
-    -v /var/run/docker.sock:/var/run/docker.sock ramrodpcp/frontend-ui:$TRAVIS_BRANCH;
-    else docker run -d --rm --name frontend -p 8080:8080 -e "STAGE=PROD" -e "LOGLEVEL=DEBUG"
-    -v /var/run/docker.sock:/var/run/docker.sock ramrodpcp/frontend-ui:latest;
-    fi
+#  - if [ "$TRAVIS_BRANCH" != "master"  ];
+#    then docker run -d --rm --name frontend -p 8080:8080 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG"
+#    -v /var/run/docker.sock:/var/run/docker.sock ramrodpcp/frontend-ui:$TRAVIS_BRANCH;
+#    else docker run -d --rm --name frontend -p 8080:8080 -e "STAGE=PROD" -e "LOGLEVEL=DEBUG"
+#    -v /var/run/docker.sock:/var/run/docker.sock ramrodpcp/frontend-ui:latest;
+#    fi
+  - docker run -d --rm --name frontend -p 8080:8080 ramrodpcp/frontend-ui
 
   # This will eventually be for more integration testing
   - sleep 10
