@@ -8,7 +8,6 @@ $(document).ready(function() {
 	});
 
 	$("#clear_buttonid").click(clear_new_jobs);           // clear content in w3
-
 //	$("#execute_button").click(execute_sequence);         // execute sequence button in 23
 });
 
@@ -20,6 +19,7 @@ Functions down below are for w2
 
 // List of commands based off of plugin name
 function get_capabilities_func(){
+    $(".tooltipHeader").empty();
 
     // plugin name the user clicked
     var plugin_name_var = $(this)[0].firstElementChild.textContent;
@@ -31,7 +31,6 @@ function get_capabilities_func(){
         data: {"plugin_name": plugin_name_var},
         datatype: 'json',
         success: function(data) {
-
             // empty content in w2
         	$(".theContent").empty();
         	$(".theContentArgument").empty();
@@ -40,40 +39,49 @@ function get_capabilities_func(){
 
             // display command(s) in w2
         	for(var i = 0; i < data.length; i++) {
-//                console.log(data[i]);
                 $(".theContent").append($("<li id='commandid' class='commandclass' onclick='#'/>").append($("<a id='acommandid' class='acommandclass' href='#'/>").text(data[i].CommandName)));
             }
             $(".theContent").append("<div/>").attr({"style": "width:250px"});
-
             $(".theContentHeader").append("<h2 class='box-title'/>").text(plugin_name_var + "  command list");
-            $(".theContentArgument").append("<input id='argumentid' placeholder='Argument Here'/>");
-//            $("a.acommandclass").click(get_command);  // replicate command name onto footer
-            $("a.acommandclass").click(function(){
-                //footer
-                $(".theContentArgument").empty();
-                $(".theContentArgument").append("<a id='commandIdBuilder'>" +$(this)[0].text + "</a>" + " &nbsp;&nbsp; " + "<input id='argumentid' placeholder='Argument Here'/>");
 
+            // User selects a command from W2
+            $("a.acommandclass").click(function(){
+                //Compare user selection of command to query
+                for(var i2 = 0; i2 < data.length; i2++) {
+                    if(data[i2].CommandName == $(this)[0].text){
+                        arg_int = data[i2].Inputs.length;
+                    }
+                }
                 //tooltip
+                $(".tooltipHeader").empty();
+                $(".tooltipHeader").append($("<p/>").append($("<b/>").text("Tooltip:")));
                 $(".tooltipContent").empty();
                 for(var i = 0; i < data.length; i++) {
                     if(data[i].CommandName == $(this)[0].text){
                         $(".tooltipContent").append("<pre>" + data[i].Tooltip + "</pre>");
                     }
                 }
-            });
 
+                //footer
+                $(".theContentArgument").empty();
+                var input_str = "<input id='argumentid' placeholder='Argument 1 Here'/>"
+                var int = 1;
+                var argumentid_num = 2;
+                while (int < arg_int){
+                var argumentid_num = int + 1;
+                var input_str2 = " &nbsp;&nbsp; " + "<input id='argumentid"+ int + "' placeholder='Argument " + argumentid_num + " Here'/>"
+                    input_str = input_str + input_str2;
+                    int++;
+                }
+                $(".theContentArgument").append("<a id='commandIdBuilder'>" +$(this)[0].text + "</a>" + " &nbsp;&nbsp; " + input_str);
+
+            });
         },
         error: function (data) {
         	console.log("ERROR FUNCTION CALLED");
         	console.log(data);
         }
     })
-}
-
-// Capability name display on footer depending which command the user clicked
-function get_command(){
-    $(".theContentArgument").empty();
-    $(".theContentArgument").append("<a id='commandIdBuilder'>" +$(this)[0].text + "</a>" + " &nbsp;&nbsp; " + "<input id='argumentid' placeholder='Argument Here'/>");
 }
 
 /*
@@ -124,13 +132,7 @@ function clear_new_jobs(){
     $("#addjob_button")[0].value = 0;
 }
 
-/*
------------------------------------------------------------------------------------------------------
-Functions down below are for w1+w3 or w2+w3
------------------------------------------------------------------------------------------------------
-*/
-
-// Drag and drop function(s) for host list
+// Drag and drop function(s) for w1+w3 or w2+w3
 function allowDrop(ev) {
     ev.preventDefault();
 }
@@ -184,13 +186,7 @@ function drop_command(ev) {
     ev.target.appendChild(data_copy);
 }
 
-/*
------------------------------------------------------------------------------------------------------
-Functions down below are for w3+w4
------------------------------------------------------------------------------------------------------
-*/
-
-// Execute Sequence function down below
+// Execute Sequence function down below are for w3+w4
 function execute_sequence(){
     console.log("execute_sequence function has been called");
 }

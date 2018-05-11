@@ -15,7 +15,7 @@ COPY . .
 
 WORKDIR /srv/app/pcp_alpha
 
-RUN python3 manage.py migrate
+#RUN python3 manage.py migrate
 
 EXPOSE 8080
 
