@@ -35,7 +35,7 @@ script:
 
   # This will eventually be for more integration testing
   - sleep 10
-  - curl -f http://localhost:8080
+  - sudo curl -f http://localhost:8080
 #  - docker ps
 #  - docker logs frontend
   - docker stop frontend
