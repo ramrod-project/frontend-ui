@@ -1,12 +1,10 @@
 from django.http import HttpResponse
-from django.shortcuts import render
+# from django.shortcuts import render  # import will be used for a future ticket pcp-68
 from Backend.db_dir.custom_queries import get_brain_targets, get_specific_commands
 
 import json
 
 
-# This function is for a future ticket pcp-73
-# TODO: COMMENTS
 def get_command_list(request):
     """
     get_capability_list function returns a specific list of capabilities

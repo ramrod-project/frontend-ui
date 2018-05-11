@@ -24,9 +24,8 @@ def db_connection():
     """
     Function db_connection open's a connection with rethinkdb
     check production environment or development environment
-    :return: db connection
+    :return: dev or prod db connection
     """
-    # sleep(9)
     if check_dev_env() != 1:
         dbconn = rtdb.connect().repl()
         print("log: connection to the Brain from docker image is connected")
@@ -42,7 +41,8 @@ def confirm_brain_db_info():
     confirm_brain_db_info function checks to see if it's using a local
     rethinkdb connection or docker's brain instance connection.  It also
     checks to see if Brain db exist and if any tables exist within the
-    Brain db.
+    Brain db.  If db and tables don't exist they will
+    be created only locally.
     :return: nothing at the moment
     """
     check_int = 0
@@ -113,7 +113,8 @@ def confirm_plugin_db_info():
     """
     confirm_plugin_db_info function checks to see if the
     Plugins db exist and if any tables exist within the
-    Plugins db
+    Plugins db.  If db and tables don't exist they will
+    be created only locally.
     :return: nothing at the moment
     """
 
@@ -157,6 +158,7 @@ def confirm_plugin_db_info():
 
         # insert dummy data
         rtdb.db("Plugins").table("Plugin1").insert([
+            #  read_file command
             {"CommandName": "read_file",
              "Tooltip": read_file_tt,
              "Output": True,
@@ -169,7 +171,7 @@ def confirm_plugin_db_info():
              ],
              "OptionalInputs": []
              },
-
+            #  delete_file command
             {"CommandName": "delete_file",
              "Tooltip": delete_file_tt,
              "Output": True,
@@ -181,8 +183,8 @@ def confirm_plugin_db_info():
                   },
                 ],
                 "OptionalInputs": []
-            },
-
+             },
+            #  send_file command
             {"CommandName": "send_file",
              "Tooltip": write_file_tt,
              "Output": True,
@@ -200,12 +202,27 @@ def confirm_plugin_db_info():
              ],
              "OptionalInputs": []
              },
+            #  echo command
+            {"CommandName": "echo",
+             "Tooltip": '\nEcho\n\nClient Returns this string verbatim\n'
+                        '\nArguments:\n1. String to Echo\n\nReturns:\nString\n',
+             "Output": True,
+             "Inputs": [
+                 {"Name": "EchoString",
+                  "Type": "textbox",
+                  "Tooltip": "This string will be echoed back",
+                  "Value": "echo user input"
+                  },
+             ],
+             "OptionalInputs": []
+             },
         ]).run()
         print("log: db Dummy data was inserted to Plugins.Plugin1 locally")
 
 
 def confirm_db_info():
     print("\nlog: ###### DB Logs ######")
+    db_connection()
     confirm_brain_db_info()
     confirm_plugin_db_info()
     # confirm_plugin_db_info()

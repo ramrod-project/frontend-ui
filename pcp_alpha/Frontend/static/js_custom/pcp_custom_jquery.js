@@ -8,7 +8,6 @@ $(document).ready(function() {
 	});
 
 	$("#clear_buttonid").click(clear_new_jobs);           // clear content in w3
-
 //	$("#execute_button").click(execute_sequence);         // execute sequence button in 23
 });
 
@@ -44,10 +43,10 @@ function get_capabilities_func(){
             }
             $(".theContent").append("<div/>").attr({"style": "width:250px"});
             $(".theContentHeader").append("<h2 class='box-title'/>").text(plugin_name_var + "  command list");
-//            $(".theContentArgument").append("<input id='argumentid' placeholder='Argument Here'/>");
 
+            // User selects a command from W2
             $("a.acommandclass").click(function(){
-                //Check user selection data to query
+                //Compare user selection of command to query
                 for(var i2 = 0; i2 < data.length; i2++) {
                     if(data[i2].CommandName == $(this)[0].text){
                         arg_int = data[i2].Inputs.length;
@@ -84,12 +83,6 @@ function get_capabilities_func(){
         }
     })
 }
-
-// Capability name display on footer depending which command the user clicked
-//function get_command(){
-//    $(".theContentArgument").empty();
-//    $(".theContentArgument").append("<a id='commandIdBuilder'>" +$(this)[0].text + "</a>" + " &nbsp;&nbsp; " + "<input id='argumentid' placeholder='Argument Here'/>");
-//}
 
 /*
 -----------------------------------------------------------------------------------------------------
@@ -139,13 +132,7 @@ function clear_new_jobs(){
     $("#addjob_button")[0].value = 0;
 }
 
-/*
------------------------------------------------------------------------------------------------------
-Functions down below are for w1+w3 or w2+w3
------------------------------------------------------------------------------------------------------
-*/
-
-// Drag and drop function(s) for host list
+// Drag and drop function(s) for w1+w3 or w2+w3
 function allowDrop(ev) {
     ev.preventDefault();
 }
@@ -199,13 +186,7 @@ function drop_command(ev) {
     ev.target.appendChild(data_copy);
 }
 
-/*
------------------------------------------------------------------------------------------------------
-Functions down below are for w3+w4
------------------------------------------------------------------------------------------------------
-*/
-
-// Execute Sequence function down below
+// Execute Sequence function down below are for w3+w4
 function execute_sequence(){
     console.log("execute_sequence function has been called");
 }

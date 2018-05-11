@@ -6,9 +6,9 @@ def location_generated_num(host_network_num):
     return "".join([str(host_network_num), str(ran_host_num)])
 
 
-##################################################
-# Dummy data for files
-##################################################
+#####################################################
+# Dummy data.  Below mimic character data in a file
+#####################################################
 read_file_tt = """
 Read File:
 
