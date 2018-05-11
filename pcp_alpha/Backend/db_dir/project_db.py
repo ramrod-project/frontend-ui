@@ -2,7 +2,7 @@ from .custom_data import location_generated_num, read_file_tt, delete_file_tt, w
 import rethinkdb as rtdb
 import sys
 import subprocess
-import docker
+# import docker
 # from time import sleep
 
 
