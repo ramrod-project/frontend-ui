@@ -1,7 +1,7 @@
 from .custom_data import location_generated_num, read_file_tt, delete_file_tt, write_file_tt
 import rethinkdb as rtdb
-import docker
 import sys
+import subprocess
 # from time import sleep
 
 
@@ -12,9 +12,8 @@ def check_dev_env():
     to connect to the brain.
     :return: 0 (prod env) or 1 (dev env)
     """
-    # sleep(9)
-    client = docker.from_env()
-    if len(client.containers.list()) != 0:
+    s = subprocess.check_output('docker ps', shell=True)
+    if s.find('myP'.encode()) != -1:
         return_int = 0
     else:
         return_int = 1

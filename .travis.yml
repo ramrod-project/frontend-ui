@@ -21,43 +21,32 @@ before_script:
   - pytest pcp_alpha
 
 script:
-#  - if [ "$TRAVIS_BRANCH" != "master"  ];
-#    then docker build -t ramrodpcp/frontend-ui:$TRAVIS_BRANCH . ;
-#    else docker build -t ramrodpcp/frontend-ui:latest . ;
-#    fi
-#
-#  - if [ "$TRAVIS_BRANCH" != "master"  ];
-#    then docker run -d --rm --name frontend -e "STAGE=DEV" -e "LOGLEVEL=DEBUG"
-#    -v /var/run/docker.sock:/var/run/docker.sock ramrodpcp/frontend-ui:$TRAVIS_BRANCH;
-#    else docker run -d --rm --name frontend -e "STAGE=PROD" -e "LOGLEVEL=DEBUG"
-#    -v /var/run/docker.sock:/var/run/docker.sock ramrodpcp/frontend-ui:latest ;
-#    fi
+  - if [ "$TRAVIS_BRANCH" != "master"  ];
+    then docker build -t ramrodpcp/frontend-ui:$TRAVIS_BRANCH . ;
+    else docker build -t ramrodpcp/frontend-ui:latest . ;
+    fi
 
-#  - if [ "$TRAVIS_BRANCH" != "master"  ];
-#    then docker build -t ramrodpcp/frontend-ui:$TRAVIS_BRANCH . ;
-#    else docker build -t ramrodpcp/frontend-ui:latest . ; fi
-#  - if [ "$TRAVIS_BRANCH" != "master"  ];
-#    then docker run -d --rm --name frontend -p 8080:8080 ramrodpcp/frontend-ui:$TRAVIS_BRANCH;
-#    else docker run -d --rm --name frontend -p 8080:8080 ramrodpcp/frontend-ui:latest; fi
+  - if [ "$TRAVIS_BRANCH" != "master"  ];
+    then docker run -d --rm --name frontend -p 8080:8080 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG"
+    -v /var/run/docker.sock:/var/run/docker.sock ramrodpcp/frontend-ui:$TRAVIS_BRANCH;
+    else docker run -d --rm --name frontend -p 8080:8080 -e "STAGE=PROD" -e "LOGLEVEL=DEBUG"
+    -v /var/run/docker.sock:/var/run/docker.sock ramrodpcp/frontend-ui:latest;
+    fi
 
-#  - docker build -t ramrodpcp/frontend-ui .
-  - docker run -d --rm --name frontend -p 8080:8080 ramrodpcp/frontend-ui
-#    fi
+#  - docker run -d --rm --name frontend -p 8080:8080 ramrodpcp/frontend-ui
 
   # This will eventually be for more integration testing
-  - sleep 5
-#  - docker ps
-  # Check to see if page is up
+  - sleep 20
+  - docker ps
+  - docker logs frontend
   - curl http://127.0.0.1:8080
   - docker stop frontend
 
 after_success:
-  - if [ "$TRAVIS_BRANCH" = "QA"  ] || [ "$TRAVIS_BRANCH" = "master"  ];
-    echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin; fi
-  - if [ "$TRAVIS_BRANCH" = "QA"  ];
-    then docker push ramrodpcp/frontend-ui:$TRAVIS_BRANCH; fi
-  - if [ "$TRAVIS_BRANCH" = "master"  ];
-    then docker push ramrodpcp/frontend-ui:latest; fi
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin; fi
+  - if [ "$TRAVIS_BRANCH" == "master"  ];
+    then docker push ramrodpcp/frontend-ui:latest;
+    else docker push ramrodpcp/frontend-ui:$TRAVIS_BRANCH; fi
 
 notifications:
   slack: ramrod-project:GDF82rRYDg3KSekrT3GA24qO
