@@ -20,6 +20,7 @@ Functions down below are for w2
 
 // List of commands based off of plugin name
 function get_capabilities_func(){
+    $(".tooltipHeader").empty();
 
     // plugin name the user clicked
     var plugin_name_var = $(this)[0].firstElementChild.textContent;
@@ -39,26 +40,42 @@ function get_capabilities_func(){
 
             // display command(s) in w2
         	for(var i = 0; i < data.length; i++) {
-//                console.log(data[i]);
                 $(".theContent").append($("<li id='commandid' class='commandclass' onclick='#'/>").append($("<a id='acommandid' class='acommandclass' href='#'/>").text(data[i].CommandName)));
             }
-            $(".tooltipHeader").append($("<p/>").append($("<b/>").text("Tooltip:")));
             $(".theContent").append("<div/>").attr({"style": "width:250px"});
             $(".theContentHeader").append("<h2 class='box-title'/>").text(plugin_name_var + "  command list");
-            $(".theContentArgument").append("<input id='argumentid' placeholder='Argument Here'/>");
+//            $(".theContentArgument").append("<input id='argumentid' placeholder='Argument Here'/>");
 
             $("a.acommandclass").click(function(){
-                //footer
-                $(".theContentArgument").empty();
-                $(".theContentArgument").append("<a id='commandIdBuilder'>" +$(this)[0].text + "</a>" + " &nbsp;&nbsp; " + "<input id='argumentid' placeholder='Argument Here'/>");
-
+                //Check user selection data to query
+                for(var i2 = 0; i2 < data.length; i2++) {
+                    if(data[i2].CommandName == $(this)[0].text){
+                        arg_int = data[i2].Inputs.length;
+                    }
+                }
                 //tooltip
+                $(".tooltipHeader").empty();
+                $(".tooltipHeader").append($("<p/>").append($("<b/>").text("Tooltip:")));
                 $(".tooltipContent").empty();
                 for(var i = 0; i < data.length; i++) {
                     if(data[i].CommandName == $(this)[0].text){
                         $(".tooltipContent").append("<pre>" + data[i].Tooltip + "</pre>");
                     }
                 }
+
+                //footer
+                $(".theContentArgument").empty();
+                var input_str = "<input id='argumentid' placeholder='Argument 1 Here'/>"
+                var int = 1;
+                var argumentid_num = 2;
+                while (int < arg_int){
+                var argumentid_num = int + 1;
+                var input_str2 = " &nbsp;&nbsp; " + "<input id='argumentid"+ int + "' placeholder='Argument " + argumentid_num + " Here'/>"
+                    input_str = input_str + input_str2;
+                    int++;
+                }
+                $(".theContentArgument").append("<a id='commandIdBuilder'>" +$(this)[0].text + "</a>" + " &nbsp;&nbsp; " + input_str);
+
             });
         },
         error: function (data) {
@@ -69,10 +86,10 @@ function get_capabilities_func(){
 }
 
 // Capability name display on footer depending which command the user clicked
-function get_command(){
-    $(".theContentArgument").empty();
-    $(".theContentArgument").append("<a id='commandIdBuilder'>" +$(this)[0].text + "</a>" + " &nbsp;&nbsp; " + "<input id='argumentid' placeholder='Argument Here'/>");
-}
+//function get_command(){
+//    $(".theContentArgument").empty();
+//    $(".theContentArgument").append("<a id='commandIdBuilder'>" +$(this)[0].text + "</a>" + " &nbsp;&nbsp; " + "<input id='argumentid' placeholder='Argument Here'/>");
+//}
 
 /*
 -----------------------------------------------------------------------------------------------------
