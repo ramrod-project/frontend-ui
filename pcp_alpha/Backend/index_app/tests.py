@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate
 import pytest
 from pytest import fixture, raises
-import docker
+# import docker
 # import rethinkdb as r
 # from time import sleep
 
