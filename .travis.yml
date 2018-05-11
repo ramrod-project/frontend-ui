@@ -17,7 +17,7 @@ install:
 
 # For when we have unit tests
 before_script:
-  - docker run -d -p 28015:28015 ramrodpcp/database-brain
+  - docker run -d --name myP -p 28015:28015 ramrodpcp/database-brain
   - pytest pcp_alpha
 
 script:
@@ -34,7 +34,7 @@ script:
     fi
 
   # This will eventually be for more integration testing
-  - sleep 20
+  - sleep 10
   - curl http://127.0.0.1:8080
 #  - docker ps
 #  - docker logs frontend
