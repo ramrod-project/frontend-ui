@@ -13,7 +13,7 @@ before_install:
 
 install:
 #  - pip install -r requirements.txt
-  - pip install django==2.0.1 pytest pytest-django docker rethinkdb
+  - pip install django==2.0.1 pytest pytest-django rethinkdb
 
 # For when we have unit tests
 before_script:
