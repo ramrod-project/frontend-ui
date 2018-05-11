@@ -36,10 +36,10 @@ script:
 #  - docker run -d --rm --name frontend -p 8080:8080 ramrodpcp/frontend-ui
 
   # This will eventually be for more integration testing
-  - sleep 20
+  - sleep 10
+  - curl http://127.0.0.1:8080
 #  - docker ps
 #  - docker logs frontend
-  - curl http://127.0.0.1:8080
   - docker stop frontend
 
 after_success:
