@@ -19,4 +19,4 @@ WORKDIR /srv/app/pcp_alpha
 
 EXPOSE 8080
 
-ENTRYPOINT python3 manage.py runserver 0.0.0.0:8000
+ENTRYPOINT python3 manage.py runserver 0.0.0.0:8080
