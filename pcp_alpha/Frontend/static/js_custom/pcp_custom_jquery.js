@@ -181,15 +181,11 @@ function drag_command(ev) {
 }
 
 function drop_command(ev) {
-    console.log("DROP FUNCTION")
+//    console.log("DROP FUNCTION")
     ev.preventDefault();
 
-    console.log("ev --")
-    console.log(ev);
-
     var data = ev.dataTransfer.getData("text");
-    console.log("DATA --")
-    console.log(data);
+//    console.log(data);
     var data_copy = document.getElementById(data).cloneNode(true);
 
     var argumentid_data = document.getElementById(data);
