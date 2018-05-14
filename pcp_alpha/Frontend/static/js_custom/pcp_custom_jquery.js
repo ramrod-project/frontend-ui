@@ -8,7 +8,7 @@ $(document).ready(function() {
 	});
 
 	$("#clear_buttonid").click(clear_new_jobs);           // clear content in w3
-//	$("#execute_button").click(execute_sequence);         // execute sequence button in 23
+	$("#execute_button").click(execute_sequence);         // execute sequence button in 23
 });
 
 /*
@@ -171,8 +171,8 @@ function allowDropCommand(ev) {
 }
 
 function drag_command(ev) {
-    console.log("DRAG FUNCTION");
-    // check # of arguments
+//    console.log("DRAG FUNCTION");
+
 //    console.log(ev.originalTarget)
 //    console.log(ev.explicitOriginalTarget.firstElementChild.id);
 
@@ -191,6 +191,23 @@ function drop_command(ev) {
     var argumentid_data = document.getElementById(data);
     var argumentid_var = document.getElementById(argumentid_data.childNodes[0].id).cloneNode(true);
 
+    // command name & argument(s).  probably check # of arguments
+//    console.log(argumentid_data)
+
+    // for commands that have more than one argument
+    if (argumentid_data.childNodes.length > 3){
+        console.log("GREATER THAN 3")
+        // while loop here for even numbers
+    } else {
+        // for command that only has one argument
+        console.log("LESS THAN OR EQUAL TO 3");
+//        console.log(argumentid_data.childNodes[0].text);
+//        console.log(argumentid_data.childNodes[2].value);
+//        console.log(String(argumentid_data.childNodes[2].value));
+        $(".hiddenArgsClass").append($("<a id='argumentCopyID' class='argumentCopyClass'/>").
+        text(String(argumentid_data.childNodes[2].value)))
+    }
+
     data_copy.id = "newCommandId";
     argumentid_var.id = "newCommandID";
     ev.target.appendChild(argumentid_var);
@@ -199,6 +216,33 @@ function drop_command(ev) {
 // Execute Sequence function down below are for w3+w4
 function execute_sequence(){
     console.log("execute_sequence function has been called");
+    var plugin_data = document.getElementById("newId");
+    var location_data = document.getElementById("newIdTwo");
+    var command_data = document.getElementById("newCommandID");
+    var args_data = document.getElementById("hiddenArgsId");
+
+//    console.log(plugin_data.textContent);
+//    console.log(location_data.textContent)
+//    console.log(command_data.textContent)
+//    console.log(args_data.textContent);
+
+    $.ajax({
+        type: "GET",
+        url: "/action/get_w3_data/",
+        data: {"target_plugin": plugin_data.textContent,
+               "target_location": location_data.textContent,
+               "command_name": command_data.textContent,
+               "command_args": args_data.textContent},
+        datatype: 'json',
+        success: function(data) {
+            console.log("SUCCESS execute_sequence function")
+//            console.log(data)
+        },
+        error: function (data) {
+            console.log("ERROR execute_sequence function")
+        }
+
+    })
 }
 
 /*
