@@ -73,7 +73,8 @@ function get_capabilities_func(){
                     input_str = input_str + input_str2;
                     int++;
                 }
-                $(".theContentArgument").append("<a id='commandIdBuilder'>" +$(this)[0].text + "</a>" + " &nbsp;&nbsp; " + input_str);
+//                $(".theContentArgument").append("<a id='commandIdBuilder'>" +$(this)[0].text + " &nbsp;&nbsp; " + input_str);  // works!
+                $(".theContentArgument").append($("<a id='commandIdBuilder'/>").text($(this)[0].text)).append("&nbsp;&nbsp;").append($(input_str));
 
             });
         },
@@ -133,6 +134,9 @@ function clear_new_jobs(){
 }
 
 // Drag and drop function(s) for w1+w3 or w2+w3
+
+// Drag and drop function(s) for targets
+// Note: Drop function needs to be validated
 function allowDrop(ev) {
     ev.preventDefault();
 }
@@ -161,29 +165,39 @@ function drop(ev) {
 }
 
 // Drag and drop function(s) for command
-// Note: Drop function for command is not currently done
-function drag_command(ev) {
-    ev.dataTransfer.setData("text", ev.explicitOriginalTarget.firstElementChild.id);
-}
-
+// Note: Drop function needs to be validated
 function allowDropCommand(ev) {
     ev.preventDefault();
 }
 
+function drag_command(ev) {
+    console.log("DRAG FUNCTION");
+    // check # of arguments
+//    console.log(ev.originalTarget)
+//    console.log(ev.explicitOriginalTarget.firstElementChild.id);
+
+//    ev.dataTransfer.setData("text", ev.explicitOriginalTarget.firstElementChild.id);  // Former code
+    ev.dataTransfer.setData("text", ev.originalTarget.id);
+}
+
 function drop_command(ev) {
+    console.log("DROP FUNCTION")
     ev.preventDefault();
 
+    console.log("ev --")
+    console.log(ev);
+
     var data = ev.dataTransfer.getData("text");
+    console.log("DATA --")
+    console.log(data);
     var data_copy = document.getElementById(data).cloneNode(true);
 
     var argumentid_data = document.getElementById(data);
-    var argumentid_var;
-    if(argumentid_data){
-        argumentid_var = argumentid_data.nextElementSibling.value;
-    }
+    var argumentid_var = document.getElementById(argumentid_data.childNodes[0].id).cloneNode(true);
 
     data_copy.id = "newCommandId";
-    ev.target.appendChild(data_copy);
+    argumentid_var.id = "newCommandID";
+    ev.target.appendChild(argumentid_var);
 }
 
 // Execute Sequence function down below are for w3+w4
