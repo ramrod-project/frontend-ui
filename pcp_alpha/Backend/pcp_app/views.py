@@ -36,10 +36,10 @@ def execute_sequence(request):
         exe_command_name = request.GET.get('command_name')
         exe_command_args = request.GET.get('command_args')
 
-        # print("\nexe_target_plugin == {}".format(exe_target_plugin))
-        # print("exe_targ_location == {}".format(exe_targ_location))
-        # print("exe_command_name == {}".format(exe_command_name))
-        # print("exe_command_args == {}\n".format(exe_command_args))
+        print("\nexe_target_plugin == {}".format(exe_target_plugin))
+        print("exe_targ_location == {}".format(exe_targ_location))
+        print("exe_command_name == {}".format(exe_command_name))
+        print("exe_command_args == {}\n".format(exe_command_args))
 
         # Later modify with more than one argument
         spec_command = get_specific_command(exe_target_plugin, exe_command_name)

@@ -236,7 +236,7 @@ function execute_sequence(){
         datatype: 'json',
         success: function(data) {
             console.log("SUCCESS execute_sequence function")
-//            console.log(data)
+            console.log(data)
         },
         error: function (data) {
             console.log("ERROR execute_sequence function")
