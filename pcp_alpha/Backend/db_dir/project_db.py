@@ -64,15 +64,38 @@ def confirm_brain_db_info():
                     rtdb.db("Brain").table_list().contains("Outputs").run():  # yes tables exist
                 print("log: db Targets, Jobs, and Outputs tables exist in Brain")
 
-                # Check if Brain.Targets has data, if not insert dummy data
-                plugin_name_data = rtdb.db("Brain").table("Targets").has_fields("PluginName").run()
-                for document in plugin_name_data:
+                # Check if Brain.Targets has data, prod doesn't insert dummy data
+                target_data = rtdb.db("Brain").table("Targets").has_fields("PluginName").run()
+                jobs_data = rtdb.db("Brain").table("Jobs").has_fields("JobTarget").run()
+                output_data = rtdb.db("Brain").table("Outputs").has_fields("OutputJob").run()
+
+                # Check Brain.Targets has any data in the table
+                for document in target_data:
                     check_int = 1
                     print("Brain.Targets document == {}\n".format(document))
                 if check_int == 0:
                     print("log: Brain.Targets doesn't have any PluginNames added")
                 else:
                     print("log: Brain.Targets has PluginNames in the table")
+
+                # Check Brain.Jobs has any data in the table
+                for document in jobs_data:
+                    check_int = 1
+                    print("Brain.Jobs document == {}\n".format(document))
+                if check_int == 0:
+                    print("log: Brain.Jobs doesn't have any JobTarget added")
+                else:
+                    print("log: Brain.Jobs has JobTarget in the table")
+
+                # Check Brain.Outputs has any data in the table
+                for document in output_data:
+                    check_int = 1
+                    print("Brain.Outputs document == {}\n".format(document))
+                if check_int == 0:
+                    print("log: Brain.Outputs doesn't have any OutputJob added")
+                else:
+                    print("log: Brain.Outputs has OutputJob in the table")
+
             else:  # tables don't exist
                 print("log: db No tables exist in Brain db")
         else:  # db Brain doesn't exist

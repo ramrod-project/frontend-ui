@@ -81,6 +81,8 @@ def insert_brain_jobs_w3(job):
 
 def get_specific_brain_output():
     # query output
+    db_name = "Brain"
+    db_table = "Outputs"
     # return info to w4
     pass
 
