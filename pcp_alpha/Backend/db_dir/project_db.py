@@ -121,13 +121,14 @@ def confirm_brain_db_info():
 
             # Brain.Targets does exist
             if rtdb.db("Brain").table_list().contains("Targets").run():
+                print("\nlog: db Brain.Targets table exist locally")
 
                 try:
                     rtdb.db("Brain").table_drop("Targets").run()
                     print("log: db Brain.Targets table has been dropped from Brain to insert new data")
 
                     rtdb.db("Brain").table_create("Targets").run()
-                    print("log: db Brain.Targets table was created to locally since they were drop to add new data")
+                    print("log: db Brain.Targets table was created to locally since they were drop to insert new data")
                 except:
                     e = sys.exc_info()[0]
                     print("EXCEPT == {}".format(e))
@@ -138,13 +139,14 @@ def confirm_brain_db_info():
 
             # Brain.Jobs does exist
             if rtdb.db("Brain").table_list().contains("Jobs").run():
+                print("\nlog: db Brain.Jobs table exist locally")
 
                 try:
                     rtdb.db("Brain").table_drop("Jobs").run()
                     print("log: db Brain.Jobs table has been dropped from Brain to insert new data")
 
                     rtdb.db("Brain").table_create("Jobs").run()
-                    print("log: db Brain.Jobs table was created to locally since they were drop to add new data")
+                    print("log: db Brain.Jobs table was created to locally since they were drop to insert new data")
                 except:
                     e = sys.exc_info()[0]
                     print("EXCEPT == {}".format(e))
@@ -155,13 +157,14 @@ def confirm_brain_db_info():
 
             # Brain.Outputs does exist
             if rtdb.db("Brain").table_list().contains("Outputs").run():
+                print("\nlog: db Brain.Outputs table exist locally")
 
                 try:
                     rtdb.db("Brain").table_drop("Outputs").run()
                     print("log: db Brain.Outputs table has been dropped from Brain to insert new data")
 
                     rtdb.db("Brain").table_create("Outputs").run()
-                    print("log: db Brain.Outputs table was created to locally since they were drop to add new data")
+                    print("log: db Brain.Outputs table was created to locally since they were drop to insert new data")
                 except:
                     e = sys.exc_info()[0]
                     print("EXCEPT == {}".format(e))
@@ -289,7 +292,7 @@ def confirm_plugin_db_info():
              "OptionalInputs": []
              },
         ]).run()
-        print("log: db Dummy data was inserted to Plugins.Plugin1 locally")
+        print("log: db Dummy data was inserted to Plugins.Plugin1 locally\n")
 
 
 def confirm_db_info():

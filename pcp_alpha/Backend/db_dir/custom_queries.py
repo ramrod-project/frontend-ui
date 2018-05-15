@@ -80,9 +80,24 @@ def insert_brain_jobs_w3(job):
 
 
 def get_specific_brain_output():
-    # query output
     db_name = "Brain"
-    db_table = "Outputs"
-    # return info to w4
-    pass
+    db_table = "Jobs"
+
+    # query for Bain.Jobs Status is 'Done'
+    query_status = rtdb.db(db_name).table(db_table).filter({"Status": "Done"}).run(db_connection())
+
+    print("*"*28)
+    # Check if the query is empty
+    for document in query_status:
+        # Note: If statement down below or...
+        # Add a while loop to keep checking as a boolean
+        if document is True:
+            print("query_status is True")
+        else:
+            print("query_status is False")
+        if document is None:  # Status does not equal to Done
+            print("query_status equals to None")
+        else:                 # Status equals Done
+            print("query_status doesn't equal to None")
+            # return query_status
 

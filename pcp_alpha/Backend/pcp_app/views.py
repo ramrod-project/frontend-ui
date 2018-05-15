@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 # from django.shortcuts import render  # import will be used for a future ticket pcp-68
 from Backend.db_dir.custom_queries import get_specific_commands, get_specific_brain_targets, \
-    get_specific_command, insert_brain_jobs_w3
+    get_specific_command, insert_brain_jobs_w3, get_specific_brain_output
 
 from uuid import uuid4
 import json

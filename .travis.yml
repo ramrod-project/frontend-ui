@@ -43,7 +43,7 @@ script:
   - docker stop frontend
 
 after_success:
-  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin; fi
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin;
   - if [ "$TRAVIS_BRANCH" == "master"  ];
     then docker push ramrodpcp/frontend-ui:latest;
     else docker push ramrodpcp/frontend-ui:$TRAVIS_BRANCH; fi
