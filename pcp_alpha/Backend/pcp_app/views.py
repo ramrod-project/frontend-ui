@@ -25,7 +25,7 @@ def execute_sequence(request):
     execute_sequence function is called when the user clicks on
     'Execute Sequence' button in W3
     :param request: user request
-    :return:
+    :return: returns data from w3 to the ui
     """
     command_item = ""
     target_item = ""
@@ -44,15 +44,12 @@ def execute_sequence(request):
         # Later modify with more than one argument
         spec_command = get_specific_command(exe_target_plugin, exe_command_name)
         for command_item in spec_command:
-            # print("\ncommand_item == \n{}".format(command_item))
             command_item['Inputs'][0]['Value'] = str(exe_command_args)
             break
 
         for target_item in get_specific_brain_targets(exe_target_plugin):
-            # print("\ntarget_item == \n{}".format(target_item))
             break
 
-        # add id using uuid python module/package
         job = {"id": str(uuid4()),
                "JobTarget": target_item,
                "Status": "Ready",

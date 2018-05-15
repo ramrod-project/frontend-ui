@@ -73,7 +73,7 @@ function get_capabilities_func(){
                     input_str = input_str + input_str2;
                     int++;
                 }
-//                $(".theContentArgument").append("<a id='commandIdBuilder'>" +$(this)[0].text + " &nbsp;&nbsp; " + input_str);  // works!
+//                $(".theContentArgument").append("<a id='commandIdBuilder'>" +$(this)[0].text + " &nbsp;&nbsp; " + input_str);  // former code
                 $(".theContentArgument").append($("<a id='commandIdBuilder'/>").text($(this)[0].text)).append("&nbsp;&nbsp;").append($(input_str));
 
             });
@@ -171,28 +171,18 @@ function allowDropCommand(ev) {
 }
 
 function drag_command(ev) {
-//    console.log("DRAG FUNCTION");
-
-//    console.log(ev.originalTarget)
-//    console.log(ev.explicitOriginalTarget.firstElementChild.id);
-
 //    ev.dataTransfer.setData("text", ev.explicitOriginalTarget.firstElementChild.id);  // Former code
     ev.dataTransfer.setData("text", ev.originalTarget.id);
 }
 
 function drop_command(ev) {
-//    console.log("DROP FUNCTION")
     ev.preventDefault();
 
     var data = ev.dataTransfer.getData("text");
-//    console.log(data);
     var data_copy = document.getElementById(data).cloneNode(true);
 
     var argumentid_data = document.getElementById(data);
     var argumentid_var = document.getElementById(argumentid_data.childNodes[0].id).cloneNode(true);
-
-    // command name & argument(s).  probably check # of arguments
-//    console.log(argumentid_data)
 
     // for commands that have more than one argument
     if (argumentid_data.childNodes.length > 3){
@@ -201,9 +191,6 @@ function drop_command(ev) {
     } else {
         // for command that only has one argument
         console.log("LESS THAN OR EQUAL TO 3");
-//        console.log(argumentid_data.childNodes[0].text);
-//        console.log(argumentid_data.childNodes[2].value);
-//        console.log(String(argumentid_data.childNodes[2].value));
         $(".hiddenArgsClass").append($("<a id='argumentCopyID' class='argumentCopyClass'/>").
         text(String(argumentid_data.childNodes[2].value)))
     }
@@ -220,11 +207,6 @@ function execute_sequence(){
     var location_data = document.getElementById("newIdTwo");
     var command_data = document.getElementById("newCommandID");
     var args_data = document.getElementById("hiddenArgsId");
-
-//    console.log(plugin_data.textContent);
-//    console.log(location_data.textContent)
-//    console.log(command_data.textContent)
-//    console.log(args_data.textContent);
 
     $.ajax({
         type: "GET",
