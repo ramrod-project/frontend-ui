@@ -108,6 +108,13 @@ function add_new_job(){
             $("<td/>").attr({"ondrop": "drop_command(event)",
                              "ondragover": "allowDropCommand(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text("")))
         ));
+
+        // W4 Rows
+        $(".W4BodyContent").append($("<tr/>").append(
+        $("<th/>").text("1"),
+        $("<th/>").append($("<a/>").attr({'id': 'updateid'}).text("terminal1"))
+        ));
+
     }
     else {
         $(".thirdBoxContent").append($("<tr/>").attr({"role": "row", "onclick": "#"}).append(
@@ -119,7 +126,13 @@ function add_new_job(){
                              "ondrop": "drop(event)",
                              "ondragover": "allowDrop(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text(""))),
             $("<td/>").attr({"ondrop": "drop_command(event)",
-                             "ondragover": "allowDropCommand(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text("Command Here")))
+                             "ondragover": "allowDropCommand(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text("")))
+        ));
+
+        // W4 Rows
+        $(".W4BodyContent").append($("<tr/>").append(
+        $("<th/>").text(value),
+        $("<th/>").append($("<a/>").text("terminal" + value))
         ));
     }
 
@@ -217,8 +230,35 @@ function execute_sequence(){
                "command_args": args_data.textContent},
         datatype: 'json',
         success: function(data) {
-            console.log("SUCCESS execute_sequence function")
-            console.log(data)
+            console.log("SUCCESS execute_sequence function");
+            console.log(data);
+            var job_id = data.id;
+
+            // ajax call to call custom_queries.get_specific_brain_output()
+            $.ajax({
+                type: "GET",
+                url: "/action/get_output_data/",
+                data: {"job_id": job_id},
+                datatype: 'json',
+                success: function(data) {
+
+                    if (data != 0){  // returns query
+                        console.log("Does not equal to zero");
+                        //data output here
+                        $("#updateid").empty();
+                        $("#updateid").append("returns query data here :)");
+
+                    } else {  // doesn't return query
+                        console.log("data equals to zero");
+                        $("#updateid").empty();
+                        $("#updateid").append("No updated data :(");
+                    }
+                },
+                error: function (data) {
+                    console.log("ERROR /action/get_output_data/");
+                }
+            })
+
         },
         error: function (data) {
             console.log("ERROR execute_sequence function")

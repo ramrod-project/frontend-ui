@@ -7,9 +7,9 @@ from uuid import uuid4
 import json
 
 
-def get_command_list(request):
+def get_commands_controller(request):
     """
-    get_capability_list function returns a specific list of capabilities
+    get_commands_controller function returns a specific list of capabilities
     as a json depending on the plugin name the user clicked.
     :param request: user request
     :return: list of capabilities as a json
@@ -20,9 +20,9 @@ def get_command_list(request):
                             content_type="application/json")
 
 
-def execute_sequence(request):
+def execute_sequence_controller(request):
     """
-    execute_sequence function is called when the user clicks on
+    execute_sequence_controller function is called when the user clicks on
     'Execute Sequence' button in W3
     :param request: user request
     :return: returns data from w3 to the ui
@@ -37,9 +37,9 @@ def execute_sequence(request):
         exe_command_args = request.GET.get('command_args')
 
         print("\nexe_target_plugin == {}".format(exe_target_plugin))
-        print("exe_targ_location == {}".format(exe_targ_location))
-        print("exe_command_name == {}".format(exe_command_name))
-        print("exe_command_args == {}\n".format(exe_command_args))
+        print("exe_targ_location   == {}".format(exe_targ_location))
+        print("exe_command_name    == {}".format(exe_command_name))
+        print("exe_command_args    == {}\n".format(exe_command_args))
 
         # Later modify with more than one argument
         spec_command = get_specific_command(exe_target_plugin, exe_command_name)
@@ -50,7 +50,8 @@ def execute_sequence(request):
         for target_item in get_specific_brain_targets(exe_target_plugin):
             break
 
-        job = {"id": str(uuid4()),
+        echo_job_id = str(uuid4())
+        job = {"id": echo_job_id,
                "JobTarget": target_item,
                "Status": "Ready",
                "StartTime": 0,
@@ -59,6 +60,15 @@ def execute_sequence(request):
         # inserting to Brain.Jobs
         insert_brain_jobs_w3(job)
         return HttpResponse(json.dumps(job),
+                            content_type="application/json")
+
+
+def w4_output_controller(request):
+    if request.method == 'GET':
+        controller_job_id = request.GET.get('job_id')
+        updated_job = get_specific_brain_output(controller_job_id)
+
+        return HttpResponse(json.dumps(updated_job),
                             content_type="application/json")
 
 

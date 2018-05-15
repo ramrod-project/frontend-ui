@@ -1,4 +1,6 @@
 from .project_db import db_connection, rtdb
+import sys
+import time
 
 
 def get_brain_targets():
@@ -40,7 +42,7 @@ def get_specific_brain_targets(w3PluginNameJob):
     """
     db_name = "Brain"
     db_table = "Targets"
-    query_specific_plugin_name = rtdb.db(db_name).table(db_table).filter({"PluginName": w3PluginNameJob}).run(db_connection())
+    query_specific_plugin_name = rtdb.db(db_name).table(db_table).filter({"PluginName": w3PluginNameJob}).run()
     return query_specific_plugin_name
 
 
@@ -79,25 +81,44 @@ def insert_brain_jobs_w3(job):
     assert inserted['inserted'] == 1
 
 
-def get_specific_brain_output():
+def test_query(job_id_here):
+    print("test_query CALLED")
     db_name = "Brain"
     db_table = "Jobs"
+    query_status2 = rtdb.db(db_name).table(db_table).filter({'id': job_id_here, 'Status': "Done"}).run(db_connection())
+    return query_status2
 
-    # query for Bain.Jobs Status is 'Done'
-    query_status = rtdb.db(db_name).table(db_table).filter({"Status": "Done"}).run(db_connection())
 
-    print("*"*28)
-    # Check if the query is empty
-    for document in query_status:
-        # Note: If statement down below or...
-        # Add a while loop to keep checking as a boolean
-        if document is True:
-            print("query_status is True")
-        else:
-            print("query_status is False")
-        if document is None:  # Status does not equal to Done
-            print("query_status equals to None")
-        else:                 # Status equals Done
-            print("query_status doesn't equal to None")
-            # return query_status
+def get_specific_brain_output(job_id):
+    """
+    get_specific_brain_output function checks to if Bain.Jobs Status is 'Done'
+    if the status is done this function will return data for W4
+    :return: query
+    """
+    db_name = "Brain"
+    db_table = "Jobs"
+    check_query_int = 0
+    timeout = time.time() + 10  # n of seconds to check till while loop breaks
+    counter_int = 0
+
+    while True:
+        test_int = 0
+        counter_int += 1
+
+        for query_item in rtdb.db(db_name).table(db_table).filter({'id': job_id,
+                                                                   'Status': "Done"}).run(db_connection()):
+            check_query_int = 1
+            if query_item != "":
+                print("NOT EQUAL NONE")
+                # return query_item  # return Brain.Outputs Content
+            else:
+                print("EQUALS NONE")
+
+        if test_int == 5 or time.time() > timeout or check_query_int == 1:
+            break
+        test_int -= 1
+        time.sleep(1)
+    return 0
+
+
 
