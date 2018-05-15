@@ -3,10 +3,13 @@
 # Logs and databases #
 ######################
 */db.sqlite3
+*/migrations/*
+**/migrations/*
 
 # Project files #
 #################
 */__pycache__/*
+.pytest_cache*
 
 # Packages #
 ############
