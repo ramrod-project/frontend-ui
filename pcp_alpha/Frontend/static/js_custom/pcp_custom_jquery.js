@@ -203,7 +203,7 @@ function drop_command(ev) {
         // while loop here for even numbers
     } else {
         // for command that only has one argument
-        console.log("LESS THAN OR EQUAL TO 3");
+//        console.log("LESS THAN OR EQUAL TO 3");
         $(".hiddenArgsClass").append($("<a id='argumentCopyID' class='argumentCopyClass'/>").
         text(String(argumentid_data.childNodes[2].value)))
     }
@@ -246,7 +246,13 @@ function execute_sequence(){
 Functions down below are for w4
 -----------------------------------------------------------------------------------------------------
 */
-function execute_sequence_output(specific_id){
+// Modify function add depth parameter, increment depth when it errors
+function execute_sequence_output(specific_id, counter=0){
+    console.log("execute_sequence_output function");
+    console.log("counter below");
+    console.log(counter);
+
+
     $.ajax({
         type: "GET",
         url: "/action/get_output_data/",
@@ -267,7 +273,30 @@ function execute_sequence_output(specific_id){
             }
         },
         error: function (data) {
+            // sleep
+            // increment depth
+            // re-call execute_sequence_output function again
             console.log("ERROR @ execute_sequence_output function");
+            console.log(data);
         }
+    }).fail(function(data){
+        console.log("FAIL FUNCTION");
+
+        var status = data.status;
+        var reason = data.responseJSON.reason;
+
+        console.log(status);
+        console.log(reason);
+
+        if(counter == 10){
+            console.log("About to BREAK");
+            $("#updateid").empty();
+            $("#updateid").append("No data to return at the moment :(");
+        } else {
+            counter++;
+            console.log("Check again");
+            setTimeout( function() { execute_sequence_output(specific_id, counter); }, 2000 );
+        }
+
     })
 }

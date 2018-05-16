@@ -3,7 +3,9 @@ import rethinkdb as rtdb
 import sys
 import subprocess
 # import docker
-# from time import sleep
+from time import sleep
+from os import environ
+from rethinkdb.errors import ReqlDriverError
 
 
 # May need to modify in the future to check environments
@@ -19,11 +21,6 @@ def check_dev_env():
     else:
         return_int = 1
 
-    # client = docker.from_env()
-    # if len(client.containers.list()) != 0:
-    #     return_int = 0
-    # else:
-    #     return_int = 1
     return return_int
 
 
@@ -33,13 +30,24 @@ def db_connection():
     check production environment or development environment
     :return: dev or prod db connection
     """
-    if check_dev_env() != 1:
-        dbconn = rtdb.connect().repl()
-        print("log: connection to the Brain from docker image is connected")
-    else:
-        dbconn = rtdb.connect("127.0.0.1", 28015).repl()
-        print("log: connection to the Brain from local is connected")
+    env_tag = environ.get('STAGE')
 
+    dbconn = None
+    while not dbconn:
+        try:
+            if env_tag == 'PROD':
+                dbconn = rtdb.connect('rethinkdb')
+                print("log: connection to the REAL Docker Brain container")
+            else:
+                if check_dev_env() != 1:
+                    dbconn = rtdb.connect()
+                    print("log: connection to the Brain from a docker image locally")
+                else:
+                    dbconn = rtdb.connect("127.0.0.1", 28015)
+                    print("log: connection to the Brain from local is connected")
+        except ReqlDriverError as err:
+            print("log: can not connect to a db, BABOON ERROR")
+            sleep(2)
     return dbconn
 
 
@@ -55,19 +63,19 @@ def confirm_brain_db_info():
     check_int = 0
 
     if check_dev_env() != 1:  # For Production Environment
-        if rtdb.db_list().contains("Brain").run():  # db Brain exist
+        if rtdb.db_list().contains("Brain").run(db_connection()):  # db Brain exist
             print("log: db Brain exist")
 
             # Checking Targets, Jobs, Outputs table exist
-            if rtdb.db("Brain").table_list().contains("Targets").run() and \
-                    rtdb.db("Brain").table_list().contains("Jobs").run() and \
-                    rtdb.db("Brain").table_list().contains("Outputs").run():  # yes tables exist
+            if rtdb.db("Brain").table_list().contains("Targets").run(db_connection()) and \
+                    rtdb.db("Brain").table_list().contains("Jobs").run(db_connection()) and \
+                    rtdb.db("Brain").table_list().contains("Outputs").run(db_connection()):  # yes tables exist
                 print("log: db Targets, Jobs, and Outputs tables exist in Brain")
 
                 # Check if Brain.Targets has data, prod doesn't insert dummy data
-                target_data = rtdb.db("Brain").table("Targets").has_fields("PluginName").run()
-                jobs_data = rtdb.db("Brain").table("Jobs").has_fields("JobTarget").run()
-                output_data = rtdb.db("Brain").table("Outputs").has_fields("OutputJob").run()
+                target_data = rtdb.db("Brain").table("Targets").has_fields("PluginName").run(db_connection())
+                jobs_data = rtdb.db("Brain").table("Jobs").has_fields("JobTarget").run(db_connection())
+                output_data = rtdb.db("Brain").table("Outputs").has_fields("OutputJob").run(db_connection())
 
                 # Check Brain.Targets has any data in the table
                 for document in target_data:
@@ -102,75 +110,75 @@ def confirm_brain_db_info():
             print("log: db Brain DOESN'T exist")
 
     else:  # For Development Environment
-        if rtdb.db_list().contains("Brain").run() is not True:  # if Brain doesn't exist locally
+        if rtdb.db_list().contains("Brain").run(db_connection()) is not True:  # if Brain doesn't exist locally
             print("log: db Brain doesn't exist locally")
-            rtdb.db_create("Brain").run()
+            rtdb.db_create("Brain").run(db_connection())
             print("log: db Brain was created to locally since it didn't exist")
 
             # create local Brain.Targets table
-            rtdb.db("Brain").table_create("Targets").run()
+            rtdb.db("Brain").table_create("Targets").run(db_connection())
             print("log: db Brain.Targets table was created to locally")
             # create local Brain.Jobs table
-            rtdb.db("Brain").table_create("Jobs").run()
+            rtdb.db("Brain").table_create("Jobs").run(db_connection())
             print("log: db Brain.Jobs table was created to locally")
             # create local Brain.Outputs table
-            rtdb.db("Brain").table_create("Outputs").run()
+            rtdb.db("Brain").table_create("Outputs").run(db_connection())
             print("log: db Brain.Outputs table was created to locally")
         else:  # if Brain does exit locally
             print("log: db Brain exist locally")
 
             # Brain.Targets does exist
-            if rtdb.db("Brain").table_list().contains("Targets").run():
+            if rtdb.db("Brain").table_list().contains("Targets").run(db_connection()):
                 print("\nlog: db Brain.Targets table exist locally")
 
                 try:
-                    rtdb.db("Brain").table_drop("Targets").run()
+                    rtdb.db("Brain").table_drop("Targets").run(db_connection())
                     print("log: db Brain.Targets table has been dropped from Brain to insert new data")
 
-                    rtdb.db("Brain").table_create("Targets").run()
+                    rtdb.db("Brain").table_create("Targets").run(db_connection())
                     print("log: db Brain.Targets table was created to locally since they were drop to insert new data")
                 except:
                     e = sys.exc_info()[0]
                     print("EXCEPT == {}".format(e))
             else:
                 print("log: db Brain.Targets doesnt exist")
-                rtdb.db("Brain").table_create("Targets").run()
+                rtdb.db("Brain").table_create("Targets").run(db_connection())
                 print("log: db Brain.Targets table was created to locally since it didn't exist")
 
             # Brain.Jobs does exist
-            if rtdb.db("Brain").table_list().contains("Jobs").run():
+            if rtdb.db("Brain").table_list().contains("Jobs").run(db_connection()):
                 print("\nlog: db Brain.Jobs table exist locally")
 
                 try:
-                    rtdb.db("Brain").table_drop("Jobs").run()
+                    rtdb.db("Brain").table_drop("Jobs").run(db_connection())
                     print("log: db Brain.Jobs table has been dropped from Brain to insert new data")
 
-                    rtdb.db("Brain").table_create("Jobs").run()
+                    rtdb.db("Brain").table_create("Jobs").run(db_connection())
                     print("log: db Brain.Jobs table was created to locally since they were drop to insert new data")
                 except:
                     e = sys.exc_info()[0]
                     print("EXCEPT == {}".format(e))
             else:
                 print("log: db Brain.Jobs doesnt exist")
-                rtdb.db("Brain").table_create("Jobs").run()
+                rtdb.db("Brain").table_create("Jobs").run(db_connection())
                 print("log: db Brain.Jobs table was created to locally since it didn't exist")
 
             # Brain.Outputs does exist
-            if rtdb.db("Brain").table_list().contains("Outputs").run():
+            if rtdb.db("Brain").table_list().contains("Outputs").run(db_connection()):
                 print("\nlog: db Brain.Outputs table exist locally")
 
                 try:
-                    rtdb.db("Brain").table_drop("Outputs").run()
+                    rtdb.db("Brain").table_drop("Outputs").run(db_connection())
                     print("log: db Brain.Outputs table has been dropped from Brain to insert new data")
 
-                    rtdb.db("Brain").table_create("Outputs").run()
+                    rtdb.db("Brain").table_create("Outputs").run(db_connection())
                     print("log: db Brain.Outputs table was created to locally since they were drop to insert new data")
                 except:
                     e = sys.exc_info()[0]
                     print("EXCEPT == {}".format(e))
             else:
                 print("log: db Brain.Outputs doesnt exist")
-                rtdb.db("Brain").table_create("Outputs").run()
+                rtdb.db("Brain").table_create("Outputs").run(db_connection())
                 print("log: db Brain.Outputs table was created to locally since it didn't exist")
 
         # insert dummy data
@@ -179,7 +187,7 @@ def confirm_brain_db_info():
              "Location": location_generated_num("172.16.5."),
              "Port": "8002",
              "Optional": "Document Here"}
-        ]).run()
+        ]).run(db_connection())
         print("log: db Dummy data was inserted to Brain.Targets locally")
         # db_connection().close()
 
@@ -194,41 +202,41 @@ def confirm_plugin_db_info():
     """
 
     if check_dev_env() != 1:  # For Production Environment
-        if rtdb.db_list().contains("Plugins").run():
+        if rtdb.db_list().contains("Plugins").run(db_connection()):
             print("\nlog: db Plugins exist")
 
             # Checking any tables exist within Plugins db
-            if rtdb.db("Plugins").table_list().run():
-                print("log: Plugins tables are listed down below:\n{}".format(rtdb.db("Plugins").table_list().run()))
+            if rtdb.db("Plugins").table_list().run(db_connection()):
+                print("log: Plugins tables are listed down below:\n{}".format(rtdb.db("Plugins").table_list().run(db_connection())))
             else:
                 print("log: Plugins tables don't exist\n")
         else:
             print("\nlog: db Plugins DOESN'T exist\n")
     else:  # if Plugins does exit locally
-        if rtdb.db_list().contains("Plugins").run() is not True:  # if Plugins doesn't exist locally
+        if rtdb.db_list().contains("Plugins").run(db_connection()) is not True:  # if Plugins doesn't exist locally
             print("\nlog: db Plugins doesn't exist locally")
-            rtdb.db_create("Plugins").run()
+            rtdb.db_create("Plugins").run(db_connection())
             print("log: db Plugins was created to locally since it didn't exist")
 
             # create local Plugins.Plugin1 table
-            rtdb.db("Plugins").table_create("Plugin1").run()
+            rtdb.db("Plugins").table_create("Plugin1").run(db_connection())
             print("log: db Plugins.Plugin1 table was created to locally")
         else:  # if Plugins does exit locally
             print("\nlog: db Plugins exist locally")
-            if rtdb.db("Plugins").table_list().contains("Plugin1").run():
+            if rtdb.db("Plugins").table_list().contains("Plugin1").run(db_connection()):
 
                 try:
-                    rtdb.db("Plugins").table_drop("Plugin1").run()
+                    rtdb.db("Plugins").table_drop("Plugin1").run(db_connection())
                     print("log: db Plugins.Plugin1 table has been dropped from Plugins to insert new data")
 
-                    rtdb.db("Plugins").table_create("Plugin1").run()
+                    rtdb.db("Plugins").table_create("Plugin1").run(db_connection())
                     print("log: db Plugins.Plugin1 table was created to locally since they were drop to add new data")
                 except:
                     e = sys.exc_info()[0]
                     print("EXCEPT == {}".format(e))
             else:
                 print("log: db Plugins.Plugin1 doesnt exist")
-                rtdb.db("Plugins").table_create("Plugin1").run()
+                rtdb.db("Plugins").table_create("Plugin1").run(db_connection())
                 print("log: db Plugins.Plugin1 table was created to locally since it didn't exist")
 
         # insert dummy data
@@ -291,7 +299,7 @@ def confirm_plugin_db_info():
              ],
              "OptionalInputs": []
              },
-        ]).run()
+        ]).run(db_connection())
         print("log: db Dummy data was inserted to Plugins.Plugin1 locally\n")
 
 

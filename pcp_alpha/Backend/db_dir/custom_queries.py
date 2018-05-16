@@ -1,8 +1,7 @@
 from .project_db import db_connection, rtdb
-import sys
-import time
 
 
+# Note: Refactor this file as a CRUD class in the future
 def get_brain_targets():
     """
     get_brain_targets function from Brain.Targets table.
@@ -42,7 +41,7 @@ def get_specific_brain_targets(w3PluginNameJob):
     """
     db_name = "Brain"
     db_table = "Targets"
-    query_specific_plugin_name = rtdb.db(db_name).table(db_table).filter({"PluginName": w3PluginNameJob}).run()
+    query_specific_plugin_name = rtdb.db(db_name).table(db_table).filter({"PluginName": w3PluginNameJob}).run(db_connection())
     return query_specific_plugin_name
 
 
@@ -75,7 +74,7 @@ def insert_brain_jobs_w3(job):
          "Status": job["Status"],
          "StartTime": job["StartTime"],
          "JobCommand": job["JobCommand"]}
-    ]).run()
+    ]).run(db_connection())
     print("log: db job from W3 was inserted to Brain.Jobs")
     print("{}\n".format(inserted))
     assert inserted['inserted'] == 1
@@ -89,31 +88,8 @@ def get_specific_brain_output(job_id):
     """
     db_name = "Brain"
     db_table = "Jobs"
-    check_query_int = 0
-    timeout = time.time() + 10  # n of seconds to check till while loop breaks
-    counter_int = 0
+    return rtdb.db(db_name).table(db_table).filter({'id': job_id, 'Status': "Done"}).run(db_connection())
 
-    while True:
-        test_int = 0
-        counter_int += 1
-
-        # Modify cursor later as Brain.Outputs instead of Brain.Jobs
-        for query_item in rtdb.db(db_name).table(db_table).filter({'id': job_id,
-                                                                   'Status': "Done"}).run(db_connection()):
-            check_query_int = 1
-            print("log: Brain.Jobs filter specific id and Status that equals to 'Done'...\n{}".format(query_item))
-
-        if check_query_int != 1:
-            print("Status isn't set to 'Done', recheck Status in a second again\n")
-        else:
-            print("Status is set to 'Done' :)")
-            # return Brain.Outputs Content
-
-        if test_int == 5 or time.time() > timeout or check_query_int == 1:
-            break
-        test_int -= 1
-        time.sleep(1)
-    return 0
 
 
 

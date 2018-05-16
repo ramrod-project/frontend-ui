@@ -1,5 +1,7 @@
 from django.http import HttpResponse
 # from django.shortcuts import render  # import will be used for a future ticket pcp-68
+from django.shortcuts import render
+
 from Backend.db_dir.custom_queries import get_specific_commands, get_specific_brain_targets, \
     get_specific_command, insert_brain_jobs_w3, get_specific_brain_output
 
@@ -67,9 +69,19 @@ def w4_output_controller(request):
     if request.method == 'GET':
         controller_job_id = request.GET.get('job_id')
         updated_job = get_specific_brain_output(controller_job_id)
-
-        return HttpResponse(json.dumps(updated_job),
-                            content_type="application/json")
+        check_int = 0
+        for item in updated_job:
+            check_int = 1
+        if check_int != 1:
+            context = {
+                'status': '418', 'reason': 'Status != Done'
+            }
+            response = HttpResponse(json.dumps(context), content_type='application/json')
+            response.status_code = 418
+            return response
+        else:
+            return HttpResponse(json.dumps(updated_job),
+                                content_type="application/json")
 
 
 # This function is for a future ticket pcp-68
