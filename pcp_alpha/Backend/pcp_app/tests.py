@@ -10,7 +10,6 @@ pytestmark = pytest.mark.django_db(transaction=True)
 def test_capability_data(rf):
     username = "pcpuser"
     password = "pcpuser123"
-
     user = authenticate(username=username, password=password)
 
     if user is not None:
