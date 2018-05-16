@@ -1,6 +1,7 @@
 from .project_db import db_connection, rtdb
 
 
+# Note: Refactor this file as a CRUD class in the future
 def get_brain_targets():
     """
     get_brain_targets function from Brain.Targets table.
@@ -73,14 +74,22 @@ def insert_brain_jobs_w3(job):
          "Status": job["Status"],
          "StartTime": job["StartTime"],
          "JobCommand": job["JobCommand"]}
-    ]).run()
+    ]).run(db_connection())
     print("log: db job from W3 was inserted to Brain.Jobs")
-    print(inserted)
+    print("{}\n".format(inserted))
     assert inserted['inserted'] == 1
 
 
-def get_specific_brain_output():
-    # query output
-    # return info to w4
-    pass
+def get_specific_brain_output(job_id):
+    """
+    get_specific_brain_output function checks to if Bain.Jobs Status is 'Done'
+    if the status is done this function will return data for W4
+    :return: Brain.Outputs Content if Status is Done or 0 if the data set doesn't exists
+    """
+    db_name = "Brain"
+    db_table = "Jobs"
+    return rtdb.db(db_name).table(db_table).filter({'id': job_id, 'Status': "Done"}).run(db_connection())
+
+
+
 

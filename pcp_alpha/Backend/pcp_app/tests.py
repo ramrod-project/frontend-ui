@@ -1,5 +1,5 @@
 from django.contrib.auth import authenticate
-from .views import get_command_list, execute_sequence
+from .views import get_commands_controller, execute_sequence_controller
 
 import pytest
 
@@ -15,7 +15,7 @@ def test_capability_data(rf):
 
     if user is not None:
         request = rf.get('action/get_capability_list/')
-        response = get_command_list(request)
+        response = get_commands_controller(request)
         assert response.status_code == 200
 
 
@@ -27,6 +27,6 @@ def test_execute_data(rf):
 
     if user is not None:
         request = rf.get('action/get_w3_data/')
-        response = execute_sequence(request)
+        response = execute_sequence_controller(request)
         assert response.status_code == 200
 

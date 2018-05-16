@@ -1,6 +1,6 @@
 var inc = 1;
 $(document).ready(function() {
-	$("tr.clickable-row").click(get_capabilities_func);   // displays commands in w2
+	$("tr.clickable-row").click(get_commands_func);   // displays commands in w2
 	$("#addjob_button").click(add_new_job);               // add new job in w3 
 	$("#addjob_button").click(function(){
 	    inc++;
@@ -18,12 +18,12 @@ Functions down below are for w2
 */
 
 // List of commands based off of plugin name
-function get_capabilities_func(){
+function get_commands_func(){
     $(".tooltipHeader").empty();
 
     // plugin name the user clicked
     var plugin_name_var = $(this)[0].firstElementChild.textContent;
-    console.log(plugin_name_var);
+//    console.log(plugin_name_var);
 
     $.ajax({
         type: "GET",
@@ -73,13 +73,13 @@ function get_capabilities_func(){
                     input_str = input_str + input_str2;
                     int++;
                 }
-//                $(".theContentArgument").append("<a id='commandIdBuilder'>" +$(this)[0].text + " &nbsp;&nbsp; " + input_str);  // works!
+//                $(".theContentArgument").append("<a id='commandIdBuilder'>" +$(this)[0].text + " &nbsp;&nbsp; " + input_str);  // former code
                 $(".theContentArgument").append($("<a id='commandIdBuilder'/>").text($(this)[0].text)).append("&nbsp;&nbsp;").append($(input_str));
 
             });
         },
         error: function (data) {
-        	console.log("ERROR FUNCTION CALLED");
+        	console.log("ERROR @ get_commands_func function");
         	console.log(data);
         }
     })
@@ -108,6 +108,13 @@ function add_new_job(){
             $("<td/>").attr({"ondrop": "drop_command(event)",
                              "ondragover": "allowDropCommand(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text("")))
         ));
+
+        // W4 Rows
+        $(".W4BodyContent").append($("<tr/>").append(
+        $("<th/>").text("1"),
+        $("<th/>").append($("<a/>").attr({'id': 'updateid'}).text("terminal1"))
+        ));
+
     }
     else {
         $(".thirdBoxContent").append($("<tr/>").attr({"role": "row", "onclick": "#"}).append(
@@ -119,7 +126,13 @@ function add_new_job(){
                              "ondrop": "drop(event)",
                              "ondragover": "allowDrop(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text(""))),
             $("<td/>").attr({"ondrop": "drop_command(event)",
-                             "ondragover": "allowDropCommand(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text("Command Here")))
+                             "ondragover": "allowDropCommand(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text("")))
+        ));
+
+        // W4 Rows
+        $(".W4BodyContent").append($("<tr/>").append(
+        $("<th/>").text(value),
+        $("<th/>").append($("<a/>").text("terminal" + value))
         ));
     }
 
@@ -171,28 +184,18 @@ function allowDropCommand(ev) {
 }
 
 function drag_command(ev) {
-//    console.log("DRAG FUNCTION");
-
-//    console.log(ev.originalTarget)
-//    console.log(ev.explicitOriginalTarget.firstElementChild.id);
-
 //    ev.dataTransfer.setData("text", ev.explicitOriginalTarget.firstElementChild.id);  // Former code
     ev.dataTransfer.setData("text", ev.originalTarget.id);
 }
 
 function drop_command(ev) {
-//    console.log("DROP FUNCTION")
     ev.preventDefault();
 
     var data = ev.dataTransfer.getData("text");
-//    console.log(data);
     var data_copy = document.getElementById(data).cloneNode(true);
 
     var argumentid_data = document.getElementById(data);
     var argumentid_var = document.getElementById(argumentid_data.childNodes[0].id).cloneNode(true);
-
-    // command name & argument(s).  probably check # of arguments
-//    console.log(argumentid_data)
 
     // for commands that have more than one argument
     if (argumentid_data.childNodes.length > 3){
@@ -200,10 +203,7 @@ function drop_command(ev) {
         // while loop here for even numbers
     } else {
         // for command that only has one argument
-        console.log("LESS THAN OR EQUAL TO 3");
-//        console.log(argumentid_data.childNodes[0].text);
-//        console.log(argumentid_data.childNodes[2].value);
-//        console.log(String(argumentid_data.childNodes[2].value));
+//        console.log("LESS THAN OR EQUAL TO 3");
         $(".hiddenArgsClass").append($("<a id='argumentCopyID' class='argumentCopyClass'/>").
         text(String(argumentid_data.childNodes[2].value)))
     }
@@ -215,16 +215,11 @@ function drop_command(ev) {
 
 // Execute Sequence function down below are for w3+w4
 function execute_sequence(){
-    console.log("execute_sequence function has been called");
+//    console.log("execute_sequence function has been called");
     var plugin_data = document.getElementById("newId");
     var location_data = document.getElementById("newIdTwo");
     var command_data = document.getElementById("newCommandID");
     var args_data = document.getElementById("hiddenArgsId");
-
-//    console.log(plugin_data.textContent);
-//    console.log(location_data.textContent)
-//    console.log(command_data.textContent)
-//    console.log(args_data.textContent);
 
     $.ajax({
         type: "GET",
@@ -235,11 +230,12 @@ function execute_sequence(){
                "command_args": args_data.textContent},
         datatype: 'json',
         success: function(data) {
-            console.log("SUCCESS execute_sequence function")
-            console.log(data)
+//            console.log(data);
+            var job_id = data.id;
+            execute_sequence_output(job_id);
         },
         error: function (data) {
-            console.log("ERROR execute_sequence function")
+            console.log("ERROR @ execute_sequence function")
         }
 
     })
@@ -250,3 +246,57 @@ function execute_sequence(){
 Functions down below are for w4
 -----------------------------------------------------------------------------------------------------
 */
+// Modify function add depth parameter, increment depth when it errors
+function execute_sequence_output(specific_id, counter=0){
+    console.log("execute_sequence_output function");
+    console.log("counter below");
+    console.log(counter);
+
+
+    $.ajax({
+        type: "GET",
+        url: "/action/get_output_data/",
+        data: {"job_id": specific_id},
+        datatype: 'json',
+        success: function(data) {
+
+            if (data != 0){  // returns query
+                console.log("Does not equal to zero");
+                //data output here
+                $("#updateid").empty();
+                $("#updateid").append("returns query data here :)");
+
+            } else {  // doesn't return query
+                console.log("data equals to zero");
+                $("#updateid").empty();
+                $("#updateid").append("No data to return at the moment :(");
+            }
+        },
+        error: function (data) {
+            // sleep
+            // increment depth
+            // re-call execute_sequence_output function again
+            console.log("ERROR @ execute_sequence_output function");
+            console.log(data);
+        }
+    }).fail(function(data){
+        console.log("FAIL FUNCTION");
+
+        var status = data.status;
+        var reason = data.responseJSON.reason;
+
+        console.log(status);
+        console.log(reason);
+
+        if(counter == 10){
+            console.log("About to BREAK");
+            $("#updateid").empty();
+            $("#updateid").append("No data to return at the moment :(");
+        } else {
+            counter++;
+            console.log("Check again");
+            setTimeout( function() { execute_sequence_output(specific_id, counter); }, 2000 );
+        }
+
+    })
+}
