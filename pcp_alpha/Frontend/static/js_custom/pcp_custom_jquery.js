@@ -1,6 +1,6 @@
 var inc = 1;
 $(document).ready(function() {
-	$("tr.clickable-row").click(get_capabilities_func);   // displays commands in w2
+	$("tr.clickable-row").click(get_commands_func);   // displays commands in w2
 	$("#addjob_button").click(add_new_job);               // add new job in w3 
 	$("#addjob_button").click(function(){
 	    inc++;
@@ -18,12 +18,12 @@ Functions down below are for w2
 */
 
 // List of commands based off of plugin name
-function get_capabilities_func(){
+function get_commands_func(){
     $(".tooltipHeader").empty();
 
     // plugin name the user clicked
     var plugin_name_var = $(this)[0].firstElementChild.textContent;
-    console.log(plugin_name_var);
+//    console.log(plugin_name_var);
 
     $.ajax({
         type: "GET",
@@ -79,7 +79,7 @@ function get_capabilities_func(){
             });
         },
         error: function (data) {
-        	console.log("ERROR FUNCTION CALLED");
+        	console.log("ERROR @ get_commands_func function");
         	console.log(data);
         }
     })
@@ -215,7 +215,7 @@ function drop_command(ev) {
 
 // Execute Sequence function down below are for w3+w4
 function execute_sequence(){
-    console.log("execute_sequence function has been called");
+//    console.log("execute_sequence function has been called");
     var plugin_data = document.getElementById("newId");
     var location_data = document.getElementById("newIdTwo");
     var command_data = document.getElementById("newCommandID");
@@ -230,38 +230,12 @@ function execute_sequence(){
                "command_args": args_data.textContent},
         datatype: 'json',
         success: function(data) {
-            console.log("SUCCESS execute_sequence function");
-            console.log(data);
+//            console.log(data);
             var job_id = data.id;
-
-            // ajax call to call custom_queries.get_specific_brain_output()
-            $.ajax({
-                type: "GET",
-                url: "/action/get_output_data/",
-                data: {"job_id": job_id},
-                datatype: 'json',
-                success: function(data) {
-
-                    if (data != 0){  // returns query
-                        console.log("Does not equal to zero");
-                        //data output here
-                        $("#updateid").empty();
-                        $("#updateid").append("returns query data here :)");
-
-                    } else {  // doesn't return query
-                        console.log("data equals to zero");
-                        $("#updateid").empty();
-                        $("#updateid").append("No updated data :(");
-                    }
-                },
-                error: function (data) {
-                    console.log("ERROR /action/get_output_data/");
-                }
-            })
-
+            execute_sequence_output(job_id);
         },
         error: function (data) {
-            console.log("ERROR execute_sequence function")
+            console.log("ERROR @ execute_sequence function")
         }
 
     })
@@ -272,3 +246,28 @@ function execute_sequence(){
 Functions down below are for w4
 -----------------------------------------------------------------------------------------------------
 */
+function execute_sequence_output(specific_id){
+    $.ajax({
+        type: "GET",
+        url: "/action/get_output_data/",
+        data: {"job_id": specific_id},
+        datatype: 'json',
+        success: function(data) {
+
+            if (data != 0){  // returns query
+                console.log("Does not equal to zero");
+                //data output here
+                $("#updateid").empty();
+                $("#updateid").append("returns query data here :)");
+
+            } else {  // doesn't return query
+                console.log("data equals to zero");
+                $("#updateid").empty();
+                $("#updateid").append("No data to return at the moment :(");
+            }
+        },
+        error: function (data) {
+            console.log("ERROR @ execute_sequence_output function");
+        }
+    })
+}

@@ -77,23 +77,15 @@ def insert_brain_jobs_w3(job):
          "JobCommand": job["JobCommand"]}
     ]).run()
     print("log: db job from W3 was inserted to Brain.Jobs")
-    print(inserted)
+    print("{}\n".format(inserted))
     assert inserted['inserted'] == 1
-
-
-def test_query(job_id_here):
-    print("test_query CALLED")
-    db_name = "Brain"
-    db_table = "Jobs"
-    query_status2 = rtdb.db(db_name).table(db_table).filter({'id': job_id_here, 'Status': "Done"}).run(db_connection())
-    return query_status2
 
 
 def get_specific_brain_output(job_id):
     """
     get_specific_brain_output function checks to if Bain.Jobs Status is 'Done'
     if the status is done this function will return data for W4
-    :return: query
+    :return: Brain.Outputs Content if Status is Done or 0 if the data set doesn't exists
     """
     db_name = "Brain"
     db_table = "Jobs"
@@ -105,14 +97,17 @@ def get_specific_brain_output(job_id):
         test_int = 0
         counter_int += 1
 
+        # Modify cursor later as Brain.Outputs instead of Brain.Jobs
         for query_item in rtdb.db(db_name).table(db_table).filter({'id': job_id,
                                                                    'Status': "Done"}).run(db_connection()):
             check_query_int = 1
-            if query_item != "":
-                print("NOT EQUAL NONE")
-                # return query_item  # return Brain.Outputs Content
-            else:
-                print("EQUALS NONE")
+            print("log: Brain.Jobs filter specific id and Status that equals to 'Done'...\n{}".format(query_item))
+
+        if check_query_int != 1:
+            print("Status isn't set to 'Done', recheck Status in a second again\n")
+        else:
+            print("Status is set to 'Done' :)")
+            # return Brain.Outputs Content
 
         if test_int == 5 or time.time() > timeout or check_query_int == 1:
             break
