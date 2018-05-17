@@ -59,7 +59,7 @@ def get_specific_command(w3_plugin_name, w3_command_name):
     return query_specific_plugin_name
 
 
-def insert_brain_jobs_w3(job):
+def insert_brain_jobs_w3(jobs):
     """
     insert_brain_jobs_w3 function inserts data from W3 in Brain.Jobs table
     :param job: controller job
@@ -67,18 +67,11 @@ def insert_brain_jobs_w3(job):
     """
     db_name = "Brain"
     db_table = "Jobs"
-
-    inserted = rtdb.db(db_name).table(db_table).insert([
-        {"id": job["id"],
-         "JobTarget": job["JobTarget"],
-         "Status": job["Status"],
-         "StartTime": job["StartTime"],
-         "JobCommand": job["JobCommand"]}
-    ]).run(db_connection())
+    assert isinstance(jobs, list)
+    inserted = rtdb.db(db_name).table(db_table).insert(jobs).run(db_connection())
     print("log: db job from W3 was inserted to Brain.Jobs")
     print("{}\n".format(inserted))
-    assert inserted['inserted'] == 1
-
+    return inserted
 
 def get_specific_brain_output(job_id):
     """
@@ -90,6 +83,19 @@ def get_specific_brain_output(job_id):
     db_table = "Jobs"
     return rtdb.db(db_name).table(db_table).filter({'id': job_id, 'Status': "Done"}).run(db_connection())
 
+
+def get_specific_brain_output_content(job_id):
+    """
+    get_specific_brain_output function checks to if Bain.Jobs Status is 'Done'
+    if the status is done this function will return data for W4
+    :return: Brain.Outputs Content if Status is Done or 0 if the data set doesn't exists
+    """
+    db_name = "Brain"
+    db_table = "Outputs"
+    c = rtdb.db(db_name).table(db_table).filter({"JobCommand": {'id': job_id}}).run(db_connection())
+    for d in c:
+        content = d['Content']
+    return content
 
 
 

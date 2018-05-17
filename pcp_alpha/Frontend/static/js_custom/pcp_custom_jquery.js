@@ -18,6 +18,9 @@ Functions down below are for w2
 */
 
 // List of commands based off of plugin name
+
+var current_command_template = {}
+
 function get_commands_func(){
     $(".tooltipHeader").empty();
 
@@ -50,32 +53,29 @@ function get_commands_func(){
                 for(var i2 = 0; i2 < data.length; i2++) {
                     if(data[i2].CommandName == $(this)[0].text){
                         arg_int = data[i2].Inputs.length;
+                        current_command_template = data[i2];
                     }
                 }
                 //tooltip
                 $(".tooltipHeader").empty();
                 $(".tooltipHeader").append($("<p/>").append($("<b/>").text("Tooltip:")));
                 $(".tooltipContent").empty();
-                for(var i = 0; i < data.length; i++) {
-                    if(data[i].CommandName == $(this)[0].text){
-                        $(".tooltipContent").append("<pre>" + data[i].Tooltip + "</pre>");
-                    }
-                }
+                $(".tooltipContent").append("<pre>" + current_command_template.Tooltip + "</pre>");
 
                 //footer
                 $(".theContentArgument").empty();
-                var input_str = "<input id='argumentid' placeholder='Argument 1 Here'/>"
-                var int = 1;
-                var argumentid_num = 2;
-                while (int < arg_int){
-                var argumentid_num = int + 1;
-                var input_str2 = " &nbsp;&nbsp; " + "<input id='argumentid"+ int + "' placeholder='Argument " + argumentid_num + " Here'/>"
-                    input_str = input_str + input_str2;
-                    int++;
+                $(".theContentArgument").append($("<a id='commandIdBuilder'/>").text($(this)[0].text))
+                $(".theContentArgument").append($("<div id='JSON_Command_DATA'/>").text(JSON.stringify(current_command_template)))
+                for (var input_i = 0; input_i < current_command_template['Inputs'].length; input_i++){
+                    //currently assumes input type is textbox
+                    var new_input = document.createElement("input");
+                    new_input.label = "argumentid_("+input_i+")";
+                    new_input.id = "argumentid_"+input_i;
+                    new_input.onchange = update_argument;
+                    new_input.onkeyup = update_argument;
+                    new_input.placeholder = current_command_template["Inputs"][input_i]['Value'];
+                    $("#commandIdBuilder").append($("<br>")).append(new_input);
                 }
-//                $(".theContentArgument").append("<a id='commandIdBuilder'>" +$(this)[0].text + " &nbsp;&nbsp; " + input_str);  // former code
-                $(".theContentArgument").append($("<a id='commandIdBuilder'/>").text($(this)[0].text)).append("&nbsp;&nbsp;").append($(input_str));
-
             });
         },
         error: function (data) {
@@ -84,7 +84,13 @@ function get_commands_func(){
         }
     })
 }
-
+function update_argument(event){
+    var source = event.target || event.srcElement;
+    var cmditem = source.id.substring(11,source.id.length);
+    console.warn("updating commdn item "+ cmditem);
+    current_command_template["Inputs"][cmditem]["Value"] = source.value;
+    document.getElementById("JSON_Command_DATA").innerText = JSON.stringify(current_command_template);
+}
 /*
 -----------------------------------------------------------------------------------------------------
 Functions down below are for w3
@@ -105,14 +111,15 @@ function add_new_job(){
             $("<td/>").attr({"id": "addressid" + 1,
                              "ondrop": "drop(event)",
                              "ondragover": "allowDrop(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text(""))),
-            $("<td/>").attr({"ondrop": "drop_command(event)",
+            $("<td/>").attr({"id": "commandid" + 1,
+                             "ondrop": "drop_command(event)",
                              "ondragover": "allowDropCommand(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text("")))
         ));
 
         // W4 Rows
         $(".W4BodyContent").append($("<tr/>").append(
         $("<th/>").text("1"),
-        $("<th/>").append($("<a/>").attr({'id': 'updateid'}).text("terminal1"))
+        $("<th/>").append($("<a/>").attr({'id': 'updateid1'}).text("terminal1"))
         ));
 
     }
@@ -125,14 +132,15 @@ function add_new_job(){
             $("<td/>").attr({"id": "addressid" + value,
                              "ondrop": "drop(event)",
                              "ondragover": "allowDrop(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text(""))),
-            $("<td/>").attr({"ondrop": "drop_command(event)",
+            $("<td/>").attr({"id": "commandid" + value,
+                             "ondrop": "drop_command(event)",
                              "ondragover": "allowDropCommand(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text("")))
         ));
 
         // W4 Rows
         $(".W4BodyContent").append($("<tr/>").append(
         $("<th/>").text(value),
-        $("<th/>").append($("<a/>").text("terminal" + value))
+        $("<th/>").append($("<a/>").attr({'id': 'updateid'+value}).text("terminal" + value))
         ));
     }
 
@@ -185,54 +193,63 @@ function allowDropCommand(ev) {
 
 function drag_command(ev) {
 //    ev.dataTransfer.setData("text", ev.explicitOriginalTarget.firstElementChild.id);  // Former code
-    ev.dataTransfer.setData("text", ev.originalTarget.id);
+    //ev.dataTransfer.setData("text", ev.originalTarget.id);
+    ev.dataTransfer.setData("text", JSON.stringify(current_command_template));
 }
 
 function drop_command(ev) {
     ev.preventDefault();
+    var command_json = ev.dataTransfer.getData("text");
+    var command = JSON.parse(command_json);
+    //ev.target.appendChild(argumentid_var);
+    var new_div = document.createElement("div");
+    new_div.innerText = command_json;
 
-    var data = ev.dataTransfer.getData("text");
-    var data_copy = document.getElementById(data).cloneNode(true);
-
-    var argumentid_data = document.getElementById(data);
-    var argumentid_var = document.getElementById(argumentid_data.childNodes[0].id).cloneNode(true);
-
-    // for commands that have more than one argument
-    if (argumentid_data.childNodes.length > 3){
-        console.log("GREATER THAN 3")
-        // while loop here for even numbers
-    } else {
-        // for command that only has one argument
-//        console.log("LESS THAN OR EQUAL TO 3");
-        $(".hiddenArgsClass").append($("<a id='argumentCopyID' class='argumentCopyClass'/>").
-        text(String(argumentid_data.childNodes[2].value)))
+    ev.target.appendChild(new_div);
+    new_div.style.display = 'none';
+    var display_string = command['CommandName'] + " ("
+    for (var j = 0; j < command["Inputs"].length; j++){
+        display_string += " "+command["Inputs"][j]["Value"]
     }
+    display_string += " )"
+    var display_div = document.createElement("div");
+    display_div.innerText = display_string;
+    ev.target.appendChild(display_div);
 
-    data_copy.id = "newCommandId";
-    argumentid_var.id = "newCommandID";
-    ev.target.appendChild(argumentid_var);
 }
 
 // Execute Sequence function down below are for w3+w4
 function execute_sequence(){
 //    console.log("execute_sequence function has been called");
-    var plugin_data = document.getElementById("newId");
-    var location_data = document.getElementById("newIdTwo");
-    var command_data = document.getElementById("newCommandID");
-    var args_data = document.getElementById("hiddenArgsId");
 
+    var jobs = []
+    var num_jobs = $("#addjob_button")[0].value;
+    for (var j = 1; j < num_jobs; j++){
+        var plugin_name = $("#pluginid"+j+" td a span")[0].innerText;
+        var location = $("#addressid"+j+" td a span")[0].innerText;
+        var command_json = $("#commandid"+j+" div")[0].innerText;
+        var command = JSON.parse(command_json);
+        var job = {"JobTarget": {"PluginName": plugin_name,
+                                 "Location": location,
+                                 "Port":  0,},
+                   "Status": "Ready",
+                   "StartTime": 0,
+                   "JobCommand": command}
+        jobs.push(job);
+    }
+    var jobs_json = JSON.stringify(jobs);
     $.ajax({
         type: "GET",
         url: "/action/get_w3_data/",
-        data: {"target_plugin": plugin_data.textContent,
-               "target_location": location_data.textContent,
-               "command_name": command_data.textContent,
-               "command_args": args_data.textContent},
+        data: {"jobs": jobs_json},
         datatype: 'json',
         success: function(data) {
 //            console.log(data);
-            var job_id = data.id;
-            execute_sequence_output(job_id);
+            var job_ids = data.generated_keys;
+            job_id = job_ids[0];
+            for (var index = 0; index < job_ids.length; ++index) {
+                execute_sequence_output(job_ids[index], index+1);
+            }
         },
         error: function (data) {
             console.log("ERROR @ execute_sequence function")
@@ -247,7 +264,7 @@ Functions down below are for w4
 -----------------------------------------------------------------------------------------------------
 */
 // Modify function add depth parameter, increment depth when it errors
-function execute_sequence_output(specific_id, counter=0){
+function execute_sequence_output(specific_id, updateid, counter=0){
     console.log("execute_sequence_output function");
     console.log("counter below");
     console.log(counter);
@@ -263,13 +280,15 @@ function execute_sequence_output(specific_id, counter=0){
             if (data != 0){  // returns query
                 console.log("Does not equal to zero");
                 //data output here
-                $("#updateid").empty();
-                $("#updateid").append("returns query data here :)");
+                $("#updateid"+updateid).empty();
+                $("#updateid"+updateid).append(JSON.stringify(data));
+                $("#updateid"+updateid).append(" [download]");
+
 
             } else {  // doesn't return query
                 console.log("data equals to zero");
-                $("#updateid").empty();
-                $("#updateid").append("No data to return at the moment :(");
+                $("#updateid"+updateid).empty();
+                $("#updateid"+updateid).append("No data to return at the moment :(");
             }
         },
         error: function (data) {
@@ -295,7 +314,7 @@ function execute_sequence_output(specific_id, counter=0){
         } else {
             counter++;
             console.log("Check again");
-            setTimeout( function() { execute_sequence_output(specific_id, counter); }, 2000 );
+            setTimeout( function() { execute_sequence_output(specific_id, updateid, counter); }, 2000 );
         }
 
     })

@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 
 from Backend.db_dir.custom_queries import get_specific_commands, get_specific_brain_targets, \
-    get_specific_command, insert_brain_jobs_w3, get_specific_brain_output
+    get_specific_command, insert_brain_jobs_w3, get_specific_brain_output, get_specific_brain_output_content
 
 from uuid import uuid4
 import json
@@ -33,35 +33,11 @@ def execute_sequence_controller(request):
     target_item = ""
 
     if request.method == 'GET':
-        exe_target_plugin = request.GET.get('target_plugin')
-        exe_targ_location = request.GET.get('target_location')
-        exe_command_name = request.GET.get('command_name')
-        exe_command_args = request.GET.get('command_args')
-
-        print("\nexe_target_plugin == {}".format(exe_target_plugin))
-        print("exe_targ_location   == {}".format(exe_targ_location))
-        print("exe_command_name    == {}".format(exe_command_name))
-        print("exe_command_args    == {}\n".format(exe_command_args))
-
-        # Later modify with more than one argument
-        spec_command = get_specific_command(exe_target_plugin, exe_command_name)
-        for command_item in spec_command:
-            command_item['Inputs'][0]['Value'] = str(exe_command_args)
-            break
-
-        for target_item in get_specific_brain_targets(exe_target_plugin):
-            break
-
-        echo_job_id = str(uuid4())
-        job = {"id": echo_job_id,
-               "JobTarget": target_item,
-               "Status": "Ready",
-               "StartTime": 0,
-               "JobCommand": command_item}
+        jobs = json.loads(request.GET.get('jobs'))
 
         # inserting to Brain.Jobs
-        insert_brain_jobs_w3(job)
-        return HttpResponse(json.dumps(job),
+        response = insert_brain_jobs_w3(jobs)
+        return HttpResponse(json.dumps(response),
                             content_type="application/json")
 
 
@@ -72,6 +48,7 @@ def w4_output_controller(request):
         check_int = 0
         for item in updated_job:
             check_int = 1
+            break
         if check_int != 1:
             context = {
                 'status': '418', 'reason': 'Status != Done'
@@ -80,7 +57,7 @@ def w4_output_controller(request):
             response.status_code = 418
             return response
         else:
-            return HttpResponse(json.dumps(updated_job),
+            return HttpResponse(json.dumps({"Content":get_specific_brain_output_content(controller_job_id)}),
                                 content_type="application/json")
 
 
