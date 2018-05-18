@@ -103,7 +103,7 @@ function add_new_job(){
 
     // content for w3
     if(value == 0 || value == 1) {
-        $(".thirdBoxContent").append($("<tr/>").attr({"role": "row", "onclick": "#"}).append(
+        $(".thirdBoxContent").append($("<tr/>").attr({"role": "row", "onclick": "#", "id":"jobrow"+1}).append(
             $("<td/>").append($("<a/>").attr({"href": "#"}).append($("<span/>").text("1"))),
             $("<td/>").attr({"id": "pluginid" + 1,
                              "ondrop": "drop(event)",
@@ -124,7 +124,7 @@ function add_new_job(){
 
     }
     else {
-        $(".thirdBoxContent").append($("<tr/>").attr({"role": "row", "onclick": "#"}).append(
+        $(".thirdBoxContent").append($("<tr/>").attr({"role": "row", "onclick": "#", "id":"jobrow"+value}).append(
             $("<td/>").append($("<a/>").attr({"href": "#"}).append($("<span/>").text(value))),
             $("<td/>").attr({"id": "pluginid" + value,
                              "ondrop": "drop(event)",
@@ -150,6 +150,7 @@ function add_new_job(){
 // Clear job content in w3
 function clear_new_jobs(){
     $(".thirdBoxContent").empty();
+    $("#W4Rows").empty();
     inc = 1;
     $("#addjob_button")[0].value = 0;
 }
@@ -231,7 +232,7 @@ function execute_sequence(){
     for (var j = 1; j < num_jobs; j++){
         var uid = j;
         var terminal = $("#updateid"+uid).parent();
-        terminal.css("background-color", "grey");
+        terminal.css("background-color", "Chartreuse");
         var plugin_name = $("#pluginid"+j+" td a span")[0].innerText;
         var location = $("#addressid"+j+" td a span")[0].innerText;
         var command_json = $("#commandid"+j+" div")[0].innerText;
@@ -292,9 +293,9 @@ function execute_sequence_output(specific_id, updateid, counter=0, backoff=2000)
                 $("#updatecontent"+updateid).append(JSON.stringify(data['Content']));
                 var download_link = $('<a>[Download]</a>');
                 download_link.attr({"href": "/action/get_full_output_data/?job_id="+specific_id});
-                download_link.appendTo($("#updateid"+updateid))
-                //$("#updateid"+updateid).append(" [download]");
-                $("#updateid"+updateid).parent().css("background-color", "white");
+                //download_link.appendTo($("#updateid"+updateid));
+                $("#updateid"+updateid).append($("<div style='background-color: white'/>").append(download_link));
+                $("#updateid"+updateid).parent().css("background-color", "Fuchsia");
 
 
             } else {  // doesn't return query
