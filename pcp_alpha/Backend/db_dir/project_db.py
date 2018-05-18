@@ -15,8 +15,8 @@ def check_dev_env():
     to connect to the brain.
     :return: 0 (prod env) or 1 (dev env)
     """
-    s = subprocess.check_output('docker ps', shell=True)
-    if s.find('myP'.encode()) != -1:
+    env_tag = environ.get('STAGE')
+    if env_tag == "PROD":
         return_int = 0
     else:
         return_int = 1
