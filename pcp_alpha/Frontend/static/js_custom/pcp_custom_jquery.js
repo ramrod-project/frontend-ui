@@ -202,10 +202,14 @@ function drop_command(ev) {
     var command_json = ev.dataTransfer.getData("text");
     var command = JSON.parse(command_json);
     //ev.target.appendChild(argumentid_var);
+    var command_hole = $(ev.target);
+    while (command_hole[0].tagName != "TD"){
+        command_hole = command_hole.parent();
+    }
+    command_hole.empty();
     var new_div = document.createElement("div");
     new_div.innerText = command_json;
-
-    ev.target.appendChild(new_div);
+    command_hole[0].appendChild(new_div);
     new_div.style.display = 'none';
     var display_string = command['CommandName'] + " ("
     for (var j = 0; j < command["Inputs"].length; j++){
@@ -214,7 +218,7 @@ function drop_command(ev) {
     display_string += " )"
     var display_div = document.createElement("div");
     display_div.innerText = display_string;
-    ev.target.appendChild(display_div);
+    command_hole[0].appendChild(display_div);
 
 }
 
@@ -225,6 +229,9 @@ function execute_sequence(){
     var jobs = []
     var num_jobs = $("#addjob_button")[0].value;
     for (var j = 1; j < num_jobs; j++){
+        var uid = j;
+        var terminal = $("#updateid"+uid).parent();
+        terminal.css("background-color", "grey");
         var plugin_name = $("#pluginid"+j+" td a span")[0].innerText;
         var location = $("#addressid"+j+" td a span")[0].innerText;
         var command_json = $("#commandid"+j+" div")[0].innerText;
@@ -264,7 +271,7 @@ Functions down below are for w4
 -----------------------------------------------------------------------------------------------------
 */
 // Modify function add depth parameter, increment depth when it errors
-function execute_sequence_output(specific_id, updateid, counter=0){
+function execute_sequence_output(specific_id, updateid, counter=0, backoff=2000){
     console.log("execute_sequence_output function");
     console.log("counter below");
     console.log(counter);
@@ -283,12 +290,14 @@ function execute_sequence_output(specific_id, updateid, counter=0){
                 $("#updateid"+updateid).empty();
                 $("#updateid"+updateid).append(JSON.stringify(data));
                 $("#updateid"+updateid).append(" [download]");
+                $("#updateid"+updateid).parent().css("background-color", "white");
 
 
             } else {  // doesn't return query
                 console.log("data equals to zero");
                 $("#updateid"+updateid).empty();
                 $("#updateid"+updateid).append("No data to return at the moment :(");
+                $("#updateid"+updateid).parent().css("background-color", "white");
             }
         },
         error: function (data) {
@@ -309,12 +318,13 @@ function execute_sequence_output(specific_id, updateid, counter=0){
 
         if(counter == 10){
             console.log("About to BREAK");
-            $("#updateid").empty();
-            $("#updateid").append("No data to return at the moment :(");
+            $("#updateid"+updateid).empty();
+            $("#updateid"+updateid).append("No data to return at the moment :(");
+            $("#updateid"+updateid).parent().css("background-color", "white");
         } else {
             counter++;
             console.log("Check again");
-            setTimeout( function() { execute_sequence_output(specific_id, updateid, counter); }, 2000 );
+            setTimeout( function() { execute_sequence_output(specific_id, updateid, counter); }, backoff*2 );
         }
 
     })
