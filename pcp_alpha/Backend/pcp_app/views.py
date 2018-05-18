@@ -40,25 +40,41 @@ def execute_sequence_controller(request):
         return HttpResponse(json.dumps(response),
                             content_type="application/json")
 
+def _w4_get_content(job_id):
+    updated_job = get_specific_brain_output(job_id)
+    check_int = 0
+    for item in updated_job:
+        check_int = 1
+        break
+    if check_int != 1:
+        result = {
+            'status': '418',
+            'reason': 'Status != Done',
+            'Content': None
+        }
+    else:
+        result = {
+            'status': '200',
+            "Content": get_specific_brain_output_content(job_id)
+        }
+    return result
 
 def w4_output_controller(request):
     if request.method == 'GET':
         controller_job_id = request.GET.get('job_id')
-        updated_job = get_specific_brain_output(controller_job_id)
-        check_int = 0
-        for item in updated_job:
-            check_int = 1
-            break
-        if check_int != 1:
-            context = {
-                'status': '418', 'reason': 'Status != Done'
-            }
-            response = HttpResponse(json.dumps(context), content_type='application/json')
-            response.status_code = 418
-            return response
-        else:
-            return HttpResponse(json.dumps({"Content":get_specific_brain_output_content(controller_job_id)}),
-                                content_type="application/json")
+        result = _w4_get_content(controller_job_id)
+        response = HttpResponse(json.dumps(result), content_type='application/json')
+        response.status_code = int(result['status'])
+        return response
+
+def w4_output_controller_download(request):
+    if request.method == 'GET':
+        controller_job_id = request.GET.get('job_id')
+        content = get_specific_brain_output_content(controller_job_id, max_size=None)
+        response = HttpResponse(content, content_type='application/octet-stream')
+        response['Content-Disposition'] = 'attachment; filename="{}.txt"'.format(controller_job_id)
+        response.status_code = 200
+        return response
 
 
 # This function is for a future ticket pcp-68

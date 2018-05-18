@@ -288,8 +288,12 @@ function execute_sequence_output(specific_id, updateid, counter=0, backoff=2000)
                 console.log("Does not equal to zero");
                 //data output here
                 $("#updateid"+updateid).empty();
-                $("#updateid"+updateid).append(JSON.stringify(data));
-                $("#updateid"+updateid).append(" [download]");
+                $('<pre id="updatecontent'+updateid+'"></pre>').appendTo("#updateid"+updateid);
+                $("#updatecontent"+updateid).append(JSON.stringify(data['Content']));
+                var download_link = $('<a>[Download]</a>');
+                download_link.attr({"href": "/action/get_full_output_data/?job_id="+specific_id});
+                download_link.appendTo($("#updateid"+updateid))
+                //$("#updateid"+updateid).append(" [download]");
                 $("#updateid"+updateid).parent().css("background-color", "white");
 
 
