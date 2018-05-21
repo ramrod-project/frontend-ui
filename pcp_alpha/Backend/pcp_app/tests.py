@@ -3,13 +3,8 @@ from multiprocessing import Process
 from time import sleep
 from pcp_alpha.Backend.db_dir.project_db import check_dev_env
 from Backend.db_dir.project_db import db_connection, rtdb
-from Backend.db_dir.custom_queries import get_specific_brain_targets, get_specific_commands, get_specific_command
+from Backend.db_dir.custom_queries import get_specific_brain_targets, get_specific_command
 from Backend.pcp_app.views import get_commands_controller, execute_sequence_controller, w4_output_controller
-from django.test import Client
-from django.urls import reverse
-
-from django.http.request import HttpRequest
-from django.shortcuts import render
 
 from pytest import raises
 from rethinkdb.errors import ReqlOpFailedError
