@@ -124,7 +124,7 @@ def confirm_brain_db_info():
             # create local Brain.Outputs table
             rtdb.db("Brain").table_create("Outputs").run(db_con_var)
             print("log: db Brain.Outputs table was created to locally")
-        else:  # if Brain does exit locally
+        else:  # if Brain does exist locally
             print("log: db Brain exist locally")
 
             # Brain.Targets does exist
