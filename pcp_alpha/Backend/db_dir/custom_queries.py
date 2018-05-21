@@ -73,6 +73,7 @@ def insert_brain_jobs_w3(jobs):
     print("{}\n".format(inserted))
     return inserted
 
+
 def get_specific_brain_output(job_id):
     """
     get_specific_brain_output function checks to if Bain.Jobs Status is 'Done'

@@ -2,6 +2,7 @@ import rethinkdb as r
 from rethinkdb.errors import ReqlOpFailedError
 from time import sleep
 
+
 def switch_to_done():
     c = r.connect()
     q = r.db("Brain").table("Jobs").filter(r.row["Status"].ne("Done")).changes().run(c)

@@ -1,44 +1,31 @@
-from django.contrib.auth import authenticate
 import pytest
-from pytest import fixture, raises
-# import docker
-# import rethinkdb as r
-# from time import sleep
-
-# sleep(7)
-
-# CLIENT = docker.from_env()
+from pcp_alpha.Backend.db_dir.project_db import check_dev_env, db_connection, rtdb
+from .views import get_target_list
 
 
-pytestmark = pytest.mark.django_db(transaction=True)
+@pytest.mark.incremental
+class TestIndex(object):
+    def test_home_page(self, rf):
+        """
+        This test checks if the web server displays
+        the home page.
+        :param rf: RequestFactory
+        """
+        home_url = '/'
 
+        if check_dev_env() is not None:
+            request = rf.get(home_url)
+            response = get_target_list(request)
+            assert response.status_code == 200
 
-# @fixture(scope="module")
-# def something():
-#     CLIENT.containers.run(
-#         "ramrodpcp/database-brain",
-#         name="Brain",
-#         detach=True,
-#         ports={"28015/tcp": 28015},
-#         remove=True
-#     )
-#     sleep(4)
-#     yield "127.0.0.1"
-#
-#     containers = CLIENT.containers.list()
-#     for container in containers:
-#         if container.name == "Brain":
-#             container.stop()
-#             break
+    def test_target_list(self):
+        """
+        This test replicates the target list displayed
+        in W1.
+        """
+        db_name = "Brain"
+        db_table = "Targets"
+        query_plugin_names = rtdb.db(db_name).table(db_table).pluck('PluginName', 'Location').run(db_connection())
 
-
-def test_home_page(client):
-    home_url = 'http://127.0.0.1/'
-
-    username = "pcpuser"
-    password = "pcpuser123"
-    user = authenticate(username=username, password=password)
-
-    if user is not None:
-        home_content = client.get(home_url).content
-        assert home_content.status_code == 200
+        for plugin_item in query_plugin_names:
+            assert isinstance(plugin_item, dict)
