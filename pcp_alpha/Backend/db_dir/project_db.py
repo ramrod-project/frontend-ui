@@ -119,7 +119,7 @@ def confirm_brain_db_info():
             rtdb.db("Brain").table_create("Targets").run(db_connection())
             print("log: db Brain.Targets table was created to locally")
             # create local Brain.Jobs table
-            rtdb.db("Brain").table_create("Jobs").run()
+            rtdb.db("Brain").table_create("Jobs").run(db_connection())
             print("log: db Brain.Jobs table was created to locally")
             # create local Brain.Outputs table
             rtdb.db("Brain").table_create("Outputs").run(db_connection())
