@@ -18,6 +18,7 @@ install:
 # For when we have unit tests
 before_script:
   - docker run -d --name myP -p 28015:28015 ramrodpcp/database-brain
+  - sleep 20
   - pytest pcp_alpha
 
 script:
