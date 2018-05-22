@@ -92,7 +92,7 @@ def get_specific_brain_output_content(job_id, max_size=1024):
     """
     db_name = "Brain"
     db_table = "Outputs"
-    c = rtdb.db(db_name).table(db_table).filter({"JobCommand": {'id': job_id}}).run(db_connection())
+    c = rtdb.db(db_name).table(db_table).filter({"OutputJob": {'id': job_id}}).run(db_connection())
     for d in c:
         if max_size and "Content" in d and len(d['Content']) > max_size:
             content = "{}\n[truncated]".format(d['Content'][:max_size])
