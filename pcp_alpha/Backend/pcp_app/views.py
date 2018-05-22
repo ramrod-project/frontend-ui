@@ -1,11 +1,8 @@
 from django.http import HttpResponse
 # from django.shortcuts import render  # import will be used for a future ticket pcp-68
-from django.shortcuts import render
-
 from Backend.db_dir.custom_queries import get_specific_commands, get_specific_brain_targets, \
     get_specific_command, insert_brain_jobs_w3, get_specific_brain_output, get_specific_brain_output_content
 
-from uuid import uuid4
 import json
 
 
@@ -40,6 +37,7 @@ def execute_sequence_controller(request):
         return HttpResponse(json.dumps(response),
                             content_type="application/json")
 
+
 def _w4_get_content(job_id):
     updated_job = get_specific_brain_output(job_id)
     check_int = 0
@@ -59,6 +57,7 @@ def _w4_get_content(job_id):
         }
     return result
 
+
 def w4_output_controller(request):
     if request.method == 'GET':
         controller_job_id = request.GET.get('job_id')
@@ -66,6 +65,7 @@ def w4_output_controller(request):
         response = HttpResponse(json.dumps(result), content_type='application/json')
         response.status_code = int(result['status'])
         return response
+
 
 def w4_output_controller_download(request):
     if request.method == 'GET':
