@@ -114,3 +114,7 @@ def confirm_brain_db_info():
              "Optional": "Document Here"}
         ]).run(db_con_var)
         print("log: db Dummy data was inserted to Brain.Targets locally")
+
+
+if __name__ == '__main__':
+    confirm_brain_db_info()
