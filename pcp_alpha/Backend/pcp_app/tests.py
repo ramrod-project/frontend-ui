@@ -23,7 +23,7 @@ class TestDataHandling(object):
     def test_display_capability_list_data(self):
         """
         This test is replicating when a user clicks on a
-        plugin from W1 a command list will be displayed
+        plugin from W1 and command list will be displayed
         in W2.
         Task pcp-141
         """
@@ -38,7 +38,14 @@ class TestDataHandling(object):
                 assert isinstance(plugin_item, dict)
 
     def test_capability_ui(self, rf):
-
+        """
+        This test is replicating when a user clicks on a
+        plugin from W1 and command list will be displayed
+        in W2.
+        Task pcp-141
+        :param rf: RequestFactory
+        :return: True if test passes
+        """
         home_url = '/action/get_command_list/?plugin_name=Plugin1'
 
         if check_dev_env() is not None:
@@ -48,7 +55,13 @@ class TestDataHandling(object):
             assert response.status_code == 200
 
     def test_capability_ui_failed(self, rf):
-
+        """
+        This test is replicating when a user clicks on a
+        plugin from W1 and command list will be displayed
+        in W2.  But this test fails on purpose.
+        :param rf: RequestFactory
+        :return: Raises an error
+        """
         home_url = '/action/get_command_list/?plugin_name=Plugin8'
 
         if check_dev_env() is not None:
@@ -88,6 +101,14 @@ class TestDataHandling(object):
             assert inserted['inserted'] == 1
 
     def test_execute_w3_data_ui(self, rf):
+        """
+        This test is replicating when the user clicks on
+        'Execute Sequence' button at the bottom right of w3.
+        With using correct data.
+        Task pcp-142
+        :param rf: RequestFactory
+        :return: True
+        """
         url = "/action/get_w3_data/?jobs=%5B%7B%22JobTarget%22%3A%7B%22PluginName%22%3A%22Plugin1%22%2C%22" \
               "Location%22%3A%22172.16.5.179%22%2C%22Port%22%3A0%7D%2C%22Status%22%3A%22Ready%22%2C%22StartTime" \
               "%22%3A0%2C%22JobCommand%22%3A%7B%22CommandName%22%3A%22echo%22%2C%22Tooltip%22%3A%22%5CnEcho%5Cn%" \
@@ -103,6 +124,14 @@ class TestDataHandling(object):
             assert response.status_code == 200
 
     def test_execute_w3_data_ui_fail(self, rf):
+        """
+        This test is replicating when the user clicks on
+        'Execute Sequence' button at the bottom right of w3.
+        With using false data.
+        Task pcp-142
+        :param rf: RequestFactory
+        :return: Raises an error
+        """
         url = "/action/get_w3_data/?jobs=%5B%7B%22JobTarget%22%3A%7B%22PluginName%22%3A%22Plugin1%22%2C%22" \
               "Location%22%3A%22172.16.5.179%22%2C%22Port%22%3A0%7D%2C%22Status%22%3A%22Ready%22%2C%22StartTime" \
               "%22%3A0%2C%22JobCommand%22%3A%7B%22CommandName%22%3A%22echo%22%2C%22Tooltip%22%3A%22%5CnEcho%5Cn%" \
@@ -118,6 +147,14 @@ class TestDataHandling(object):
                 response = execute_sequence_controller(request)
 
     def test_execute_w4_data_ui(self, rf):
+        """
+        This test is replicating the data displayed in W4 when
+        a user clicks on 'Execute Sequence' button at the bottom
+        right of w3. With correct data.
+        Task pcp-140
+        :param rf: RequestFactory
+        :return: True
+        """
         url2 = "/action/get_w3_data/?jobs=%5B%7B%22JobTarget%22%3A%7B%22PluginName%22%3A%22Plugin1%22%2C%22" \
                "Location%22%3A%22172.16.5.179%22%2C%22Port%22%3A0%7D%2C%22Status%22%3A%22Ready%22%2C%22StartTime" \
                "%22%3A0%2C%22JobCommand%22%3A%7B%22CommandName%22%3A%22echo%22%2C%22Tooltip%22%3A%22%5CnEcho%5Cn%" \
@@ -149,6 +186,14 @@ class TestDataHandling(object):
             p.join(timeout=2)
 
     def test_execute_w4_data_ui_fail(self, rf):
+        """
+        This test is replicating the data displayed in W4 when
+        a user clicks on 'Execute Sequence' button at the bottom
+        right of w3. With wrong data.
+        Task pcp-140
+        :param rf: RequestFactory
+        :return: Raises an error
+        """
         url = "/action/get_output_data/?job_id=60d5405c-81b0-4248-aead-9e4f8d38cd14"
 
         if check_dev_env() is not None:
