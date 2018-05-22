@@ -2,6 +2,7 @@ from django.http import HttpResponse
 # from django.shortcuts import render  # import will be used for a future ticket pcp-68
 from Backend.db_dir.custom_queries import get_specific_commands, get_specific_brain_targets, \
     get_specific_command, insert_brain_jobs_w3, get_specific_brain_output, get_specific_brain_output_content
+from django.template import loader
 
 import json
 
@@ -79,7 +80,8 @@ def w4_output_controller_download(request):
 
 # This function is for a future ticket pcp-68
 def new_target_form(request):
-    pass
+    template = loader.get_template('pcp_app/target_form_mod1.html')
+    return HttpResponse(template.render(context=None, request=request))
 
 
 # This function is for a future ticket pcp-68
