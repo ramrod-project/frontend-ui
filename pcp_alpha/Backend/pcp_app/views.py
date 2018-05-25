@@ -1,8 +1,10 @@
 from django.http import HttpResponse
-# from django.shortcuts import render  # import will be used for a future ticket pcp-68
+from django.shortcuts import render  # import will be used for a future ticket pcp-68
 from Backend.db_dir.custom_queries import get_specific_commands, get_specific_brain_targets, \
-    get_specific_command, insert_brain_jobs_w3, get_specific_brain_output, get_specific_brain_output_content
+    get_specific_command, insert_brain_jobs_w3, get_specific_brain_output, get_specific_brain_output_content, \
+    insert_new_target, get_brain_targets
 from django.template import loader
+from .forms import TargetForm
 
 import json
 
@@ -78,13 +80,39 @@ def w4_output_controller_download(request):
         return response
 
 
+# TODO: Add comments to functions below
 # This function is for a future ticket pcp-68
 def new_target_form(request):
-    template = loader.get_template('pcp_app/target_form_mod1.html')
+    template = loader.get_template('pcp_app/target_form.html')
     return HttpResponse(template.render(context=None, request=request))
 
 
 # This function is for a future ticket pcp-68
 def val_target_form(request):
-    pass
+    if request.method == 'POST':
+        # get user input
+        req_plugin_name = request.POST.get('plugin_name')
+        req_location_num = request.POST.get('location_num')
+        req_port_num = request.POST.get('port_num')
+        req_optional_char = request.POST.get('optional_char')
+
+        print("TEST: req_plugin_name == {}".format(req_plugin_name))
+        print("TEST: req_location == {}".format(req_location_num))
+        print("TEST: req_port_num == {}".format(req_port_num))
+        print("TEST: req_optional == {}".format(req_optional_char))
+
+        form = TargetForm(request.POST)
+
+        if form.is_valid():
+            insert_new_target(plugin_name=req_plugin_name,
+                              location_num=req_location_num,
+                              port_num=req_port_num,
+                              optional_char=req_optional_char)
+            return render(request,
+                          'index_app/base_page.html',
+                          context={'host_dict': get_brain_targets(), })
+    else:
+        form = TargetForm()
+    template = loader.get_template('pcp_app/target_form.html')
+    return HttpResponse(template.render(context=None, request=request))
 
