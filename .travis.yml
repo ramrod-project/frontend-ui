@@ -18,41 +18,49 @@ before_install:
   - git clone  https://github.com/ramrod-project/frontend-ui.git
 
 install:
-#  - pip install -r requirements.txt
   - pip install django==2.0.1 pytest pytest-django rethinkdb
 
-# For when we have unit tests
 before_script:
-  - docker run -d --name myP -p 28015:28015 ramrodpcp/database-brain
-  - sleep 20
-  - pytest pcp_alpha
+  - if [ "$TRAVIS_BRANCH" != "master"  ];
+    then docker run -d --rm --name myP -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG"
+    ramrodpcp/database-brain:$TRAVIS_BRANCH;
+    else docker run -d --rm --name myP -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG"
+    ramrodpcp/database-brain:latest; fi
+  - sleep 5
+  - STAGE=TESTING pytest pcp_alpha
+  - docker stop myP
 
 script:
   - if [ "$TRAVIS_BRANCH" != "master"  ];
     then docker build -t ramrodpcp/frontend-ui:$TRAVIS_BRANCH . ;
-    else docker build -t ramrodpcp/frontend-ui:latest . ;
-    fi
+    else docker build -t ramrodpcp/frontend-ui:latest . ; fi
 
-#  - if [ "$TRAVIS_BRANCH" != "master"  ];
-#    then docker run -d --rm --name frontend -p 8080:8080 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG"
-#    -v /var/run/docker.sock:/var/run/docker.sock ramrodpcp/frontend-ui:$TRAVIS_BRANCH;
-#    else docker run -d --rm --name frontend -p 8080:8080 -e "STAGE=PROD" -e "LOGLEVEL=DEBUG"
-#    -v /var/run/docker.sock:/var/run/docker.sock ramrodpcp/frontend-ui:latest;
-#    fi
-
-  - docker run -d --rm --name frontend -p 8080:8080 ramrodpcp/frontend-ui
+  - docker network create test
+  - if [ "$TRAVIS_BRANCH" != "master"  ];
+    then docker run -d --rm --name rethinkdb_test -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG"
+    --network test ramrodpcp/database-brain:$TRAVIS_BRANCH;
+    else docker run -d --rm --name rethinkdb_test -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG"
+    --network test ramrodpcp/database-brain:latest; fi
+  - sleep 5
+  - if [ "$TRAVIS_BRANCH" != "master"  ];
+    then docker run -d --rm --name frontend -p 8080:8080 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG"
+    --network test ramrodpcp/frontend-ui:$TRAVIS_BRANCH;
+    else docker run -d --rm --name frontend -p 8080:8080 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG"
+    --network test ramrodpcp/frontend-ui:latest; fi
 
   # This will eventually be for more integration testing
   - sleep 10
   - curl http://127.0.0.1:8080
-#  - docker ps
-#  - docker logs frontend
+  - docker ps
+  - docker logs frontend
   - docker stop frontend
+  - docker stop rethinkdb_test
+  - docker network prune -f
 
 after_success:
   - if [[ "$TRAVIS_PULL_REQUEST" == "false" ]];
     then echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin; fi
-  - if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false"  ]];
+  - if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]];
     then docker push ramrodpcp/frontend-ui:latest;
     elif [[ "$TRAVIS_PULL_REQUEST" == "false" ]];
     then docker push ramrodpcp/frontend-ui:$TRAVIS_BRANCH; fi
