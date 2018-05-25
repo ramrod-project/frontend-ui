@@ -43,7 +43,7 @@ def db_connection():
                     dbconn = rtdb.connect()
                     print("log: connection to the Brain from a docker image locally")
                 else:
-                    dbconn = rtdb.connect("127.0.0.1", 28015)
+                    dbconn = rtdb.connect("rethinkdb_test", 28015)
                     print("log: connection to the Brain from local is connected")
         except ReqlDriverError as err:
             print("log: can not connect to a db, BABOON ERROR")
