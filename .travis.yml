@@ -22,8 +22,9 @@ install:
 
 before_script:
   - docker run -d --name myP -p 28015:28015 ramrodpcp/database-brain
-  - sleep 20
+  - sleep 10
   - pytest pcp_alpha
+  - docker stop myP
 
 script:
   - if [ "$TRAVIS_BRANCH" != "master"  ];
@@ -31,11 +32,19 @@ script:
     else docker build -t ramrodpcp/frontend-ui:latest . ;
     fi
 
+  - docker network create test
   - if [ "$TRAVIS_BRANCH" != "master"  ];
-    then docker run -d --rm --name frontend -p 8080:8080 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG"
-    -v /var/run/docker.sock:/var/run/docker.sock ramrodpcp/frontend-ui:$TRAVIS_BRANCH;
-    else docker run -d --rm --name frontend -p 8080:8080 -e "STAGE=PROD" -e "LOGLEVEL=DEBUG"
-    -v /var/run/docker.sock:/var/run/docker.sock ramrodpcp/frontend-ui:latest;
+    then docker run -d --rm --name rethinkdb_test -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG" 
+    --network test ramrodpcp/database-brain:$TRAVIS_BRANCH;
+    else docker run -d --rm --name rethinkdb_test -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG" 
+    --network test ramrodpcp/database-brain:latest;
+    fi
+
+  - if [ "$TRAVIS_BRANCH" != "master"  ];
+    then docker run -d --rm --name frontend -p 8080:8080 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG" 
+    --network test ramrodpcp/frontend-ui:$TRAVIS_BRANCH;
+    else docker run -d --rm --name frontend -p 8080:8080 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG" 
+    --network test ramrodpcp/frontend-ui:latest;
     fi
 
   # This will eventually be for more integration testing
@@ -44,6 +53,8 @@ script:
   - docker ps
   - docker logs frontend
   - docker stop frontend
+  - docker stop rethinkdb_test
+  - docker network prune -f
 
 after_success:
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin;
