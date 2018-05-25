@@ -26,7 +26,7 @@ before_script:
     ramrodpcp/database-brain:$TRAVIS_BRANCH;
     else docker run -d --rm --name myP -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG" 
     ramrodpcp/database-brain:latest; fi
-  - sleep 10
+  - sleep 5
   - STAGE=TESTING pytest pcp_alpha
   - docker stop myP
 
