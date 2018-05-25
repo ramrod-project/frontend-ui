@@ -18,20 +18,17 @@
         page. However, you can choose any other skin. Make sure you
         apply the skin class to the body tag so the changes take effect. -->
     <link rel="stylesheet" href="{% static 'AdminLTE/dist/css/skins/skin-blue.min.css' %}">
-    <!-- Custom styles for this template -->
-    <link href="{% static 'equal-height-columns.css' %}" rel="stylesheet">
 
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
-    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
+    <!--<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>-->
+    <!--<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>-->
+    <!--<![endif]&ndash;&gt;-->
 
     <!-- Google Font -->
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+    <!--<link rel="stylesheet" href="{% static 'AdminLTE_int/googlefont1.css' %}">-->
 
     <!-- favicon -->
     <link rel="icon"
@@ -102,7 +99,7 @@ desired effect
         <li class="header">HEADER</li>
         <!-- Links on the sidebar -->
         <li class="active"><a href="/"><i class="fa fa-home text-aqua"></i> <span>Home Page</span></a></li>
-        <li><a href="/new_target_form/"><i class="fa fa-send text-aqua"></i> <span>Add Target</span></a></li>
+        <li><a href="/new_target_form/"><i class="fa fa-laptop text-aqua"></i> <span>Add Target</span></a></li>
         <!--<li><a href="#"><i class="fa fa-laptop text-aqua"></i> <span>Dashboard2</span></a></li>-->
         <!--<li class="treeview">-->
           <!--<a href="#"><i class="fa fa-fighter-jet text-aqua"></i> <span>Capabilities</span>-->
@@ -126,6 +123,7 @@ desired effect
   <div class="content-wrapper">
     <!-- Content Header (Page header) -->
     <section class="content-header">
+      {% block breadcrumb %}
       <h1>
         PCP Dashboard
         <small>Home page</small>
@@ -134,6 +132,7 @@ desired effect
         <!--<li><a href="#"><i class="fa fa-dashboard"></i> Main</a></li>-->
         <!--<li class="active">Here</li>-->
       <!--</ol>-->
+      {% endblock %}
     </section>
 
     <!-- Main content -->
@@ -141,7 +140,7 @@ desired effect
       <!--------------------------
         | Your Page Content Here |
         -------------------------->
-
+    {% block content %}
       <!--Content-->
       <!--First Row-->
       <div class="row">
@@ -375,7 +374,7 @@ desired effect
         </div>
         <!-- /W4 -->
     </div>
-    {% block content %}{% endblock %}
+    {% endblock %}
         <!--------------------------
         | Your Page Content Ends Here |
         -------------------------->
