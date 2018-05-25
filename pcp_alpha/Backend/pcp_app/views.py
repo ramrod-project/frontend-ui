@@ -80,17 +80,30 @@ def w4_output_controller_download(request):
         return response
 
 
-# TODO: Add comments to functions below
-# This function is for a future ticket pcp-68
 def new_target_form(request):
+    """
+    new_target_form function renders a form to add new
+    targets by clicking 'Add Target' on the left side panel
+    ticket pcp-68
+    :param request: user request
+    :return: New Target Form
+    """
     template = loader.get_template('pcp_app/target_form.html')
     return HttpResponse(template.render(context=None, request=request))
 
 
-# This function is for a future ticket pcp-68
 def val_target_form(request):
+    """
+    val_target_form functions validates the form based
+    off of the user inputs.  If all goes well the new target
+    will be added to Brain.Targets and render the user back
+    to the home page.
+    ticket pcp-68
+    :param request: user request
+    :return: inserts new target to Brain.Target and renders operator to home page
+    """
     if request.method == 'POST':
-        # get user input
+        # get user inputs
         req_plugin_name = request.POST.get('plugin_name')
         req_location_num = request.POST.get('location_num')
         req_port_num = request.POST.get('port_num')
@@ -101,9 +114,12 @@ def val_target_form(request):
         print("TEST: req_port_num == {}".format(req_port_num))
         print("TEST: req_optional == {}".format(req_optional_char))
 
+        # form template
         form = TargetForm(request.POST)
 
+        # validate form based off user inputs
         if form.is_valid():
+            # insert new target
             insert_new_target(plugin_name=req_plugin_name,
                               location_num=req_location_num,
                               port_num=req_port_num,

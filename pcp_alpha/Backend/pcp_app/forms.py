@@ -1,10 +1,10 @@
-from django.forms import ModelForm
 from django import forms
 
 
-# TODO: Add comments to function below
 class TargetForm(forms.Form):
-    # target info
+    """
+    TargetForm class is the template to add a new target as a form.
+    """
     plugin_name = forms.CharField(label='plugin_name', max_length=100)
     location_num = forms.CharField(label='location_num', max_length=15)
     port_num = forms.CharField(label='port_num', max_length=4)

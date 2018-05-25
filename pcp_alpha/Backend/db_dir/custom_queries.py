@@ -104,8 +104,16 @@ def get_specific_brain_output_content(job_id, max_size=1024):
     return content
 
 
-# TODO: Add comments to function below
 def insert_new_target(plugin_name, location_num, port_num, optional_char):
+    """
+    insert_new_target function gets called when the user's input is validated
+    and inserts a new target to Brain.Targets table.
+    :param plugin_name: user input plugin name
+    :param location_num: user input location number
+    :param port_num: user input port number
+    :param optional_char: user input optional
+    :return: the insert
+    """
     inserted_new_target = rtdb.db("Brain").table("Targets").insert([
         {"PluginName": str(plugin_name),
          "Location": str(location_num),
