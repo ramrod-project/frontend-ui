@@ -8,14 +8,18 @@ python:
 services:
   - docker
 
+branches:
+  only:
+  - master
+  - dev
+  - qa
+
 before_install:
   - git clone  https://github.com/ramrod-project/frontend-ui.git
 
 install:
-#  - pip install -r requirements.txt
   - pip install django==2.0.1 pytest pytest-django rethinkdb
 
-# For when we have unit tests
 before_script:
   - docker run -d --name myP -p 28015:28015 ramrodpcp/database-brain
   - sleep 20
@@ -27,20 +31,18 @@ script:
     else docker build -t ramrodpcp/frontend-ui:latest . ;
     fi
 
-#  - if [ "$TRAVIS_BRANCH" != "master"  ];
-#    then docker run -d --rm --name frontend -p 8080:8080 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG"
-#    -v /var/run/docker.sock:/var/run/docker.sock ramrodpcp/frontend-ui:$TRAVIS_BRANCH;
-#    else docker run -d --rm --name frontend -p 8080:8080 -e "STAGE=PROD" -e "LOGLEVEL=DEBUG"
-#    -v /var/run/docker.sock:/var/run/docker.sock ramrodpcp/frontend-ui:latest;
-#    fi
-
-  - docker run -d --rm --name frontend -p 8080:8080 ramrodpcp/frontend-ui
+  - if [ "$TRAVIS_BRANCH" != "master"  ];
+    then docker run -d --rm --name frontend -p 8080:8080 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG"
+    -v /var/run/docker.sock:/var/run/docker.sock ramrodpcp/frontend-ui:$TRAVIS_BRANCH;
+    else docker run -d --rm --name frontend -p 8080:8080 -e "STAGE=PROD" -e "LOGLEVEL=DEBUG"
+    -v /var/run/docker.sock:/var/run/docker.sock ramrodpcp/frontend-ui:latest;
+    fi
 
   # This will eventually be for more integration testing
   - sleep 10
   - curl http://127.0.0.1:8080
-#  - docker ps
-#  - docker logs frontend
+  - docker ps
+  - docker logs frontend
   - docker stop frontend
 
 after_success:
