@@ -35,6 +35,7 @@
 *.idea
 /*.idea
 **/.idea
+.vscode*
 
 .idea/frontend-ui.iml
 .idea/misc.xml
@@ -48,4 +49,4 @@
 */*.pyc
 *.pyc
 
-
+venv*
