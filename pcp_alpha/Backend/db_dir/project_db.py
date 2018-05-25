@@ -42,7 +42,7 @@ def db_connection():
                 dbconn = rtdb.connect()
                 print("log: connection to the Brain from a docker image locally")
             else:
-                dbconn = rtdb.connect("rethinkdb_test", 28015)
+                dbconn = rtdb.connect("127.0.0.1", 28015)
                 print("log: connection to the Brain from local is connected")
         except ReqlDriverError as err:
             print("log: can not connect to a db, BABOON ERROR")
@@ -161,7 +161,7 @@ def confirm_brain_db_info():
                 print("\nlog: db Brain.Outputs table exist locally")
 
                 try:
-                    rethinkdb.db("Brain").table("Outputs").delete().run(db_con_var)
+                    rtdb.db("Brain").table("Outputs").delete().run(db_con_var)
                     print("log: db Brain.Outputs table has been cleared")
                 except:
                     e = sys.exc_info()[0]
