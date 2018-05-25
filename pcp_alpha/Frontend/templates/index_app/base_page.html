@@ -1,0 +1,485 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>PCP-Demo</title>
+    <!--Static root directory-->
+    {% load static %}
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <link rel="stylesheet" href="{% static 'AdminLTE/bower_components/bootstrap/dist/css/bootstrap.min.css' %}">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="{% static 'AdminLTE/bower_components/font-awesome/css/font-awesome.min.css' %}">
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="{% static 'AdminLTE/bower_components/Ionicons/css/ionicons.min.css' %}">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="{% static 'AdminLTE/dist/css/AdminLTE.min.css' %}">
+    <!-- AdminLTE Skins. We have chosen the skin-blue for this starter
+        page. However, you can choose any other skin. Make sure you
+        apply the skin class to the body tag so the changes take effect. -->
+    <link rel="stylesheet" href="{% static 'AdminLTE/dist/css/skins/skin-blue.min.css' %}">
+    <!-- Custom styles for this template -->
+    <link href="{% static 'equal-height-columns.css' %}" rel="stylesheet">
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- Google Font -->
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+
+    <!-- favicon -->
+    <link rel="icon"
+      type="image/png"
+      href="{% static 'images/favicon.ico' %}" />
+    <!--for template inheritance-->
+    {% block styles %}{% endblock %}
+</head>
+<!--
+BODY TAG OPTIONS:
+=================
+Apply one or more of the following classes to get the
+desired effect
+|---------------------------------------------------------|
+| SKINS         | skin-blue                               |
+|               | skin-black                              |
+|               | skin-purple                             |
+|               | skin-yellow                             |
+|               | skin-red                                |
+|               | skin-green                              |
+|---------------------------------------------------------|
+|LAYOUT OPTIONS | fixed                                   |
+|               | layout-boxed                            |
+|               | layout-top-nav                          |
+|               | sidebar-collapse                        |
+|               | sidebar-mini                            |
+|---------------------------------------------------------|
+-->
+<body class="hold-transition skin-blue sidebar-mini">
+<div class="wrapper">
+
+  <!-- Main Header -->
+  <header class="main-header">
+
+    <!-- Logo -->
+    <a href="/" class="logo">
+      <!-- mini logo for sidebar mini 50x50 pixels -->
+      <span class="logo-mini"><b>P</b>CP</span>
+      <!-- logo for regular state and mobile devices -->
+      <span class="logo-lg"><b>PCP-</b>DEMO</span>
+    </a>
+
+    <!-- Header Navbar -->
+    <nav class="navbar navbar-static-top" role="navigation">
+      <!-- Sidebar toggle button-->
+      <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
+        <span class="sr-only">Toggle navigation</span>
+      </a>
+      <!-- Navbar Right Menu -->
+      <div class="navbar-custom-menu">
+        <ul class="nav navbar-nav">
+          <!-- Control Sidebar Toggle Button -->
+          <li>
+            <a href="#" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+  <!-- Left side column. contains the logo and sidebar -->
+  <aside class="main-sidebar">
+
+    <!-- sidebar: style can be found in sidebar.less -->
+    <section class="sidebar">
+
+      <!-- Sidebar Menu -->
+      <ul class="sidebar-menu" data-widget="tree">
+        <li class="header">HEADER</li>
+        <!-- Links on the sidebar -->
+        <li class="active"><a href="/"><i class="fa fa-home text-aqua"></i> <span>Home Page</span></a></li>
+        <li><a href="/new_target_form/"><i class="fa fa-send text-aqua"></i> <span>Add Target</span></a></li>
+        <!--<li><a href="#"><i class="fa fa-laptop text-aqua"></i> <span>Dashboard2</span></a></li>-->
+        <!--<li class="treeview">-->
+          <!--<a href="#"><i class="fa fa-fighter-jet text-aqua"></i> <span>Capabilities</span>-->
+            <!--<span class="pull-right-container">-->
+                <!--<i class="fa fa-angle-left pull-right"></i>-->
+              <!--</span>-->
+          <!--</a>-->
+          <!--<ul class="treeview-menu">-->
+            <!--<li><a href="#">Form One</a></li>-->
+            <!--<li><a href="#">Form Two</a></li>-->
+            <!--<li><a href="#">Form Three</a></li>-->
+          <!--</ul>-->
+        <!--</li>-->
+      </ul>
+      <!-- /.sidebar-menu -->
+    </section>
+    <!-- /.sidebar -->
+  </aside>
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <h1>
+        PCP Dashboard
+        <small>Home page</small>
+      </h1>
+      <!--<ol class="breadcrumb">-->
+        <!--<li><a href="#"><i class="fa fa-dashboard"></i> Main</a></li>-->
+        <!--<li class="active">Here</li>-->
+      <!--</ol>-->
+    </section>
+
+    <!-- Main content -->
+    <section class="content container-fluid">
+      <!--------------------------
+        | Your Page Content Here |
+        -------------------------->
+
+      <!--Content-->
+      <!--First Row-->
+      <div class="row">
+        <!--W1-->
+        <div class="col-md-6">
+            <div class="nav-tabs-custom box-success">
+            <!-- Left box TABS HERE -->
+                <ul class="nav nav-tabs">
+                    <li class="pull-left header"><i class="fa fa-laptop"></i> Target List</li>
+                    <!--<li class="active"><a href="#tab_1" data-toggle="tab">tab 1 here</a></li>-->
+                    <!--<li><a href="#tab_3" data-toggle="tab">tab 2 here</a></li>-->
+
+                    <!--Minimize and Maximize buttons-->
+                    <!--<li class="pull-right">-->
+                        <!--<button type="button" class="btn bg-grey btn-sm" data-widget="collapse"><i class="fa fa-minus"></i>-->
+                        <!--</button>-->
+                        <!--<button type="button" class="btn bg-grey btn-sm" data-widget="remove"><i class="fa fa-times"></i>-->
+                        <!--</button>-->
+                    <!--</li>-->
+                    <!--/Minimize and Maximize buttons-->
+
+                    <!-- Search button -->
+                    <li class="pull-right">
+                        <div id="user_search_hide_id" class="input-group input-group-sm" style="width: 150px;">
+                            <input class="form-control pull-right" id="searchNameHere_id" name="searchNameHere" placeholder="Search">
+                            <div id="user_search_button_hide_id" class="input-group-btn">
+                                <button id="user_search" type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
+                            </div>
+                        </div>
+                    </li>
+                    <!-- /Search button -->
+                </ul>
+                <!-- /Left box TABS HERE -->
+                <form action="/action/get_command_list/" method="get">
+                <div class="tab-content">
+                  <div class="box box-primary">
+                    <!--box body-->
+                    <div class="box-body">
+                      <div id="example2_wrapper" class="dataTables_wrapper form-inline dt-bootstrap"><div class="row"><div class="col-sm-6"></div><div class="col-sm-6"></div></div><div class="row"><div class="col-sm-12"><table id="example2" class="table table-bordered table-hover dataTable" role="grid" aria-describedby="example2_info">
+                        <thead>
+                        <tr role="row"><th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Rendering engine: activate to sort column descending">Plugin Name</th><th class="sorting" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">Location</th></tr>
+                        </thead>
+                        <tbody>
+                        {% if host_dict %}
+                            {% for items in host_dict %}
+                                <a name="name_tag_name">
+                                <tr role="row" class="odd clickable-row" onclick="#" draggable="true" ondragstart="drag(event)">
+                                  <td id="name_tag_id{{ forloop.counter0 }}"><a href="#"><span>{{ items.PluginName }}</span></a></td>
+                                  <td id="address_tag_id{{ forloop.counter0 }}"><a href="#"><span>{{ items.Location }} </span></a></td>
+                                </tr></a>
+                            {% endfor %}
+                        {% endif %}
+                        </tbody>
+                        <tfoot>
+                        <tr><th rowspan="1" colspan="1">Plugin Name</th><th rowspan="1" colspan="1">Location</th></tr>
+                        </tfoot>
+                      </table></div></div><div class="row"><div class="col-sm-5"><div class="dataTables_info" id="example2_info" role="status" aria-live="polite">Showing 1 to 10 of 57 entries</div></div><div class="col-sm-7"><div class="dataTables_paginate paging_simple_numbers" id="example2_paginate"><ul class="pagination"><li class="paginate_button previous disabled" id="example2_previous"><a href="#" aria-controls="example2" data-dt-idx="0" tabindex="0">Previous</a></li><li class="paginate_button active"><a href="#" aria-controls="example2" data-dt-idx="1" tabindex="0">1</a></li><li class="paginate_button "><a href="#" aria-controls="example2" data-dt-idx="2" tabindex="0">2</a></li><li class="paginate_button "><a href="#" aria-controls="example2" data-dt-idx="3" tabindex="0">3</a></li><li class="paginate_button "><a href="#" aria-controls="example2" data-dt-idx="4" tabindex="0">4</a></li><li class="paginate_button "><a href="#" aria-controls="example2" data-dt-idx="5" tabindex="0">5</a></li><li class="paginate_button "><a href="#" aria-controls="example2" data-dt-idx="6" tabindex="0">6</a></li><li class="paginate_button next" id="example2_next"><a href="#" aria-controls="example2" data-dt-idx="7" tabindex="0">Next</a></li></ul></div></div></div></div>
+                    </div>
+                    <!-- /.box-body -->
+                  </div>
+                    <div class="tab-pane" id="tab_2" name="tab_2">
+                    </div>
+                    <div class="tab-pane" id="tab_3">
+                    </div>
+                    <!-- /.tab-pane -->
+                </div>
+                </form>
+                <!-- /.tab-content -->
+            </div>
+          <!-- /.box -->
+        </div>
+        <!--/W1-->
+
+      <!--W2-->
+      <div class="col-md-6">
+        <div class="nav-tabs-custom">
+        <!-- W2 Tabs -->
+            <ul class="nav nav-tabs">
+                <li class="pull-left header"><i class="fa fa-exchange"></i> Command Builder</li>
+                <!--<li class="active"><a href="#tab_1" data-toggle="tab">tab 1 here</a></li>-->
+                <!--<li><a href="#tab_3" data-toggle="tab">tab 2 here</a></li>-->
+
+                <!--Minimize and Maximize buttons-->
+                <!--<li class="pull-right">-->
+                    <!--<button type="button" class="btn bg-grey btn-sm" data-widget="collapse"><i class="fa fa-minus"></i>-->
+                    <!--</button>-->
+                    <!--<button type="button" class="btn bg-grey btn-sm" data-widget="remove"><i class="fa fa-times"></i>-->
+                    <!--</button>-->
+                <!--</li>-->
+                <!--/Minimize and Maximize buttons-->
+            </ul>
+        <!-- /W2 Tabs -->
+            <div class="box box-primary">
+                <div class="box-body">
+                    <div class="row">
+                        <div class="col-xs-4">
+                            <div class="box-header theContentHeader">
+                            </div>
+
+                            <div class="tab-content theContent">
+                                <div class="tab-pane active" id="tab1">
+                                </div>
+                                <div class="tab-pane" id="tab_4" name="tab_2">
+                                    <ul>
+
+                                    </ul>
+                                </div>
+                                <div class="tab-pane" id="tab_5">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xs-8">
+                            <div class="box-header tooltipHeader">
+                                <!--<p><b>Tooltip:</b></p>-->
+                            </div>
+                            <div class="tab-content tooltipContent">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="box-footer theContentArgument" onclick="#" draggable="true" ondragstart="drag_command(event)" id="boxtwofooterid">
+            </div>
+            <!-- /.tab-content -->
+        </div>
+      <!-- /.box -->
+    </div>
+    <!--/W2-->
+    </div>
+
+    <!--Second Row-->
+    <div class="row">
+        <!-- W3 -->
+        <div class="col-md-6">
+            <div class="nav-tabs-custom">
+                <!-- W3 Sequence Tabs -->
+                <ul class="nav nav-tabs newTabContent">
+                    <li class="pull-left header"><i class="fa fa-bars"></i> Jobs Queue </li>
+                    <li class="active"><a href="#tab_1" data-toggle="tab">Seq A</a></li>
+                    <!--<li><a href="#tab_3" data-toggle="tab">Seq B</a></li>-->
+                    <li><a href="#tab_4" data-toggle="tab" class="fa fa-plus"></a></li>
+
+                    <!--Minimize and Maximize buttons-->
+                    <!--<li class="pull-right">-->
+                        <!--<button type="button" class="btn bg-grey btn-sm" data-widget="collapse"><i class="fa fa-minus"></i>-->
+                        <!--</button>-->
+                        <!--<button type="button" class="btn bg-grey btn-sm" data-widget="remove"><i class="fa fa-times"></i>-->
+                        <!--</button>-->
+                    <!--</li>-->
+                    <!--/Minimize and Maximize buttons-->
+
+                    <li class="pull-right"><button type="submit" class="btn btn-default" id="clear_buttonid">Clear</button></li>
+                </ul>
+                <!-- /W3 Tabs -->
+                <div class="box box-primary">
+                    <div class="box-body">
+                        <div class="tab-content">
+                            <div id="example3_wrapper" class="dataTables_wrapper form-inline dt-bootstrap"><div class="row"><div class="col-sm-6"></div><div class="col-sm-6"></div></div><div class="row"><div class="col-sm-12"><table id="example3" class="table table-bordered table-hover dataTable" role="grid" aria-describedby="example2_info">
+                                <thead>
+                                <tr role="row"><th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Rendering engine: activate to sort column descending">Job #</th><th class="sorting" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">Plugin Name</th><th class="sorting" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">Host</th><th class="sorting" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">Command</th></tr>
+                                </thead>
+                                <tbody class="thirdBoxContent" id="third_box_content">
+                                <a name="thirdboxname">
+                                    <tr role="row" class="odd" onclick="#">
+
+                                    </tr>
+                                </a>
+                                </tbody>
+                                <div id="hiddenArgsId" class="hiddenArgsClass" hidden></div>
+                            </table>
+                            </div>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box-footer">
+                        <button type="submit" id="addjob_button" value="0" class="btn btn-default">Add Job</button>
+                        <button type="submit" id="execute_button" value="Submit" class="btn btn-info pull-right">Execute Sequence</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /W3 -->
+
+        <!-- W4 -->
+        <div class="col-md-6">
+            <div class="nav-tabs-custom">
+                <!-- W4 Tabs -->
+                <ul class="nav nav-tabs">
+                    <li class="pull-left header"><i class="fa fa-check-square-o"></i> Job Output</li>
+                    <li class="active"><a href="#tab_1" data-toggle="tab">Seq A</a></li>
+                    <!--<li><a href="#tab_3" data-toggle="tab" class="fa fa-plus"></a></li>-->
+
+                    <!--Minimize and Maximize buttons-->
+                    <!--<li class="pull-right">-->
+                        <!--<button type="button" class="btn bg-grey btn-sm" data-widget="collapse"><i class="fa fa-minus"></i>-->
+                        <!--</button>-->
+                        <!--<button type="button" class="btn bg-grey btn-sm" data-widget="remove"><i class="fa fa-times"></i>-->
+                        <!--</button>-->
+                    <!--</li>-->
+                    <!--/Minimize and Maximize buttons-->
+                </ul>
+                <!-- /W4 Tabs -->
+                <!--Content-->
+                <div class="box box-primary">
+                    <div class="box-body">
+                        <table class="table no-margin">
+                            <thead>
+                                <tr>
+                                    <th style="width: 60px">Job #</th>
+                                    <th>Update</th>
+                                </tr>
+                            <tbody class="W4BodyContent" id="W4Rows">
+                                <!--<tr>-->
+                                    <!--<th>1</th>-->
+                                    <!--<th><a>terminal1</a></th>-->
+                                <!--</tr>-->
+                                <!--<tr>-->
+                                    <!--<th>2</th>-->
+                                    <!--<th><a>terminal2</a></th>-->
+                                <!--</tr>-->
+                            </tbody>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+                <!--/Content-->
+            </div>
+        </div>
+        <!-- /W4 -->
+    </div>
+    {% block content %}{% endblock %}
+        <!--------------------------
+        | Your Page Content Ends Here |
+        -------------------------->
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+
+  <!-- Main Footer -->
+  <footer class="main-footer">
+    <!-- To the right -->
+    <div class="pull-right hidden-xs">
+	    <strong>Version 0.1.1</strong>
+    </div>
+    <!-- Default to the left -->
+    <strong>Demo Version for the <a href="http://nooooooooooooooo.com/">PCP Project</a></strong> :)
+  </footer>
+
+  <!-- Control Sidebar -->
+  <aside class="control-sidebar control-sidebar-dark">
+    <!-- Create the tabs -->
+    <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
+      <li class="active"><a href="#control-sidebar-home-tab" data-toggle="tab"><i class="fa fa-home"></i></a></li>
+      <li><a href="#control-sidebar-settings-tab" data-toggle="tab"><i class="fa fa-gears"></i></a></li>
+    </ul>
+    <!-- Tab panes -->
+    <div class="tab-content">
+      <!-- Home tab content -->
+      <div class="tab-pane active" id="control-sidebar-home-tab">
+        <h3 class="control-sidebar-heading">Recent Activity</h3>
+        <ul class="control-sidebar-menu">
+          <li>
+            <a href="javascript:;">
+              <i class="menu-icon fa fa-bell bg-red"></i>
+
+              <div class="menu-info">
+                <h4 class="control-sidebar-subheading">Notification HERE</h4>
+
+                <p>Detail notification HERE</p>
+              </div>
+            </a>
+          </li>
+        </ul>
+        <!-- /.control-sidebar-menu -->
+        <h3 class="control-sidebar-heading">Tasks Progress</h3>
+        <ul class="control-sidebar-menu">
+          <li>
+            <a href="javascript:;">
+              <h4 class="control-sidebar-subheading">
+                Custom Template Design
+                <span class="pull-right-container">
+                    <span class="label label-danger pull-right">70%</span>
+                  </span>
+              </h4>
+              <div class="progress progress-xxs">
+                <div class="progress-bar progress-bar-danger" style="width: 70%"></div>
+              </div>
+            </a>
+          </li>
+        </ul>
+        <!-- /.control-sidebar-menu -->
+      </div>
+      <!-- /.tab-pane -->
+      <!-- Stats tab content -->
+      <div class="tab-pane" id="control-sidebar-stats-tab">Stats Tab Content</div>
+      <!-- /.tab-pane -->
+      <!-- Settings tab content -->
+      <div class="tab-pane" id="control-sidebar-settings-tab">
+        <form method="post">
+          <h3 class="control-sidebar-heading">General Settings</h3>
+
+          <div class="form-group">
+            <label class="control-sidebar-subheading">
+              Report panel usage
+              <input type="checkbox" class="pull-right" checked>
+            </label>
+
+            <p>
+              Some information about this general settings option
+            </p>
+          </div>
+          <!-- /.form-group -->
+        </form>
+      </div>
+      <!-- /.tab-pane -->
+    </div>
+  </aside>
+  <!-- /.control-sidebar -->
+  <!-- Add the sidebar's background. This div must be placed
+  immediately after the control sidebar -->
+  <div class="control-sidebar-bg"></div>
+</div>
+<!-- ./wrapper -->
+
+<!-- JS SCRIPTS -->
+<!-- jQuery 3 -->
+<script src="{% static 'AdminLTE/bower_components/jquery/dist/jquery.min.js' %}"></script>
+<!-- Bootstrap 3.3.7 -->
+<script src="{% static 'AdminLTE/bower_components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
+<!-- AdminLTE App -->
+<script src="{% static 'AdminLTE/dist/js/adminlte.min.js' %}"></script>
+<!-- GET list of commands -->
+<script type="text/javascript" src="{% static 'js_custom/pcp_custom_jquery.js' %}"></script>
+<!--for template inheritance-->
+{% block extra_js %}{% endblock extra_js %}
+</body>
+</html>
