@@ -132,11 +132,8 @@ def confirm_brain_db_info():
                 print("\nlog: db Brain.Targets table exist locally")
 
                 try:
-                    rtdb.db("Brain").table_drop("Targets").run(db_con_var)
-                    print("log: db Brain.Targets table has been dropped from Brain to insert new data")
-
-                    rtdb.db("Brain").table_create("Targets").run(db_con_var)
-                    print("log: db Brain.Targets table was created to locally since they were drop to insert new data")
+                    rtdb.db("Brain").table("Targets").delete().run(db_con_var)
+                    print("log: db Brain.Targets table has been cleared.")
                 except:
                     e = sys.exc_info()[0]
                     print("EXCEPT == {}".format(e))
@@ -150,11 +147,8 @@ def confirm_brain_db_info():
                 print("\nlog: db Brain.Jobs table exist locally")
 
                 try:
-                    rtdb.db("Brain").table_drop("Jobs").run(db_con_var)
-                    print("log: db Brain.Jobs table has been dropped from Brain to insert new data")
-
-                    rtdb.db("Brain").table_create("Jobs").run(db_con_var)
-                    print("log: db Brain.Jobs table was created to locally since they were drop to insert new data")
+                    rtdb.db("Brain").table("Jobs").delete().run(db_con_var)
+                    print("log: db Brain.Jobs table has been cleared.")
                 except:
                     e = sys.exc_info()[0]
                     print("EXCEPT == {}".format(e))
@@ -168,11 +162,8 @@ def confirm_brain_db_info():
                 print("\nlog: db Brain.Outputs table exist locally")
 
                 try:
-                    rtdb.db("Brain").table_drop("Outputs").run(db_con_var)
-                    print("log: db Brain.Outputs table has been dropped from Brain to insert new data")
-
-                    rtdb.db("Brain").table_create("Outputs").run(db_con_var)
-                    print("log: db Brain.Outputs table was created to locally since they were drop to insert new data")
+                    rethinkdb.db("Brain").table("Outputs").delete().run(db_con_var)
+                    print("log: db Brain.Outputs table has been cleared")
                 except:
                     e = sys.exc_info()[0]
                     print("EXCEPT == {}".format(e))
