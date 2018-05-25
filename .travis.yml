@@ -21,9 +21,14 @@ install:
   - pip install django==2.0.1 pytest pytest-django rethinkdb
 
 before_script:
-  - docker run -d --name rethinkdb_test -p 28015:28015 ramrodpcp/database-brain
+  - if [ "$TRAVIS_BRANCH" != "master"  ];
+    then docker run -d --rm --name myP -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG" 
+    ramrodpcp/database-brain:$TRAVIS_BRANCH;
+    else docker run -d --rm --name myP -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG" 
+    ramrodpcp/database-brain:latest; fi
   - sleep 10
-  - pytest pcp_alpha
+  - STAGE=TESTING pytest pcp_alpha
+  - docker stop myP
 
 script:
   - if [ "$TRAVIS_BRANCH" != "master"  ];
