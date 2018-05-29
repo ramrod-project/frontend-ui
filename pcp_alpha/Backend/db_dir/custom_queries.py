@@ -1,5 +1,5 @@
 from .project_db import db_connection, rtdb
-
+import json
 
 # Note: Refactor this file as a CRUD class in the future
 def get_brain_targets():
@@ -10,7 +10,11 @@ def get_brain_targets():
     db_name = "Brain"
     db_table = "Targets"
     query_plugin_names = rtdb.db(db_name).table(db_table).pluck('PluginName', 'Location').run(db_connection())
-    return query_plugin_names
+    items = []
+    for item in query_plugin_names:
+        item['json'] = json.dumps(item)
+        items.append(item)
+    return items
 
 
 def get_specific_commands(user_selection):
