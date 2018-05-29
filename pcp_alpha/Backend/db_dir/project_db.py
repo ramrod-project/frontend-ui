@@ -50,6 +50,19 @@ def db_connection():
     return dbconn
 
 
+def validate_data(db_data):
+    for data in db_data:
+        for document in data[1]:
+            check_int = 1
+            print("Brain.{} document == {}\n".format(data[0], document))
+            if check_int == 0:
+                print("log: Brain.{} doesn't have any data"
+                        .format(data[0]))
+            else:
+                print("log: Brain.{} has data in the table"
+                        .format(data[0]))
+
+
 def confirm_brain_db_info():
     """
     confirm_brain_db_info function checks to see if it's using a local
@@ -88,20 +101,11 @@ def confirm_brain_db_info():
                     "OutputJob"
                 ).run(db_con_var)
 
-                for data in [
-                        ("Targets", target_data),
-                        ("Jobs", jobs_data),
-                        ("Outputs", output_data)
-                    ]:
-                    for document in data[1]:
-                        check_int = 1
-                        print("Brain.{} document == {}\n".format(data[0], document))
-                        if check_int == 0:
-                            print("log: Brain.{} doesn't have any data"
-                                  .format(data[0]))
-                        else:
-                            print("log: Brain.{} has data in the table"
-                                  .format(data[0]))
+                validate_data([
+                    ("Targets", target_data),
+                    ("Jobs", jobs_data),
+                    ("Outputs", output_data)
+                ])
 
             else:  # tables don't exist
                 print("log: db No tables exist in Brain db")
