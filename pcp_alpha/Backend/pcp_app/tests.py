@@ -2,9 +2,11 @@ from test.test_w4_switch_to_done import switch_to_done
 from multiprocessing import Process
 from time import sleep
 from pcp_alpha.Backend.db_dir.project_db import check_dev_env
+from Backend.db_dir.custom_data import location_generated_num
 from Backend.db_dir.project_db import db_connection, rtdb
-from Backend.db_dir.custom_queries import get_specific_brain_targets, get_specific_command
-from Backend.pcp_app.views import get_commands_controller, execute_sequence_controller, w4_output_controller
+from Backend.db_dir.custom_queries import get_specific_brain_targets, get_specific_command, insert_new_target
+from Backend.pcp_app.views import get_commands_controller, execute_sequence_controller, w4_output_controller, \
+    new_target_form, val_target_form
 
 from pytest import raises
 from rethinkdb.errors import ReqlOpFailedError
@@ -225,3 +227,52 @@ class TestDataHandling(object):
 
             p.terminate()
             p.join(timeout=2)
+
+    def test_render_target_form(self, rf):
+        """
+        This test checks if it renders the
+        form correctly to add new targets.
+        Task pcp-68
+        :param rf: RequestFactory
+        :return: True if status code is 200
+        """
+        url = "/new_target_form/"
+        if check_dev_env() is not None:
+            request = rf.get(url)
+            response = new_target_form(request)
+            assert response.status_code == 200
+
+    def test_add_target(self):
+        """
+        This test is replicating the data if the form
+        is validated it will insert the new target to
+        Brain.Targets table.
+        Task pcp-68
+        :return: pass (status code of 200) or fail
+        """
+        if check_dev_env() is not None:
+            plugin_name = "Plugin1"
+            location_num = location_generated_num("172.16.5.")
+            port_num = "8002"
+            optional_char = ""
+
+            inserted_new_target = rtdb.db("Brain").table("Targets").insert([
+                {"PluginName": plugin_name,
+                 "Location": location_num,
+                 "Port": port_num,
+                 "Optional": optional_char}
+            ]).run(db_connection())
+            assert inserted_new_target['inserted'] == 1
+
+    def test_validate_form(self, rf):
+        """
+        This test checks the url validation is ran correctly.
+        Task pcp-68
+        :param rf: RequestFactory
+        :return: True if status code is 200
+        """
+        url = "/action/val_target_form/"
+        if check_dev_env() is not None:
+            request = rf.get(url)
+            response = val_target_form(request)
+            assert response.status_code == 200
