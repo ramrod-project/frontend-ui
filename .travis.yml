@@ -8,6 +8,10 @@ python:
 services:
   - docker
 
+env:
+  global:
+    - CC_TEST_REPORTER_ID=6444ce234e6ec1703cda414367cc0ef773c9645e0248ec579e4201d366575aaf
+
 branches:
   only:
   - master
