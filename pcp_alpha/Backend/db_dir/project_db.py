@@ -6,7 +6,6 @@ from os import environ
 from rethinkdb.errors import ReqlDriverError
 
 
-# May need to modify in the future to check environments
 def check_dev_env():
     """
     check_dev_env function check's which environment (prod or dev)
