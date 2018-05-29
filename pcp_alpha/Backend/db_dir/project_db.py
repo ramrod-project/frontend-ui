@@ -65,7 +65,6 @@ def confirm_brain_db_info():
         if rtdb.db_list().contains("Brain").run(db_con_var):  # db Brain exist
             print("log: db Brain exist")
 
-            # Checking Targets, Jobs, Outputs table exist
             if rtdb.db("Brain").table_list().contains(
                     "Targets"
                 ).run(db_con_var) and \
@@ -89,32 +88,20 @@ def confirm_brain_db_info():
                     "OutputJob"
                 ).run(db_con_var)
 
-                # Check Brain.Targets has any data in the table
-                for document in target_data:
-                    check_int = 1
-                    print("Brain.Targets document == {}\n".format(document))
-                if check_int == 0:
-                    print("log: Brain.Targets doesn't have any PluginNames")
-                else:
-                    print("log: Brain.Targets has PluginNames in the table")
-
-                # Check Brain.Jobs has any data in the table
-                for document in jobs_data:
-                    check_int = 1
-                    print("Brain.Jobs document == {}\n".format(document))
-                if check_int == 0:
-                    print("log: Brain.Jobs doesn't have any JobTarget added")
-                else:
-                    print("log: Brain.Jobs has JobTarget in the table")
-
-                # Check Brain.Outputs has any data in the table
-                for document in output_data:
-                    check_int = 1
-                    print("Brain.Outputs document == {}\n".format(document))
-                if check_int == 0:
-                    print("log: Brain.Outputs doesn't have any OutputJob")
-                else:
-                    print("log: Brain.Outputs has OutputJob in the table")
+                for data in [
+                        ("Targets", target_data),
+                        ("Jobs", jobs_data),
+                        ("Outputs", output_data)
+                    ]:
+                    for document in data[1]:
+                        check_int = 1
+                        print("Brain.{} document == {}\n".format(data[0], document))
+                        if check_int == 0:
+                            print("log: Brain.{} doesn't have any data"
+                                  .format(data[0]))
+                        else:
+                            print("log: Brain.{} has data in the table"
+                                  .format(data[0]))
 
             else:  # tables don't exist
                 print("log: db No tables exist in Brain db")
@@ -128,18 +115,12 @@ def confirm_brain_db_info():
             print("log: db Brain was created to locally since it didn't exist")
 
             # create local Brain.Targets table
-            rtdb.db("Brain").table_create("Targets").run(db_con_var)
-            print("log: db Brain.Targets table was created to locally")
-            # create local Brain.Jobs table
-            rtdb.db("Brain").table_create("Jobs").run(db_con_var)
-            print("log: db Brain.Jobs table was created to locally")
-            # create local Brain.Outputs table
-            rtdb.db("Brain").table_create("Outputs").run(db_con_var)
-            print("log: db Brain.Outputs table was created to locally")
+            for table_name in ["Targets", "Jobs", "Outputs"]:
+                rtdb.db("Brain").table_create(table_name).run(db_con_var)
+                print("log: db Brain.{} table was created to locally"
+                      .format(table_name))
         else:  # if Brain does exist locally
             print("log: db Brain exist locally")
-
-            # Brain.Targets does exist
             for table_name in ["Targets", "Jobs", "Outputs"]:
                 # Brain.{table_name} does exist
                 if rtdb.db("Brain").table_list().contains(
@@ -163,7 +144,6 @@ def confirm_brain_db_info():
                     print("log: db Brain.{} table was created to locally \
                           since it didn't exist".format(table_name))
 
-        # insert dummy data
         rtdb.db("Brain").table("Targets").insert([
             {"PluginName": "Plugin1",
              "Location": location_generated_num("172.16.5."),
@@ -171,7 +151,6 @@ def confirm_brain_db_info():
              "Optional": "Document Here"}
         ]).run(db_con_var)
         print("log: db Dummy data was inserted to Brain.Targets locally")
-        # db_connection().close()
 
 
 def confirm_plugin_db_info():
@@ -187,7 +166,6 @@ def confirm_plugin_db_info():
         if rtdb.db_list().contains("Plugins").run(db_connection()):
             print("\nlog: db Plugins exist")
 
-            # Checking any tables exist within Plugins db
             if rtdb.db("Plugins").table_list().run(db_connection()):
                 print("log: db Plugins tables are listed down below:\n{}"
                       .format(rtdb.db("Plugins").table_list()
@@ -202,7 +180,6 @@ def confirm_plugin_db_info():
             rtdb.db_create("Plugins").run(db_connection())
             print("log: db Plugins didn't exist, was created to locally")
 
-            # create local Plugins.Plugin1 table
             rtdb.db("Plugins").table_create("Plugin1").run(db_connection())
             print("log: db Plugins.Plugin1 table was created to locally")
         else:  # if Plugins does exit locally
@@ -212,17 +189,11 @@ def confirm_plugin_db_info():
                 ).run(db_connection()):
 
                 try:
-                    rtdb.db("Plugins").table_drop(
+                    rtdb.db("Plugins").table(
                         "Plugin1"
-                    ).run(db_connection())
-                    print("log: db Plugins.Plugin1 table dropped from \
-                          Plugins to insert new data")
-
-                    rtdb.db("Plugins").table_create(
-                        "Plugin1"
-                    ).run(db_connection())
-                    print("log: db Plugins.Plugin1 table was created \
-                          to locally since they were drop to add new data")
+                    ).delete().run(db_connection())
+                    print("log: db Plugins.Plugin1 table was cleared \
+                          for new data.")
                 except:
                     err = sys.exc_info()[0]
                     print("EXCEPT == {}".format(err))
@@ -231,10 +202,9 @@ def confirm_plugin_db_info():
                 rtdb.db("Plugins").table_create(
                     "Plugin1"
                 ).run(db_connection())
-                print("log: db Plugins.Plugin1 table was created to \
+                print("log: db Plugins.Plugin1 table was created \
                       locally since it didn't exist")
 
-        # insert dummy data
         rtdb.db("Plugins").table("Plugin1").insert([
             #  read_file command
             {
@@ -312,4 +282,3 @@ def confirm_db_info():
     db_connection()
     confirm_brain_db_info()
     confirm_plugin_db_info()
-    # confirm_plugin_db_info()
