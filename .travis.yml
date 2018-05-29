@@ -51,6 +51,7 @@ script:
     then docker run -d --rm --name frontend -p 8080:8080 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG" 
     --network test ramrodpcp/frontend-ui:$TRAVIS_BRANCH;
     else docker run -d --rm --name frontend -p 8080:8080 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG" 
+
     --network test ramrodpcp/frontend-ui:latest; fi
 
   # This will eventually be for more integration testing
