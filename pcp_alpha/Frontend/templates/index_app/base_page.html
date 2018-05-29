@@ -187,8 +187,8 @@ desired effect
                         {% if host_dict %}
                             {% for items in host_dict %}
                                 <a name="name_tag_name">
-                                <tr role="row" class="odd clickable-row" onclick="#" draggable="true" ondragstart="drag(event)">
-                                  <td id="name_tag_id{{ forloop.counter0 }}"><a href="#"><span>{{ items.PluginName }}</span></a></td>
+                                <tr role="row" class="odd clickable-row" id="target_row{{ forloop.counter0 }}" onclick="#" draggable="true" ondragstart="drag(event)">
+                                    <td id="name_tag_id{{ forloop.counter0 }}"><a href="#"><span style="display:none" id="nameidjson{{ forloop.counter0 }}">{{ items.json }}</span><span>{{ items.PluginName }}</span></a></td>
                                   <td id="address_tag_id{{ forloop.counter0 }}"><a href="#"><span>{{ items.Location }} </span></a></td>
                                 </tr></a>
                             {% endfor %}
