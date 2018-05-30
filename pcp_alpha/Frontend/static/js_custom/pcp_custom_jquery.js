@@ -25,7 +25,9 @@ function get_commands_func(){
     $(".tooltipHeader").empty();
 
     // plugin name the user clicked
-    var plugin_name_var = $(this)[0].firstElementChild.textContent;
+    var row_id = $(this)[0].id.substring(10, $(this)[0].id.length);
+
+    var plugin_name_var = $("#name_tag_id"+row_id+" a span")[1].innerText;
 //    console.log(plugin_name_var);
 
     $.ajax({
@@ -164,26 +166,20 @@ function allowDrop(ev) {
 }
 
 function drag(ev) {
-    ev.dataTransfer.setData("text", ev.target.cells[0].id);
+    var row_data = ev.target.cells[0].id;
+    var source_id = row_data.substring(11,row_data.length);
+    var target_json =  $("#nameidjson"+source_id)[0].innerText;
+    console.warn(row_data);
+    ev.dataTransfer.setData("text", target_json);
 }
 
 function drop(ev) {
     ev.preventDefault();
-    var data = ev.dataTransfer.getData("text");
-    var data_copy = document.getElementById(data).cloneNode(true);
-
-    var addressid_data = document.getElementById(data);
-    var addressid_var;
-    if(addressid_data){
-        addressid_var = addressid_data.nextElementSibling.id;
-    }
-
-    var data_copy2 = document.getElementById(addressid_var).cloneNode(true);
-    data_copy2.id = "newIdTwo";
-
-    data_copy.id = "newId";
-    ev.target.appendChild(data_copy);
-    ev.target.nextElementSibling.appendChild(data_copy2);
+    var target_json = ev.dataTransfer.getData("text");
+    var target_js = JSON.parse(target_json);
+    var drop_row = ev.target.id.substring(8, ev.target.id.length);
+    $("#pluginid"+drop_row+" a span")[0].innerText = target_js.PluginName;
+    $("#addressid"+drop_row+" a span")[0].innerText = target_js.Location;
 }
 
 // Drag and drop function(s) for command
@@ -233,8 +229,8 @@ function execute_sequence(){
         var uid = j;
         var terminal = $("#updateid"+uid).parent();
         terminal.css("background-color", "Chartreuse");
-        var plugin_name = $("#pluginid"+j+" td a span")[0].innerText;
-        var location = $("#addressid"+j+" td a span")[0].innerText;
+        var plugin_name = $("#pluginid"+j+" a span")[0].innerText;
+        var location = $("#addressid"+j+" a span")[0].innerText;
         var command_json = $("#commandid"+j+" div")[0].innerText;
         var command = JSON.parse(command_json);
         var job = {"JobTarget": {"PluginName": plugin_name,
