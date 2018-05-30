@@ -22,7 +22,7 @@ before_install:
   - git clone  https://github.com/ramrod-project/frontend-ui.git
 
 install:
-  - pip install django==2.0.1 pytest pytest-cov pytest-django rethinkdb
+  - pip install django==2.0.1 pytest pytest-cov pytest-django rethinkdb ramrodbrain
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
