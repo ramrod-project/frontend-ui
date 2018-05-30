@@ -145,31 +145,27 @@ class TestDataHandling(object):
         This test is replicating the data displayed in W4 when a user clicks
         on 'Execute Sequence' button at the bottom right of w3. With correct data.
         """
-        first_url = "/action/get_w3_data/?jobs=%5B%7B%22JobTarget%22%3A%" \
-                    "7B%22PluginName%22%3A%22Plugin1%22%2C%22Location%22%" \
-                    "3A%22172.16.5.179%22%2C%22Port%22%3A0%7D%2C%22Status%" \
-                    "22%3A%22Ready%22%2C%22StartTime%22%3A0%2C%22JobCommand" \
-                    "%22%3A%7B%22CommandName%22%3A%22echo%22%2C%22Tooltip%22" \
-                    "%3A%22%5CnEcho%5Cn%5CnClient%20Returns%20this%20string%2" \
-                    "0verbatim%5Cn%5CnArguments%3A%5Cn1.%20String%20to%20Echo%" \
-                    "5Cn%5CnReturns%3A%5CnString%5Cn%22%2C%22Output%22%3Atrue%2" \
-                    "C%22Inputs%22%3A%5B%7B%22Value%22%3A%22sdfsdfsdf%22%2C%22Ty" \
-                    "pe%22%3A%22textbox%22%2C%22Name%22%3A%22EchoString%22%2C%22T" \
-                    "ooltip%22%3A%22This%20string%20will%20be%20echoed%20back%22%7D%5D%7D%7D%5D"
-
+        first_url = "/action/get_w3_data/?jobs=%5B%7B%22JobTarget%22%3A%7B%22Plugin" \
+                    "Name%22%3A%22Plugin1%22%2C%22Location%22%3A%22172.16.5.179%22%2" \
+                    "C%22Port%22%3A0%7D%2C%22Status%22%3A%22Ready%22%2C%22StartTime%" \
+                    "22%3A0%2C%22JobCommand%22%3A%7B%22CommandName%22%3A%22echo%22%2C" \
+                    "%22Tooltip%22%3A%22%5CnEcho%5Cn%5CnClient%20Returns%20this%20stri" \
+                    "ng%20verbatim%5Cn%5CnArguments%3A%5Cn1.%20String%20to%20Echo%5Cn%5" \
+                    "CnReturns%3A%5CnString%5Cn%22%2C%22Output%22%3Atrue%2C%22Inputs%22" \
+                    "%3A%5B%7B%22Value%22%3A%22sdfsdfsdf%22%2C%22Type%22%3A%22textbox%22" \
+                    "%2C%22Name%22%3A%22EchoString%22%2C%22Tooltip%22%3A%22This%20string%" \
+                    "20will%20be%20echoed%20back%22%7D%5D%7D%7D%5D"
         if check_dev_env() is not None:
             process_obj = Process(target=switch_to_done)
             process_obj.start()
             sleep(2)
-            request_insert = rf.get(first_url)
-            response = execute_sequence_controller(request_insert)
-            assert "inserted" in str(response.content)
+            response = execute_sequence_controller(rf.get(first_url))
+            assert "inserted" in str(execute_sequence_controller(rf.get(first_url)).content)
             assert response.status_code == 200
             sleep(5)
-            url = "/action/get_output_data/?job_id={}".format(json.loads(
+            second_url = "/action/get_output_data/?job_id={}".format(json.loads(
                 response.getvalue().decode())['generated_keys'][0])
-            request2 = rf.get(url)
-            response2 = w4_output_controller(request2)
+            response2 = w4_output_controller(rf.get(second_url))
             assert response2.status_code == 200
             assert "sdfsdfsd" in str(response2.content)
             process_obj.terminate()
