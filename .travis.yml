@@ -59,7 +59,7 @@ script:
 
   # This will eventually be for more integration testing
   - sleep 10
-  - curl http://127.0.0.1:8080
+#  - curl http://127.0.0.1:8080
   - docker ps
   - docker logs frontend
   - docker stop frontend
