@@ -13,7 +13,6 @@ from pcp_alpha.Backend.db_dir.custom_queries import get_specific_brain_targets, 
 from pcp_alpha.Backend.pcp_app.views import get_commands_controller, execute_sequence_controller, \
     w4_output_controller, new_target_form, val_target_form
 
-
 ECHO_JOB_ID = str(uuid4())
 
 
@@ -38,40 +37,40 @@ class TestDataHandling(object):
                 assert isinstance(plugin_item, dict)
 
     @staticmethod
-    def test_capability_ui(rf_var):
+    def test_capability_ui(rf):
         """
         This test is replicating when a user clicks on a
         plugin from W1 and command list will be displayed
         in W2.
         Task pcp-141
-        :param rf_var: RequestFactory
+        :param rf: RequestFactory
         :return: True if test passes
         """
         home_url = '/action/get_command_list/?plugin_name=Plugin1'
 
         if check_dev_env() is not None:
-            request = rf_var.get(home_url)
+            request = rf.get(home_url)
             response = get_commands_controller(request)
             assert "echo" in str(response.content)
             assert response.status_code == 200
 
     @staticmethod
-    def test_capability_ui_failed(rf_var):
+    def test_capability_ui_failed(rf):
         """
         This test is replicating when a user clicks on a
         plugin from W1 and command list will be displayed
         in W2.  But this test fails on purpose.
-        :param rf_var: RequestFactory
+        :param rf: RequestFactory
         :return: Raises an error
         """
         home_url = '/action/get_command_list/?plugin_name=Plugin8'
 
         if check_dev_env() is not None:
-            request = rf_var.get(home_url)
+            request = rf.get(home_url)
 
             with pytest.raises(ReqlOpFailedError):
                 response = get_commands_controller(request)
-                # assert response.status_code != 200
+                assert not response.status_code == 200
 
     @staticmethod
     def test_execute_w3_data():
@@ -105,13 +104,13 @@ class TestDataHandling(object):
             assert inserted['inserted'] == 1
 
     @staticmethod
-    def test_execute_w3_data_ui(rf_var):
+    def test_execute_w3_data_ui(rf):
         """
         This test is replicating when the user clicks on
         'Execute Sequence' button at the bottom right of w3.
         With using correct data.
         Task pcp-142
-        :param rf_var: RequestFactory
+        :param rf: RequestFactory
         :return: True
         """
         url_var = "/action/get_w3_data/?jobs=%5B%7B%22JobTarget%22%3A%7" \
@@ -127,19 +126,19 @@ class TestDataHandling(object):
                   "g%20will%20be%20echoed%20back%22%7D%5D%7D%7D%5D"
 
         if check_dev_env() is not None:
-            request = rf_var.get(url_var)
+            request = rf.get(url_var)
             response = execute_sequence_controller(request)
             assert "inserted" in str(response.content)
             assert response.status_code == 200
 
     @staticmethod
-    def test_execute_w3_data_ui_fail(rf_var):
+    def test_execute_w3_data_ui_fail(rf):
         """
         This test is replicating when the user clicks on
         'Execute Sequence' button at the bottom right of w3.
         With using false data.
         Task pcp-142
-        :param rf_var: RequestFactory
+        :param rf: RequestFactory
         :return: Raises an error
         """
         url_var = "/action/get_w3_data/?jobs=%5B%7B%22JobTarget%22%3A%7B%22Plugin" \
@@ -154,20 +153,20 @@ class TestDataHandling(object):
                   "e%20echoed%20back%22%7D%5D%7D%7D%5"
 
         if check_dev_env() is not None:
-            request = rf_var.get(url_var)
+            request = rf.get(url_var)
 
             with pytest.raises(json.JSONDecodeError):
                 response = execute_sequence_controller(request)
-                # assert response.status_code != 200
+                assert not response.status_code == 200
 
     @staticmethod
-    def test_execute_w4_data_ui(rf_var):
+    def test_execute_w4_data_ui(rf):
         """
         This test is replicating the data displayed in W4 when
         a user clicks on 'Execute Sequence' button at the bottom
         right of w3. With correct data.
         Task pcp-140
-        :param rf_var: RequestFactory
+        :param rf: RequestFactory
         :return: True
         """
         first_url = "/action/get_w3_data/?jobs=%5B%7B%22JobTarget%22%3A%" \
@@ -183,42 +182,42 @@ class TestDataHandling(object):
                     "ooltip%22%3A%22This%20string%20will%20be%20echoed%20back%22%7D%5D%7D%7D%5D"
 
         if check_dev_env() is not None:
-            process_var = Process(target=switch_to_done)
-            process_var.start()
+            process_obj = Process(target=switch_to_done)
+            process_obj.start()
             sleep(2)
 
-            request_insert = rf_var.get(first_url)
+            request_insert = rf.get(first_url)
 
             response = execute_sequence_controller(request_insert)
             assert "inserted" in str(response.content)
             assert response.status_code == 200
             sleep(5)
 
-            second_url = "/action/get_output_data/?job_id={}".format(json.loads(
+            url = "/action/get_output_data/?job_id={}".format(json.loads(
                 response.getvalue().decode())['generated_keys'][0])
-            request2 = rf_var.get(second_url)
+            request2 = rf.get(url)
             response2 = w4_output_controller(request2)
 
             assert response2.status_code == 200
             assert "sdfsdfsd" in str(response2.content)
 
-            process_var.terminate()
-            process_var.join(timeout=2)
+            process_obj.terminate()
+            process_obj.join(timeout=2)
 
     @staticmethod
-    def test_execute_w4_data_ui_fail(rf_var):
+    def test_execute_w4_data_ui_fail(rf):
         """
         This test is replicating the data displayed in W4 when
         a user clicks on 'Execute Sequence' button at the bottom
         right of w3. With wrong data.
         Task pcp-140
-        :param rf_var: RequestFactory
+        :param rf: RequestFactory
         :return: Raises an error
         """
         url_var = "/action/get_output_data/?job_id=60d5405c-81b0-4248-aead-9e4f8d38cd14"
 
         if check_dev_env() is not None:
-            request = rf_var.get(url_var)
+            request = rf.get(url_var)
             response = w4_output_controller(request)
             assert response.status_code == 418
 
@@ -249,17 +248,17 @@ class TestDataHandling(object):
             process_var.join(timeout=2)
 
     @staticmethod
-    def test_render_target_form(rf_var):
+    def test_render_target_form(rf):
         """
         This test checks if it renders the
         form correctly to add new targets.
         Task pcp-68
-        :param rf_var: RequestFactory
+        :param rf: RequestFactory
         :return: True if status code is 200
         """
         url_var = "/new_target_form/"
         if check_dev_env() is not None:
-            request = rf_var.get(url_var)
+            request = rf.get(url_var)
             response = new_target_form(request)
             assert response.status_code == 200
 
@@ -287,15 +286,15 @@ class TestDataHandling(object):
             assert inserted_new_target['inserted'] == 1
 
     @staticmethod
-    def test_validate_form(rf_var):
+    def test_validate_form(rf):
         """
         This test checks the url_var validation is ran correctly.
         Task pcp-68
-        :param rf_var: RequestFactory
+        :param rf: RequestFactory
         :return: True if status code is 200
         """
         url_var = "/action/val_target_form/"
         if check_dev_env() is not None:
-            request = rf_var.get(url_var)
+            request = rf.get(url_var)
             response = val_target_form(request)
             assert response.status_code == 200

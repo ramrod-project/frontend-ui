@@ -45,7 +45,7 @@ def _w4_get_content(job_id):
     for item in updated_job:
         check_int = 1
         break
-    print("item == {}".format(item))
+
     if check_int != 1:
         result = {
             'status': '418',
