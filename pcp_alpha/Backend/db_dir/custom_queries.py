@@ -100,6 +100,7 @@ def get_brain_output_content(job_id, max_size=1024):
     if the status is done this function will return data for W4
     :return: Brain.Outputs Content if Status is Done or 0 if the data set doesn't exists
     """
+    content = None
     db_name = "Brain"
     db_table = "Outputs"
     check_status = rtdb.db(db_name).table(db_table).filter(

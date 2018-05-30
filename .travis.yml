@@ -55,7 +55,6 @@ script:
     then docker run -d --rm --name frontend -p 8080:8080 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG" 
     --network test ramrodpcp/frontend-ui:$TRAVIS_BRANCH;
     else docker run -d --rm --name frontend -p 8080:8080 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG"
-
     --network test ramrodpcp/frontend-ui:latest; fi
 
   # This will eventually be for more integration testing
@@ -68,11 +67,11 @@ script:
   - docker network prune -f
 
 after_success:
-  - if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; 
+  - if [[ "$TRAVIS_PULL_REQUEST" == "false" ]];
     then echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin; fi
-  - if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]]; 
+  - if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]];
     then docker push ramrodpcp/frontend-ui:latest;
-    elif [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; 
+    elif [[ "$TRAVIS_PULL_REQUEST" == "false" ]];
     then docker push ramrodpcp/frontend-ui:$TRAVIS_BRANCH; fi
 
 notifications:
