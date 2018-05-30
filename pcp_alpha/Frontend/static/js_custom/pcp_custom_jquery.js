@@ -168,15 +168,14 @@ function allowDrop(ev) {
 function drag(ev) {
     var row_data = ev.target.cells[0].id;
     var source_id = row_data.substring(11,row_data.length);
-    var target_json =  $("#nameidjson"+source_id)[0].innerText;
-    console.warn(row_data);
-    ev.dataTransfer.setData("text", target_json);
+    var target_js =  JSON.parse($("#nameidjson"+source_id)[0].innerText);
+    ev.dataTransfer.setData("text", JSON.stringify([target_js]));
 }
 
 function drop(ev) {
     ev.preventDefault();
     var target_json = ev.dataTransfer.getData("text");
-    var target_js = JSON.parse(target_json);
+    var target_js = JSON.parse(target_json)[0];//Loop this at a later date
     var drop_row = ev.target.id.substring(8, ev.target.id.length);
     $("#pluginid"+drop_row+" a span")[0].innerText = target_js.PluginName;
     $("#addressid"+drop_row+" a span")[0].innerText = target_js.Location;
