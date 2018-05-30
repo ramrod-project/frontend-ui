@@ -1,0 +1,12 @@
+[run]
+include = 
+    # src package
+    *index_app*
+    # plugins
+    *pcp_app*
+
+omit =
+    *Frontend*
+    *pcp_alpha_settings*
+    *test*
+    *manage.py
