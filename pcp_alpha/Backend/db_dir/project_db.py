@@ -2,25 +2,12 @@ from os import environ
 import sys
 from time import sleep
 
-import rethinkdb as rtdb
-from rethinkdb.errors import ReqlDriverError
+
+from brain import connect, r as rtdb
+from brain import check_dev_env, check_prod_env
+from brain.connection import BrainNotReady
 
 from .custom_data import location_generated_num, read_file_tt, delete_file_tt, write_file_tt
-
-
-def check_dev_env():
-    """
-    check_dev_env function check's which environment (prod or dev)
-    to connect to the brain.
-    :return: 0 (prod env) or 1 (dev env)
-    """
-    env_tag = environ.get('STAGE')
-    if env_tag == "PROD":
-        return_int = 0
-    else:
-        return_int = 1
-
-    return return_int
 
 
 def db_connection():
@@ -29,23 +16,13 @@ def db_connection():
     check production environment or development environment
     :return: dev or prod db connection
     """
-    env_tag = environ.get('STAGE')
-
     dbconn = None
     while not dbconn:
         try:
-            if env_tag == 'PROD':
-                dbconn = rtdb.connect('rethinkdb')
-                print("log: connection to the REAL Docker Brain container")
-            elif env_tag == 'TESTING':
-                dbconn = rtdb.connect()
-                print("log: connection to the Brain from localhost")
-            else:
-                dbconn = rtdb.connect("rethinkdb_test", 28015)
-                print("log: connection to the Brain (docker network)")
-        except ReqlDriverError:
-            print("log: can not connect to a db, BABOON ERROR")
-            sleep(2)
+            dbconn = connect()
+        except BrainNotReady:
+            print("BABOON ERROR: Brain is still not ready")
+            break
     return dbconn
 
 
@@ -73,45 +50,7 @@ def confirm_brain_db_info():
     """
     check_int = 0
     db_con_var = db_connection()
-    if check_dev_env() != 1:  # For Production Environment
-        if rtdb.db_list().contains("Brain").run(db_con_var):  # db Brain exist
-            print("log: db Brain exist")
-
-            if rtdb.db("Brain").table_list().contains(
-                    "Targets"
-                ).run(db_con_var) and \
-                rtdb.db("Brain").table_list().contains(
-                    "Jobs"
-                ).run(db_con_var) and \
-                rtdb.db("Brain").table_list().contains(
-                    "Outputs"
-                ).run(db_con_var):
-                print("log: Targets, Jobs, and Outputs tables exist in Brain")
-
-                # Check if Brain.Targets has data,
-                # prod doesn't insert dummy data
-                target_data = rtdb.db("Brain").table("Targets").has_fields(
-                    "PluginName"
-                ).run(db_con_var)
-                jobs_data = rtdb.db("Brain").table("Jobs").has_fields(
-                    "JobTarget"
-                ).run(db_con_var)
-                output_data = rtdb.db("Brain").table("Outputs").has_fields(
-                    "OutputJob"
-                ).run(db_con_var)
-
-                validate_data([
-                    ("Targets", target_data),
-                    ("Jobs", jobs_data),
-                    ("Outputs", output_data)
-                ])
-
-            else:  # tables don't exist
-                print("log: db No tables exist in Brain db")
-        else:  # db Brain doesn't exist
-            print("log: db Brain DOESN'T exist")
-
-    else:  # For Development Environment
+    if check_dev_env():  # For Development Environment
         if rtdb.db_list().contains("Brain").run(db_con_var) is not True:
             print("log: db Brain doesn't exist locally")
             rtdb.db_create("Brain").run(db_con_var)
@@ -126,7 +65,8 @@ def confirm_brain_db_info():
             print("log: db Brain exist locally")
             for table_name in ["Targets", "Jobs", "Outputs"]:
                 # Brain.{table_name} does exist
-                if rtdb.db("Brain").table_list().contains(table_name).run(db_con_var):
+                if rtdb.db("Brain").table_list().contains(
+                        table_name).run(db_con_var):
                     print("\nlog: db Brain.{} table exist locally"
                           .format(table_name))
                     try:
@@ -163,7 +103,7 @@ def confirm_plugin_db_info():
     :return: nothing at the moment
     """
 
-    if check_dev_env() != 1:  # For Production Environment
+    if check_prod_env():  # For Production Environment
         if rtdb.db_list().contains("Plugins").run(db_connection()):
             print("\nlog: db Plugins exist")
 
@@ -175,7 +115,7 @@ def confirm_plugin_db_info():
                 print("log: db Plugins tables don't exist\n")
         else:
             print("\nlog: db Plugins DOESN'T exist\n")
-    else:  # if Plugins does exit locally
+    else:  # is check_dev_env()-- if Plugins does exit locally
         if rtdb.db_list().contains("Plugins").run(db_connection()) is not True:
             print("\nlog: db Plugins doesn't exist locally")
             rtdb.db_create("Plugins").run(db_connection())
