@@ -64,7 +64,7 @@ script:
   - docker ps
   - docker logs frontend
   - docker stop frontend
-  - docker stop rethinkdb_test
+  - docker stop rethinkdb
   - docker network prune -f
 
 after_success:
