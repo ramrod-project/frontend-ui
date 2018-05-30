@@ -1,12 +1,12 @@
+import json
+
 from django.http import HttpResponse
 from django.shortcuts import render
-from Backend.db_dir.custom_queries import get_specific_commands, get_specific_brain_targets, \
-    get_specific_command, insert_brain_jobs_w3, get_specific_brain_output, get_specific_brain_output_content, \
-    insert_new_target, get_brain_targets
 from django.template import loader
-from .forms import TargetForm
 
-import json
+from pcp_alpha.Backend.db_dir.custom_queries import get_specific_commands, insert_brain_jobs_w3, \
+    get_specific_brain_output, get_brain_output_content, insert_new_target, get_brain_targets
+from .forms import TargetForm
 
 
 def get_commands_controller(request):
@@ -29,8 +29,6 @@ def execute_sequence_controller(request):
     :param request: user request
     :return: returns data from w3 to the ui
     """
-    command_item = ""
-    target_item = ""
 
     if request.method == 'GET':
         jobs = json.loads(request.GET.get('jobs'))
@@ -47,6 +45,7 @@ def _w4_get_content(job_id):
     for item in updated_job:
         check_int = 1
         break
+    print("item == {}".format(item))
     if check_int != 1:
         result = {
             'status': '418',
@@ -56,7 +55,7 @@ def _w4_get_content(job_id):
     else:
         result = {
             'status': '200',
-            "Content": get_specific_brain_output_content(job_id)
+            "Content": get_brain_output_content(job_id)
         }
     return result
 
@@ -73,7 +72,7 @@ def w4_output_controller(request):
 def w4_output_controller_download(request):
     if request.method == 'GET':
         controller_job_id = request.GET.get('job_id')
-        content = get_specific_brain_output_content(controller_job_id, max_size=None)
+        content = get_brain_output_content(controller_job_id, max_size=None)
         response = HttpResponse(content, content_type='application/octet-stream')
         response['Content-Disposition'] = 'attachment; filename="{}.txt"'.format(controller_job_id)
         response.status_code = 200
@@ -126,4 +125,3 @@ def val_target_form(request):
         form = TargetForm()
     template = loader.get_template('pcp_app/target_form.html')
     return HttpResponse(template.render(context=None, request=request))
-

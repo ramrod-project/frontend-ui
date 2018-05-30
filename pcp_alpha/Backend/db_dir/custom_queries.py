@@ -1,5 +1,6 @@
-from .project_db import db_connection, rtdb
 import json
+from .project_db import db_connection, rtdb
+
 
 # Note: Refactor this file as a CRUD class in the future
 def get_brain_targets():
@@ -9,7 +10,8 @@ def get_brain_targets():
     """
     db_name = "Brain"
     db_table = "Targets"
-    query_plugin_names = rtdb.db(db_name).table(db_table).pluck('PluginName', 'Location').run(db_connection())
+    query_plugin_names = rtdb.db(db_name).table(db_table).pluck(
+        'PluginName', 'Location').run(db_connection())
     items = []
     for item in query_plugin_names:
         item['json'] = json.dumps(item)
@@ -37,15 +39,16 @@ def get_specific_commands(user_selection):
     return command_list
 
 
-def get_specific_brain_targets(w3PluginNameJob):
+def get_specific_brain_targets(plugin_name_job):
     """
     get_specific_brain_targets function queries a specific PluginName
-    :param w3PluginNameJob: PluginName from W3
+    :param plugin_name_job: PluginName from W3
     :return: query
     """
     db_name = "Brain"
     db_table = "Targets"
-    query_specific_plugin_name = rtdb.db(db_name).table(db_table).filter({"PluginName": w3PluginNameJob}).run(db_connection())
+    query_specific_plugin_name = rtdb.db(db_name).table(db_table).filter(
+        {"PluginName": plugin_name_job}).run(db_connection())
     return query_specific_plugin_name
 
 
@@ -59,20 +62,21 @@ def get_specific_command(w3_plugin_name, w3_command_name):
     """
     db_name = "Plugins"
     db_table = w3_plugin_name
-    query_specific_plugin_name = rtdb.db(db_name).table(db_table).filter({"CommandName": w3_command_name}).run(db_connection())
+    query_specific_plugin_name = rtdb.db(db_name).table(db_table).filter(
+        {"CommandName": w3_command_name}).run(db_connection())
     return query_specific_plugin_name
 
 
-def insert_brain_jobs_w3(jobs):
+def insert_brain_jobs_w3(w3_jobs):
     """
     insert_brain_jobs_w3 function inserts data from W3 in Brain.Jobs table
-    :param job: controller job
+    :param w3_jobs: controller job
     :return: nothing for the moment
     """
     db_name = "Brain"
     db_table = "Jobs"
-    assert isinstance(jobs, list)
-    inserted = rtdb.db(db_name).table(db_table).insert(jobs).run(db_connection())
+    assert isinstance(w3_jobs, list)
+    inserted = rtdb.db(db_name).table(db_table).insert(w3_jobs).run(db_connection())
     print("log: db job from W3 was inserted to Brain.Jobs")
     print("{}\n".format(inserted))
     return inserted
@@ -86,10 +90,11 @@ def get_specific_brain_output(job_id):
     """
     db_name = "Brain"
     db_table = "Jobs"
-    return rtdb.db(db_name).table(db_table).filter({'id': job_id, 'Status': "Done"}).run(db_connection())
+    return rtdb.db(db_name).table(db_table).filter({'id': job_id,
+                                                    'Status': "Done"}).run(db_connection())
 
 
-def get_specific_brain_output_content(job_id, max_size=1024):
+def get_brain_output_content(job_id, max_size=1024):
     """
     get_specific_brain_output function checks to if Bain.Jobs Status is 'Done'
     if the status is done this function will return data for W4
@@ -97,12 +102,13 @@ def get_specific_brain_output_content(job_id, max_size=1024):
     """
     db_name = "Brain"
     db_table = "Outputs"
-    c = rtdb.db(db_name).table(db_table).filter({"OutputJob": {'id': job_id}}).run(db_connection())
-    for d in c:
-        if max_size and "Content" in d and len(d['Content']) > max_size:
-            content = "{}\n[truncated]".format(d['Content'][:max_size])
-        elif "Content" in d:
-            content = d['Content']
+    check_status = rtdb.db(db_name).table(db_table).filter(
+        {"OutputJob": {'id': job_id}}).run(db_connection())
+    for status_item in check_status:
+        if max_size and "Content" in status_item and len(status_item['Content']) > max_size:
+            content = "{}\n[truncated]".format(status_item['Content'][:max_size])
+        elif "Content" in status_item:
+            content = status_item['Content']
         else:
             content = ""
     return content
@@ -127,6 +133,3 @@ def insert_new_target(plugin_name, location_num, port_num, optional_char):
     print("log: db New target was inserted to Brain.Targets")
     print("{}\n".format(inserted_new_target))
     return inserted_new_target
-
-
-

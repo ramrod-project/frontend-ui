@@ -45,7 +45,7 @@ def db_connection():
                 dbconn = rtdb.connect("127.0.0.1", 28015)
                 print("log: connection to the Brain from local is connected")
         except ReqlDriverError as err:
-            print("log: can not connect to a db, BABOON ERROR")
+            print("log: can not connect to a db, BABOON ERROR\nerr == {}".format(err))
             sleep(2)
     return dbconn
 
@@ -56,11 +56,9 @@ def validate_data(db_data):
             check_int = 1
             print("Brain.{} document == {}\n".format(data[0], document))
             if check_int == 0:
-                print("log: Brain.{} doesn't have any data"
-                        .format(data[0]))
+                print("log: Brain.{} doesn't have any data".format(data[0]))
             else:
-                print("log: Brain.{} has data in the table"
-                        .format(data[0]))
+                print("log: Brain.{} has data in the table".format(data[0]))
 
 
 def confirm_brain_db_info():
@@ -72,7 +70,6 @@ def confirm_brain_db_info():
     be created only locally.
     :return: nothing at the moment
     """
-    check_int = 0
     db_con_var = db_connection()
     if check_dev_env() != 1:  # For Production Environment
         if rtdb.db_list().contains("Brain").run(db_con_var):  # db Brain exist
@@ -85,8 +82,7 @@ def confirm_brain_db_info():
                     "Jobs"
                 ).run(db_con_var) and \
                 rtdb.db("Brain").table_list().contains(
-                    "Outputs"
-                ).run(db_con_var):
+                    "Outputs").run(db_con_var):
                 print("log: Targets, Jobs, and Outputs tables exist in Brain")
 
                 # Check if Brain.Targets has data,
@@ -128,8 +124,7 @@ def confirm_brain_db_info():
             for table_name in ["Targets", "Jobs", "Outputs"]:
                 # Brain.{table_name} does exist
                 if rtdb.db("Brain").table_list().contains(
-                        table_name
-                    ).run(db_con_var):
+                        table_name).run(db_con_var):
                     print("\nlog: db Brain.{} table exist locally"
                           .format(table_name))
                     try:
