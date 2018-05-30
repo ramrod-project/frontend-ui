@@ -29,7 +29,7 @@ install:
 
 before_script:
   - if [ "$TRAVIS_BRANCH" != "master"  ];
-    then docker run -d --rm --name myP -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG" 
+    then docker run -d --rm --name myP -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG"
     ramrodpcp/database-brain:$TRAVIS_BRANCH;
     else docker run -d --rm --name myP -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG" 
     ramrodpcp/database-brain:latest; fi
@@ -58,7 +58,7 @@ script:
     --network test ramrodpcp/frontend-ui:latest; fi
 
   # This will eventually be for more integration testing
-  - sleep 35
+  - sleep 10
   - curl http://127.0.0.1:8080
   - docker ps
   - docker logs frontend
@@ -67,11 +67,11 @@ script:
   - docker network prune -f
 
 after_success:
-  - if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; 
+  - if [[ "$TRAVIS_PULL_REQUEST" == "false" ]];
     then echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin; fi
-  - if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]]; 
+  - if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]];
     then docker push ramrodpcp/frontend-ui:latest;
-    elif [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; 
+    elif [[ "$TRAVIS_PULL_REQUEST" == "false" ]];
     then docker push ramrodpcp/frontend-ui:$TRAVIS_BRANCH; fi
 
 notifications:

@@ -1,18 +1,22 @@
-import rethinkdb as r
-from rethinkdb.errors import ReqlOpFailedError
 from time import sleep
+import rethinkdb as rtdb
+from rethinkdb.errors import ReqlOpFailedError
 
 
 def switch_to_done():
-    c = r.connect()
-    q = r.db("Brain").table("Jobs").filter(r.row["Status"].ne("Done")).changes().run(c)
-    for x in q:
-        if x and x.get("new_val") and x['new_val'].get("id"):
-            print(x['new_val']['id'])
+    connection_var = rtdb.connect()
+    query_obj = rtdb.db("Brain").table("Jobs").filter(
+        rtdb.row["Status"].ne("Done")).changes().run(connection_var)
+    for query_item in query_obj:
+        if query_item and query_item.get("new_val") and query_item['new_val'].get("id"):
+            print(query_item['new_val']['id'])
             sleep(2)
-            print(r.db("Brain").table("Outputs").insert({"OutputJob": x['new_val'],
-                                                         "Content": x['new_val']["JobCommand"]["Inputs"][0]["Value"]}).run(c))
-            print(r.db("Brain").table("Jobs").get(x['new_val']['id']).update({"Status": "Done"}).run(c))
+            print(rtdb.db("Brain").table("Outputs").insert(
+                {"OutputJob": query_item['new_val'],
+                 "Content": query_item['new_val']["JobCommand"]["Inputs"][0]["Value"]}).
+                  run(connection_var))
+            print(rtdb.db("Brain").table("Jobs").get(
+                query_item['new_val']['id']).update({"Status": "Done"}).run(connection_var))
 
 
 if __name__ == "__main__":
@@ -21,5 +25,3 @@ if __name__ == "__main__":
             switch_to_done()
         except ReqlOpFailedError:
             sleep(5)
-
-

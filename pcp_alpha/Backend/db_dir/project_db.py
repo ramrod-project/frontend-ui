@@ -10,8 +10,6 @@ from brain.connection import BrainNotReady
 from .custom_data import location_generated_num, read_file_tt, delete_file_tt, write_file_tt
 
 
-
-
 def db_connection():
     """
     Function db_connection open's a connection with rethinkdb
@@ -68,8 +66,7 @@ def confirm_brain_db_info():
             for table_name in ["Targets", "Jobs", "Outputs"]:
                 # Brain.{table_name} does exist
                 if rtdb.db("Brain").table_list().contains(
-                        table_name
-                    ).run(db_con_var):
+                        table_name).run(db_con_var):
                     print("\nlog: db Brain.{} table exist locally"
                           .format(table_name))
                     try:
@@ -118,7 +115,7 @@ def confirm_plugin_db_info():
                 print("log: db Plugins tables don't exist\n")
         else:
             print("\nlog: db Plugins DOESN'T exist\n")
-    else:  #is check_dev_env()-- if Plugins does exit locally
+    else:  # is check_dev_env()-- if Plugins does exit locally
         if rtdb.db_list().contains("Plugins").run(db_connection()) is not True:
             print("\nlog: db Plugins doesn't exist locally")
             rtdb.db_create("Plugins").run(db_connection())
