@@ -2,3 +2,4 @@ pytest-django
 pytest
 django==2.0.1
 rethinkdb
+ramrodbrain>=0.1.2
