@@ -8,6 +8,10 @@ python:
 services:
   - docker
 
+env:
+  global:
+    - CC_TEST_REPORTER_ID=6444ce234e6ec1703cda414367cc0ef773c9645e0248ec579e4201d366575aaf
+
 branches:
   only:
   - master
@@ -18,7 +22,10 @@ before_install:
   - git clone  https://github.com/ramrod-project/frontend-ui.git
 
 install:
-  - pip install django==2.0.1 pytest pytest-django rethinkdb
+  - pip install django==2.0.1 pytest pytest-cov pytest-django rethinkdb
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
 
 before_script:
   - if [ "$TRAVIS_BRANCH" != "master"  ];
@@ -27,8 +34,9 @@ before_script:
     else docker run -d --rm --name myP -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG" 
     ramrodpcp/database-brain:latest; fi
   - sleep 5
-  - STAGE=TESTING pytest pcp_alpha
+  - STAGE=TESTING pytest --cov --cov-config .coveragerc --cov-report xml pcp_alpha
   - docker stop myP
+  - ./cc-test-reporter after-build -t coverage.py --exit-code 0
 
 script:
   - if [ "$TRAVIS_BRANCH" != "master"  ];
@@ -36,6 +44,7 @@ script:
     else docker build -t ramrodpcp/frontend-ui:latest . ; fi
 
   - docker network create test
+
   - if [ "$TRAVIS_BRANCH" != "master"  ];
     then docker run -d --rm --name rethinkdb_test -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG" 
     --network test ramrodpcp/database-brain:$TRAVIS_BRANCH;
@@ -46,6 +55,7 @@ script:
     then docker run -d --rm --name frontend -p 8080:8080 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG" 
     --network test ramrodpcp/frontend-ui:$TRAVIS_BRANCH;
     else docker run -d --rm --name frontend -p 8080:8080 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG"
+
     --network test ramrodpcp/frontend-ui:latest; fi
 
   # This will eventually be for more integration testing
