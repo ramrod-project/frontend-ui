@@ -142,9 +142,8 @@ class TestDataHandling(object):
     @staticmethod
     def test_execute_w4_data_ui(rf):
         """
-        This test is replicating the data displayed in W4 when
-        a user clicks on 'Execute Sequence' button at the bottom
-        right of w3. With correct data.
+        This test is replicating the data displayed in W4 when a user clicks
+        on 'Execute Sequence' button at the bottom right of w3. With correct data.
         """
         first_url = "/action/get_w3_data/?jobs=%5B%7B%22JobTarget%22%3A%" \
                     "7B%22PluginName%22%3A%22Plugin1%22%2C%22Location%22%" \
