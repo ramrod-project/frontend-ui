@@ -46,9 +46,9 @@ script:
   - docker network create test
 
   - if [ "$TRAVIS_BRANCH" != "master"  ];
-    then docker run -d --rm --name rethinkdb_test -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG" 
+    then docker run -d --rm --name rethinkdb -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG"
     --network test ramrodpcp/database-brain:$TRAVIS_BRANCH;
-    else docker run -d --rm --name rethinkdb_test -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG" 
+    else docker run -d --rm --name rethinkdb -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG"
     --network test ramrodpcp/database-brain:latest; fi
   - sleep 5
   - if [ "$TRAVIS_BRANCH" != "master"  ];
@@ -63,7 +63,7 @@ script:
   - docker ps
   - docker logs frontend
   - docker stop frontend
-  - docker stop rethinkdb_test
+  - docker stop rethinkdb
   - docker network prune -f
 
 after_success:
