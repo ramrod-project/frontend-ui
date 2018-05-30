@@ -4,12 +4,12 @@ from uuid import uuid4
 import json
 import pytest
 from rethinkdb.errors import ReqlOpFailedError
-from pcp_alpha.test.test_w4_switch_to_done import switch_to_done
-from pcp_alpha.Backend.db_dir.project_db import check_dev_env
-from pcp_alpha.Backend.db_dir.custom_data import location_generated_num
-from pcp_alpha.Backend.db_dir.project_db import db_connection, rtdb
-from pcp_alpha.Backend.db_dir.custom_queries import get_specific_brain_targets, get_specific_command
-from pcp_alpha.Backend.pcp_app.views import get_commands_controller, execute_sequence_controller, \
+from test.test_w4_switch_to_done import switch_to_done
+from Backend.db_dir.project_db import check_dev_env
+from Backend.db_dir.custom_data import location_generated_num
+from Backend.db_dir.project_db import db_connection, rtdb
+from Backend.db_dir.custom_queries import get_specific_brain_targets, get_specific_command
+from Backend.pcp_app.views import get_commands_controller, execute_sequence_controller, \
     w4_output_controller, new_target_form, val_target_form
 
 ECHO_JOB_ID = str(uuid4())
