@@ -160,14 +160,13 @@ class TestDataHandling(object):
             process_obj.start()
             sleep(2)
             response = execute_sequence_controller(rf.get(first_url))
-            assert "inserted" in str(execute_sequence_controller(rf.get(first_url)).content)
+            assert "inserted" in str(response.content)
             assert response.status_code == 200
             sleep(5)
             second_url = "/action/get_output_data/?job_id={}".format(json.loads(
                 response.getvalue().decode())['generated_keys'][0])
-            response2 = w4_output_controller(rf.get(second_url))
-            assert response2.status_code == 200
-            assert "sdfsdfsd" in str(response2.content)
+            assert w4_output_controller(rf.get(second_url)).status_code == 200
+            assert "sdfsdfsd" in str(w4_output_controller(rf.get(second_url)).content)
             process_obj.terminate()
             process_obj.join(timeout=2)
 
