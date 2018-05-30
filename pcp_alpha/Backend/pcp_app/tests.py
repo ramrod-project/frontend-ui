@@ -71,7 +71,7 @@ class TestDataHandling(object):
 
             with pytest.raises(ReqlOpFailedError):
                 response = get_commands_controller(request)
-                assert response.status_code != 200
+                # assert response.status_code != 200
 
     @staticmethod
     def test_execute_w3_data():
@@ -158,7 +158,7 @@ class TestDataHandling(object):
 
             with pytest.raises(json.JSONDecodeError):
                 response = execute_sequence_controller(request)
-                assert response.status_code != 200
+                # assert response.status_code != 200
 
     @staticmethod
     def test_execute_w4_data_ui(rf_var):
