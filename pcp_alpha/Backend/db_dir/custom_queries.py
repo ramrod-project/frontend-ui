@@ -1,5 +1,6 @@
 import json
 from .project_db import db_connection, rtdb
+from rethinkdb.errors import ReqlOpFailedError
 
 
 # Note: Refactor this file as a CRUD class in the future
@@ -28,14 +29,16 @@ def get_specific_commands(user_selection):
     :return: Query as a dictionary nested in a list to w2
     """
     command_list = list()
-
-    cur = rtdb.db("Plugins").table(user_selection).pluck('OptionalInput',
-                                                         'Inputs',
-                                                         'Tooltip',
-                                                         'CommandName',
-                                                         'Output').run(db_connection())
-    for item_cur in cur:
-        command_list.append(dict(item_cur))
+    try:
+        cur = rtdb.db("Plugins").table(user_selection).pluck('OptionalInput',
+                                                             'Inputs',
+                                                             'Tooltip',
+                                                             'CommandName',
+                                                             'Output').run(db_connection())
+        for item_cur in cur:
+            command_list.append(dict(item_cur))
+    except ReqlOpFailedError as err:  # TODO: Talk to Dan about import error
+        command_list.append(str(err).split(":")[0][:-3])
     return command_list
 
 

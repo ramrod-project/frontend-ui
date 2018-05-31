@@ -22,6 +22,7 @@ Functions down below are for w2
 var current_command_template = {}
 
 function get_commands_func(){
+    console.log("get_commands_func function has been called");
     $(".tooltipHeader").empty();
 
     // plugin name the user clicked
@@ -36,6 +37,7 @@ function get_commands_func(){
         data: {"plugin_name": plugin_name_var},
         datatype: 'json',
         success: function(data) {
+            console.log(data);
             // empty content in w2
         	$(".theContent").empty();
         	$(".theContentArgument").empty();
@@ -43,8 +45,14 @@ function get_commands_func(){
         	$(".tooltipContent").empty();
 
             // display command(s) in w2
-        	for(var i = 0; i < data.length; i++) {
-                $(".theContent").append($("<li id='commandid' class='commandclass' onclick='#'/>").append($("<a id='acommandid' class='acommandclass' href='#'/>").text(data[i].CommandName)));
+            if (data.length == 1){
+                $(".theContent").append($("<li/>").text(data));
+            }
+            else{
+                for(var i = 0; i < data.length; i++) {
+                    $(".theContent").append($("<li id='commandid' class='commandclass' onclick='#'/>").append(
+                    $("<a id='acommandid' class='acommandclass' href='#'/>").text(data[i].CommandName)));
+            }
             }
             $(".theContent").append("<div/>").attr({"style": "width:250px"});
             $(".theContentHeader").append("<h2 class='box-title'/>").text(plugin_name_var + "  command list");
@@ -83,6 +91,8 @@ function get_commands_func(){
         error: function (data) {
         	console.log("ERROR @ get_commands_func function");
         	console.log(data);
+//        	$(".theContent").empty();
+//        	$(".theContent").append($("<li/>").text("An error has occurred");
         }
     })
 }
