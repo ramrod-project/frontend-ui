@@ -1,7 +1,14 @@
-var inc = 1;
+
 $(document).ready(function() {
+    var inc = 1;
 	$("tr.clickable-row").click(get_commands_func);   // displays commands in w2
-	$("#addjob_button").click(add_new_job);               // add new job in w3 
+	$("#target_table").dataTable({
+	    searching: false,
+	    paging: false,
+	    bInfo: false,
+        select: true
+	});
+	$("#addjob_button").click(add_new_job);               // add new job in w3
 	$("#addjob_button").click(function(){
 	    inc++;
 	    $("#addjob_button")[0].value = inc;
@@ -22,7 +29,6 @@ Functions down below are for w2
 var current_command_template = {}
 
 function get_commands_func(){
-    console.log("get_commands_func function has been called");
     $(".tooltipHeader").empty();
 
     // plugin name the user clicked
@@ -37,7 +43,6 @@ function get_commands_func(){
         data: {"plugin_name": plugin_name_var},
         datatype: 'json',
         success: function(data) {
-            console.log(data);
             // empty content in w2
         	$(".theContent").empty();
         	$(".theContentArgument").empty();
@@ -102,6 +107,12 @@ function update_argument(event){
     console.warn("updating commdn item "+ cmditem);
     current_command_template["Inputs"][cmditem]["Value"] = source.value;
     document.getElementById("JSON_Command_DATA").innerText = JSON.stringify(current_command_template);
+}
+
+function target_checkbox_func(){
+    console.log("target_checkbox_func function was called");
+    $(this).toggleClass(".table-hover tbody tr td.active:hover");
+    console.log($(this).toggleClass(".table-hover tbody tr td.active:hover"));
 }
 /*
 -----------------------------------------------------------------------------------------------------
