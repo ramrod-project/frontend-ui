@@ -36,10 +36,7 @@ def get_specific_brain_targets(plugin_name_job):
     :param plugin_name_job: PluginName from W3
     :return: query
     """
-    db_name = "Brain"
-    db_table = "Targets"
-    query_specific_plugin_name = rtdb.db(db_name).table(db_table).filter(
-        {"PluginName": plugin_name_job}).run(db_connection())
+    query_specific_plugin_name = brain.queries.get_targets_by_plugin(plugin_name_job)
     return query_specific_plugin_name
 
 
