@@ -2,12 +2,81 @@
 $(document).ready(function() {
     var inc = 1;
 	$("tr.clickable-row").click(get_commands_func);   // displays commands in w2
-	$("#target_table").dataTable({
+//	$("#target_table").dataTable({
+//	    searching: false,
+//	    paging: false,
+//	    bInfo: false,
+//        rowReorder: true,
+//        select: true
+//        }
+//	});
+
+	var row_selection = $('#target_table').DataTable({
 	    searching: false,
 	    paging: false,
 	    bInfo: false,
+        rowReorder: true,
         select: true
 	});
+
+	row_selection.on('select', function(e, dt, type, indexes) {
+        console.log("HEEELLLLLOOOO")
+        var selected_var = $(".gridSelect tbody tr.selected");
+        console.log(selected_var);
+        if(selected_var.length > 1){
+            console.log("HERE1");
+            selected_var.attr({"draggable": "true", "ondragstart": "drag_command(event)"});
+        } else {
+            console.log("HERE2");
+            selected_var.attr({"draggable": "true", "ondragstart": "drag_command(event)"});
+        }
+    });
+
+    row_selection.on('deselect', function(e, dt, type, indexes) {
+        console.log("HEEELLLLLOOOO2");
+        var deselected_var = $(".gridSelect tbody tr");
+        for (var counter_int = 0; counter_int < deselected_var.length; counter_int++){
+            if (deselected_var[counter_int].getAttribute("draggable")){
+                deselected_var[counter_int].removeAttribute("draggable");
+                deselected_var[counter_int].removeAttribute("ondragstart");
+            }
+        }
+
+        if (type.trim() == 'row'){
+            var data = row_selection.row(indexes).context[0];
+            console.log(data);
+            console.log(deselected_var);
+        }
+    });
+
+//	$(".gridSelect tbody tr").click(target_select_func);
+
+//    DRAG
+//	$(".gridSelect tbody tr, .gridSelect tbody tr").draggable({
+//	    helper: function(){
+//	        console.log("draggable");
+//	        var selected_var = $(".gridSelect tbody tr.selected");
+//	        console.log(selected_var);
+//
+////            if (selected_var.length === 0) {
+////              selected_var = $(this).addClass('selectedRow');
+////            }
+////            var container = $('<table/>').attr('id', 'draggingContainer');
+//////            console.log(container);
+////        container.append(selected_var.clone().removeClass("selected"));
+////        console.log(container);
+////        return container;
+//	    }
+//	});
+
+//	DROP
+//    $(".gridSelect, .gridSelect").droppable({
+//        drop: function (event, ui) {
+//            $(this).append(ui.helper.children());
+//            $('.selected').remove();
+//        }
+//    });
+
 	$("#addjob_button").click(add_new_job);               // add new job in w3
 	$("#addjob_button").click(function(){
 	    inc++;
@@ -109,10 +178,10 @@ function update_argument(event){
     document.getElementById("JSON_Command_DATA").innerText = JSON.stringify(current_command_template);
 }
 
-function target_checkbox_func(){
-    console.log("target_checkbox_func function was called");
-    $(this).toggleClass(".table-hover tbody tr td.active:hover");
-    console.log($(this).toggleClass(".table-hover tbody tr td.active:hover"));
+function target_select_func(){
+    console.log("target_select_func function was called");
+    $(this).toggleClass("sorting_1");
+//    console.log($(this).toggleClass("sorting_1")[0]);
 }
 /*
 -----------------------------------------------------------------------------------------------------
@@ -187,6 +256,7 @@ function allowDrop(ev) {
 }
 
 function drag(ev) {
+    console.log("drag function");
     var row_data = ev.target.cells[0].id;
     var source_id = row_data.substring(11,row_data.length);
     var target_js =  JSON.parse($("#nameidjson"+source_id)[0].innerText);
