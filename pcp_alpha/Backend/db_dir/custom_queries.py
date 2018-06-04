@@ -1,5 +1,4 @@
 import json
-from .project_db import db_connection, rtdb
 import brain.queries
 
 

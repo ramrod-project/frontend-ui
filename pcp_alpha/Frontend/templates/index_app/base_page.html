@@ -7,7 +7,7 @@
     {% load static %}
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <link rel="stylesheet" href="{% static 'AdminLTE/bower_components/bootstrap/dist/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'AdminLTE/bower_components/bootstrap/dist/css/bootstrap.css' %}">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="{% static 'AdminLTE/bower_components/font-awesome/css/font-awesome.min.css' %}">
     <!-- Ionicons -->
@@ -18,6 +18,11 @@
         page. However, you can choose any other skin. Make sure you
         apply the skin class to the body tag so the changes take effect. -->
     <link rel="stylesheet" href="{% static 'AdminLTE/dist/css/skins/skin-blue.min.css' %}">
+    <link rel="stylesheet" href="{% static 'Select/css/select.dataTables.css' %}">
+    <link rel="stylesheet" href="{% static 'DataTables/datatables.min.css' %}">
+    <!--<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">-->
+    <!--custom css for clicking more than one row on w1-->
+    <!--<link rel="stylesheet" href="{% static 'css_custom/pcp_custom_css.css' %}">-->
 
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -35,6 +40,9 @@
       type="image/png"
       href="{% static 'images/favicon.ico' %}" />
     <!--for template inheritance-->
+    <style>
+        #draggable { width: 150px; height: 150px; padding: 0.5em; }
+    </style>
     {% block styles %}{% endblock %}
 </head>
 <!--
@@ -179,25 +187,78 @@ desired effect
                   <div class="box box-primary">
                     <!--box body-->
                     <div class="box-body">
-                      <div id="example2_wrapper" class="dataTables_wrapper form-inline dt-bootstrap"><div class="row"><div class="col-sm-6"></div><div class="col-sm-6"></div></div><div class="row"><div class="col-sm-12"><table id="example2" class="table table-bordered table-hover dataTable" role="grid" aria-describedby="example2_info">
-                        <thead>
-                        <tr role="row"><th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Rendering engine: activate to sort column descending">Plugin Name</th><th class="sorting" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">Location</th></tr>
-                        </thead>
-                        <tbody>
-                        {% if host_dict %}
-                            {% for items in host_dict %}
-                                <a name="name_tag_name">
-                                <tr role="row" class="odd clickable-row" id="target_row{{ forloop.counter0 }}" onclick="#" draggable="true" ondragstart="drag(event)">
-                                    <td id="name_tag_id{{ forloop.counter0 }}"><a href="#"><span style="display:none" id="nameidjson{{ forloop.counter0 }}">{{ items.json }}</span><span>{{ items.PluginName }}</span></a></td>
-                                  <td id="address_tag_id{{ forloop.counter0 }}"><a href="#"><span>{{ items.Location }} </span></a></td>
-                                </tr></a>
-                            {% endfor %}
-                        {% endif %}
-                        </tbody>
-                        <tfoot>
-                        <tr><th rowspan="1" colspan="1">Plugin Name</th><th rowspan="1" colspan="1">Location</th></tr>
-                        </tfoot>
-                      </table></div></div><div class="row"><div class="col-sm-5"><div class="dataTables_info" id="example2_info" role="status" aria-live="polite">Showing 1 to 10 of 57 entries</div></div><div class="col-sm-7"><div class="dataTables_paginate paging_simple_numbers" id="example2_paginate"><ul class="pagination"><li class="paginate_button previous disabled" id="example2_previous"><a href="#" aria-controls="example2" data-dt-idx="0" tabindex="0">Previous</a></li><li class="paginate_button active"><a href="#" aria-controls="example2" data-dt-idx="1" tabindex="0">1</a></li><li class="paginate_button "><a href="#" aria-controls="example2" data-dt-idx="2" tabindex="0">2</a></li><li class="paginate_button "><a href="#" aria-controls="example2" data-dt-idx="3" tabindex="0">3</a></li><li class="paginate_button "><a href="#" aria-controls="example2" data-dt-idx="4" tabindex="0">4</a></li><li class="paginate_button "><a href="#" aria-controls="example2" data-dt-idx="5" tabindex="0">5</a></li><li class="paginate_button "><a href="#" aria-controls="example2" data-dt-idx="6" tabindex="0">6</a></li><li class="paginate_button next" id="example2_next"><a href="#" aria-controls="example2" data-dt-idx="7" tabindex="0">Next</a></li></ul></div></div></div></div>
+                      <div id="example2_wrapper" class="dataTables_wrapper form-inline dt-bootstrap">
+                          <div class="row">
+                              <div class="col-sm-6">
+
+                              </div>
+                              <div class="col-sm-6">
+
+                              </div>
+                          </div>
+                          <div class="row">
+                              <div class="col-sm-12">
+                                  <table id="target_table" class="table table-bordered table-hover dataTable display gridSelect" role="grid" aria-describedby="target_table_info">
+                                      <thead>
+                                      <tr role="row">
+                                          <!--<th class="sorting_asc" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Rendering engine: activate to sort column descending">-->
+                                              <!--Row #-->
+                                          <!--</th>-->
+                                          <th class="sorting_asc" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Rendering engine: activate to sort column descending">
+                                              Plugin Name
+                                          </th>
+                                          <th class="sorting" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">
+                                              Location
+                                          </th>
+                                      </tr>
+                                      </thead>
+                                      <tbody>
+                                      {% if host_dict %}
+                                        {% for items in host_dict %}
+                                            <a name="name_tag_name">
+                                            <tr role="row" class="odd clickable-row" id="target_row{{ forloop.counter0 }}" onclick="#">
+                                                <!--<td>-->
+                                                    <!--<input class="target_checkbox" type="checkbox">&nbsp;{{ forloop.counter }}<br>-->
+                                                <!--</td>-->
+                                                <td id="name_tag_id{{ forloop.counter0 }}"><a href="#">
+                                                    <span style="display:none" id="nameidjson{{ forloop.counter0 }}">{{ items.json }}</span><span>{{ items.PluginName }}</span></a></td>
+                                                <td id="address_tag_id{{ forloop.counter0 }}"><a href="#">
+                                                    <span>{{ items.Location }} </span></a></td>
+                                            </tr></a>
+                                        {% endfor %}
+                                      {% endif %}
+                                      </tbody>
+                                      <tfoot>
+                                      <tr>
+                                          <!--<th rowspan="1" colspan="1">Row #</th>-->
+                                          <th rowspan="1" colspan="1">Plugin Name</th>
+                                          <th rowspan="1" colspan="1">Location</th>
+                                      </tr>
+                                      </tfoot>
+                                  </table>
+                              </div>
+                          </div>
+                          <div class="row">
+                              <!--<div class="col-sm-5">-->
+                                  <!--<div class="dataTables_info" id="target_table_info" role="status" aria-live="polite">Showing 1 to 10 of 57 entries-->
+                                  <!--</div>-->
+                              <!--</div>-->
+                              <!--<div class="col-sm-7">-->
+                                  <!--<div class="dataTables_paginate paging_simple_numbers" id="example2_paginate">-->
+                                      <!--<ul class="pagination">-->
+                                          <!--<li class="paginate_button previous disabled" id="example2_previous"><a href="#" aria-controls="target_table" data-dt-idx="0" tabindex="0">Previous</a></li>-->
+                                          <!--<li class="paginate_button active"><a href="#" aria-controls="target_table" data-dt-idx="1" tabindex="0">1</a></li>-->
+                                          <!--<li class="paginate_button "><a href="#" aria-controls="target_table" data-dt-idx="2" tabindex="0">2</a></li>-->
+                                          <!--<li class="paginate_button "><a href="#" aria-controls="target_table" data-dt-idx="3" tabindex="0">3</a></li>-->
+                                          <!--<li class="paginate_button "><a href="#" aria-controls="target_table" data-dt-idx="4" tabindex="0">4</a></li>-->
+                                          <!--<li class="paginate_button "><a href="#" aria-controls="target_table" data-dt-idx="5" tabindex="0">5</a></li>-->
+                                          <!--<li class="paginate_button "><a href="#" aria-controls="target_table" data-dt-idx="6" tabindex="0">6</a></li>-->
+                                          <!--<li class="paginate_button next" id="example2_next"><a href="#" aria-controls="target_table" data-dt-idx="7" tabindex="0">Next</a></li>-->
+                                      <!--</ul>-->
+                                  <!--</div>-->
+                              <!--</div>-->
+                          </div>
+                      </div>
                     </div>
                     <!-- /.box-body -->
                   </div>
@@ -300,9 +361,10 @@ desired effect
                 <div class="box box-primary">
                     <div class="box-body">
                         <div class="tab-content">
-                            <div id="example3_wrapper" class="dataTables_wrapper form-inline dt-bootstrap"><div class="row"><div class="col-sm-6"></div><div class="col-sm-6"></div></div><div class="row"><div class="col-sm-12"><table id="example3" class="table table-bordered table-hover dataTable" role="grid" aria-describedby="example2_info">
+                            <div id="example3_wrapper" class="dataTables_wrapper form-inline dt-bootstrap"><div class="row"><div class="col-sm-6"></div><div class="col-sm-6"></div></div><div class="row"><div class="col-sm-12">
+                                <table id="job_table" class="table table-bordered table-hover dataTable gridSelect2" role="grid" aria-describedby="target_table_info">
                                 <thead>
-                                <tr role="row"><th class="sorting_asc" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Rendering engine: activate to sort column descending">Job #</th><th class="sorting" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">Plugin Name</th><th class="sorting" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">Host</th><th class="sorting" tabindex="0" aria-controls="example2" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">Command</th></tr>
+                                <tr role="row"><th class="sorting_asc" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Rendering engine: activate to sort column descending">Job #</th><th class="sorting" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">Plugin Name</th><th class="sorting" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">Host</th><th class="sorting" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">Command</th></tr>
                                 </thead>
                                 <tbody class="thirdBoxContent" id="third_box_content">
                                 <a name="thirdboxname">
@@ -387,7 +449,7 @@ desired effect
   <footer class="main-footer">
     <!-- To the right -->
     <div class="pull-right hidden-xs">
-	    <strong>Version 0.1.1</strong>
+        <strong>Version 0.1.2</strong>
     </div>
     <!-- Default to the left -->
     <strong>Demo Version for the <a href="http://nooooooooooooooo.com/">PCP Project</a></strong> :)
@@ -477,7 +539,12 @@ desired effect
 <!-- AdminLTE App -->
 <script src="{% static 'AdminLTE/dist/js/adminlte.min.js' %}"></script>
 <!-- GET list of commands -->
-<script type="text/javascript" src="{% static 'js_custom/pcp_custom_jquery.js' %}"></script>
+<script src="{% static 'js_custom/pcp_custom_jquery.js' %}"></script>
+<script src="{% static 'DataTables/js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'DataTables/datatables.min.js' %}"></script>
+
+<!--<script src="//code.jquery.com/jquery-1.10.2.js"></script>-->
+<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 <!--for template inheritance-->
 {% block extra_js %}{% endblock extra_js %}
 </body>
