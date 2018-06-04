@@ -99,7 +99,7 @@ function get_commands_func(){
         },
         error: function (data) {
         	console.log("ERROR @ get_commands_func function");
-        	console.log(data);
+//        	console.log(data);
 //        	$(".theContent").empty();
 //        	$(".theContent").append($("<li/>").text("An error has occurred");
         }
@@ -182,10 +182,9 @@ function clear_new_jobs(){
 // Drag and drop function(s) for targets
 // Note: Drop function needs to be validated
 function target_select_func(row_selection){
-    console.log("target_select_func function was called");
+//    console.log("target_select_func function was called");
     row_selection.on('select', function(e, dt, type, indexes) {
         var selected_var = $(".gridSelect tbody tr.selected");
-        console.log("selected_var");
         if(selected_var.length > 1){
             console.log("draggable object for more than one object");
         } else {
@@ -196,20 +195,20 @@ function target_select_func(row_selection){
 //    DRAG
 	$(".gridSelect tbody tr, .gridSelect2 tbody tr").draggable({
 	    helper: function(){
-	        console.log("draggable");
+//	        console.log("draggable");
 	        var selected_var = $(".gridSelect tbody tr.selected");
             if (selected_var.length === 0) {
-                console.log("draggable2");
                 selected_var = $(this).addClass('selected');
             }
-            var container = $('<table/>').attr('id', 'draggingContainer');
+//            console.log(selected_var);
+            var container = $('<table/>').attr({'id':'draggingContainer'});
             container.append(selected_var.clone().removeClass("selected"));
+//            console.log(container);
             return container;
 	    }
 	});
 
     $(document).on('mouseenter', '.divw3row', function () {
-        console.log("HOVER");
         var hover_object = $(this);
         // animation of some sort?
         //DROP
@@ -245,7 +244,6 @@ function allowDropCommand(ev) {
 }
 
 function drag_command(ev) {
-//    ev.dataTransfer.setData("text", ev.explicitOriginalTarget.firstElementChild.id);  // Former code
     //ev.dataTransfer.setData("text", ev.originalTarget.id);
     ev.dataTransfer.setData("text", JSON.stringify(current_command_template));
 }
@@ -325,10 +323,7 @@ Functions down below are for w4
 */
 // Modify function add depth parameter, increment depth when it errors
 function execute_sequence_output(specific_id, updateid, counter=0, backoff=2000){
-    console.log("execute_sequence_output function");
-    console.log("counter below");
-    console.log(counter);
-
+//    console.log("execute_sequence_output function");
 
     $.ajax({
         type: "GET",
@@ -362,7 +357,7 @@ function execute_sequence_output(specific_id, updateid, counter=0, backoff=2000)
             // increment depth
             // re-call execute_sequence_output function again
             console.log("ERROR @ execute_sequence_output function");
-            console.log(data);
+//            console.log(data);
         }
     }).fail(function(data){
         console.log("FAIL FUNCTION");
@@ -370,8 +365,8 @@ function execute_sequence_output(specific_id, updateid, counter=0, backoff=2000)
         var status = data.status;
         var reason = data.responseJSON.reason;
 
-        console.log(status);
-        console.log(reason);
+//        console.log(status);
+//        console.log(reason);
 
         if(counter == 10){
             console.log("About to BREAK");
@@ -380,7 +375,7 @@ function execute_sequence_output(specific_id, updateid, counter=0, backoff=2000)
             $("#updateid"+updateid).parent().css("background-color", "white");
         } else {
             counter++;
-            console.log("Check again");
+//            console.log("Check again");
             setTimeout( function() { execute_sequence_output(specific_id, updateid, counter); }, backoff*2 );
         }
 
