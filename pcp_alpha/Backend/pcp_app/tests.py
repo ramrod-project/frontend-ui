@@ -62,7 +62,7 @@ class TestDataHandling(object):
 
         if check_dev_env() is not None:
             request = rf.get(home_url)
-            with pytest.raises(ReqlOpFailedError):
+            with pytest.raises(ValueError):
                 response = get_commands_controller(request)
                 assert not response.status_code == 200
 
