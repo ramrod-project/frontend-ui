@@ -3,7 +3,7 @@ from time import sleep
 from uuid import uuid4
 import json
 import pytest
-from rethinkdb.errors import ReqlOpFailedError
+# from rethinkdb.errors import ReqlOpFailedError
 from test.test_w4_switch_to_done import switch_to_done
 from Backend.db_dir.project_db import check_dev_env
 from Backend.db_dir.custom_data import location_generated_num
