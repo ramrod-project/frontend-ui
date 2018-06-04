@@ -45,12 +45,7 @@ def execute_sequence_controller(request):
 
 def _w4_get_content(job_id):
     updated_job = get_specific_brain_output(job_id)
-    check_int = 0
-    for item in updated_job:
-        check_int = 1
-        break
-
-    if check_int != 1:
+    if not updated_job:
         result = {
             'status': '418',
             'reason': 'Status != Done',
