@@ -1,42 +1,17 @@
-
+var selected_target_template = {}
+var inc = 1;
 $(document).ready(function() {
-    var inc = 1;
 	$("tr.clickable-row").click(get_commands_func);   // displays commands in w2
-	$("#target_table").dataTable({
+
+	var row_selection = $('#target_table').DataTable({  //for w1+w3
 	    searching: false,
 	    paging: false,
 	    bInfo: false,
         rowReorder: true,
         select: true
 	});
-//	$(".gridSelect tbody tr").click(target_select_func);
 
-//    DRAG
-	$(".gridSelect tbody tr, .gridSelect2 tbody tr").draggable({
-	    helper: function(){
-	        console.log("draggable");
-	        var selected_var = $(".gridSelect tbody tr.selected");
-//	        console.log(selected_var);
-
-            if (selected_var.length === 0) {
-              selected_var = $(this).addClass('selectedRow');
-            }
-            var container = $('<table/>').attr('id', 'draggingContainer');
-//            console.log(container);
-        container.append(selected_var.clone().removeClass("selected"));
-        console.log(container);
-        return container;
-	    }
-	});
-
-//	DROP
-    $(".gridSelect, .gridSelect2").droppable({
-        drop: function (event, ui) {
-            $(this).append(ui.helper.children());
-            $('.selected').remove();
-        }
-    });
-
+	$(".gridSelect tbody tr").click(target_select_func(row_selection));  // highlight target in w1 to drag to w3
 	$("#addjob_button").click(add_new_job);               // add new job in w3
 	$("#addjob_button").click(function(){
 	    inc++;
@@ -138,14 +113,6 @@ function update_argument(event){
     document.getElementById("JSON_Command_DATA").innerText = JSON.stringify(current_command_template);
 }
 
-function target_select_func(){
-//    console.log("target_select_func function was called");
-//    $(this).toggleClass("sorting_1");
-//    console.log($(this).toggleClass("sorting_1")[0]);
-    console.log("target_checkbox_func function was called");
-//    $(this).toggleClass(".table-hover tbody tr td.active:hover");
-//    console.log($(this).toggleClass(".table-hover tbody tr td.active:hover"));
-}
 /*
 -----------------------------------------------------------------------------------------------------
 Functions down below are for w3
@@ -158,7 +125,7 @@ function add_new_job(){
 
     // content for w3
     if(value == 0 || value == 1) {
-        $(".thirdBoxContent").append($("<tr/>").attr({"role": "row", "onclick": "#", "id":"jobrow"+1}).append(
+        $(".thirdBoxContent").append($("<tr/>").attr({"role": "row", "onclick": "#", "id":"jobrow"+1, "class": "draggable_tr divw3row"}).append(
             $("<td/>").append($("<a/>").attr({"href": "#"}).append($("<span/>").text("1"))),
             $("<td/>").attr({"id": "pluginid" + 1,
                              "ondrop": "drop(event)",
@@ -179,7 +146,7 @@ function add_new_job(){
 
     }
     else {
-        $(".thirdBoxContent").append($("<tr/>").attr({"role": "row", "onclick": "#", "id":"jobrow"+value}).append(
+        $(".thirdBoxContent").append($("<tr/>").attr({"role": "row", "onclick": "#", "id":"jobrow"+value, "class": "draggable_tr divw3row"}).append(
             $("<td/>").append($("<a/>").attr({"href": "#"}).append($("<span/>").text(value))),
             $("<td/>").attr({"id": "pluginid" + value,
                              "ondrop": "drop(event)",
@@ -214,28 +181,63 @@ function clear_new_jobs(){
 
 // Drag and drop function(s) for targets
 // Note: Drop function needs to be validated
-function allowDrop(ev) {
-    ev.preventDefault();
-}
+function target_select_func(row_selection){
+    console.log("target_select_func function was called");
+    row_selection.on('select', function(e, dt, type, indexes) {
+        var selected_var = $(".gridSelect tbody tr.selected");
+        console.log("selected_var");
+        if(selected_var.length > 1){
+            console.log("draggable object for more than one object");
+        } else {
+            console.log("draggable object for one object");
+        }
+    });
 
-function drag(ev) {
-    console.log("drag function");
-    console.log(ev);
-    var row_data = ev.target.cells[0].id;
-    var source_id = row_data.substring(11,row_data.length);
-    var target_js =  JSON.parse($("#nameidjson"+source_id)[0].innerText);
-    ev.dataTransfer.setData("text", JSON.stringify([target_js]));
-}
+//    DRAG
+	$(".gridSelect tbody tr, .gridSelect2 tbody tr").draggable({
+	    helper: function(){
+	        console.log("draggable");
+	        var selected_var = $(".gridSelect tbody tr.selected");
+            if (selected_var.length === 0) {
+                console.log("draggable2");
+                selected_var = $(this).addClass('selected');
+            }
+            var container = $('<table/>').attr('id', 'draggingContainer');
+            container.append(selected_var.clone().removeClass("selected"));
+            return container;
+	    }
+	});
 
-function drop(ev) {
-    ev.preventDefault();
-    var target_json = ev.dataTransfer.getData("text");
-    var target_js = JSON.parse(target_json)[0];//Loop this at a later date
-    var drop_row = ev.target.id.substring(8, ev.target.id.length);
-    $("#pluginid"+drop_row+" a span")[0].innerText = target_js.PluginName;
-    $("#addressid"+drop_row+" a span")[0].innerText = target_js.Location;
-}
+    $(document).on('mouseenter', '.divw3row', function () {
+        console.log("HOVER");
+        var hover_object = $(this);
+        // animation of some sort?
+        //DROP
+        $(".gridSelect, .divw3row").droppable({
+            drop: function (event, ui) {
+                console.log("DROP");
+                var selected_var = ui.helper.children();
 
+                for(var int = 0; int < selected_var.length; int++){
+                    var row_id = selected_var[int].id;
+                    var row_id_str = row_id.substring(10,row_id.length);
+                    var row_js = JSON.parse($("#nameidjson" + row_id_str)[0].innerText);
+
+                    if (int != 0){
+                        hover_object.nextUntil()[(int -1)].children[1].append(row_js.PluginName);
+                        hover_object.nextUntil()[(int -1)].children[2].append(row_js.Location);
+                    } else{
+                        hover_object[0].children[1].append(row_js.PluginName);  // PluginName
+                        hover_object[0].children[2].append(row_js.Location);  //Location
+                    }
+                }
+                $('.selected');
+            }
+        });
+    }).on('mouseleave', '.divw3row', function () {
+        // if animations, animations would reset
+    });
+}
 // Drag and drop function(s) for command
 // Note: Drop function needs to be validated
 function allowDropCommand(ev) {
