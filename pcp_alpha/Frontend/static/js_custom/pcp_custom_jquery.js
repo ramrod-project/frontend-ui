@@ -285,8 +285,8 @@ function execute_sequence(){
         var uid = j;
         var terminal = $("#updateid"+uid).parent();
         terminal.css("background-color", "Chartreuse");
-        var plugin_name = $("#pluginid"+j+" a span")[0].innerText;
-        var location = $("#addressid"+j+" a span")[0].innerText;
+        var plugin_name = $("#pluginid"+j)[0].textContent;
+        var location = $("#addressid"+j)[0].textContent;
         var command_json = $("#commandid"+j+" div")[0].innerText;
         var command = JSON.parse(command_json);
         var job = {"JobTarget": {"PluginName": plugin_name,
