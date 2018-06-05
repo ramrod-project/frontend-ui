@@ -119,6 +119,7 @@ Functions down below are for w3
 // Add new job
 function add_new_job(){
     var value = $("#addjob_button")[0].value;
+    console.log(value);
 
     // content for w3
     if(value == 0 || value == 1) {
@@ -132,7 +133,8 @@ function add_new_job(){
                              "ondragover": "allowDrop(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text(""))),
             $("<td/>").attr({"id": "commandid" + 1,
                              "ondrop": "drop_command(event)",
-                             "ondragover": "allowDropCommand(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text("")))
+                             "ondragover": "allowDropCommand(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text(""))),
+            $("<td/>").attr({"id": "jobstatusid" + 1})
         ));
 
         // W4 Rows
@@ -153,7 +155,8 @@ function add_new_job(){
                              "ondragover": "allowDrop(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text(""))),
             $("<td/>").attr({"id": "commandid" + value,
                              "ondrop": "drop_command(event)",
-                             "ondragover": "allowDropCommand(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text("")))
+                             "ondragover": "allowDropCommand(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text(""))),
+            $("<td/>").attr({"id": "jobstatusid" + value})
         ));
 
         // W4 Rows
@@ -207,7 +210,20 @@ function target_select_func(row_selection){
 
     $(document).on('mouseenter', '.divw3row', function () {
         var hover_object = $(this);
+        var hover_object_id = hover_object[0].id;
+        var hover_object_num = hover_object_id.substring(6, hover_object_id.length);
         // animation of some sort?
+
+        // status box
+        var plugin_name_text = hover_object[0].children[1].innerText;
+        var location_text = hover_object[0].children[2].innerText;
+        var command_text = hover_object[0].children[3].innerText;
+        var status_text = hover_object[0].children[4].innerText;
+
+        if (plugin_name_text && location_text && command_text != "" && status_text == false){
+            console.log("IF_____");
+            $("#jobstatusid"+hover_object_num).append($("<span/>").attr({"class": "label label-success"}).text("Ready"));
+        }
         //DROP
         $(".gridSelect, .divw3row").droppable({
             drop: function (event, ui) {
@@ -225,6 +241,21 @@ function target_select_func(row_selection){
                     } else{
                         hover_object[0].children[1].append(row_js.PluginName);  // PluginName
                         hover_object[0].children[2].append(row_js.Location);  //Location
+                    }
+
+                    // status box
+                    if (hover_object[0].children[1].innerText && hover_object[0].children[2].innerText && hover_object[0].children[3].innerText != ""){
+                        if (int != 0){
+                            var plugin_name_text = hover_object.nextUntil()[(int -1)].children[1].innerText;
+                            var location_text = hover_object.nextUntil()[(int -1)].children[2].innerText;
+                            var command_text = hover_object.nextUntil()[(int -1)].children[3].innerText;
+
+                            if (plugin_name_text && location_text && command_text != ""){
+                                $("#jobstatusid"+(parseInt(hover_object_num)+int)).append($("<span/>").attr({"class": "label label-success"}).text("Ready"));
+                            }
+                        } else {
+                            $("#jobstatusid"+(parseInt(hover_object_num)+int)).append($("<span/>").attr({"class": "label label-success"}).text("Ready"));
+                        }
                     }
                 }
                 $('.selected');
@@ -248,6 +279,7 @@ function drag_command(ev) {
 }
 
 function drop_command(ev) {
+//    console.log("drop_command");
     ev.preventDefault();
     var command_json = ev.dataTransfer.getData("text");
     var command = JSON.parse(command_json);
@@ -275,10 +307,15 @@ function drop_command(ev) {
 // Execute Sequence function down below are for w3+w4
 function execute_sequence(){
 //    console.log("execute_sequence function has been called");
+    // RIGHT HERE
 
     var jobs = []
     var num_jobs = $("#addjob_button")[0].value;
+//    console.log(num_jobs);
+    console.log(inc -1);
+    console.log($("#addjob_button"));
     for (var j = 1; j < num_jobs; j++){
+        console.log(j);
         var uid = j;
         var terminal = $("#updateid"+uid).parent();
         terminal.css("background-color", "Chartreuse");
