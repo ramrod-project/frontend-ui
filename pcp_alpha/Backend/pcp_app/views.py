@@ -2,7 +2,7 @@ import json
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.template import loader
-
+from ua_parser import user_agent_parser
 from Backend.db_dir.custom_queries import get_specific_commands, insert_brain_jobs_w3, \
     get_specific_brain_output, get_brain_output_content, insert_new_target, get_brain_targets
 from .forms import TargetForm
@@ -66,20 +66,23 @@ def w4_output_controller(request):
     else:
         controller_job_id = request.GET.get('job_id')
         result = _w4_get_content(controller_job_id)
-        response = HttpResponse(json.dumps(result), content_type='application/json')
+        response = HttpResponse(json.dumps(result),
+                                content_type='application/json')
         response.status_code = int(result['status'])
     return response
 
 
 def w4_output_controller_download(request):
-    response = None
-    if request.method != 'GET':
-        print("w4_output_controller_download function returned == {}".format(str(response)))
-    else:
+    if request.method == 'GET':
+        ua = user_agent_parser.ParseOS(request.META.get("HTTP_USER_AGENT"))
         controller_job_id = request.GET.get('job_id')
         content = get_brain_output_content(controller_job_id, max_size=None)
-        response = HttpResponse(content, content_type='application/octet-stream')
-        response['Content-Disposition'] = 'attachment; filename="{}.txt"'.format(controller_job_id)
+        if "windows" in ua.get("family").lower() and isinstance(content, str):
+            content = content.replace("\n", "\r\n")
+        response = HttpResponse(content,
+                                content_type='application/octet-stream')
+        response['Content-Disposition'] = 'attachment; \
+                                           filename="{}.txt"'.format(controller_job_id)
         response.status_code = 200
     return response
 
