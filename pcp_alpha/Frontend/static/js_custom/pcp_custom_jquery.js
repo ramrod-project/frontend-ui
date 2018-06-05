@@ -222,7 +222,7 @@ function target_select_func(row_selection){
 
         if (plugin_name_text && location_text && command_text != "" && status_text == false){
             console.log("IF_____");
-            $("#jobstatusid"+hover_object_num).append($("<span/>").attr({"class": "label label-success"}).text("Ready"));
+            $("#jobstatusid"+hover_object_num).append($("<span/>").attr({"class": "label label-warning"}).text("Prep"));
         }
         //DROP
         $(".gridSelect, .divw3row").droppable({
@@ -251,10 +251,10 @@ function target_select_func(row_selection){
                             var command_text = hover_object.nextUntil()[(int -1)].children[3].innerText;
 
                             if (plugin_name_text && location_text && command_text != ""){
-                                $("#jobstatusid"+(parseInt(hover_object_num)+int)).append($("<span/>").attr({"class": "label label-success"}).text("Ready"));
+                                $("#jobstatusid"+(parseInt(hover_object_num)+int)).append($("<span/>").attr({"class": "label label-warning"}).text("Prep"));
                             }
                         } else {
-                            $("#jobstatusid"+(parseInt(hover_object_num)+int)).append($("<span/>").attr({"class": "label label-success"}).text("Ready"));
+                            $("#jobstatusid"+(parseInt(hover_object_num)+int)).append($("<span/>").attr({"class": "label label-warning"}).text("Prep"));
                         }
                     }
                 }
