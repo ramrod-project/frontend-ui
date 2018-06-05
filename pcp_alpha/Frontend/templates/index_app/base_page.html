@@ -304,7 +304,7 @@ desired effect
                     </div>
                 </div>
             </div>
-            <div class="box-footer theContentArgument" onclick="#" draggable="true" ondragstart="drag_command(event)" id="boxtwofooterid">
+            <div class="box-footer theContentArgument" onclick="#" draggable="true" ondragstart="drag_command(event)" ondragend="drag_end_command(event)" id="boxtwofooterid">
             </div>
             <!-- /.tab-content -->
         </div>
@@ -340,6 +340,7 @@ desired effect
                 <div class="box box-primary">
                     <div class="box-body">
                         <div class="tab-content">
+                            <div id="w3_drop_to_all" style="outline: 1px dashed #ABABAB; outline-offset: 1px; text-align: center; display: none; "><br>Drop Here to apply the command to <strong>all</strong> jobs<br><br></div>
                             <div id="example3_wrapper" class="dataTables_wrapper form-inline dt-bootstrap"><div class="row"><div class="col-sm-6"></div><div class="col-sm-6"></div></div><div class="row"><div class="col-sm-12">
                                 <table id="job_table" class="table table-bordered table-hover dataTable gridSelect2" role="grid" aria-describedby="target_table_info">
                                 <thead>

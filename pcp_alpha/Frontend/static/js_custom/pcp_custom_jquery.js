@@ -20,6 +20,10 @@ $(document).ready(function() {
 
 	$("#clear_buttonid").click(clear_new_jobs);           // clear content in w3
 	$("#execute_button").click(execute_sequence);         // execute sequence button in 23
+
+    $("#w3_drop_to_all").attr({"ondrop": "drop_command_to_multiple(event)",
+                               "ondragover": "allowDropCommand(event)"});
+
 });
 
 /*
@@ -224,7 +228,8 @@ function target_select_func(row_selection){
 
         if (plugin_name_text && location_text && command_text != "" && status_text == false){
             console.log("IF_____");
-            $("#jobstatusid"+hover_object_num).append($("<span/>").attr({"class": "label label-warning"}).text("Prep"));
+            $("#jobstatusid"+hover_object_num).empty()
+            $("#jobstatusid"+hover_object_num).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
         }
         //DROP
         $(".gridSelect, .divw3row").droppable({
@@ -253,10 +258,12 @@ function target_select_func(row_selection){
                             var command_text = hover_object.nextUntil()[(int -1)].children[3].innerText;
 
                             if (plugin_name_text && location_text && command_text != ""){
-                                $("#jobstatusid"+(parseInt(hover_object_num)+int)).append($("<span/>").attr({"class": "label label-warning"}).text("Prep"));
+                                $("#jobstatusid"+(parseInt(hover_object_num)+int)).empty();
+                                $("#jobstatusid"+(parseInt(hover_object_num)+int)).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
                             }
                         } else {
-                            $("#jobstatusid"+(parseInt(hover_object_num)+int)).append($("<span/>").attr({"class": "label label-warning"}).text("Prep"));
+                            $("#jobstatusid"+(parseInt(hover_object_num)+int)).empty();
+                            $("#jobstatusid"+(parseInt(hover_object_num)+int)).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
                         }
                     }
                 }
@@ -278,12 +285,17 @@ function drag_command(ev) {
 //    ev.dataTransfer.setData("text", ev.explicitOriginalTarget.firstElementChild.id);  // Former code
     //ev.dataTransfer.setData("text", ev.originalTarget.id);
     ev.dataTransfer.setData("text", JSON.stringify(current_command_template));
+    $("#w3_drop_to_all").css("display", "");
+}
+function drag_end_command(event){
+    $("#w3_drop_to_all").css("display", "none");
 }
 
 function drop_command(ev) {
 //    console.log("drop_command");
     ev.preventDefault();
     var command_json = ev.dataTransfer.getData("text");
+    $("#w3_drop_to_all").css("display", "none");
     var command = JSON.parse(command_json);
     //ev.target.appendChild(argumentid_var);
     var command_hole = $(ev.target);
@@ -292,18 +304,39 @@ function drop_command(ev) {
     }
     command_hole.empty();
     var new_div = document.createElement("div");
+    drop_command_into_hole(command, command_json, command_hole);
+}
+
+function drop_command_to_multiple(ev) {
+    ev.preventDefault();
+    var command_json = ev.dataTransfer.getData("text");
+    $("#w3_drop_to_all").css("display", "none");
+    var command = JSON.parse(command_json);
+    var num_jobs = $("#addjob_button")[0].value;
+    for (var j = 1; j < num_jobs; j++){
+        var command_td = $("#commandid"+j);
+        if (command_td.length == 1){
+            drop_command_into_hole(command, command_json, command_td);
+            $("#jobstatusid"+j).empty()
+            $("#jobstatusid"+j).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
+        }
+    }
+}
+
+function drop_command_into_hole(command, command_json, command_td){
+    command_td.empty();
+    var new_div = document.createElement("div");
     new_div.innerText = command_json;
-    command_hole[0].appendChild(new_div);
     new_div.style.display = 'none';
     var display_string = command['CommandName'] + " ("
     for (var j = 0; j < command["Inputs"].length; j++){
         display_string += " "+command["Inputs"][j]["Value"]
     }
-    display_string += " )"
+    display_string += " )";
+    command_td[0].appendChild(new_div);
     var display_div = document.createElement("div");
     display_div.innerText = display_string;
-    command_hole[0].appendChild(display_div);
-
+    command_td[0].appendChild(display_div);
 }
 
 // Execute Sequence function down below are for w3+w4
