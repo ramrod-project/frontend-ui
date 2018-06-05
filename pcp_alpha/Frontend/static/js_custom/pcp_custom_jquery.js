@@ -365,22 +365,22 @@ function execute_sequence(){
     var num_jobs = $("#addjob_button")[0].value;
     var w3_rows = $("#third_box_content tr");
 
-    for (var j = 1; j < num_jobs; j++){
+    for (var j = 0; j < num_jobs - 1; j++){
         var w3_status = w3_rows[j].children[4].innerText;
         if(w3_status == false){
-            $("#updatestatusid"+j).append($("<span/>").attr({"class": "label label-danger"}).text("Error"));
-            $("#jobstatusid"+j).append($("<span/>").attr({"class": "label label-danger"}).text("Error"));
+            $("#updatestatusid"+(j+1)).append($("<span/>").attr({"class": "label label-danger"}).text("Error"));
+            $("#jobstatusid"+(j+1)).append($("<span/>").attr({"class": "label label-danger"}).text("Error"));
             jobs.push({});
         } else {
-            $("#updatestatusid"+j).append($("<span/>").attr({"class": "label label-success"}).text("Ready"));
-            $("#jobstatusid"+j).empty();
-            $("#jobstatusid"+j).append($("<span/>").attr({"class": "label label-success"}).text("Ready"));
+            $("#updatestatusid"+(j+1)).append($("<span/>").attr({"class": "label label-success"}).text("Ready"));
+            $("#jobstatusid"+(j+1)).empty();
+            $("#jobstatusid"+(j+1)).append($("<span/>").attr({"class": "label label-success"}).text("Ready"));
 
-            var uid = j;
+            var uid = j+1;
             var terminal = $("#updateid"+uid).parent();
-            var plugin_name = $("#pluginid"+j)[0].textContent;
-            var location = $("#addressid"+j)[0].textContent;
-            var command_json = $("#commandid"+j+" div")[0].innerText;
+            var plugin_name = $("#pluginid"+(j+1))[0].textContent;
+            var location = $("#addressid"+(j+1))[0].textContent;
+            var command_json = $("#commandid"+(j+1)+" div")[0].innerText;
             var command = JSON.parse(command_json);
             var job = {"JobTarget": {"PluginName": plugin_name,
                                      "Location": location,
