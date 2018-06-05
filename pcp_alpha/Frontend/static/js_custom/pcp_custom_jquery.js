@@ -226,7 +226,8 @@ function target_select_func(row_selection){
 
         if (plugin_name_text && location_text && command_text != "" && status_text == false){
             console.log("IF_____");
-            $("#jobstatusid"+hover_object_num).append($("<span/>").attr({"class": "label label-warning"}).text("Prep"));
+            $("#jobstatusid"+hover_object_num).empty()
+            $("#jobstatusid"+hover_object_num).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
         }
         //DROP
         $(".gridSelect, .divw3row").droppable({
@@ -255,10 +256,12 @@ function target_select_func(row_selection){
                             var command_text = hover_object.nextUntil()[(int -1)].children[3].innerText;
 
                             if (plugin_name_text && location_text && command_text != ""){
-                                $("#jobstatusid"+(parseInt(hover_object_num)+int)).append($("<span/>").attr({"class": "label label-warning"}).text("Prep"));
+                                $("#jobstatusid"+(parseInt(hover_object_num)+int)).empty();
+                                $("#jobstatusid"+(parseInt(hover_object_num)+int)).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
                             }
                         } else {
-                            $("#jobstatusid"+(parseInt(hover_object_num)+int)).append($("<span/>").attr({"class": "label label-warning"}).text("Prep"));
+                            $("#jobstatusid"+(parseInt(hover_object_num)+int)).empty();
+                            $("#jobstatusid"+(parseInt(hover_object_num)+int)).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
                         }
                     }
                 }
@@ -313,7 +316,7 @@ function drop_command_to_multiple(ev) {
         if (command_td.length == 1){
             drop_command_into_hole(command, command_json, command_td);
             $("#jobstatusid"+j).empty()
-            $("#jobstatusid"+j).append($("<span/>").attr({"class": "label label-warning"}).text("Prep"));
+            $("#jobstatusid"+j).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
         }
     }
 }
