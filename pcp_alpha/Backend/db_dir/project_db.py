@@ -1,8 +1,4 @@
-from os import environ
 import sys
-from time import sleep
-
-
 from brain import connect, r as rtdb
 from brain import check_dev_env, check_prod_env
 from brain.connection import BrainNotReady
@@ -83,6 +79,14 @@ def confirm_brain_db_info():
                           since it didn't exist".format(table_name))
 
         rtdb.db("Brain").table("Targets").insert([
+            {"PluginName": "Plugin1",
+             "Location": location_generated_num("172.16.5."),
+             "Port": "8002",
+             "Optional": "Document Here"},
+            {"PluginName": "Plugin1",
+             "Location": location_generated_num("172.16.5."),
+             "Port": "8002",
+             "Optional": "Document Here"},
             {"PluginName": "Plugin1",
              "Location": location_generated_num("172.16.5."),
              "Port": "8002",

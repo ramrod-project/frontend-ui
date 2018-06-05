@@ -1,3 +1,4 @@
+var selected_target_template = {}
 var inc = 1;
 $(document).ready(function() {
 	$("tr.clickable-row").click(get_commands_func);   // displays commands in w2
@@ -233,6 +234,7 @@ function target_select_func(row_selection){
         // if animations, animations would reset
     });
 }
+
 // Drag and drop function(s) for command
 // Note: Drop function needs to be validated
 function allowDropCommand(ev) {
@@ -240,6 +242,7 @@ function allowDropCommand(ev) {
 }
 
 function drag_command(ev) {
+//    ev.dataTransfer.setData("text", ev.explicitOriginalTarget.firstElementChild.id);  // Former code
     //ev.dataTransfer.setData("text", ev.originalTarget.id);
     ev.dataTransfer.setData("text", JSON.stringify(current_command_template));
 }
