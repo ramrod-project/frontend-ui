@@ -3,13 +3,14 @@ from time import sleep
 from uuid import uuid4
 import json
 import pytest
-from rethinkdb.errors import ReqlOpFailedError
-from test.test_w4_switch_to_done import switch_to_done
-from Backend.db_dir.project_db import check_dev_env
-from Backend.db_dir.custom_data import location_generated_num
-from Backend.db_dir.project_db import db_connection, rtdb
-from Backend.db_dir.custom_queries import get_specific_brain_targets, get_specific_command
-from Backend.pcp_app.views import get_commands_controller, execute_sequence_controller, \
+
+from pcp_alpha.test.test_w4_switch_to_done import switch_to_done
+# from rethinkdb.errors import ReqlOpFailedError
+from pcp_alpha.Backend.db_dir.project_db import check_dev_env
+from pcp_alpha.Backend.db_dir.custom_data import location_generated_num
+from pcp_alpha.Backend.db_dir.project_db import db_connection, rtdb
+from pcp_alpha.Backend.db_dir.custom_queries import get_specific_brain_targets, get_specific_command
+from pcp_alpha.Backend.pcp_app.views import get_commands_controller, execute_sequence_controller, \
     w4_output_controller, new_target_form, val_target_form
 
 ECHO_JOB_ID = str(uuid4())
@@ -62,9 +63,8 @@ class TestDataHandling(object):
 
         if check_dev_env() is not None:
             request = rf.get(home_url)
-            with pytest.raises(ReqlOpFailedError):
-                response = get_commands_controller(request)
-                assert not response.status_code == 200
+            response = get_commands_controller(request)
+            assert "`Plugins.Plugin8` does not exist" in str(response.content)
 
     @staticmethod
     def test_execute_w3_data():
@@ -200,6 +200,32 @@ class TestDataHandling(object):
                 assert isinstance(query_item, dict)
             process_var.terminate()
             process_var.join(timeout=2)
+
+    def test_execute_w3_data_two(self, rf):
+        """
+        This test is replicating when the user clicks on
+        'Execute Sequence' button at the bottom right of w3 but
+        the command has two arguments.
+        """
+        job_url = "/action/get_w3_data/?jobs=%5B%7B%22JobTarget%22%3A%7B%22PluginName%22%3A%" \
+                  "22Plugin1%22%2C%22Location%22%3A%22172.16.5.140%22%2C%22Port%22%3A0%7D%2C" \
+                  "%22Status%22%3A%22Ready%22%2C%22StartTime%22%3A0%2C%22JobCommand%22%3A%7B" \
+                  "%22Tooltip%22%3A%22%5CnWrite%20File%3A%5Cn%5CnThis%20command%20writes%20a" \
+                  "%20file%5Cnto%20the%20endpoint%20and%20returns%5Cnto%20the%20status%20code" \
+                  "%5Cn%5CnArguments%3A%5Cn1%3A%20Source%20File%20(must%20be%20uploaded)%5Cn2" \
+                  "%3A%20Remote%20filename%20(string%20format)%5Cn%5CnReturns%3A%20Status%" \
+                  "20code%5Cn%22%2C%22Output%22%3Atrue%2C%22CommandName%22%3A%22send_file%22" \
+                  "%2C%22Inputs%22%3A%5B%7B%22Type%22%3A%22textbox%22%2C%22Value%22%3A%22file1" \
+                  "%22%2C%22Tooltip%22%3A%22Must%20be%20uploaded%20here%20first%22%2C%22Name%" \
+                  "22%3A%22SourceFilePath%22%7D%2C%7B%22Type%22%3A%22textbox%22%2C%22Value%22" \
+                  "%3A%22file2%22%2C%22Tooltip%22%3A%22Must%20be%20the%20fully%20qualified%20path" \
+                  "%22%2C%22Name%22%3A%22DestinationFilePath%22%7D%5D%2C%22OptionalInputs%22%" \
+                  "3A%5B%5D%2C%22id%22%3A%2220188422-03e0-4e33-848a-b528ef504517%22%7D%7D%5D"
+        status_obj = self.status_code_test(url_str=job_url,
+                                           function_obj=execute_sequence_controller,
+                                           rf=rf)
+        assert "inserted" in str(status_obj.content)
+        assert status_obj.status_code == 200
 
     def test_render_target_form(self, rf):
         """

@@ -32,11 +32,9 @@ def validate_data(db_data):
             check_int = 1
             print("Brain.{} document == {}\n".format(data[0], document))
             if check_int == 0:
-                print("log: Brain.{} doesn't have any data"
-                        .format(data[0]))
+                print("log: Brain.{} doesn't have any data".format(data[0]))
             else:
-                print("log: Brain.{} has data in the table"
-                        .format(data[0]))
+                print("log: Brain.{} has data in the table".format(data[0]))
 
 
 def confirm_brain_db_info():
@@ -48,7 +46,6 @@ def confirm_brain_db_info():
     be created only locally.
     :return: nothing at the moment
     """
-    check_int = 0
     db_con_var = db_connection()
     if check_dev_env():  # For Development Environment
         if rtdb.db_list().contains("Brain").run(db_con_var) is not True:
@@ -126,8 +123,7 @@ def confirm_plugin_db_info():
         else:  # if Plugins does exit locally
             print("\nlog: db Plugins exist locally")
             if rtdb.db("Plugins").table_list().contains(
-                    "Plugin1"
-                ).run(db_connection()):
+                    "Plugin1").run(db_connection()):
 
                 try:
                     rtdb.db("Plugins").table(

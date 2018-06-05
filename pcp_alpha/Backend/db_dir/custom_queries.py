@@ -1,5 +1,4 @@
 import json
-from .project_db import db_connection, rtdb
 import brain.queries
 
 
@@ -25,8 +24,11 @@ def get_specific_commands(user_selection):
     :return: Query as a dictionary nested in a list to w2
     """
     command_list = list()
-    for item_cur in brain.queries.get_plugin_commands(user_selection):
-        command_list.append(dict(item_cur))
+    try:
+        for item_cur in brain.queries.get_plugin_commands(user_selection):
+            command_list.append(dict(item_cur))
+    except ValueError as err:
+        command_list.append(str(err).split(":")[0][:-3])
     return command_list
 
 

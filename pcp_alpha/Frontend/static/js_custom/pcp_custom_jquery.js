@@ -1,7 +1,17 @@
 var inc = 1;
 $(document).ready(function() {
 	$("tr.clickable-row").click(get_commands_func);   // displays commands in w2
-	$("#addjob_button").click(add_new_job);               // add new job in w3 
+
+	var row_selection = $('#target_table').DataTable({  //for w1+w3
+	    searching: false,
+	    paging: false,
+	    bInfo: false,
+        rowReorder: true,
+        select: true
+	});
+
+	$(".gridSelect tbody tr").click(target_select_func(row_selection));  // highlight target in w1 to drag to w3
+	$("#addjob_button").click(add_new_job);               // add new job in w3
 	$("#addjob_button").click(function(){
 	    inc++;
 	    $("#addjob_button")[0].value = inc;
@@ -43,8 +53,14 @@ function get_commands_func(){
         	$(".tooltipContent").empty();
 
             // display command(s) in w2
-        	for(var i = 0; i < data.length; i++) {
-                $(".theContent").append($("<li id='commandid' class='commandclass' onclick='#'/>").append($("<a id='acommandid' class='acommandclass' href='#'/>").text(data[i].CommandName)));
+            if (data.length == 1){
+                $(".theContent").append($("<li/>").text(data));
+            }
+            else{
+                for(var i = 0; i < data.length; i++) {
+                    $(".theContent").append($("<li id='commandid' class='commandclass' onclick='#'/>").append(
+                    $("<a id='acommandid' class='acommandclass' href='#'/>").text(data[i].CommandName)));
+            }
             }
             $(".theContent").append("<div/>").attr({"style": "width:250px"});
             $(".theContentHeader").append("<h2 class='box-title'/>").text(plugin_name_var + "  command list");
@@ -82,7 +98,7 @@ function get_commands_func(){
         },
         error: function (data) {
         	console.log("ERROR @ get_commands_func function");
-        	console.log(data);
+        	//console.log(data);
         }
     })
 }
@@ -105,7 +121,7 @@ function add_new_job(){
 
     // content for w3
     if(value == 0 || value == 1) {
-        $(".thirdBoxContent").append($("<tr/>").attr({"role": "row", "onclick": "#", "id":"jobrow"+1}).append(
+        $(".thirdBoxContent").append($("<tr/>").attr({"role": "row", "onclick": "#", "id":"jobrow"+1, "class": "draggable_tr divw3row"}).append(
             $("<td/>").append($("<a/>").attr({"href": "#"}).append($("<span/>").text("1"))),
             $("<td/>").attr({"id": "pluginid" + 1,
                              "ondrop": "drop(event)",
@@ -126,7 +142,7 @@ function add_new_job(){
 
     }
     else {
-        $(".thirdBoxContent").append($("<tr/>").attr({"role": "row", "onclick": "#", "id":"jobrow"+value}).append(
+        $(".thirdBoxContent").append($("<tr/>").attr({"role": "row", "onclick": "#", "id":"jobrow"+value, "class": "draggable_tr divw3row"}).append(
             $("<td/>").append($("<a/>").attr({"href": "#"}).append($("<span/>").text(value))),
             $("<td/>").attr({"id": "pluginid" + value,
                              "ondrop": "drop(event)",
@@ -161,26 +177,62 @@ function clear_new_jobs(){
 
 // Drag and drop function(s) for targets
 // Note: Drop function needs to be validated
-function allowDrop(ev) {
-    ev.preventDefault();
-}
+function target_select_func(row_selection){
+//    console.log("target_select_func function was called");
+    row_selection.on('select', function(e, dt, type, indexes) {
+        var selected_var = $(".gridSelect tbody tr.selected");
+        if(selected_var.length > 1){
+            console.log("draggable object for more than one object");
+        } else {
+            console.log("draggable object for one object");
+        }
+    });
 
-function drag(ev) {
-    var row_data = ev.target.cells[0].id;
-    var source_id = row_data.substring(11,row_data.length);
-    var target_js =  JSON.parse($("#nameidjson"+source_id)[0].innerText);
-    ev.dataTransfer.setData("text", JSON.stringify([target_js]));
-}
+//    DRAG
+	$(".gridSelect tbody tr, .gridSelect2 tbody tr").draggable({
+	    helper: function(){
+//	        console.log("draggable");
+	        var selected_var = $(".gridSelect tbody tr.selected");
+            if (selected_var.length === 0) {
+                selected_var = $(this).addClass('selected');
+            }
+//            console.log(selected_var);
+            var container = $('<table/>').attr({'id':'draggingContainer'});
+            container.append(selected_var.clone().removeClass("selected"));
+//            console.log(container);
+            return container;
+	    }
+	});
 
-function drop(ev) {
-    ev.preventDefault();
-    var target_json = ev.dataTransfer.getData("text");
-    var target_js = JSON.parse(target_json)[0];//Loop this at a later date
-    var drop_row = ev.target.id.substring(8, ev.target.id.length);
-    $("#pluginid"+drop_row+" a span")[0].innerText = target_js.PluginName;
-    $("#addressid"+drop_row+" a span")[0].innerText = target_js.Location;
-}
+    $(document).on('mouseenter', '.divw3row', function () {
+        var hover_object = $(this);
+        // animation of some sort?
+        //DROP
+        $(".gridSelect, .divw3row").droppable({
+            drop: function (event, ui) {
+                console.log("DROP");
+                var selected_var = ui.helper.children();
 
+                for(var int = 0; int < selected_var.length; int++){
+                    var row_id = selected_var[int].id;
+                    var row_id_str = row_id.substring(10,row_id.length);
+                    var row_js = JSON.parse($("#nameidjson" + row_id_str)[0].innerText);
+
+                    if (int != 0){
+                        hover_object.nextUntil()[(int -1)].children[1].append(row_js.PluginName);
+                        hover_object.nextUntil()[(int -1)].children[2].append(row_js.Location);
+                    } else{
+                        hover_object[0].children[1].append(row_js.PluginName);  // PluginName
+                        hover_object[0].children[2].append(row_js.Location);  //Location
+                    }
+                }
+                $('.selected');
+            }
+        });
+    }).on('mouseleave', '.divw3row', function () {
+        // if animations, animations would reset
+    });
+}
 // Drag and drop function(s) for command
 // Note: Drop function needs to be validated
 function allowDropCommand(ev) {
@@ -188,7 +240,6 @@ function allowDropCommand(ev) {
 }
 
 function drag_command(ev) {
-//    ev.dataTransfer.setData("text", ev.explicitOriginalTarget.firstElementChild.id);  // Former code
     //ev.dataTransfer.setData("text", ev.originalTarget.id);
     ev.dataTransfer.setData("text", JSON.stringify(current_command_template));
 }
@@ -228,8 +279,8 @@ function execute_sequence(){
         var uid = j;
         var terminal = $("#updateid"+uid).parent();
         terminal.css("background-color", "Chartreuse");
-        var plugin_name = $("#pluginid"+j+" a span")[0].innerText;
-        var location = $("#addressid"+j+" a span")[0].innerText;
+        var plugin_name = $("#pluginid"+j)[0].textContent;
+        var location = $("#addressid"+j)[0].textContent;
         var command_json = $("#commandid"+j+" div")[0].innerText;
         var command = JSON.parse(command_json);
         var job = {"JobTarget": {"PluginName": plugin_name,
@@ -268,10 +319,7 @@ Functions down below are for w4
 */
 // Modify function add depth parameter, increment depth when it errors
 function execute_sequence_output(specific_id, updateid, counter=0, backoff=2000){
-    console.log("execute_sequence_output function");
-    console.log("counter below");
-    console.log(counter);
-
+//    console.log("execute_sequence_output function");
 
     $.ajax({
         type: "GET",
@@ -305,7 +353,7 @@ function execute_sequence_output(specific_id, updateid, counter=0, backoff=2000)
             // increment depth
             // re-call execute_sequence_output function again
             console.log("ERROR @ execute_sequence_output function");
-            console.log(data);
+//            console.log(data);
         }
     }).fail(function(data){
         console.log("FAIL FUNCTION");
@@ -313,8 +361,8 @@ function execute_sequence_output(specific_id, updateid, counter=0, backoff=2000)
         var status = data.status;
         var reason = data.responseJSON.reason;
 
-        console.log(status);
-        console.log(reason);
+//        console.log(status);
+//        console.log(reason);
 
         if(counter == 10){
             console.log("About to BREAK");
@@ -323,7 +371,7 @@ function execute_sequence_output(specific_id, updateid, counter=0, backoff=2000)
             $("#updateid"+updateid).parent().css("background-color", "white");
         } else {
             counter++;
-            console.log("Check again");
+//            console.log("Check again");
             setTimeout( function() { execute_sequence_output(specific_id, updateid, counter); }, backoff*2 );
         }
 
