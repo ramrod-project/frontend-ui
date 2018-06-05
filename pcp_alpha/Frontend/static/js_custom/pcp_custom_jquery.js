@@ -291,11 +291,6 @@ function drag_end_command(event){
 
 function drop_command(ev) {
     console.log("drop_command");
-    var num_jobs = $("#addjob_button")[0].value;
-    var w3_rows = $("#third_box_content tr");
-
-
-
     ev.preventDefault();
     var command_json = ev.dataTransfer.getData("text");
     $("#w3_drop_to_all").css("display", "none");
@@ -306,9 +301,14 @@ function drop_command(ev) {
         command_hole = command_hole.parent();
     }
     command_hole.empty();
-    var new_div = document.createElement("div");
-    drop_command_into_hole(command, command_json, command_hole);
+    var row_id = command_hole[0].id.substring(9, command_hole[0].id.length);
+    drop_command_into_hole(command, command_json, command_hole, row_id);
 
+    set_w3_job_status();
+}
+function set_w3_job_status(){
+    var num_jobs = $("#addjob_button")[0].value;
+    var w3_rows = $("#third_box_content tr");
     for (var j = 0; j < num_jobs - 1 ; j++){
         var what = w3_rows[j];
         var plugin_name_text = w3_rows[j].children[1].innerText;
@@ -316,7 +316,7 @@ function drop_command(ev) {
         var command_text = w3_rows[j].children[3].innerText;
         var w3_status = w3_rows[j].children[4].innerText;
 
-        if(plugin_name_text && command_text){
+        if(plugin_name_text && command_text && w3_status != "Done"){
             console.log("TRUE");
             $("#jobstatusid"+(j+1)).empty()
             $("#jobstatusid"+(j+1)).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
@@ -326,6 +326,7 @@ function drop_command(ev) {
     }
 }
 
+
 function drop_command_to_multiple(ev) {
     ev.preventDefault();
     var command_json = ev.dataTransfer.getData("text");
@@ -334,28 +335,35 @@ function drop_command_to_multiple(ev) {
     var num_jobs = $("#addjob_button")[0].value;
     for (var j = 1; j < num_jobs; j++){
         var command_td = $("#commandid"+j);
-        if (command_td.length == 1){
-            drop_command_into_hole(command, command_json, command_td);
-            $("#jobstatusid"+j).empty()
-            $("#jobstatusid"+j).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
-        }
+        drop_command_into_hole(command, command_json, command_td, j)
     }
+    set_w3_job_status();
 }
 
-function drop_command_into_hole(command, command_json, command_td){
-    command_td.empty();
-    var new_div = document.createElement("div");
-    new_div.innerText = command_json;
-    new_div.style.display = 'none';
-    var display_string = command['CommandName'] + " ("
-    for (var j = 0; j < command["Inputs"].length; j++){
-        display_string += " "+command["Inputs"][j]["Value"]
+function drop_command_into_hole(command, command_json, command_td, row_id){
+    var current_status = $("#jobstatusid"+row_id+" span");
+    if ((current_status.length == 0) ||
+        (current_status.length >=1 && command_td.length == 1 && ( current_status[0].innerText == "Pending" ||
+                                                                  current_status[0].innerText == "Stopped"  ||
+                                                                  current_status[0].innerText == "Error")
+        )
+     ){
+        command_td.empty();
+        var new_div = document.createElement("div");
+        new_div.innerText = command_json;
+        new_div.style.display = 'none';
+        var display_string = command['CommandName'] + " ("
+        for (var j = 0; j < command["Inputs"].length; j++){
+            display_string += " "+command["Inputs"][j]["Value"]
+        }
+        display_string += " )";
+        command_td[0].appendChild(new_div);
+        var display_div = document.createElement("div");
+        display_div.innerText = display_string;
+        command_td[0].appendChild(display_div);
+    } else {
+        console.error("Can't drop command into job "+row_id+" (job already in Brain)");
     }
-    display_string += " )";
-    command_td[0].appendChild(new_div);
-    var display_div = document.createElement("div");
-    display_div.innerText = display_string;
-    command_td[0].appendChild(display_div);
 }
 
 // Execute Sequence function down below are for w3+w4
@@ -371,7 +379,8 @@ function execute_sequence(){
             $("#updatestatusid"+(j+1)).append($("<span/>").attr({"class": "label label-danger"}).text("Error"));
             $("#jobstatusid"+(j+1)).append($("<span/>").attr({"class": "label label-danger"}).text("Error"));
             jobs.push({});
-        } else {
+        } else if (w3_status == "Preparing") {
+            $("#updatestatusid"+(j+1)).empty();
             $("#updatestatusid"+(j+1)).append($("<span/>").attr({"class": "label label-success"}).text("Ready"));
             $("#jobstatusid"+(j+1)).empty();
             $("#jobstatusid"+(j+1)).append($("<span/>").attr({"class": "label label-success"}).text("Ready"));
@@ -389,6 +398,8 @@ function execute_sequence(){
                        "StartTime": 0,
                        "JobCommand": command}
             jobs.push(job);
+        } else {
+            jobs.push({});
         }
     }
     var jobs_json = JSON.stringify(jobs);
