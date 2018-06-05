@@ -140,7 +140,8 @@ function add_new_job(){
         // W4 Rows
         $(".W4BodyContent").append($("<tr/>").append(
         $("<th/>").text("1"),
-        $("<th/>").append($("<a/>").attr({'id': 'updateid1'}).text("terminal1"))
+        $("<th/>").append($("<a/>").attr({'id': 'updateid1'}).text("terminal1")),
+        $("<th/>").attr({"id": "updatestatusid" + 1})
         ));
 
     }
@@ -162,7 +163,8 @@ function add_new_job(){
         // W4 Rows
         $(".W4BodyContent").append($("<tr/>").append(
         $("<th/>").text(value),
-        $("<th/>").append($("<a/>").attr({'id': 'updateid'+value}).text("terminal" + value))
+        $("<th/>").append($("<a/>").attr({'id': 'updateid'+value}).text("terminal" + value)),
+        $("<th/>").attr({"id": "updatestatusid" + value})
         ));
     }
 
@@ -306,30 +308,36 @@ function drop_command(ev) {
 
 // Execute Sequence function down below are for w3+w4
 function execute_sequence(){
-//    console.log("execute_sequence function has been called");
-    // RIGHT HERE
-
+    console.log("execute_sequence function has been called");
     var jobs = []
     var num_jobs = $("#addjob_button")[0].value;
-//    console.log(num_jobs);
-    console.log(inc -1);
-    console.log($("#addjob_button"));
+    var w3_rows = $(this)[0].offsetParent.firstElementChild.children[0].firstElementChild.children[1].children[0].children[2].children[1].children;
+
     for (var j = 1; j < num_jobs; j++){
-        console.log(j);
-        var uid = j;
-        var terminal = $("#updateid"+uid).parent();
-        terminal.css("background-color", "Chartreuse");
-        var plugin_name = $("#pluginid"+j)[0].textContent;
-        var location = $("#addressid"+j)[0].textContent;
-        var command_json = $("#commandid"+j+" div")[0].innerText;
-        var command = JSON.parse(command_json);
-        var job = {"JobTarget": {"PluginName": plugin_name,
-                                 "Location": location,
-                                 "Port":  0,},
-                   "Status": "Ready",
-                   "StartTime": 0,
-                   "JobCommand": command}
-        jobs.push(job);
+//        console.log("j == %d", j);
+        var w3_status = w3_rows[j].children[4].innerText;
+        if(w3_status == false){
+            $("#updatestatusid"+j).append($("<span/>").attr({"class": "label label-danger"}).text("Error"));
+        } else {
+            $("#updatestatusid"+j).append($("<span/>").attr({"class": "label label-success"}).text("Ready"));
+            $("#jobstatusid"+j).empty();
+            $("#jobstatusid"+j).append($("<span/>").attr({"class": "label label-success"}).text("Ready"));
+
+            var uid = j;
+            var terminal = $("#updateid"+uid).parent();
+    //        terminal.css("background-color", "Chartreuse");
+            var plugin_name = $("#pluginid"+j)[0].textContent;
+            var location = $("#addressid"+j)[0].textContent;
+            var command_json = $("#commandid"+j+" div")[0].innerText;
+            var command = JSON.parse(command_json);
+            var job = {"JobTarget": {"PluginName": plugin_name,
+                                     "Location": location,
+                                     "Port":  0,},
+                       "Status": "Ready",
+                       "StartTime": 0,
+                       "JobCommand": command}
+            jobs.push(job);
+        }
     }
     var jobs_json = JSON.stringify(jobs);
     $.ajax({
@@ -338,7 +346,6 @@ function execute_sequence(){
         data: {"jobs": jobs_json},
         datatype: 'json',
         success: function(data) {
-//            console.log(data);
             var job_ids = data.generated_keys;
             job_id = job_ids[0];
             for (var index = 0; index < job_ids.length; ++index) {
@@ -360,6 +367,7 @@ Functions down below are for w4
 // Modify function add depth parameter, increment depth when it errors
 function execute_sequence_output(specific_id, updateid, counter=0, backoff=2000){
 //    console.log("execute_sequence_output function");
+    console.log($(this))
 
     $.ajax({
         type: "GET",
@@ -367,6 +375,22 @@ function execute_sequence_output(specific_id, updateid, counter=0, backoff=2000)
         data: {"job_id": specific_id},
         datatype: 'json',
         success: function(data) {
+
+            console.log("SUCCESS__");
+            console.log(data);
+            console.log(inc);
+            for (var j = 1; j < inc; j++){
+                console.log();
+                if($("#jobstatusid"+j) == false){
+                    console.log("FALSE__");
+                } else {
+                    console.log("SUCCESS__");
+                    $("#updatestatusid"+j).empty();
+                    $("#updatestatusid"+j).append($("<span/>").attr({"class": "label label-info"}).text("Done"));
+                    $("#jobstatusid"+j).empty();
+                    $("#jobstatusid"+j).append($("<span/>").attr({"class": "label label-info"}).text("Done"));
+                }
+            }
 
             if (data != 0){  // returns query
                 console.log("Does not equal to zero");

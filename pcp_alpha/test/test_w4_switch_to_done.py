@@ -6,7 +6,8 @@ from rethinkdb.errors import ReqlOpFailedError
 def switch_to_done():
     connection_var = rtdb.connect()
     query_obj = rtdb.db("Brain").table("Jobs").filter(
-        rtdb.row["Status"].ne("Done")).changes().run(connection_var)
+        rtdb.row["Status"].ne("Done") and rtdb.row["Status"].ne("Error")
+    ).changes().run(connection_var)
     for query_item in query_obj:
         if query_item and query_item.get("new_val") and query_item['new_val'].get("id"):
             print(query_item['new_val']['id'])
