@@ -294,20 +294,7 @@ function drop_command(ev) {
     var num_jobs = $("#addjob_button")[0].value;
     var w3_rows = $("#third_box_content tr");
 
-    for (var j = 1; j < num_jobs; j++){
-        var plugin_name_text = w3_rows[j].children[1].innerText;
-        var location_text = w3_rows[j].children[2].innerText;
-        var command_text = w3_rows[j].children[3].innerText;
-        var w3_status = w3_rows[j].children[4].innerText;
 
-        if(plugin_name_text && plugin_name_text){
-            console.log("TRUE");
-            $("#jobstatusid"+j).empty()
-            $("#jobstatusid"+j).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
-        } else {
-            console.log("FALSE");
-        }
-    }
 
     ev.preventDefault();
     var command_json = ev.dataTransfer.getData("text");
@@ -321,6 +308,22 @@ function drop_command(ev) {
     command_hole.empty();
     var new_div = document.createElement("div");
     drop_command_into_hole(command, command_json, command_hole);
+
+    for (var j = 0; j < num_jobs - 1 ; j++){
+        var what = w3_rows[j];
+        var plugin_name_text = w3_rows[j].children[1].innerText;
+        var location_text = w3_rows[j].children[2].innerText;
+        var command_text = w3_rows[j].children[3].innerText;
+        var w3_status = w3_rows[j].children[4].innerText;
+
+        if(plugin_name_text && command_text){
+            console.log("TRUE");
+            $("#jobstatusid"+(j+1)).empty()
+            $("#jobstatusid"+(j+1)).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
+        } else {
+            console.log("FALSE");
+        }
+    }
 }
 
 function drop_command_to_multiple(ev) {
