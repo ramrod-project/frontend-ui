@@ -123,7 +123,6 @@ Functions down below are for w3
 // Add new job
 function add_new_job(){
     var value = $("#addjob_button")[0].value;
-    console.log(value);
 
     // content for w3
     if(value == 0 || value == 1) {
@@ -227,14 +226,13 @@ function target_select_func(row_selection){
         var status_text = hover_object[0].children[4].innerText;
 
         if (plugin_name_text && location_text && command_text != "" && status_text == false){
-            console.log("IF_____");
             $("#jobstatusid"+hover_object_num).empty()
             $("#jobstatusid"+hover_object_num).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
         }
         //DROP
         $(".gridSelect, .divw3row").droppable({
             drop: function (event, ui) {
-                console.log("DROP");
+//                console.log("DROP");
                 var selected_var = ui.helper.children();
 
                 for(var int = 0; int < selected_var.length; int++){
@@ -341,16 +339,17 @@ function drop_command_into_hole(command, command_json, command_td){
 
 // Execute Sequence function down below are for w3+w4
 function execute_sequence(){
-    console.log("execute_sequence function has been called");
+//    console.log("execute_sequence function has been called");
     var jobs = []
     var num_jobs = $("#addjob_button")[0].value;
-    var w3_rows = $(this)[0].offsetParent.firstElementChild.children[0].firstElementChild.children[1].children[0].children[2].children[1].children;
+    var w3_rows = $("#third_box_content tr");
 
     for (var j = 1; j < num_jobs; j++){
-//        console.log("j == %d", j);
         var w3_status = w3_rows[j].children[4].innerText;
         if(w3_status == false){
             $("#updatestatusid"+j).append($("<span/>").attr({"class": "label label-danger"}).text("Error"));
+            $("#jobstatusid"+j).append($("<span/>").attr({"class": "label label-danger"}).text("Error"));
+            jobs.push({});
         } else {
             $("#updatestatusid"+j).append($("<span/>").attr({"class": "label label-success"}).text("Ready"));
             $("#jobstatusid"+j).empty();
@@ -358,7 +357,6 @@ function execute_sequence(){
 
             var uid = j;
             var terminal = $("#updateid"+uid).parent();
-    //        terminal.css("background-color", "Chartreuse");
             var plugin_name = $("#pluginid"+j)[0].textContent;
             var location = $("#addressid"+j)[0].textContent;
             var command_json = $("#commandid"+j+" div")[0].innerText;
@@ -382,7 +380,9 @@ function execute_sequence(){
             var job_ids = data.generated_keys;
             job_id = job_ids[0];
             for (var index = 0; index < job_ids.length; ++index) {
-                execute_sequence_output(job_ids[index], index+1);
+                if (job_ids[index] != "invalid-job"){
+                    execute_sequence_output(job_ids[index], index+1);
+                }
             }
         },
         error: function (data) {
@@ -400,24 +400,15 @@ Functions down below are for w4
 // Modify function add depth parameter, increment depth when it errors
 function execute_sequence_output(specific_id, updateid, counter=0, backoff=2000){
 //    console.log("execute_sequence_output function");
-    console.log($(this))
-
     $.ajax({
         type: "GET",
         url: "/action/get_output_data/",
         data: {"job_id": specific_id},
         datatype: 'json',
         success: function(data) {
-
-            console.log("SUCCESS__");
-            console.log(data);
-            console.log(inc);
             for (var j = 1; j < inc; j++){
-                console.log();
-                if($("#jobstatusid"+j) == false){
-                    console.log("FALSE__");
+                if($("#jobstatusid"+j)[0].innerText == 'Error'){
                 } else {
-                    console.log("SUCCESS__");
                     $("#updatestatusid"+j).empty();
                     $("#updatestatusid"+j).append($("<span/>").attr({"class": "label label-info"}).text("Done"));
                     $("#jobstatusid"+j).empty();
@@ -426,7 +417,7 @@ function execute_sequence_output(specific_id, updateid, counter=0, backoff=2000)
             }
 
             if (data != 0){  // returns query
-                console.log("Does not equal to zero");
+//                console.log("Does not equal to zero");
                 //data output here
                 $("#updateid"+updateid).empty();
                 $('<pre id="updatecontent'+updateid+'"></pre>').appendTo("#updateid"+updateid);
@@ -439,7 +430,7 @@ function execute_sequence_output(specific_id, updateid, counter=0, backoff=2000)
 
 
             } else {  // doesn't return query
-                console.log("data equals to zero");
+//                console.log("data equals to zero");
                 $("#updateid"+updateid).empty();
                 $("#updateid"+updateid).append("No data to return at the moment :(");
                 $("#updateid"+updateid).parent().css("background-color", "white");
@@ -453,7 +444,7 @@ function execute_sequence_output(specific_id, updateid, counter=0, backoff=2000)
 //            console.log(data);
         }
     }).fail(function(data){
-        console.log("FAIL FUNCTION");
+//        console.log("FAIL FUNCTION");
 
         var status = data.status;
         var reason = data.responseJSON.reason;
@@ -462,7 +453,7 @@ function execute_sequence_output(specific_id, updateid, counter=0, backoff=2000)
 //        console.log(reason);
 
         if(counter == 10){
-            console.log("About to BREAK");
+//            console.log("About to BREAK");
             $("#updateid"+updateid).empty();
             $("#updateid"+updateid).append("No data to return at the moment :(");
             $("#updateid"+updateid).parent().css("background-color", "white");
