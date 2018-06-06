@@ -11,7 +11,11 @@ $(document).ready(function() {
         select: true
 	});
 
-	$(".gridSelect tbody tr").click(target_select_func(row_selection));  // highlight target in w1 to drag to w3
+    for(var inc_int = 0; inc_int < $(".target_box_content")[0].children.length; inc_int++){
+        $("#target_row"+inc_int).click(target_select_func(row_selection));
+    }
+
+//	$(".gridSelect tbody tr").click(target_select_func);  // highlight target in w1 to drag to w3
 	$("#addjob_button").click(add_new_job);               // add new job in w3
 	$("#addjob_button").click(function(){
 	    inc++;
@@ -190,14 +194,19 @@ function target_select_func(row_selection){
 //    console.log("target_select_func function was called");
     row_selection.on('select', function(e, dt, type, indexes) {
         var selected_var = $(".gridSelect tbody tr.selected");
-        if(selected_var.length > 1){
+
+        if(selected_var.length > 0){
             console.log("draggable object for more than one object");
+            drag_target();
         } else {
             console.log("draggable object for one object");
         }
     });
+}
 
-//    DRAG
+// DRAG
+function drag_target(){
+    console.log("drag_target");
 	$(".gridSelect tbody tr, .gridSelect2 tbody tr").draggable({
 	    helper: function(){
 //	        console.log("draggable");
@@ -209,56 +218,79 @@ function target_select_func(row_selection){
             var container = $('<table/>').attr({'id':'draggingContainer'});
             container.append(selected_var.clone().removeClass("selected"));
 //            console.log(container);
+            hover_w3_for_target(container);
             return container;
 	    }
 	});
+}
 
-    $(document).on('mouseenter', '.divw3row', function () {
-        var hover_object = $(this);
-        var hover_object_id = hover_object[0].id;
-        var hover_object_num = hover_object_id.substring(6, hover_object_id.length);
-        // animation of some sort?
+function hover_w3_for_target(container){
+    console.log("hover_w3_for_target");
+    console.log(container)
+    var num_jobs = $("#addjob_button")[0].value;
+    var w3_rows = $("#third_box_content");
+    var w3_hover_row_id;
 
-        // status box
-        var plugin_name_text = hover_object[0].children[1].innerText;
-        var location_text = hover_object[0].children[2].innerText;
-        var command_text = hover_object[0].children[3].innerText;
-        var status_text = hover_object[0].children[4].innerText;
+    for (var j = 1; j <= num_jobs - 1 ; j++){
+        $("#jobrow"+j).mouseover(hover_drop);
+    }
+    //    future animation
+//    for (var j2 = 1; j2 <= num_jobs - 1 ; j2++){
+//        $("#jobrow"+j2).mouseleave(hover_leave);
+//    }
+}
 
-        if (plugin_name_text && location_text && command_text != "" && status_text == false){
-//            $("#jobstatusid"+hover_object_num).empty()
-            $("#jobstatusid"+hover_object_num).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
-        }
-        //DROP
-        $(".gridSelect, .divw3row").droppable({
-            drop: function (event, ui) {
-//                console.log("DROP");
-                var selected_var = ui.helper.children();
+//    future animation
+//function hover_leave(){
+//    $(this)[0].style.backgroundColor = "white";
+//}
 
-                for(var int = 0; int < selected_var.length; int++){
-                    var row_id = selected_var[int].id;
-                    var row_id_str = row_id.substring(10,row_id.length);
-                    var row_js = JSON.parse($("#nameidjson" + row_id_str)[0].innerText);
-                    var selected_row = undefined;
-                    if (int != 0){
-                        selected_row = hover_object.nextUntil()[(int -1)];
-                    } else{
-                        selected_row = hover_object[0];
-                    }
-                    var selected_row_id = selected_row.id.substring(6, selected_row.id.length);
-                    if (job_row_is_mutable(selected_row_id)) {
-                        $(selected_row.children[1]).empty(); //plugin column
-                        $(selected_row.children[2]).empty(); //location column
-                        selected_row.children[1].append(row_js.PluginName);
-                        selected_row.children[2].append(row_js.Location);
-                    }
+function hover_drop(){
+//    console.log("hover_drop");
+    var hover_object = $(this);
+    console.log($(this)[0].style);
+//    future animation
+//    $(this)[0].style.backgroundColor = "yellow";
+    var hover_object_id = hover_object[0].id;
+    var hover_object_num = hover_object_id.substring(6, hover_object_id.length);
+
+    // status box
+    var plugin_name_text = hover_object[0].children[1].innerText;
+    var location_text = hover_object[0].children[2].innerText;
+    var command_text = hover_object[0].children[3].innerText;
+    var status_text = hover_object[0].children[4].innerText;
+
+    if (plugin_name_text && location_text && command_text != "" && status_text == false){
+        $("#jobstatusid"+hover_object_num).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
+    }
+    //DROP
+//    console.log("drop");
+    $(".gridSelect, .divw3row").droppable({
+        drop: function (event, ui) {
+            var selected_var = ui.helper.children();
+            for(var int = 0; int < selected_var.length; int++){
+                var row_id = selected_var[int].id;
+                var row_id_str = row_id.substring(10,row_id.length);
+                var row_js = JSON.parse($("#nameidjson" + row_id_str)[0].innerText);
+                var selected_row = undefined;
+
+                if (int != 0){
+                    selected_row = hover_object.nextUntil()[(int -1)];
+                } else {
+                    selected_row = hover_object[0];
                 }
-                set_w3_job_status();
-                $('.selected');
+
+                var selected_row_id = selected_row.id.substring(6, selected_row.id.length);
+                if (job_row_is_mutable(selected_row_id)) {
+                    $(selected_row.children[1]).empty(); //plugin column
+                    $(selected_row.children[2]).empty(); //location column
+                    selected_row.children[1].append(row_js.PluginName);
+                    selected_row.children[2].append(row_js.Location);
+                }
             }
-        });
-    }).on('mouseleave', '.divw3row', function () {
-        // if animations, animations would reset
+            set_w3_job_status();
+            $('.selected');
+        }
     });
 }
 
@@ -274,6 +306,7 @@ function job_row_is_mutable(job_row){
     }
     return result;
 }
+
 function job_row_is_imutable(job_row){
     return !job_row_is_mutable(job_row);
 }
