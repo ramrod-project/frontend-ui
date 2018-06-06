@@ -251,10 +251,9 @@ function target_select_func(row_selection){
                         $(selected_row.children[2]).empty(); //location column
                         selected_row.children[1].append(row_js.PluginName);
                         selected_row.children[2].append(row_js.Location);
-                        // status box
-                        set_w3_job_status();
                     }
                 }
+                set_w3_job_status();
                 $('.selected');
             }
         });
