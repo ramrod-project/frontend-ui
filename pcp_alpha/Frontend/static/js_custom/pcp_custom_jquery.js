@@ -1,5 +1,6 @@
 var selected_target_template = {}
 var inc = 1;
+var hover_int = 0;
 $(document).ready(function() {
 	$("tr.clickable-row").click(get_commands_func);   // displays commands in w2
 
@@ -11,7 +12,7 @@ $(document).ready(function() {
         select: true
 	});
 
-	$(".gridSelect tbody tr").click(target_select_func(row_selection));  // highlight target in w1 to drag to w3
+    $(".gridSelect tbody tr").click(target_select_func(row_selection));  // highlight target in w1 to drag to w3
 	$("#addjob_button").click(add_new_job);               // add new job in w3
 	$("#addjob_button").click(function(){
 	    inc++;
@@ -190,49 +191,76 @@ function target_select_func(row_selection){
 //    console.log("target_select_func function was called");
     row_selection.on('select', function(e, dt, type, indexes) {
         var selected_var = $(".gridSelect tbody tr.selected");
-        if(selected_var.length > 1){
+        if(selected_var.length > 0){
             console.log("draggable object for more than one object");
+            drag_target();
         } else {
             console.log("draggable object for one object");
         }
     });
+}
 
-//    DRAG
+// DRAG
+function drag_target(){
+    console.log("drag_target");
 	$(".gridSelect tbody tr, .gridSelect2 tbody tr").draggable({
 	    helper: function(){
-//	        console.log("draggable");
 	        var selected_var = $(".gridSelect tbody tr.selected");
             if (selected_var.length === 0) {
                 selected_var = $(this).addClass('selected');
             }
-//            console.log(selected_var);
             var container = $('<table/>').attr({'id':'draggingContainer'});
             container.append(selected_var.clone().removeClass("selected"));
-//            console.log(container);
+            hover_w3_for_target();
             return container;
 	    }
 	});
+}
 
-    $(document).on('mouseenter', '.divw3row', function () {
-        var hover_object = $(this);
-        var hover_object_id = hover_object[0].id;
-        var hover_object_num = hover_object_id.substring(6, hover_object_id.length);
-        // animation of some sort?
+function hover_w3_for_target(){
+    console.log("hover_w3_for_target");
+    var num_jobs = $("#addjob_button")[0].value;
 
-        // status box
-        var plugin_name_text = hover_object[0].children[1].innerText;
-        var location_text = hover_object[0].children[2].innerText;
-        var command_text = hover_object[0].children[3].innerText;
-        var status_text = hover_object[0].children[4].innerText;
+    for (var j = 1; j <= num_jobs - 1 ; j++){
+        $("#jobrow"+j).mouseover(hover_drop);
+    }
 
-        if (plugin_name_text && location_text && command_text != "" && status_text == false){
-//            $("#jobstatusid"+hover_object_num).empty()
-            $("#jobstatusid"+hover_object_num).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
-        }
-        //DROP
-        $(".gridSelect, .divw3row").droppable({
-            drop: function (event, ui) {
-//                console.log("DROP");
+    for (var j2 = 1; j2 <= num_jobs - 1 ; j2++){
+        $("#jobrow"+j2).mouseleave(hover_leave);
+    }
+
+}
+
+//    future animation
+function hover_leave(){
+    console.log("hover_leave");
+    hover_int = 0;
+}
+
+function hover_drop(){
+//    console.log("hover_drop");
+    hover_int = 1;
+    var hover_object = $(this);
+    var hover_object_id = hover_object[0].id;
+    var hover_object_num = hover_object_id.substring(6, hover_object_id.length);
+
+    // status box
+    var plugin_name_text = hover_object[0].children[1].innerText;
+    var location_text = hover_object[0].children[2].innerText;
+    var command_text = hover_object[0].children[3].innerText;
+    var status_text = hover_object[0].children[4].innerText;
+
+    if (plugin_name_text && location_text && command_text != "" && status_text == false){
+        $("#jobstatusid"+hover_object_num).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
+    }
+
+    //DROP
+//    console.log("drop");
+    $(".gridSelect, .divw3row").droppable({
+        drop: function (event, ui) {
+            console.log("drop");
+            console.log(hover_int);
+            if (hover_int != 0){
                 var selected_var = ui.helper.children();
 
                 for(var int = 0; int < selected_var.length; int++){
@@ -242,7 +270,7 @@ function target_select_func(row_selection){
                     var selected_row = undefined;
                     if (int != 0){
                         selected_row = hover_object.nextUntil()[(int -1)];
-                    } else{
+                    } else {
                         selected_row = hover_object[0];
                     }
                     var selected_row_id = selected_row.id.substring(6, selected_row.id.length);
@@ -256,9 +284,7 @@ function target_select_func(row_selection){
                 set_w3_job_status();
                 $('.selected');
             }
-        });
-    }).on('mouseleave', '.divw3row', function () {
-        // if animations, animations would reset
+        }
     });
 }
 
