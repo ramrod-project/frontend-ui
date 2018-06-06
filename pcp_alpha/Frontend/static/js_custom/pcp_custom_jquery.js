@@ -245,24 +245,27 @@ function target_select_func(row_selection){
                     } else{
                         selected_row = hover_object[0];
                     }
-                    $(selected_row.children[1]).empty(); //plugin column
-                    $(selected_row.children[2]).empty(); //location column
-                    selected_row.children[1].append(row_js.PluginName);
-                    selected_row.children[2].append(row_js.Location);
-                    // status box
-                    if (hover_object[0].children[1].innerText && hover_object[0].children[2].innerText && hover_object[0].children[3].innerText != ""){
-                        if (int != 0){
-                            var plugin_name_text = hover_object.nextUntil()[(int -1)].children[1].innerText;
-                            var location_text = hover_object.nextUntil()[(int -1)].children[2].innerText;
-                            var command_text = hover_object.nextUntil()[(int -1)].children[3].innerText;
+                    var selected_row_id = selected_row.id.substring(6, selected_row.id.length);
+                    if (job_row_is_mutable(selected_row_id)) {
+                        $(selected_row.children[1]).empty(); //plugin column
+                        $(selected_row.children[2]).empty(); //location column
+                        selected_row.children[1].append(row_js.PluginName);
+                        selected_row.children[2].append(row_js.Location);
+                        // status box
+                        if (hover_object[0].children[1].innerText && hover_object[0].children[2].innerText && hover_object[0].children[3].innerText != "") {
+                            if (int != 0) {
+                                var plugin_name_text = hover_object.nextUntil()[(int - 1)].children[1].innerText;
+                                var location_text = hover_object.nextUntil()[(int - 1)].children[2].innerText;
+                                var command_text = hover_object.nextUntil()[(int - 1)].children[3].innerText;
 
-                            if (plugin_name_text && location_text && command_text != ""){
-                                $("#jobstatusid"+(parseInt(hover_object_num)+int)).empty();
-                                $("#jobstatusid"+(parseInt(hover_object_num)+int)).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
+                                if (plugin_name_text && location_text && command_text != "") {
+                                    $("#jobstatusid" + (parseInt(hover_object_num) + int)).empty();
+                                    $("#jobstatusid" + (parseInt(hover_object_num) + int)).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
+                                }
+                            } else {
+                                $("#jobstatusid" + (parseInt(hover_object_num) + int)).empty();
+                                $("#jobstatusid" + (parseInt(hover_object_num) + int)).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
                             }
-                        } else {
-                            $("#jobstatusid"+(parseInt(hover_object_num)+int)).empty();
-                            $("#jobstatusid"+(parseInt(hover_object_num)+int)).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
                         }
                     }
                 }
@@ -274,6 +277,21 @@ function target_select_func(row_selection){
     });
 }
 
+function job_row_is_mutable(job_row){
+    var result = false;
+    var num_jobs = $("#addjob_button")[0].value;
+    if (job_row < num_jobs){
+        var current_status = $("#jobstatusid"+job_row+" span");
+        result =  ((current_status.length == 0) ||
+                   (current_status.length >=1 && ( current_status[0].innerText == "Preparing" ||
+                                                   current_status[0].innerText == "Stopped"  ||
+                                                   current_status[0].innerText == "Error")));
+    }
+    return result;
+}
+function job_row_is_imutable(job_row){
+    return !job_row_is_mutable(job_row);
+}
 // Drag and drop function(s) for command
 // Note: Drop function needs to be validated
 function allowDropCommand(ev) {
