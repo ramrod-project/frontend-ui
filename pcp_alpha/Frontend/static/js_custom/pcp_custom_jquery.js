@@ -1,5 +1,6 @@
 var selected_target_template = {}
 var inc = 1;
+var hover_int = 0;
 $(document).ready(function() {
 	$("tr.clickable-row").click(get_commands_func);   // displays commands in w2
 
@@ -10,19 +11,8 @@ $(document).ready(function() {
         rowReorder: true,
         select: true
 	});
-//    $('#target_table').DataTable({  //for w1+w3
-//	    searching: false,
-//	    paging: false,
-//	    bInfo: false,
-//        rowReorder: true,
-//        select: true
-//	});
-    for(var inc_int = 0; inc_int < $(".target_box_content")[0].children.length; inc_int++){
-//        console.log(inc_int);
-        $("#target_row"+inc_int).click(target_select_func(row_selection));
-    }
 
-//	$(".gridSelect tbody tr").click(target_select_func);  // highlight target in w1 to drag to w3
+    $(".gridSelect tbody tr").click(target_select_func(row_selection));  // highlight target in w1 to drag to w3
 	$("#addjob_button").click(add_new_job);               // add new job in w3
 	$("#addjob_button").click(function(){
 	    inc++;
@@ -198,14 +188,9 @@ function clear_new_jobs(){
 // Drag and drop function(s) for targets
 // Note: Drop function needs to be validated
 function target_select_func(row_selection){
-    console.log("target_select_func function was called");
+//    console.log("target_select_func function was called");
     row_selection.on('select', function(e, dt, type, indexes) {
         var selected_var = $(".gridSelect tbody tr.selected");
-//        if(selected_var.length > 1){
-//            console.log("draggable object for more than one object");
-//        } else {
-//            console.log("draggable object for one object");
-//        }
         if(selected_var.length > 0){
             console.log("draggable object for more than one object");
             drag_target();
@@ -220,48 +205,42 @@ function drag_target(){
     console.log("drag_target");
 	$(".gridSelect tbody tr, .gridSelect2 tbody tr").draggable({
 	    helper: function(){
-//	        console.log("draggable");
 	        var selected_var = $(".gridSelect tbody tr.selected");
             if (selected_var.length === 0) {
                 selected_var = $(this).addClass('selected');
             }
-//            console.log(selected_var);
             var container = $('<table/>').attr({'id':'draggingContainer'});
             container.append(selected_var.clone().removeClass("selected"));
-//            console.log(container);
-            hover_w3_for_target(container);
+            hover_w3_for_target();
             return container;
 	    }
 	});
 }
 
-function hover_w3_for_target(container){
+function hover_w3_for_target(){
     console.log("hover_w3_for_target");
-    console.log(container)
     var num_jobs = $("#addjob_button")[0].value;
-    var w3_rows = $("#third_box_content");
-//    console.log(w3_rows[0].children);
-    var w3_hover_row_id;
+
     for (var j = 1; j <= num_jobs - 1 ; j++){
         $("#jobrow"+j).mouseover(hover_drop);
     }
-    //    future animation
-//    for (var j2 = 1; j2 <= num_jobs - 1 ; j2++){
-//        $("#jobrow"+j2).mouseleave(hover_leave);
-//    }
+
+    for (var j2 = 1; j2 <= num_jobs - 1 ; j2++){
+        $("#jobrow"+j2).mouseleave(hover_leave);
+    }
+
 }
 
 //    future animation
-//function hover_leave(){
-//    $(this)[0].style.backgroundColor = "white";
-//}
+function hover_leave(){
+    console.log("hover_leave");
+    hover_int = 0;
+}
 
 function hover_drop(){
 //    console.log("hover_drop");
+    hover_int = 1;
     var hover_object = $(this);
-    console.log($(this)[0].style);
-//    future animation
-//    $(this)[0].style.backgroundColor = "yellow";
     var hover_object_id = hover_object[0].id;
     var hover_object_num = hover_object_id.substring(6, hover_object_id.length);
 
@@ -274,47 +253,56 @@ function hover_drop(){
     if (plugin_name_text && location_text && command_text != "" && status_text == false){
         $("#jobstatusid"+hover_object_num).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
     }
+
     //DROP
 //    console.log("drop");
     $(".gridSelect, .divw3row").droppable({
         drop: function (event, ui) {
-            var selected_var = ui.helper.children();
+            console.log("drop");
+            console.log(hover_int);
+            if (hover_int != 0){
+                var selected_var = ui.helper.children();
 
-            for(var int = 0; int < selected_var.length; int++){
-                var row_id = selected_var[int].id;
-                var row_id_str = row_id.substring(10,row_id.length);
-                var row_js = JSON.parse($("#nameidjson" + row_id_str)[0].innerText);
-
-                if (int != 0){
-                    hover_object.nextUntil()[(int -1)].children[1].append(row_js.PluginName);
-                    hover_object.nextUntil()[(int -1)].children[2].append(row_js.Location);
-                } else{
-                    hover_object[0].children[1].append(row_js.PluginName);  // PluginName
-                    hover_object[0].children[2].append(row_js.Location);  //Location
-                }
-
-                // status box
-                if (hover_object[0].children[1].innerText && hover_object[0].children[2].innerText && hover_object[0].children[3].innerText != ""){
+                for(var int = 0; int < selected_var.length; int++){
+                    var row_id = selected_var[int].id;
+                    var row_id_str = row_id.substring(10,row_id.length);
+                    var row_js = JSON.parse($("#nameidjson" + row_id_str)[0].innerText);
+                    var selected_row = undefined;
                     if (int != 0){
-                        var plugin_name_text = hover_object.nextUntil()[(int -1)].children[1].innerText;
-                        var location_text = hover_object.nextUntil()[(int -1)].children[2].innerText;
-                        var command_text = hover_object.nextUntil()[(int -1)].children[3].innerText;
-
-                        if (plugin_name_text && location_text && command_text != ""){
-                            $("#jobstatusid"+(parseInt(hover_object_num)+int)).empty();
-                            $("#jobstatusid"+(parseInt(hover_object_num)+int)).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
-                        }
+                        selected_row = hover_object.nextUntil()[(int -1)];
                     } else {
-                        $("#jobstatusid"+(parseInt(hover_object_num)+int)).empty();
-                        $("#jobstatusid"+(parseInt(hover_object_num)+int)).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
+                        selected_row = hover_object[0];
+                    }
+                    var selected_row_id = selected_row.id.substring(6, selected_row.id.length);
+                    if (job_row_is_mutable(selected_row_id)) {
+                        $(selected_row.children[1]).empty(); //plugin column
+                        $(selected_row.children[2]).empty(); //location column
+                        selected_row.children[1].append(row_js.PluginName);
+                        selected_row.children[2].append(row_js.Location);
                     }
                 }
+                set_w3_job_status();
+                $('.selected');
             }
-            $('.selected');
         }
     });
 }
 
+function job_row_is_mutable(job_row){
+    var result = false;
+    var num_jobs = $("#addjob_button")[0].value;
+    if (job_row < num_jobs){
+        var current_status = $("#jobstatusid"+job_row+" span");
+        result =  ((current_status.length == 0) ||
+                   (current_status.length >=1 && ( current_status[0].innerText == "Preparing" ||
+                                                   current_status[0].innerText == "Stopped"  ||
+                                                   current_status[0].innerText == "Error")));
+    }
+    return result;
+}
+function job_row_is_imutable(job_row){
+    return !job_row_is_mutable(job_row);
+}
 // Drag and drop function(s) for command
 // Note: Drop function needs to be validated
 function allowDropCommand(ev) {
