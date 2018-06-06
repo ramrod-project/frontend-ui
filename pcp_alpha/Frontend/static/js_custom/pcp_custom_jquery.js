@@ -300,7 +300,6 @@ function drop_command(ev) {
     while (command_hole[0].tagName != "TD"){
         command_hole = command_hole.parent();
     }
-    command_hole.empty();
     var row_id = command_hole[0].id.substring(9, command_hole[0].id.length);
     drop_command_into_hole(command, command_json, command_hole, row_id);
 
@@ -343,7 +342,7 @@ function drop_command_to_multiple(ev) {
 function drop_command_into_hole(command, command_json, command_td, row_id){
     var current_status = $("#jobstatusid"+row_id+" span");
     if ((current_status.length == 0) ||
-        (current_status.length >=1 && command_td.length == 1 && ( current_status[0].innerText == "Pending" ||
+        (current_status.length >=1 && command_td.length == 1 && ( current_status[0].innerText == "Preparing" ||
                                                                   current_status[0].innerText == "Stopped"  ||
                                                                   current_status[0].innerText == "Error")
         )
