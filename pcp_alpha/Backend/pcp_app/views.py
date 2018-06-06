@@ -1,3 +1,6 @@
+"""
+Views python file for pcp_app 'django' app.
+"""
 import json
 from django.http import HttpResponse
 from django.shortcuts import render

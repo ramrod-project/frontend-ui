@@ -24,8 +24,11 @@ def get_specific_commands(user_selection):
     :return: Query as a dictionary nested in a list to w2
     """
     command_list = list()
-    for item_cur in brain.queries.get_plugin_commands(user_selection):
-        command_list.append(dict(item_cur))
+    try:
+        for item_cur in brain.queries.get_plugin_commands(user_selection):
+            command_list.append(dict(item_cur))
+    except ValueError as err:
+        command_list.append(str(err).split(":")[0][:-3])
     return command_list
 
 
@@ -60,7 +63,18 @@ def insert_brain_jobs_w3(w3_jobs):
     :return: nothing for the moment
     """
     assert isinstance(w3_jobs, list)
-    inserted = brain.queries.insert_jobs(w3_jobs, verify_jobs=False)
+    inserted = {"generated_keys": [],
+                "inserted": 0}
+    for param_item in w3_jobs:
+        if not param_item:
+            # fake an ID
+            inserted["generated_keys"].append("invalid-job")
+        else:
+            print(param_item)
+            attempted = brain.queries.insert_jobs([param_item], verify_jobs=False)
+            inserted["generated_keys"].extend(attempted["generated_keys"])
+            inserted["inserted"] += 1
+
     print("log: db job from W3 was inserted to Brain.Jobs")
     print("{}\n".format(inserted))
     return inserted

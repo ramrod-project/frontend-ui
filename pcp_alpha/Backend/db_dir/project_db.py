@@ -82,6 +82,14 @@ def confirm_brain_db_info():
             {"PluginName": "Plugin1",
              "Location": location_generated_num("172.16.5."),
              "Port": "8002",
+             "Optional": "Document Here"},
+            {"PluginName": "Plugin1",
+             "Location": location_generated_num("172.16.5."),
+             "Port": "8002",
+             "Optional": "Document Here"},
+            {"PluginName": "Plugin1",
+             "Location": location_generated_num("172.16.5."),
+             "Port": "8002",
              "Optional": "Document Here"}
         ]).run(db_con_var)
         print("log: db Dummy data was inserted to Brain.Targets locally")
