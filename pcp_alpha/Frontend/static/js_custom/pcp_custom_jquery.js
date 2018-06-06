@@ -239,15 +239,16 @@ function target_select_func(row_selection){
                     var row_id = selected_var[int].id;
                     var row_id_str = row_id.substring(10,row_id.length);
                     var row_js = JSON.parse($("#nameidjson" + row_id_str)[0].innerText);
-
+                    var selected_row = undefined;
                     if (int != 0){
-                        hover_object.nextUntil()[(int -1)].children[1].append(row_js.PluginName);
-                        hover_object.nextUntil()[(int -1)].children[2].append(row_js.Location);
+                        selected_row = hover_object.nextUntil()[(int -1)];
                     } else{
-                        hover_object[0].children[1].append(row_js.PluginName);  // PluginName
-                        hover_object[0].children[2].append(row_js.Location);  //Location
+                        selected_row = hover_object[0];
                     }
-
+                    $(selected_row.children[1]).empty(); //plugin column
+                    $(selected_row.children[2]).empty(); //location column
+                    selected_row.children[1].append(row_js.PluginName);
+                    selected_row.children[2].append(row_js.Location);
                     // status box
                     if (hover_object[0].children[1].innerText && hover_object[0].children[2].innerText && hover_object[0].children[3].innerText != ""){
                         if (int != 0){
