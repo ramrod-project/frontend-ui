@@ -1,4 +1,5 @@
-from .project_db import db_connection, rtdb
+import json
+import brain.queries
 
 
 # Note: Refactor this file as a CRUD class in the future
@@ -7,10 +8,11 @@ def get_brain_targets():
     get_brain_targets function from Brain.Targets table.
     :return: the query
     """
-    db_name = "Brain"
-    db_table = "Targets"
-    query_plugin_names = rtdb.db(db_name).table(db_table).pluck('PluginName', 'Location').run(db_connection())
-    return query_plugin_names
+    items = []
+    for item in brain.queries.get_targets():
+        item['json'] = json.dumps(item)
+        items.append(item)
+    return items
 
 
 def get_specific_commands(user_selection):
@@ -22,26 +24,21 @@ def get_specific_commands(user_selection):
     :return: Query as a dictionary nested in a list to w2
     """
     command_list = list()
-
-    cur = rtdb.db("Plugins").table(user_selection).pluck('OptionalInput',
-                                                         'Inputs',
-                                                         'Tooltip',
-                                                         'CommandName',
-                                                         'Output').run(db_connection())
-    for item_cur in cur:
-        command_list.append(dict(item_cur))
+    try:
+        for item_cur in brain.queries.get_plugin_commands(user_selection):
+            command_list.append(dict(item_cur))
+    except ValueError as err:
+        command_list.append(str(err).split(":")[0][:-3])
     return command_list
 
 
-def get_specific_brain_targets(w3PluginNameJob):
+def get_specific_brain_targets(plugin_name_job):
     """
     get_specific_brain_targets function queries a specific PluginName
-    :param w3PluginNameJob: PluginName from W3
+    :param plugin_name_job: PluginName from W3
     :return: query
     """
-    db_name = "Brain"
-    db_table = "Targets"
-    query_specific_plugin_name = rtdb.db(db_name).table(db_table).filter({"PluginName": w3PluginNameJob}).run(db_connection())
+    query_specific_plugin_name = brain.queries.get_targets_by_plugin(plugin_name_job)
     return query_specific_plugin_name
 
 
@@ -51,24 +48,33 @@ def get_specific_command(w3_plugin_name, w3_command_name):
     PluginName in W3
     :param w3_plugin_name: PluginName from W3
     :param w3_command_name: CommandName from W3
-    :return: query
+    :return: <dict> Command
     """
     db_name = "Plugins"
     db_table = w3_plugin_name
-    query_specific_plugin_name = rtdb.db(db_name).table(db_table).filter({"CommandName": w3_command_name}).run(db_connection())
-    return query_specific_plugin_name
+    command = brain.queries.get_plugin_command(w3_plugin_name, w3_command_name)
+    return command
 
 
-def insert_brain_jobs_w3(jobs):
+def insert_brain_jobs_w3(w3_jobs):
     """
     insert_brain_jobs_w3 function inserts data from W3 in Brain.Jobs table
-    :param job: controller job
+    :param w3_jobs: controller job
     :return: nothing for the moment
     """
-    db_name = "Brain"
-    db_table = "Jobs"
-    assert isinstance(jobs, list)
-    inserted = rtdb.db(db_name).table(db_table).insert(jobs).run(db_connection())
+    assert isinstance(w3_jobs, list)
+    inserted = {"generated_keys": [],
+                "inserted": 0}
+    for param_item in w3_jobs:
+        if not param_item:
+            # fake an ID
+            inserted["generated_keys"].append("invalid-job")
+        else:
+            print(param_item)
+            attempted = brain.queries.insert_jobs([param_item], verify_jobs=False)
+            inserted["generated_keys"].extend(attempted["generated_keys"])
+            inserted["inserted"] += 1
+
     print("log: db job from W3 was inserted to Brain.Jobs")
     print("{}\n".format(inserted))
     return inserted
@@ -80,28 +86,36 @@ def get_specific_brain_output(job_id):
     if the status is done this function will return data for W4
     :return: Brain.Outputs Content if Status is Done or 0 if the data set doesn't exists
     """
-    db_name = "Brain"
-    db_table = "Jobs"
-    return rtdb.db(db_name).table(db_table).filter({'id': job_id, 'Status': "Done"}).run(db_connection())
+    return brain.queries.is_job_done(job_id)
 
 
-def get_specific_brain_output_content(job_id, max_size=1024):
+def get_brain_output_content(job_id, max_size=1024):
     """
     get_specific_brain_output function checks to if Bain.Jobs Status is 'Done'
     if the status is done this function will return data for W4
     :return: Brain.Outputs Content if Status is Done or 0 if the data set doesn't exists
     """
-    db_name = "Brain"
-    db_table = "Outputs"
-    c = rtdb.db(db_name).table(db_table).filter({"JobCommand": {'id': job_id}}).run(db_connection())
-    for d in c:
-        if max_size and "Content" in d and len(d['Content']) > max_size:
-            content = "{}\n[truncated]".format(d['Content'][:max_size])
-        elif "Content" in d:
-            content = d['Content']
-        else:
-            content = ""
+    content = None
+    if brain.queries.is_job_done(job_id):
+        content = brain.queries.get_output_content(job_id, max_size=max_size)
     return content
 
 
-
+def insert_new_target(plugin_name, location_num, port_num, optional_char):
+    """
+    insert_new_target function gets called when the user's input is validated
+    and inserts a new target to Brain.Targets table.
+    :param plugin_name: user input plugin name
+    :param location_num: user input location number
+    :param port_num: user input port number
+    :param optional_char: user input optional
+    :return: the insert
+    """
+    inserted_new_target = brain.queries.insert_new_target(plugin_name,
+                                                          location_num,
+                                                          port_num,
+                                                          optional_char,
+                                                          verify_target=False)
+    print("log: db New target was inserted to Brain.Targets")
+    print("{}\n".format(inserted_new_target))
+    return inserted_new_target
