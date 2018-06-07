@@ -256,7 +256,6 @@ function hover_drop(){
         $("#jobstatusid"+hover_object_num).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
     }
 
-
     if (hover_int != 0){
         drop_target(hover_object);
     } else {
