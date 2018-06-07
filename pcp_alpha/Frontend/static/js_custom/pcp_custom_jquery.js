@@ -1,4 +1,3 @@
-var selected_target_template = {}
 var inc = 1;
 var hover_int = 0;
 $(document).ready(function() {
@@ -21,10 +20,8 @@ $(document).ready(function() {
 
 	$("#clear_buttonid").click(clear_new_jobs);           // clear content in w3
 	$("#execute_button").click(execute_sequence);         // execute sequence button in 23
-
     $("#w3_drop_to_all").attr({"ondrop": "drop_command_to_multiple(event)",
                                "ondragover": "allowDropCommand(event)"});
-
 });
 
 /*
@@ -42,9 +39,7 @@ function get_commands_func(){
 
     // plugin name the user clicked
     var row_id = $(this)[0].id.substring(10, $(this)[0].id.length);
-
     var plugin_name_var = $("#name_tag_id"+row_id+" a span")[1].innerText;
-//    console.log(plugin_name_var);
 
     $.ajax({
         type: "GET",
@@ -61,12 +56,11 @@ function get_commands_func(){
             // display command(s) in w2
             if (data.length == 1){
                 $(".theContent").append($("<li/>").text(data));
-            }
-            else{
+            } else {
                 for(var i = 0; i < data.length; i++) {
                     $(".theContent").append($("<li id='commandid' class='commandclass' onclick='#'/>").append(
                     $("<a id='acommandid' class='acommandclass' href='#'/>").text(data[i].CommandName)));
-            }
+                }
             }
             $(".theContent").append("<div/>").attr({"style": "width:250px"});
             $(".theContentHeader").append("<h2 class='box-title'/>").text(plugin_name_var + "  command list");
@@ -129,12 +123,8 @@ function add_new_job(){
     if(value == 0 || value == 1) {
         $(".thirdBoxContent").append($("<tr/>").attr({"role": "row", "onclick": "#", "id":"jobrow"+1, "class": "draggable_tr divw3row"}).append(
             $("<td/>").append($("<a/>").attr({"href": "#"}).append($("<span/>").text("1"))),
-            $("<td/>").attr({"id": "pluginid" + 1,
-                             "ondrop": "drop(event)",
-                             "ondragover": "allowDrop(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text(""))),
-            $("<td/>").attr({"id": "addressid" + 1,
-                             "ondrop": "drop(event)",
-                             "ondragover": "allowDrop(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text(""))),
+            $("<td/>").attr({"id": "pluginid" + 1}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text(""))),
+            $("<td/>").attr({"id": "addressid" + 1}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text(""))),
             $("<td/>").attr({"id": "commandid" + 1,
                              "ondrop": "drop_command(event)",
                              "ondragover": "allowDropCommand(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text(""))),
@@ -152,12 +142,8 @@ function add_new_job(){
     else {
         $(".thirdBoxContent").append($("<tr/>").attr({"role": "row", "onclick": "#", "id":"jobrow"+value, "class": "draggable_tr divw3row"}).append(
             $("<td/>").append($("<a/>").attr({"href": "#"}).append($("<span/>").text(value))),
-            $("<td/>").attr({"id": "pluginid" + value,
-                             "ondrop": "drop(event)",
-                             "ondragover": "allowDrop(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text(""))),
-            $("<td/>").attr({"id": "addressid" + value,
-                             "ondrop": "drop(event)",
-                             "ondragover": "allowDrop(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text(""))),
+            $("<td/>").attr({"id": "pluginid" + value}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text(""))),
+            $("<td/>").attr({"id": "addressid" + value}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text(""))),
             $("<td/>").attr({"id": "commandid" + value,
                              "ondrop": "drop_command(event)",
                              "ondragover": "allowDropCommand(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text(""))),
@@ -209,6 +195,7 @@ function drag_target(){
             if (selected_var.length === 0) {
                 selected_var = $(this).addClass('selected');
             }
+
             var container = $('<table/>').attr({'id':'draggingContainer'});
             container.append(selected_var.clone().removeClass("selected"));
             hover_w3_for_target();
@@ -218,17 +205,10 @@ function drag_target(){
 }
 
 function hover_w3_for_target(){
-    console.log("hover_w3_for_target");
+//    console.log("hover_w3_for_target");
     var num_jobs = $("#addjob_button")[0].value;
-
-    for (var j = 1; j <= num_jobs - 1 ; j++){
-        $("#jobrow"+j).mouseover(hover_drop);
-    }
-
-    for (var j2 = 1; j2 <= num_jobs - 1 ; j2++){
-        $("#jobrow"+j2).mouseleave(hover_leave);
-    }
-
+    $("#third_box_content tr").mouseover(hover_drop);
+    $("#third_box_content tr").mouseleave(hover_leave);
 }
 
 //    future animation
@@ -254,12 +234,18 @@ function hover_drop(){
         $("#jobstatusid"+hover_object_num).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
     }
 
-    //DROP
-//    console.log("drop");
+    if (hover_int != 0){
+        drop_target(hover_object);
+    } else {
+        console.log("not dragging the object over a validated job row");
+    }
+}
+
+// Drop target to W3
+function drop_target(hover_object){
+    console.log("drop_target");
     $(".gridSelect, .divw3row").droppable({
         drop: function (event, ui) {
-            console.log("drop");
-            console.log(hover_int);
             if (hover_int != 0){
                 var selected_var = ui.helper.children();
 
@@ -268,6 +254,7 @@ function hover_drop(){
                     var row_id_str = row_id.substring(10,row_id.length);
                     var row_js = JSON.parse($("#nameidjson" + row_id_str)[0].innerText);
                     var selected_row = undefined;
+
                     if (int != 0){
                         selected_row = hover_object.nextUntil()[(int -1)];
                     } else {
@@ -320,19 +307,19 @@ function drag_end_command(event){
 }
 
 function drop_command(ev) {
-    console.log("drop_command");
+//    console.log("drop_command");
     ev.preventDefault();
     var command_json = ev.dataTransfer.getData("text");
     $("#w3_drop_to_all").css("display", "none");
     var command = JSON.parse(command_json);
     //ev.target.appendChild(argumentid_var);
     var command_hole = $(ev.target);
+
     while (command_hole[0].tagName != "TD"){
         command_hole = command_hole.parent();
     }
     var row_id = command_hole[0].id.substring(9, command_hole[0].id.length);
     drop_command_into_hole(command, command_json, command_hole, row_id);
-
     set_w3_job_status();
 }
 function set_w3_job_status(){
@@ -346,11 +333,10 @@ function set_w3_job_status(){
         var w3_status = w3_rows[j].children[4].innerText;
 
         if(plugin_name_text && command_text && w3_status != "Done"){
-            console.log("TRUE");
             $("#jobstatusid"+(j+1)).empty()
             $("#jobstatusid"+(j+1)).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
         } else {
-            console.log("FALSE");
+            console.log("Status is done and plugin and command are filled up in the job row");
         }
     }
 }
@@ -362,6 +348,7 @@ function drop_command_to_multiple(ev) {
     $("#w3_drop_to_all").css("display", "none");
     var command = JSON.parse(command_json);
     var num_jobs = $("#addjob_button")[0].value;
+
     for (var j = 1; j < num_jobs; j++){
         var command_td = $("#commandid"+j);
         drop_command_into_hole(command, command_json, command_td, j)
@@ -376,12 +363,13 @@ function drop_command_into_hole(command, command_json, command_td, row_id){
                                                                   current_status[0].innerText == "Stopped"  ||
                                                                   current_status[0].innerText == "Error")
         )
-     ){
+    ){
         command_td.empty();
         var new_div = document.createElement("div");
         new_div.innerText = command_json;
         new_div.style.display = 'none';
         var display_string = command['CommandName'] + " ("
+
         for (var j = 0; j < command["Inputs"].length; j++){
             display_string += " "+command["Inputs"][j]["Value"]
         }
@@ -478,9 +466,10 @@ function execute_sequence_output(specific_id, updateid, counter=0, backoff=2000)
             }
 
             if (data != 0){  // returns query
-//                console.log("Does not equal to zero");
+//                console.log("returns query");
                 //data output here
                 $("#updateid"+updateid).empty();
+                $("#updateid"+updateid).attr({"class": ""});
                 $('<pre id="updatecontent'+updateid+'"></pre>').appendTo("#updateid"+updateid);
                 $("#updatecontent"+updateid).append(JSON.stringify(data['Content']));
                 var download_link = $('<a>[Download]</a>');
@@ -491,7 +480,7 @@ function execute_sequence_output(specific_id, updateid, counter=0, backoff=2000)
 
 
             } else {  // doesn't return query
-//                console.log("data equals to zero");
+//                console.log("does not return query");
                 $("#updateid"+updateid).empty();
                 $("#updateid"+updateid).append("No data to return at the moment :(");
                 $("#updateid"+updateid).parent().css("background-color", "white");
@@ -501,8 +490,11 @@ function execute_sequence_output(specific_id, updateid, counter=0, backoff=2000)
             // sleep
             // increment depth
             // re-call execute_sequence_output function again
+
+//            It's waiting for data in W4
             console.log("ERROR @ execute_sequence_output function");
-//            console.log(data);
+            $("#updateid"+updateid).empty();
+            $("#updateid"+updateid).attr({"class": "fa fa-refresh fa-spin"});
         }
     }).fail(function(data){
 //        console.log("FAIL FUNCTION");
