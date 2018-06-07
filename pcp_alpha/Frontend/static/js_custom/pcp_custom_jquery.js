@@ -31,7 +31,6 @@ Functions down below are for w2
 */
 
 // List of commands based off of plugin name
-
 var current_command_template = {}
 
 function get_commands_func(){
@@ -121,7 +120,10 @@ function add_new_job(){
 
     // content for w3
     if(value == 0 || value == 1) {
-        $(".thirdBoxContent").append($("<tr/>").attr({"role": "row", "onclick": "#", "id":"jobrow"+1, "class": "draggable_tr divw3row"}).append(
+        $(".thirdBoxContent").append($("<tr/>").attr({"role": "row",
+                                                      "onclick": "#",
+                                                      "id":"jobrow"+1,
+                                                      "class": "draggable_tr divw3row"}).append(
             $("<td/>").append($("<a/>").attr({"href": "#"}).append($("<span/>").text("1"))),
             $("<td/>").attr({"id": "pluginid" + 1}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text(""))),
             $("<td/>").attr({"id": "addressid" + 1}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text(""))),
@@ -140,7 +142,10 @@ function add_new_job(){
 
     }
     else {
-        $(".thirdBoxContent").append($("<tr/>").attr({"role": "row", "onclick": "#", "id":"jobrow"+value, "class": "draggable_tr divw3row"}).append(
+        $(".thirdBoxContent").append($("<tr/>").attr({"role": "row",
+                                                      "onclick": "#",
+                                                      "id":"jobrow"+value,
+                                                      "class": "draggable_tr divw3row"}).append(
             $("<td/>").append($("<a/>").attr({"href": "#"}).append($("<span/>").text(value))),
             $("<td/>").attr({"id": "pluginid" + value}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text(""))),
             $("<td/>").attr({"id": "addressid" + value}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text(""))),
@@ -170,7 +175,6 @@ function clear_new_jobs(){
 }
 
 // Drag and drop function(s) for w1+w3 or w2+w3
-
 // Drag and drop function(s) for targets
 // Note: Drop function needs to be validated
 function target_select_func(row_selection){
