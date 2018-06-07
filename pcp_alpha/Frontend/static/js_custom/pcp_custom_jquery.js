@@ -199,7 +199,6 @@ function drag_target(){
             if (selected_var.length === 0) {
                 selected_var = $(this).addClass('selected');
             }
-
             var container = $('<table/>').attr({'id':'draggingContainer'});
             container.append(selected_var.clone().removeClass("selected"));
             hover_w3_for_target();
@@ -237,6 +236,7 @@ function hover_drop(){
     if (plugin_name_text && location_text && command_text != "" && status_text == false){
         $("#jobstatusid"+hover_object_num).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
     }
+
 
     if (hover_int != 0){
         drop_target(hover_object);
