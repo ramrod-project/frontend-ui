@@ -355,13 +355,18 @@ function set_w3_job_status(){
         var location_text = what.children[2].innerText;
         var command_text = what.children[3].innerText;
         var w3_status = what.children[4].innerText;
+        var error_msg = 0;
 
         if(plugin_name_text && command_text && w3_status != "Done"){
             $("#jobstatusid"+(j+1)).empty()
             $("#jobstatusid"+(j+1)).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
         } else {
             console.log("Status is done and plugin and command are filled up in the job row");
+            error_msg = 1;
         }
+    }
+    if (error_msg == 1){
+
     }
 }
 
