@@ -362,12 +362,13 @@ function set_w3_job_status(){
             $("#jobstatusid"+(j+1)).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
         } else {
             console.log("Status is done and plugin and command are filled up in the job row");
-            error_msg = 1;
+//            error_msg = 1;
         }
     }
-    if (error_msg == 1){
-
-    }
+    //
+//    if (error_msg == 1){
+//
+//    }
 }
 
 
