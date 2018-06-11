@@ -56,7 +56,7 @@ function get_commands_func(){
     // plugin name the user clicked
     var row_id = $(this)[0].id.substring(10, $(this)[0].id.length);
     var plugin_name_var = $("#name_tag_id"+row_id+" a span")[1].innerText;
-    var check_content_var = 0;
+    var check_content_var = false;
 
     $.ajax({
         type: "GET",
@@ -69,14 +69,13 @@ function get_commands_func(){
             if($(".theContent li a").length > 0){
                 for(var int = 0; int < $(".theContent li a").length; int++){
                     if(data[0].CommandName == $(".theContent li a")[int].text){
-                        check_content_var = 1;
+                        check_content_var = true;
                     }
                 }
             }
 
             // empty content in w2 if different plugin name was clicked previously
-            if (check_content_var == 0){
-                console.log("check_content_var == 1");
+            if (!check_content_var){
                 $(".tooltipHeader").empty();
                 $(".tooltipContent").empty();
                 $(".theContentArgument").empty();
