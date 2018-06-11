@@ -64,6 +64,8 @@ function get_commands_func(){
         data: {"plugin_name": plugin_name_var},
         datatype: 'json',
         success: function(data) {
+
+            // check if w2 should re-render or not
             if($(".theContent li a").length > 0){
                 for(var int = 0; int < $(".theContent li a").length; int++){
                     if(data[0].CommandName == $(".theContent li a")[int].text){
@@ -72,7 +74,7 @@ function get_commands_func(){
                 }
             }
 
-            // empty content in w2
+            // empty content in w2 if different plugin name was clicked previously
             if (check_content_var == 0){
                 console.log("check_content_var == 1");
                 $(".tooltipHeader").empty();
