@@ -51,11 +51,12 @@ Functions down below are for w2
 var current_command_template = {}
 
 function get_commands_func(){
-    $(".tooltipHeader").empty();
+//    console.log("get_commands_func");  // debug
 
     // plugin name the user clicked
     var row_id = $(this)[0].id.substring(10, $(this)[0].id.length);
     var plugin_name_var = $("#name_tag_id"+row_id+" a span")[1].innerText;
+    var check_content_var = 0;
 
     $.ajax({
         type: "GET",
@@ -63,16 +64,28 @@ function get_commands_func(){
         data: {"plugin_name": plugin_name_var},
         datatype: 'json',
         success: function(data) {
+            if($(".theContent li a").length > 0){
+                for(var int = 0; int < $(".theContent li a").length; int++){
+                    if(data[0].CommandName == $(".theContent li a")[int].text){
+                        check_content_var = 1;
+                    }
+                }
+            }
+
             // empty content in w2
+            if (check_content_var == 0){
+                console.log("check_content_var == 1");
+                $(".tooltipHeader").empty();
+                $(".tooltipContent").empty();
+                $(".theContentArgument").empty();
+            }
+
         	$(".theContent").empty();
-        	$(".theContentArgument").empty();
-        	$(".theContentHeader").empty();
-        	$(".tooltipContent").empty();
 
             // display command(s) in w2
             if (data.length == 1){
                 $(".theContent").append($("<li/>").text(data));
-            } else {
+            } else {  // no commands for plugin
                 for(var i = 0; i < data.length; i++) {
                     $(".theContent").append($("<li id='commandid' class='commandclass' onclick='#'/>").append(
                     $("<a id='acommandid' class='acommandclass' href='#'/>").text(data[i].CommandName)));
