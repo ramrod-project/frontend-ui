@@ -26,6 +26,14 @@ class TestDataHandling(object):
             request = rf.get(url_str)
             response = function_obj(request)
         return response
+    
+    @staticmethod
+    def post_test(url_str, post_data, function_obj, rf):
+        response = None
+        if check_dev_env() is not None:
+            request = rf.post(url_str, post_data)
+            response = function_obj(request)
+        return response
 
     @staticmethod
     def test_display_capability_list():
@@ -170,6 +178,31 @@ class TestDataHandling(object):
             assert "sdfsdfsd" in str(w4_output_controller(rf.get(second_url)).content)
             process_obj.terminate()
             process_obj.join(timeout=2)
+
+    @staticmethod
+    def test_target_form_post(rf):
+        """Test posting a target
+
+        Sends POST to the val_target_form method
+        to ensure it processes POST requests.
+        
+        Arguments:
+            rf {RequestFactory} -- used for mocking
+            requests.
+        """
+        post_data = {
+            "plugin_name": "Plugin1",
+            "location_num": "127.0.0.1",
+            "port_num": "8000",
+            "optional_char": ""
+        }
+        url_var = "/action/val_target_form"
+        if check_dev_env() is not None:
+            response = TestDataHandling.post_test(url_var, post_data, val_target_form, rf)
+            assert response.status_code == 302
+            assert response.url == "/"
+            response = TestDataHandling.post_test(url_var, {}, val_target_form, rf)
+            assert response.status_code == 200
 
     @staticmethod
     def test_execute_w4_data_ui_fail(rf):
