@@ -3,12 +3,13 @@ from time import sleep
 from uuid import uuid4
 import json
 import pytest
+from brain import connect
 
 from pcp_alpha.test.test_w4_switch_to_done import switch_to_done
 # from rethinkdb.errors import ReqlOpFailedError
 from pcp_alpha.Backend.db_dir.project_db import check_dev_env
 from pcp_alpha.Backend.db_dir.custom_data import location_generated_num
-from pcp_alpha.Backend.db_dir.project_db import db_connection, rtdb
+from pcp_alpha.Backend.db_dir.project_db import rtdb
 from pcp_alpha.Backend.db_dir.custom_queries import get_specific_brain_targets, get_specific_command
 from pcp_alpha.Backend.pcp_app.views import get_commands_controller, execute_sequence_controller, \
     w4_output_controller, new_target_form, val_target_form
@@ -37,7 +38,7 @@ class TestDataHandling(object):
                                                                 'Inputs',
                                                                 'Tooltip',
                                                                 'CommandName',
-                                                                'Output').run(db_connection())
+                                                                'Output').run(connect())
             for plugin_item in cur_var:
                 assert isinstance(plugin_item, dict)
 
@@ -92,7 +93,7 @@ class TestDataHandling(object):
                  "Status": "Ready",
                  "StartTime": 0,
                  "JobCommand": job_command}
-            ]).run(db_connection())
+            ]).run(connect())
             assert inserted['inserted'] == 1
 
     def test_execute_w3_data_ui(self, rf):
@@ -195,7 +196,7 @@ class TestDataHandling(object):
             process_var.start()
             sleep(2)
             command_document = rtdb.db(brain_db).table(output_table).filter({
-                "JobCommand": {'id': ECHO_JOB_ID}}).run(db_connection())
+                "JobCommand": {'id': ECHO_JOB_ID}}).run(connect())
             for query_item in command_document:
                 assert isinstance(query_item, dict)
             process_var.terminate()
@@ -252,7 +253,7 @@ class TestDataHandling(object):
                  "Location": location_num,
                  "Port": port_num,
                  "Optional": optional_char}
-            ]).run(db_connection())
+            ]).run(connect())
             assert inserted_new_target['inserted'] == 1
 
     def test_validate_form(self, rf):

@@ -3,7 +3,7 @@ Views python file for pcp_app 'django' app.
 """
 import json
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import redirect
 from django.template import loader
 from ua_parser import user_agent_parser
 from Backend.db_dir.custom_queries import get_specific_commands, insert_brain_jobs_w3, \
@@ -129,9 +129,7 @@ def val_target_form(request):
                               location_num=req_location_num,
                               port_num=req_port_num,
                               optional_char=req_optional_char)
-            return render(request,
-                          'index_app/base_page.html',
-                          context={'host_dict': get_brain_targets(), })
+            return redirect('/')
     else:
         form = TargetForm()
     template = loader.get_template('pcp_app/target_form.html')
