@@ -98,6 +98,84 @@ _TEST_COMMANDS = [
 ]
 
 
+def table_clear(database, table):
+    """Clears data from a table
+
+    Clears all data from a given table
+    in a database.
+    
+    Arguments:
+        database {str} -- database name
+        table {str} -- name of the table to clear.
+    """
+    db_con_var = connect()
+    try:
+        rtdb.db(database).table(
+            table
+        ).delete().run(db_con_var)
+        print(
+            "log: db {}.{} table has been cleared."
+                .format(database, table)
+        )
+    except rtdb.ReqlError as err:
+        err = sys.exc_info()[0]
+        print("EXCEPT == {}".format(err))
+
+def tables_create(database, tables):
+    """Create a list of tables in the database
+    
+    Creates tables in a database from provided
+    list.
+
+    Arguments:
+        database {str} -- a string denoting the
+        name of the database.
+        tables {list<str>} -- a list of table names to
+        check for.
+    """
+    db_con_var = connect()
+    for table_name in tables:
+        try:
+            rtdb.db(database).table_create(table_name).run(db_con_var)
+            print("log: db {}.{} table was created to locally \
+                since it didn't exist".format(database, table_name))
+        except rtdb.ReqlError as err:
+            err = sys.exc_info()[0]
+            print("EXCEPT == {}".format(err))
+
+
+def tables_check(database, tables):
+    """Takes a list of tables and checks for them
+
+    This function takes a list of table names and
+    checks if they exist in the database.
+
+    Arguments:
+        database {string} -- a string denoting the
+        name of the database.
+        tables {list<str>} -- a list of table names to
+        check for.
+    
+    Returns:
+        {list} -- a list of tables that do not exist
+        in the database.
+    """
+    db_con_var = connect()
+    for i, table_name in enumerate(tables):
+        # {database}.{table_name} does exist
+        if rtdb.db(database).table_list().contains(
+                table_name
+            ).run(db_con_var):
+            print("\nlog: db {}.{} table exist locally"
+                    .format(database, table_name))
+            table_clear(database, table_name)
+            del tables[i]
+        else:
+            print("log: db {}.{} doesnt exist"
+                    .format(database, table_name))
+    return tables
+
+
 def confirm_brain_db_info():
     """
     confirm_brain_db_info function checks to see if it's using a local
@@ -107,46 +185,25 @@ def confirm_brain_db_info():
     be created only locally.
     :return: nothing at the moment
     """
+    if not check_dev_env(): # Check for Development Environment
+        return
     db_con_var = connect()
-    if check_dev_env():  # For Development Environment
-        if rtdb.db_list().contains("Brain").run(db_con_var) is not True:
-            print("log: db Brain doesn't exist locally")
-            rtdb.db_create("Brain").run(db_con_var)
-            print("log: db Brain was created to locally since it didn't exist")
+    if rtdb.db_list().contains("Brain").run(db_con_var) is not True:
+        print("log: db Brain doesn't exist locally")
+        rtdb.db_create("Brain").run(db_con_var)
+        print("log: db Brain was created to locally since it didn't exist")
 
-            # create local Brain.Targets table
-            for table_name in ["Targets", "Jobs", "Outputs"]:
-                rtdb.db("Brain").table_create(table_name).run(db_con_var)
-                print("log: db Brain.{} table was created to locally"
-                      .format(table_name))
-        else:  # if Brain does exist locally
-            print("log: db Brain exist locally")
-            for table_name in ["Targets", "Jobs", "Outputs"]:
-                # Brain.{table_name} does exist
-                if rtdb.db("Brain").table_list().contains(
-                        table_name).run(db_con_var):
-                    print("\nlog: db Brain.{} table exist locally"
-                          .format(table_name))
-                    try:
-                        rtdb.db("Brain").table(
-                            table_name
-                        ).delete().run(db_con_var)
-                        print("log: db Brain.{} table has been cleared."
-                              .format(table_name))
-                    except:
-                        err = sys.exc_info()[0]
-                        print("EXCEPT == {}".format(err))
-                else:
-                    print("log: db Brain.{} doesnt exist"
-                          .format(table_name))
-                    rtdb.db("Brain").table_create(table_name).run(db_con_var)
-                    print("log: db Brain.{} table was created to locally \
-                          since it didn't exist".format(table_name))
+        # create local Brain tables
+        tables_create("Brain", ["Targets", "Jobs", "Outputs"])
+    else:  # if Brain does exist locally
+        print("log: db Brain exist locally")
+        non_existing_tables = tables_check("Brain", ["Targets", "Jobs", "Outputs"])
+        tables_create("Brain", non_existing_tables)
 
-        rtdb.db("Brain").table("Targets").insert(
-            _TEST_TARGETS
-        ).run(db_con_var)
-        print("log: db Dummy data was inserted to Brain.Targets locally")
+    rtdb.db("Brain").table("Targets").insert(
+        _TEST_TARGETS
+    ).run(db_con_var)
+    print("log: db Dummy data was inserted to Brain.Targets locally")
 
 
 def confirm_plugin_db_info():
@@ -175,30 +232,11 @@ def confirm_plugin_db_info():
             print("\nlog: db Plugins doesn't exist locally")
             rtdb.db_create("Plugins").run(db_con_var)
             print("log: db Plugins didn't exist, was created to locally")
-
-            rtdb.db("Plugins").table_create("Plugin1").run(db_con_var)
-            print("log: db Plugins.Plugin1 table was created to locally")
+            tables_create("Plugins", ["Plugin1"])
         else:  # if Plugins does exit locally
             print("\nlog: db Plugins exist locally")
-            if rtdb.db("Plugins").table_list().contains(
-                    "Plugin1").run(db_con_var):
-
-                try:
-                    rtdb.db("Plugins").table(
-                        "Plugin1"
-                    ).delete().run(db_con_var)
-                    print("log: db Plugins.Plugin1 table was cleared \
-                          for new data.")
-                except:
-                    err = sys.exc_info()[0]
-                    print("EXCEPT == {}".format(err))
-            else:
-                print("log: db Plugins.Plugin1 doesnt exist")
-                rtdb.db("Plugins").table_create(
-                    "Plugin1"
-                ).run(db_con_var)
-                print("log: db Plugins.Plugin1 table was created \
-                      locally since it didn't exist")
+            non_existing_tables = tables_check("Plugins", ["Plugin1"])
+            tables_create("Plugins", non_existing_tables)
 
         rtdb.db("Plugins").table("Plugin1").insert(
             _TEST_COMMANDS
