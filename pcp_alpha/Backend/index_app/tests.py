@@ -1,5 +1,6 @@
 import pytest
-from pcp_alpha.Backend.db_dir.project_db import check_dev_env, db_connection, rtdb
+from brain import connect
+from pcp_alpha.Backend.db_dir.project_db import check_dev_env, rtdb
 from .views import get_target_list
 
 
@@ -12,7 +13,7 @@ class TestIndex(object):
         """
         db_name = "Brain"
         db_table = "Targets"
-        query_plugin_names = rtdb.db(db_name).table(db_table).pluck('PluginName', 'Location').run(db_connection())
+        query_plugin_names = rtdb.db(db_name).table(db_table).pluck('PluginName', 'Location').run(connect())
 
         for plugin_item in query_plugin_names:
             assert isinstance(plugin_item, dict)
