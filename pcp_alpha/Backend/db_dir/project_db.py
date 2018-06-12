@@ -1,9 +1,18 @@
+"""Project db module (to be moved to brain)
+
+Includes multiple functions for integrating with
+and validating information in the Brain.
+"""
 import sys
 from brain import connect, r as rtdb
 from brain import check_dev_env, check_prod_env
-from brain.connection import BrainNotReady
 
-from .custom_data import location_generated_num, read_file_tt, delete_file_tt, write_file_tt
+from .custom_data import (
+    location_generated_num,
+    read_file_tt,
+    delete_file_tt,
+    write_file_tt
+)
 
 
 _TEST_TARGETS = [
@@ -83,7 +92,7 @@ _TEST_COMMANDS = [
     {
         "CommandName": "echo",
         "Tooltip": '\nEcho\n\nClient Returns this string verbatim\n'
-                '\nArguments:\n1. String to Echo\n\nReturns:\nString\n',
+                   '\nArguments:\n1. String to Echo\n\nReturns:\nString\n',
         "Output": True,
         "Inputs": [
             {
@@ -103,7 +112,7 @@ def table_clear(database, table):
 
     Clears all data from a given table
     in a database.
-    
+
     Arguments:
         database {str} -- database name
         table {str} -- name of the table to clear.
@@ -115,7 +124,7 @@ def table_clear(database, table):
         ).delete().run(db_con_var)
         print(
             "log: db {}.{} table has been cleared."
-                .format(database, table)
+            .format(database, table)
         )
     except rtdb.ReqlError as err:
         err = sys.exc_info()[0]
@@ -123,7 +132,7 @@ def table_clear(database, table):
 
 def tables_create(database, tables):
     """Create a list of tables in the database
-    
+
     Creates tables in a database from provided
     list.
 
@@ -155,7 +164,7 @@ def tables_check(database, tables):
         name of the database.
         tables {list<str>} -- a list of table names to
         check for.
-    
+
     Returns:
         {list} -- a list of tables that do not exist
         in the database.
@@ -167,12 +176,12 @@ def tables_check(database, tables):
                 table_name
             ).run(db_con_var):
             print("\nlog: db {}.{} table exist locally"
-                    .format(database, table_name))
+                  .format(database, table_name))
             table_clear(database, table_name)
             del tables[i]
         else:
             print("log: db {}.{} doesnt exist"
-                    .format(database, table_name))
+                  .format(database, table_name))
     return tables
 
 
@@ -197,7 +206,10 @@ def confirm_brain_db_info():
         tables_create("Brain", ["Targets", "Jobs", "Outputs"])
     else:  # if Brain does exist locally
         print("log: db Brain exist locally")
-        non_existing_tables = tables_check("Brain", ["Targets", "Jobs", "Outputs"])
+        non_existing_tables = tables_check(
+            "Brain",
+            ["Targets", "Jobs", "Outputs"]
+        )
         tables_create("Brain", non_existing_tables)
 
     rtdb.db("Brain").table("Targets").insert(
@@ -245,6 +257,9 @@ def confirm_plugin_db_info():
 
 
 def confirm_db_info():
+    """Runs all the db confirm functions
+    """
+
     print("\nlog: ###### DB Logs ######")
     connect()
     confirm_brain_db_info()
