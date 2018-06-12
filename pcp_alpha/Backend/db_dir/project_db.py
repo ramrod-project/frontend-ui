@@ -6,12 +6,10 @@ from brain.connection import BrainNotReady
 from .custom_data import location_generated_num, read_file_tt, delete_file_tt, write_file_tt
 
 
-def db_connection():
-    """
+"""def db_connection():
     Function db_connection open's a connection with rethinkdb
     check production environment or development environment
     :return: dev or prod db connection
-    """
     dbconn = None
     while not dbconn:
         try:
@@ -19,7 +17,7 @@ def db_connection():
         except BrainNotReady:
             print("BABOON ERROR: Brain is still not ready")
             break
-    return dbconn
+    return dbconn"""
 
 
 def validate_data(db_data):
@@ -42,7 +40,7 @@ def confirm_brain_db_info():
     be created only locally.
     :return: nothing at the moment
     """
-    db_con_var = db_connection()
+    db_con_var = connect()
     if check_dev_env():  # For Development Environment
         if rtdb.db_list().contains("Brain").run(db_con_var) is not True:
             print("log: db Brain doesn't exist locally")
@@ -103,36 +101,36 @@ def confirm_plugin_db_info():
     be created only locally.
     :return: nothing at the moment
     """
-
+    db_con_var = connect()
     if check_prod_env():  # For Production Environment
-        if rtdb.db_list().contains("Plugins").run(db_connection()):
+        if rtdb.db_list().contains("Plugins").run(db_con_var):
             print("\nlog: db Plugins exist")
 
-            if rtdb.db("Plugins").table_list().run(db_connection()):
+            if rtdb.db("Plugins").table_list().run(db_con_var):
                 print("log: db Plugins tables are listed down below:\n{}"
                       .format(rtdb.db("Plugins").table_list()
-                              .run(db_connection())))
+                              .run(db_con_var)))
             else:
                 print("log: db Plugins tables don't exist\n")
         else:
             print("\nlog: db Plugins DOESN'T exist\n")
     else:  # is check_dev_env()-- if Plugins does exit locally
-        if rtdb.db_list().contains("Plugins").run(db_connection()) is not True:
+        if rtdb.db_list().contains("Plugins").run(db_con_var) is not True:
             print("\nlog: db Plugins doesn't exist locally")
-            rtdb.db_create("Plugins").run(db_connection())
+            rtdb.db_create("Plugins").run(db_con_var)
             print("log: db Plugins didn't exist, was created to locally")
 
-            rtdb.db("Plugins").table_create("Plugin1").run(db_connection())
+            rtdb.db("Plugins").table_create("Plugin1").run(db_con_var)
             print("log: db Plugins.Plugin1 table was created to locally")
         else:  # if Plugins does exit locally
             print("\nlog: db Plugins exist locally")
             if rtdb.db("Plugins").table_list().contains(
-                    "Plugin1").run(db_connection()):
+                    "Plugin1").run(db_con_var):
 
                 try:
                     rtdb.db("Plugins").table(
                         "Plugin1"
-                    ).delete().run(db_connection())
+                    ).delete().run(db_con_var)
                     print("log: db Plugins.Plugin1 table was cleared \
                           for new data.")
                 except:
@@ -142,7 +140,7 @@ def confirm_plugin_db_info():
                 print("log: db Plugins.Plugin1 doesnt exist")
                 rtdb.db("Plugins").table_create(
                     "Plugin1"
-                ).run(db_connection())
+                ).run(db_con_var)
                 print("log: db Plugins.Plugin1 table was created \
                       locally since it didn't exist")
 
@@ -214,12 +212,12 @@ def confirm_plugin_db_info():
                 ],
                 "OptionalInputs": []
             },
-        ]).run(db_connection())
+        ]).run(db_con_var)
         print("log: db Dummy data was inserted to Plugins.Plugin1 locally\n")
 
 
 def confirm_db_info():
     print("\nlog: ###### DB Logs ######")
-    db_connection()
+    connect()
     confirm_brain_db_info()
     confirm_plugin_db_info()
