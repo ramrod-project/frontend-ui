@@ -6,29 +6,96 @@ from brain.connection import BrainNotReady
 from .custom_data import location_generated_num, read_file_tt, delete_file_tt, write_file_tt
 
 
-"""def db_connection():
-    Function db_connection open's a connection with rethinkdb
-    check production environment or development environment
-    :return: dev or prod db connection
-    dbconn = None
-    while not dbconn:
-        try:
-            dbconn = connect()
-        except BrainNotReady:
-            print("BABOON ERROR: Brain is still not ready")
-            break
-    return dbconn"""
+_TEST_TARGETS = [
+    {
+        "PluginName": "Plugin1",
+        "Location": location_generated_num("172.16.5."),
+        "Port": "8002",
+        "Optional": "Document Here"
+    },
+    {
+        "PluginName": "Plugin1",
+        "Location": location_generated_num("172.16.5."),
+        "Port": "8002",
+        "Optional": "Document Here"
+    },
+    {
+        "PluginName": "Plugin1",
+        "Location": location_generated_num("172.16.5."),
+        "Port": "8002",
+        "Optional": "Document Here"
+    }
+]
 
-
-def validate_data(db_data):
-    for data in db_data:
-        for document in data[1]:
-            check_int = 1
-            print("Brain.{} document == {}\n".format(data[0], document))
-            if check_int == 0:
-                print("log: Brain.{} doesn't have any data".format(data[0]))
-            else:
-                print("log: Brain.{} has data in the table".format(data[0]))
+_TEST_COMMANDS = [
+    #  read_file command
+    {
+        "CommandName": "read_file",
+        "Tooltip": read_file_tt,
+        "Output": True,
+        "Inputs": [
+            {
+                "Name": "FilePath",
+                "Type": "textbox",
+                "Tooltip": "Must be the fully qualified path",
+                "Value": "remote filename"
+            },
+        ],
+        "OptionalInputs": []
+    },
+    #  delete_file command
+    {
+        "CommandName": "delete_file",
+        "Tooltip": delete_file_tt,
+        "Output": True,
+        "Inputs": [
+            {
+                "Name": "FilePath",
+                "Type": "textbox",
+                "Tooltip": "Must be the fully qualified path",
+                "Value": "remote filename"
+            },
+        ],
+        "OptionalInputs": []
+    },
+    #  send_file command
+    {
+        "CommandName": "send_file",
+        "Tooltip": write_file_tt,
+        "Output": True,
+        "Inputs": [
+            {
+                "Name": "SourceFilePath",
+                "Type": "textbox",
+                "Tooltip": "Must be uploaded here first",
+                "Value": "File"
+            },
+            {
+                "Name": "DestinationFilePath",
+                "Type": "textbox",
+                "Tooltip": "Must be the fully qualified path",
+                "Value": "remote filename"
+            },
+        ],
+        "OptionalInputs": []
+    },
+    #  echo command
+    {
+        "CommandName": "echo",
+        "Tooltip": '\nEcho\n\nClient Returns this string verbatim\n'
+                '\nArguments:\n1. String to Echo\n\nReturns:\nString\n',
+        "Output": True,
+        "Inputs": [
+            {
+                "Name": "EchoString",
+                "Type": "textbox",
+                "Tooltip": "This string will be echoed back",
+                "Value": "echo user input"
+            },
+        ],
+        "OptionalInputs": []
+    },
+]
 
 
 def confirm_brain_db_info():
@@ -76,20 +143,9 @@ def confirm_brain_db_info():
                     print("log: db Brain.{} table was created to locally \
                           since it didn't exist".format(table_name))
 
-        rtdb.db("Brain").table("Targets").insert([
-            {"PluginName": "Plugin1",
-             "Location": location_generated_num("172.16.5."),
-             "Port": "8002",
-             "Optional": "Document Here"},
-            {"PluginName": "Plugin1",
-             "Location": location_generated_num("172.16.5."),
-             "Port": "8002",
-             "Optional": "Document Here"},
-            {"PluginName": "Plugin1",
-             "Location": location_generated_num("172.16.5."),
-             "Port": "8002",
-             "Optional": "Document Here"}
-        ]).run(db_con_var)
+        rtdb.db("Brain").table("Targets").insert(
+            _TEST_TARGETS
+        ).run(db_con_var)
         print("log: db Dummy data was inserted to Brain.Targets locally")
 
 
@@ -144,75 +200,9 @@ def confirm_plugin_db_info():
                 print("log: db Plugins.Plugin1 table was created \
                       locally since it didn't exist")
 
-        rtdb.db("Plugins").table("Plugin1").insert([
-            #  read_file command
-            {
-                "CommandName": "read_file",
-                "Tooltip": read_file_tt,
-                "Output": True,
-                "Inputs": [
-                    {
-                        "Name": "FilePath",
-                        "Type": "textbox",
-                        "Tooltip": "Must be the fully qualified path",
-                        "Value": "remote filename"
-                    },
-                ],
-                "OptionalInputs": []
-            },
-            #  delete_file command
-            {
-                "CommandName": "delete_file",
-                "Tooltip": delete_file_tt,
-                "Output": True,
-                "Inputs": [
-                    {
-                        "Name": "FilePath",
-                        "Type": "textbox",
-                        "Tooltip": "Must be the fully qualified path",
-                        "Value": "remote filename"
-                    },
-                ],
-                "OptionalInputs": []
-            },
-            #  send_file command
-            {
-                "CommandName": "send_file",
-                "Tooltip": write_file_tt,
-                "Output": True,
-                "Inputs": [
-                    {
-                        "Name": "SourceFilePath",
-                        "Type": "textbox",
-                        "Tooltip": "Must be uploaded here first",
-                        "Value": "File"
-                    },
-                    {
-                        "Name": "DestinationFilePath",
-                        "Type": "textbox",
-                        "Tooltip": "Must be the fully qualified path",
-                        "Value": "remote filename"
-                    },
-                ],
-                "OptionalInputs": []
-            },
-            #  echo command
-            {
-                "CommandName": "echo",
-                "Tooltip": '\nEcho\n\nClient Returns this string verbatim\n'
-                           '\nArguments:\n1. String to Echo\n\nReturns:\nString\n',
-                "Output": True,
-                "Inputs": [
-                    {
-                        "Name": "EchoString",
-                        "Type": "textbox",
-                        "Tooltip": "This string will be echoed back",
-                        "Value": "echo user input"
-                    },
-                ],
-                "OptionalInputs": []
-            },
-        ]).run(db_con_var)
+        rtdb.db("Plugins").table("Plugin1").insert(
+            _TEST_COMMANDS
+        ).run(db_con_var)
         print("log: db Dummy data was inserted to Plugins.Plugin1 locally\n")
 
 
