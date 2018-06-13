@@ -1,9 +1,9 @@
 from multiprocessing import Process
-from time import sleep
+from time import sleep, time
 from uuid import uuid4
 import json
 import pytest
-from brain import connect
+from brain import connect, r
 
 from pcp_alpha.test.test_w4_switch_to_done import switch_to_done
 # from rethinkdb.errors import ReqlOpFailedError
@@ -12,9 +12,46 @@ from pcp_alpha.Backend.db_dir.custom_data import location_generated_num
 from pcp_alpha.Backend.db_dir.project_db import rtdb
 from pcp_alpha.Backend.db_dir.custom_queries import get_specific_brain_targets, get_specific_command
 from pcp_alpha.Backend.pcp_app.views import get_commands_controller, execute_sequence_controller, \
-    w4_output_controller, new_target_form, val_target_form
+    w4_output_controller, w4_output_controller_download, new_target_form, val_target_form
 
 ECHO_JOB_ID = str(uuid4())
+NOW = time()
+
+SAMPLE_TARGET = {
+    "id": "w93hyh-vc83j5i-v82h54u-b6eu4n",
+    "PluginName": "Plugin1",
+    "Location": "127.0.0.1",
+    "Port": "8000",
+    "Optional": {
+        "TestVal1": "Test value",
+        "TestVal2": "Test value 2"
+    }
+}
+SAMPLE_JOB = {
+    "id": "138thg-eg98198-sf98gy3-feh8h8",
+    "JobTarget": SAMPLE_TARGET,
+    "Status": "Done",
+    "StartTime": NOW,
+    "JobCommand": "Do stuff"
+}
+SAMPLE_OUTPUT = {
+    "OutputJob": SAMPLE_JOB,
+    "Content": "Sample output string"
+}
+
+
+@pytest.fixture(scope="function")
+def dummy_output_data():
+    conn = connect()
+    r.db("Brain").table("Jobs").insert(
+        SAMPLE_JOB
+    ).run(conn)
+    r.db("Brain").table("Outputs").insert(
+        SAMPLE_OUTPUT
+    ).run(conn)
+    yield
+    r.db("Brain").table("Outputs").delete().run(conn)
+    r.db("Brain").table("Jobs").delete().run(conn)
 
 
 @pytest.mark.incremental
@@ -24,6 +61,22 @@ class TestDataHandling(object):
         response = None
         if check_dev_env() is not None:
             request = rf.get(url_str)
+            response = function_obj(request)
+        return response
+
+    @staticmethod
+    def get_test(url_str, function_obj, rf):
+        response = None
+        if check_dev_env() is not None:
+            request = rf.get(url_str, HTTP_USER_AGENT="Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
+            response = function_obj(request)
+        return response
+    
+    @staticmethod
+    def post_test(url_str, post_data, function_obj, rf):
+        response = None
+        if check_dev_env() is not None:
+            request = rf.post(url_str, post_data)
             response = function_obj(request)
         return response
 
@@ -170,6 +223,43 @@ class TestDataHandling(object):
             assert "sdfsdfsd" in str(w4_output_controller(rf.get(second_url)).content)
             process_obj.terminate()
             process_obj.join(timeout=2)
+
+    @staticmethod
+    def test_target_form_post(rf):
+        """Test posting a target
+
+        Sends POST to the val_target_form method
+        to ensure it processes POST requests.
+        
+        Arguments:
+            rf {RequestFactory} -- used for mocking
+            requests.
+        """
+        post_data = {
+            "plugin_name": "Plugin1",
+            "location_num": "127.0.0.1",
+            "port_num": "8000",
+            "optional_char": ""
+        }
+        url_var = "/action/val_target_form"
+        if check_dev_env() is not None:
+            response = TestDataHandling.post_test(url_var, post_data, val_target_form, rf)
+            assert response.status_code == 302
+            assert response.url == "/"
+            response = TestDataHandling.post_test(url_var, {}, val_target_form, rf)
+            assert response.status_code == 200
+
+    @staticmethod
+    def test_w4_download(dummy_output_data, rf):
+        url_var = "/action/get_full_output_data?job_id=138thg-eg98198-sf98gy3-feh8h8"
+        if check_dev_env() is not None:
+            response = TestDataHandling.get_test(
+                url_var,
+                w4_output_controller_download,
+                rf
+            )
+            assert response.status_code == 200
+            assert response.content.decode("utf-8") == SAMPLE_OUTPUT["Content"]
 
     @staticmethod
     def test_execute_w4_data_ui_fail(rf):
