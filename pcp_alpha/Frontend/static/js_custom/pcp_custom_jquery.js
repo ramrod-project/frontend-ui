@@ -549,7 +549,9 @@ function execute_sequence_output(specific_id, updateid, counter=0, backoff=2000)
 
         if(counter == 10){
 //            console.log("About to BREAK");
+            // W4 errors out or the job doesn't work for whatever reason.
             $("#updateid"+updateid).empty();
+            $("#updateid"+updateid).attr({"class": ""});
             $("#updateid"+updateid).append("No data to return at the moment :(");
             $("#updateid"+updateid).parent().css("background-color", "white");
         } else {
