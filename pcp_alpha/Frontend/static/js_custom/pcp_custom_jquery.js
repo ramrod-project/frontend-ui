@@ -27,6 +27,10 @@ $(document).ready(function() {
     $("#w3_drop_to_all").attr({"ondrop": "drop_command_to_multiple(event)",
                                "ondragover": "allowDropCommand(event)"});
     $("#dvader_nooo_id").click(easter_egg_one);           // dvader nooo audio
+    $("#searchNameHere_id").change(filter_w1);
+    $("#searchNameHere_id").keyup(filter_w1);
+    $("#w1_command_active_filter").css("display", "none");
+
 });
 
 /*
@@ -49,6 +53,28 @@ Functions down below are for w2
 // List of commands based off of plugin name
 var current_command_template = {}
 
+function filter_w1(){
+    var filter_content = $("#searchNameHere_id")[0].value.toLowerCase();
+    var filter_display = $("#w1_command_active_filter");
+    var num_targets = 2;
+    if (filter_content.length == 0){
+        filter_display.css("display", "none");
+    } else {
+        filter_display.css("display", "");
+        filter_display[0].innerText = "Currently filtering on: "+filter_content;
+    }
+    var to_filter = $("#target_box_contentid tr");
+    for (var row_i = 0; row_i < to_filter.length; row_i++){
+        var row_id = to_filter[row_i].id.substring(10, to_filter[row_i].id.length);
+        var target_json = $("#name_tag_id"+row_id+" a span")[0].innerHTML;
+        var target = JSON.parse(target_json);
+        if (target.PluginName.toLowerCase().includes(filter_content)  || target.Location.toLowerCase().includes(filter_content) ){
+            $(to_filter[row_i]).css("display", "");
+        } else {
+            $(to_filter[row_i]).css("display", "none");
+        }
+    }
+}
 function get_commands_func(){
 //    console.log("get_commands_func");  // debug
 
