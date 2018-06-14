@@ -19,8 +19,7 @@ $(document).ready(function() {
 
     $(".gridSelect tbody tr").click(target_select_func(row_selection));  // highlight target in w1 to drag to w3
 	$("#addjob_button").click(function(){
-	    inc++;
-	    $("#addjob_button")[0].value = inc;
+
 	});
 	$("#addjob_button").click(add_new_job);               // add new job in w3
 	$("#clear_buttonid").click(clear_new_jobs);           // clear content in w3
@@ -151,6 +150,9 @@ function add_new_plugin_location_job_row(id_parameter, num_parameter){
 
 // Add new job
 function add_new_job(){
+    inc++;
+    $("#addjob_button")[0].value = inc;
+
     var value = $("#addjob_button")[0].value;
     // content for w3
     if(value == 1) {
@@ -393,7 +395,10 @@ function drop_command_to_multiple(ev) {
     $("#w3_drop_to_all").css("display", "none");
     var command = JSON.parse(command_json);
     var num_jobs = $("#addjob_button")[0].value;
-
+    if (num_jobs < 1){
+        num_jobs++;
+        add_new_job();
+    }
     for (var j = 1; j <= num_jobs; j++){
         var command_td = $("#commandid"+j);
         drop_command_into_hole(command, command_json, command_td, j)
