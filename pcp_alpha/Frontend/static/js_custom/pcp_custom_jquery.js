@@ -31,6 +31,28 @@ $(document).ready(function() {
     $("#searchNameHere_id").keyup(filter_w1);
     $("#w1_command_active_filter").css("display", "none");
 
+    $("#w3_drop_target_to_all").droppable({
+        drop: function (event, ui){
+            if (hover_int != 0){
+                var selected_var = ui.helper.children();
+                if (selected_var.length == 1){
+                    var num_jobs = $("#addjob_button")[0].value;
+                    for (var i=1; i<=num_jobs; i++){
+                        if (job_row_is_mutable(i)) {
+                            var row_id = selected_var[0].id;
+                            var row_id_str = row_id.substring(10,row_id.length);
+                            var row_js = JSON.parse($("#nameidjson" + row_id_str)[0].innerText);
+                            $("#addressid"+i)[0].innerText = row_js.Location;
+                            $("#pluginid"+i)[0].innerText = row_js.PluginName;
+                        }
+                    }
+                    set_w3_job_status();
+                    $('.selected');
+                }
+            }
+        }
+    });
+
 });
 
 /*
@@ -260,17 +282,31 @@ function drag_target(){
 	        var selected_var = $(".gridSelect tbody tr.selected");
             if (selected_var.length === 0) {
                 selected_var = $(this).addClass('selected');
+            } else if (selected_var.length == 1) {
+                display_drop_all();
             }
             var container = $('<table/>').attr({'id':'draggingContainer'});
             container.append(selected_var.clone().removeClass("selected"));
             hover_w3_for_target();
             return container;
-	    }
+	    },
+	    revert: function(){
+	        hide_drop_all();
+	        return true;
+        }
 	});
+}
+function display_drop_all(){
+    $("#w3_drop_target_to_all").css("display", "");
+}
+function hide_drop_all(){
+    $("#w3_drop_target_to_all").css("display", "none");
 }
 
 function hover_w3_for_target(){
 //    console.log("hover_w3_for_target");
+    $("#w3_drop_target_to_all").mouseover(hover_drop);
+    $("#w3_drop_target_to_all").mouseover(hover_leave);
     $("#third_box_content tr").mouseover(hover_drop);
     $("#third_box_content tr").mouseleave(hover_leave);
 }
