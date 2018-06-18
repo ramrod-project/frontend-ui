@@ -4,7 +4,7 @@
   "description": "Websocket server for PCP frontend/rethinkdb connection.",
   "main": "server.js",
   "scripts": {
-    "test": "mocha test/test.js",
+    "test": "STAGE=TESTING mocha --exit test/test.js",
     "start": "PORT=3000 node src/server.js"
   },
   "repository": {

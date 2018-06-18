@@ -15,43 +15,25 @@ var testws = null;
 
 describe('', function () {
 
-    this.timeout(5000);
+    this.timeout(3000);
 
     before(function (done) {
         testws = new wsclient();
-        rdb.connect( {host: 'localhost', port: 28015}, function(err, conn) {
-            if (err) throw err;
-            rdbconn = conn;
-            rdb.db('test').tableList().run(rdbconn, function (err, result) {
-                if (err) throw err;
-                if (result[0] != 'messages') {
-                    rdb.db('test').tableCreate('messages').run(rdbconn, function (err, result) {
-                        if (err) throw err;
-                        done();
-                    });
-                } else {
-                    done();
-                }
-            });
-        });
-    });
-
-    after(function(done) {
-        /*rdb.db('test').tableDrop('messages').run(rdbconn, function (err, result) {
-            if (err) throw err;
-            done();
-        });*/
         done();
     });
 
-    it('should return index page', function () {
+    after(function(done) {
+        done();
+    });
+
+    /*it('should return index page', function () {
         return chai.request(app)
             .get('/')
             .then(function(res) {
                 expect(res).to.have.status(200);
                 expect(res).to.be.html;
             })
-    });
+    });*/
 
     it('should confirm Websockets connection', function (done) {
         testws.on('connect', function (conn) {
@@ -59,26 +41,38 @@ describe('', function () {
                 connection = conn;
                 connection.once('message', function (message) {
                     expect(typeof(message.utf8Data)).to.equal('string');
-                    expect(message.utf8Data).equal("Websocket connection established.");
+                    expect(message.utf8Data).equal("Websocket connection established. Awaiting feed selection...");
                     done();
                 });
             }
         });
-        testws.connect('ws://localhost:8080/monitor');
+        testws.connect('ws://localhost:3000/monitor');
     });
 
     it('should confirm Rethinkdb connection', function (done) {
         if (connection.connected) {
             connection.once('message', function (message) {
                 expect(typeof(message.utf8Data)).to.equal('string');
-                expect(message.utf8Data).equal("Waiting for changes to RethinkDB table 'test'");
+                expect(message.utf8Data).equal("Waiting for changes in job statuses...");
                 done();
             });
-            connection.send('rethinkdb');
+            connection.send('status');
         }
     });
 
-    it('should push database updates to client', function (done) {
+    it('should not open feed on invalid parameter', function (done) {
+        if (connection.connected) {
+            const invalidSelection = "foo";
+            connection.once('message', function (message) {
+                expect(typeof(message.utf8Data)).to.equal('string');
+                expect(message.utf8Data).equal("foo not a valid feed!");
+                done();
+            });
+            connection.send(invalidSelection);
+        }
+    });
+
+    it('should push job status updates to client', function (done) {
         if (connection.connected) {
             connection.once('message', function (message) {
                 expect(typeof(JSON.parse(message.utf8Data))).to.equal('object');
@@ -96,6 +90,6 @@ describe('', function () {
         ).run(rdbconn, function (err, result) {
             if (err) throw err;
         });
-    });
+    });*/
 
 })
