@@ -16,13 +16,11 @@ matrix:
           - qa
       before_install:
         - git clone  https://github.com/ramrod-project/frontend-ui.git
-
       install:
-        - pip install django==2.0.1 pytest pytest-cov pytest-django rethinkdb ramrodbrain ua-parser
+        - pip install -r requirements.txt
         - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
         - chmod +x ./cc-test-reporter
         - ./cc-test-reporter before-build
-
       before_script:
         - if [ "$TRAVIS_BRANCH" != "master"  ];
           then docker run -d --rm --name myP -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG"
@@ -33,14 +31,11 @@ matrix:
         - STAGE=TESTING pytest --cov --cov-config .coveragerc --cov-report xml pcp_alpha
         - docker stop myP
         - ./cc-test-reporter after-build -t coverage.py --exit-code 0
-
       script:
         - if [ "$TRAVIS_BRANCH" != "master"  ];
           then docker build -t ramrodpcp/frontend-ui:$TRAVIS_BRANCH . ;
           else docker build -t ramrodpcp/frontend-ui:latest . ; fi
-
         - docker network create test
-
         - if [ "$TRAVIS_BRANCH" != "master"  ];
           then docker run -d --rm --name rethinkdb -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG"
           --network test ramrodpcp/database-brain:$TRAVIS_BRANCH;
@@ -66,8 +61,6 @@ matrix:
         - "8.9.3"
       services:
         - docker
-      before_script:
-        - cd websocket_server
       install:
         - npm install --production
       before_script:
@@ -76,6 +69,7 @@ matrix:
           ramrodpcp/database-brain:$TRAVIS_BRANCH;
           else docker run -d --rm --name rethinkdb -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG" 
           ramrodpcp/database-brain:latest; fi
+        - cd websocket_server
         - npm test
         - docker stop rethinkdb
       script:
