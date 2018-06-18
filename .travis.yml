@@ -68,9 +68,9 @@ matrix:
         - docker
       install:
         - cd websocket_server
-        - if [ "$TRAVIS_BRANCH" != "master"  ];
-          then docker build -t ramrodpcp/websocket-server:$TRAVIS_BRANCH . ;
-          else docker build -t ramrodpcp/websocket-server:latest . ; fi
+        # - if [ "$TRAVIS_BRANCH" != "master"  ];
+        #   then docker build -t ramrodpcp/websocket-server:$TRAVIS_BRANCH . ;
+        #   else docker build -t ramrodpcp/websocket-server:latest . ; fi
         - npm i -g npm@6.1.0
         - npm i
       before_script:
@@ -83,20 +83,20 @@ matrix:
         - npm test
         - docker stop rethinkdb
       script:
-        - if [ "$TRAVIS_BRANCH" != "master"  ];
-          then docker run -d --rm --name websocket -p 3000:3000 -e "STAGE=QA" -e "LOGLEVEL=DEBUG"
-          --network test ramrodpcp/websocket-server:$TRAVIS_BRANCH;
-          else docker run -d --rm --name websocket -p 3000:3000 -e "STAGE=QA" -e "LOGLEVEL=DEBUG"
-          --network test ramrodpcp/websocket-server:latest; fi
+        # - if [ "$TRAVIS_BRANCH" != "master"  ];
+        #   then docker run -d --rm --name websocket -p 3000:3000 -e "STAGE=QA" -e "LOGLEVEL=DEBUG"
+        #   --network test ramrodpcp/websocket-server:$TRAVIS_BRANCH;
+        #   else docker run -d --rm --name websocket -p 3000:3000 -e "STAGE=QA" -e "LOGLEVEL=DEBUG"
+        #   --network test ramrodpcp/websocket-server:latest; fi
         - sleep 5
-        - docker logs websocket
+        # - docker logs websocket
       after_success:
         - if [[ "$TRAVIS_PULL_REQUEST" == "false" ]];
           then echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin; fi
-        - if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]];
-          then docker push ramrodpcp/websocket-server:latest;
-          elif [[ "$TRAVIS_PULL_REQUEST" == "false" ]];
-          then docker push ramrodpcp/websocket-server:$TRAVIS_BRANCH; fi
+        # - if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]];
+        #   then docker push ramrodpcp/websocket-server:latest;
+        #   elif [[ "$TRAVIS_PULL_REQUEST" == "false" ]];
+        #   then docker push ramrodpcp/websocket-server:$TRAVIS_BRANCH; fi
 
 notifications:
   slack: ramrod-project:GDF82rRYDg3KSekrT3GA24qO

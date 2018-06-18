@@ -5,7 +5,7 @@ RUN apk update && \
 
 WORKDIR /srv/node-app
 
-RUN npm i -g npm
+RUN npm i -g npm@6.1.0
 
 COPY ./package.json .
 
