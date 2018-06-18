@@ -111,11 +111,13 @@ def insert_new_target(plugin_name, location_num, port_num, optional_char):
     :param optional_char: user input optional
     :return: the insert
     """
-    inserted_new_target = brain.queries.insert_new_target(plugin_name,
-                                                          location_num,
-                                                          port_num,
-                                                          optional_char,
-                                                          verify_target=False)
+    target_dict = {
+        "PluginName": plugin_name,
+        "Location": location_num,
+        "Port": port_num,
+        "Optional": {"init": optional_char}
+    }
+    inserted_new_target = brain.queries.insert_target(target_dict)
     print("log: db New target was inserted to Brain.Targets")
     print("{}\n".format(inserted_new_target))
     return inserted_new_target
