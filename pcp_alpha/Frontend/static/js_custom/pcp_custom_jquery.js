@@ -7,7 +7,8 @@ This file was created for project pcp to add jquery functionality and other java
 var inc = 0;
 var hover_int = 0;
 $(document).ready(function() {
-	$("tr.clickable-row").click(get_commands_func);   // displays commands in w2
+	$("tr td.clickable-row-col1").click(get_commands_func);   // displays commands in w2
+	$("tr td.clickable-row-col2").click(get_commands_func);   // displays commands in w2
 
 	var row_selection = $('#target_table').DataTable({  //for w1+w3
 	    searching: false,
@@ -19,8 +20,7 @@ $(document).ready(function() {
 
     $(".gridSelect tbody tr").click(target_select_func(row_selection));  // highlight target in w1 to drag to w3
 	$("#addjob_button").click(function(){
-	    inc++;
-	    $("#addjob_button")[0].value = inc;
+
 	});
 	$("#addjob_button").click(add_new_job);               // add new job in w3
 	$("#clear_buttonid").click(clear_new_jobs);           // clear content in w3
@@ -28,6 +28,32 @@ $(document).ready(function() {
     $("#w3_drop_to_all").attr({"ondrop": "drop_command_to_multiple(event)",
                                "ondragover": "allowDropCommand(event)"});
     $("#dvader_nooo_id").click(easter_egg_one);           // dvader nooo audio
+    $("#searchNameHere_id").change(filter_w1);
+    $("#searchNameHere_id").keyup(filter_w1);
+    $("#w1_command_active_filter").css("display", "none");
+
+    $("#w3_drop_target_to_all").droppable({
+        drop: function (event, ui){
+            if (hover_int != 0){
+                var selected_var = ui.helper.children();
+                if (selected_var.length == 1){
+                    var num_jobs = $("#addjob_button")[0].value;
+                    for (var i=1; i<=num_jobs; i++){
+                        if (job_row_is_mutable(i)) {
+                            var row_id = selected_var[0].id;
+                            var row_id_str = row_id.substring(10,row_id.length);
+                            var row_js = JSON.parse($("#nameidjson" + row_id_str)[0].innerText);
+                            $("#addressid"+i)[0].innerText = row_js.Location;
+                            $("#pluginid"+i)[0].innerText = row_js.PluginName;
+                        }
+                    }
+                    set_w3_job_status();
+                    $('.selected');
+                }
+            }
+        }
+    });
+
 });
 
 /*
@@ -50,11 +76,34 @@ Functions down below are for w2
 // List of commands based off of plugin name
 var current_command_template = {}
 
+function filter_w1(){
+    var filter_content = $("#searchNameHere_id")[0].value.toLowerCase();
+    var filter_display = $("#w1_command_active_filter");
+    var num_targets = 2;
+    if (filter_content.length == 0){
+        filter_display.css("display", "none");
+    } else {
+        filter_display.css("display", "");
+        filter_display[0].innerText = "Currently filtering on: "+filter_content;
+    }
+    var to_filter = $("#target_box_contentid tr");
+    for (var row_i = 0; row_i < to_filter.length; row_i++){
+        var row_id = to_filter[row_i].id.substring(10, to_filter[row_i].id.length);
+        var target_json = $("#name_tag_id"+row_id+" a span")[0].innerHTML;
+        var target = JSON.parse(target_json);
+        if (target.PluginName.toLowerCase().includes(filter_content)  || target.Location.toLowerCase().includes(filter_content) ){
+            $(to_filter[row_i]).css("display", "");
+        } else {
+            $(to_filter[row_i]).css("display", "none");
+        }
+    }
+}
 function get_commands_func(){
 //    console.log("get_commands_func");  // debug
+//    console.log($(this)[0].parentElement.id);
 
     // plugin name the user clicked
-    var row_id = $(this)[0].id.substring(10, $(this)[0].id.length);
+    var row_id = $(this)[0].parentElement.id.substring(10, $(this)[0].id.length);
     var plugin_name_var = $("#name_tag_id"+row_id+" a span")[1].innerText;
     var check_content_var = false;
 
@@ -151,6 +200,9 @@ function add_new_plugin_location_job_row(id_parameter, num_parameter){
 
 // Add new job
 function add_new_job(){
+    inc++;
+    $("#addjob_button")[0].value = inc;
+
     var value = $("#addjob_button")[0].value;
     // content for w3
     if(value == 1) {
@@ -232,17 +284,31 @@ function drag_target(){
 	        var selected_var = $(".gridSelect tbody tr.selected");
             if (selected_var.length === 0) {
                 selected_var = $(this).addClass('selected');
+            } else if (selected_var.length == 1) {
+                display_drop_all();
             }
             var container = $('<table/>').attr({'id':'draggingContainer'});
             container.append(selected_var.clone().removeClass("selected"));
             hover_w3_for_target();
             return container;
-	    }
+	    },
+	    revert: function(){
+	        hide_drop_all();
+	        return true;
+        }
 	});
+}
+function display_drop_all(){
+    $("#w3_drop_target_to_all").css("display", "");
+}
+function hide_drop_all(){
+    $("#w3_drop_target_to_all").css("display", "none");
 }
 
 function hover_w3_for_target(){
 //    console.log("hover_w3_for_target");
+    $("#w3_drop_target_to_all").mouseover(hover_drop);
+    $("#w3_drop_target_to_all").mouseover(hover_leave);
     $("#third_box_content tr").mouseover(hover_drop);
     $("#third_box_content tr").mouseleave(hover_leave);
 }
@@ -296,12 +362,14 @@ function drop_target(hover_object){
                     } else {
                         selected_row = hover_object[0];
                     }
-                    var selected_row_id = selected_row.id.substring(6, selected_row.id.length);
-                    if (job_row_is_mutable(selected_row_id)) {
-                        $(selected_row.children[1]).empty(); //plugin column
-                        $(selected_row.children[2]).empty(); //location column
-                        selected_row.children[1].append(row_js.PluginName);
-                        selected_row.children[2].append(row_js.Location);
+                    if (selected_row != undefined){
+                        var selected_row_id = selected_row.id.substring(6, selected_row.id.length);
+                        if (job_row_is_mutable(selected_row_id)) {
+                            $(selected_row.children[1]).empty(); //plugin column
+                            $(selected_row.children[2]).empty(); //location column
+                            selected_row.children[1].append(row_js.PluginName);
+                            selected_row.children[2].append(row_js.Location);
+                        }
                     }
                 }
                 set_w3_job_status();
@@ -393,7 +461,10 @@ function drop_command_to_multiple(ev) {
     $("#w3_drop_to_all").css("display", "none");
     var command = JSON.parse(command_json);
     var num_jobs = $("#addjob_button")[0].value;
-
+    if (num_jobs < 1){
+        num_jobs++;
+        add_new_job();
+    }
     for (var j = 1; j <= num_jobs; j++){
         var command_td = $("#commandid"+j);
         drop_command_into_hole(command, command_json, command_td, j)
