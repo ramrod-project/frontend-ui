@@ -59,13 +59,18 @@ matrix:
         - if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]];
           then docker push ramrodpcp/frontend-ui:latest;
           elif [[ "$TRAVIS_PULL_REQUEST" == "false" ]];
-          then docker push ramrodpcp/frontend-ui:$TRAVIS_BRANCH;
+          then docker push ramrodpcp/frontend-ui:$TRAVIS_BRANCH; fi
     - sudo: required
       language: node_js
       node_js:
         - "8.9.3"
       services:
         - docker
+      branches:
+        only:
+          - master
+          - dev
+          - qa
       install:
         - cd websocket_server
         # - if [ "$TRAVIS_BRANCH" != "master"  ];
