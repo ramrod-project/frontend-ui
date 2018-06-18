@@ -104,7 +104,7 @@ desired effect
         <li class="header">HEADER</li>
         <!-- Links on the sidebar -->
         <li class="active"><a href="/"><i class="fa fa-home text-aqua"></i> <span>Home Page</span></a></li>
-        <li><a href="/new_target_form/"><i class="fa fa-laptop text-aqua"></i> <span>Add Target</span></a></li>
+        <li><a href="/new_target_form/"><i class="fa fa-laptop text-aqua"></i> <span id="add_target_id">Add Target</span></a></li>
         <!--<li><a href="#"><i class="fa fa-laptop text-aqua"></i> <span>Dashboard2</span></a></li>-->
         <!--<li class="treeview">-->
           <!--<a href="#"><i class="fa fa-fighter-jet text-aqua"></i> <span>Capabilities</span>-->
@@ -208,21 +208,37 @@ desired effect
                                           <th class="sorting" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">
                                               Location
                                           </th>
+                                          <th class="sorting" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">
+
+                                          </th>
                                       </tr>
                                       </thead>
                                       <tbody id="target_box_contentid" class="target_box_content">
                                       {% if host_dict %}
                                         {% for items in host_dict %}
-                                            <a name="name_tag_name">
-                                            <tr role="row" class="odd clickable-row" id="target_row{{ forloop.counter0 }}" onclick="#">
+                                            <!--<a name="name_tag_name">-->
+                                            <tr role="row" class="odd" id="target_row{{ forloop.counter0 }}">
                                                 <!--<td>-->
                                                     <!--<input class="target_checkbox" type="checkbox">&nbsp;{{ forloop.counter }}<br>-->
                                                 <!--</td>-->
-                                                <td id="name_tag_id{{ forloop.counter0 }}"><a href="#">
-                                                    <span style="display:none" id="nameidjson{{ forloop.counter0 }}">{{ items.json }}</span><span>{{ items.PluginName }}</span></a></td>
-                                                <td id="address_tag_id{{ forloop.counter0 }}"><a href="#">
-                                                    <span>{{ items.Location }} </span></a></td>
-                                            </tr></a>
+                                                <td id="name_tag_id{{ forloop.counter0 }}" class="clickable-row-col1" onclick="#">
+                                                    <a href="#">
+                                                    <span style="display:none" id="nameidjson{{ forloop.counter0 }}">{{ items.json }}</span>
+                                                    <span>{{ items.PluginName }}</span>
+                                                    </a>
+                                                </td>
+                                                <td id="address_tag_id{{ forloop.counter0 }}" class="clickable-row-col2" onclick="#">
+                                                    <a href="#">
+                                                    <span>{{ items.Location }} </span>
+                                                    </a>
+                                                </td>
+                                                <td>
+                                                    <span id="edit_target_id">
+                                                        <a href="/edit_target_form/{{ items.id }}/" target="_blank" class="btn btn-social-icon btn-bitbucket btn-xs"><i class="fa fa-edit"></i></a>
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                            <!--</a>-->
                                         {% endfor %}
                                       {% endif %}
                                       </tbody>
@@ -231,6 +247,7 @@ desired effect
                                           <!--<th rowspan="1" colspan="1">Row #</th>-->
                                           <th rowspan="1" colspan="1">Plugin Name</th>
                                           <th rowspan="1" colspan="1">Location</th>
+                                          <th rowspan="1" colspan="1"></th>
                                       </tr>
                                       </tfoot>
                                   </table>
@@ -341,6 +358,7 @@ desired effect
                 <div class="box box-primary">
                     <div class="box-body">
                         <div id="w3_drop_to_all" style="outline: 1px dashed #ABABAB; outline-offset: 1px; text-align: center; display: none; "><br>Drop Here to apply the command to <strong>all</strong> jobs<br><br></div>
+                        <div id="w3_drop_target_to_all" style="outline: 1px dashed #ABABAB; outline-offset: 1px; text-align: center; display: none; "><br>Drop Here to apply to <strong>all</strong> jobs<br><br></div>
                         <div id="jobq_content" class="tab-content">
                             <div id="jobq_1" class="tab-pane active"> </div>
                             <div id="example3_wrapper" class="dataTables_wrapper form-inline dt-bootstrap">

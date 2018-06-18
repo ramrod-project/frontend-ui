@@ -9,7 +9,8 @@ var hover_int = 0;
 var sequences = {}
 
 $(document).ready(function() {
-	$("tr.clickable-row").click(get_commands_func);   // displays commands in w2
+	$("tr td.clickable-row-col1").click(get_commands_func);   // displays commands in w2
+	$("tr td.clickable-row-col2").click(get_commands_func);   // displays commands in w2
 
 	var row_selection = $('#target_table').DataTable({  //for w1+w3
 	    searching: false,
@@ -33,6 +34,28 @@ $(document).ready(function() {
     $("#searchNameHere_id").keyup(filter_w1);
     $("#w1_command_active_filter").css("display", "none");
     $("#new_jobq_button").click(add_sequence_tab);
+
+    $("#w3_drop_target_to_all").droppable({
+        drop: function (event, ui){
+            if (hover_int != 0){
+                var selected_var = ui.helper.children();
+                if (selected_var.length == 1){
+                    var num_jobs = $("#addjob_button")[0].value;
+                    for (var i=1; i<=num_jobs; i++){
+                        if (job_row_is_mutable(i)) {
+                            var row_id = selected_var[0].id;
+                            var row_id_str = row_id.substring(10,row_id.length);
+                            var row_js = JSON.parse($("#nameidjson" + row_id_str)[0].innerText);
+                            $("#addressid"+i)[0].innerText = row_js.Location;
+                            $("#pluginid"+i)[0].innerText = row_js.PluginName;
+                        }
+                    }
+                    set_w3_job_status();
+                    $('.selected');
+                }
+            }
+        }
+    });
 
 });
 
@@ -80,9 +103,10 @@ function filter_w1(){
 }
 function get_commands_func(){
 //    console.log("get_commands_func");  // debug
+//    console.log($(this)[0].parentElement.id);
 
     // plugin name the user clicked
-    var row_id = $(this)[0].id.substring(10, $(this)[0].id.length);
+    var row_id = $(this)[0].parentElement.id.substring(10, $(this)[0].id.length);
     var plugin_name_var = $("#name_tag_id"+row_id+" a span")[1].innerText;
     var check_content_var = false;
 
@@ -278,17 +302,31 @@ function drag_target(){
 	        var selected_var = $(".gridSelect tbody tr.selected");
             if (selected_var.length === 0) {
                 selected_var = $(this).addClass('selected');
+            } else if (selected_var.length == 1) {
+                display_drop_all();
             }
             var container = $('<table/>').attr({'id':'draggingContainer'});
             container.append(selected_var.clone().removeClass("selected"));
             hover_w3_for_target();
             return container;
-	    }
+	    },
+	    revert: function(){
+	        hide_drop_all();
+	        return true;
+        }
 	});
+}
+function display_drop_all(){
+    $("#w3_drop_target_to_all").css("display", "");
+}
+function hide_drop_all(){
+    $("#w3_drop_target_to_all").css("display", "none");
 }
 
 function hover_w3_for_target(){
 //    console.log("hover_w3_for_target");
+    $("#w3_drop_target_to_all").mouseover(hover_drop);
+    $("#w3_drop_target_to_all").mouseover(hover_leave);
     $("#third_box_content tr").mouseover(hover_drop);
     $("#third_box_content tr").mouseleave(hover_leave);
 }
@@ -342,12 +380,14 @@ function drop_target(hover_object){
                     } else {
                         selected_row = hover_object[0];
                     }
-                    var selected_row_id = selected_row.id.substring(6, selected_row.id.length);
-                    if (job_row_is_mutable(selected_row_id)) {
-                        $(selected_row.children[1]).empty(); //plugin column
-                        $(selected_row.children[2]).empty(); //location column
-                        selected_row.children[1].append(row_js.PluginName);
-                        selected_row.children[2].append(row_js.Location);
+                    if (selected_row != undefined){
+                        var selected_row_id = selected_row.id.substring(6, selected_row.id.length);
+                        if (job_row_is_mutable(selected_row_id)) {
+                            $(selected_row.children[1]).empty(); //plugin column
+                            $(selected_row.children[2]).empty(); //location column
+                            selected_row.children[1].append(row_js.PluginName);
+                            selected_row.children[2].append(row_js.Location);
+                        }
                     }
                 }
                 set_w3_job_status();
