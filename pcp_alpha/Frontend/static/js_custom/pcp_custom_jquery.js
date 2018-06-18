@@ -201,15 +201,25 @@ function add_sequence_tab(e){
     $('#jobq_content').append('<div class="tab-pane" id="jobq_'+next_tab+'">New Data '+next_tab+'</div>');
     console.warn("adding sequence ");
     //ADD THE OUTPUT TAB TOO!
-    var output_tab = $("#output_tabs").append('<li><a href="#outq_'+next_tab+'" data-toggle="tab">'+next_tab+'</a></li>');
+    var output_tab = $("#output_tabs").append('<li onclick="synchronize_output_sequence_tabs('+next_tab+')"><a href="#outq_'+next_tab+'" data-toggle="tab">'+next_tab+'</a></li>');
     $('#outq_content').append('<div class="tab-pane" id="outq_'+next_tab+'">New Data '+next_tab+'</div>');
     var syscheck=1;
 }
 function synchronize_job_sequence_tabs(tab_id){
     var other_tab = $('#output_tabs a[href="#outq_'+tab_id+'"]');
     other_tab.tab('show');
-
+    synchronize_sequence_tab_rows(tab_id);
 }
+function synchronize_output_sequence_tabs(tab_id){
+    var other_tab = $('#jobq_tabs a[href="#jobq_'+tab_id+'"]');
+    other_tab.tab('show');
+    synchronize_sequence_tab_rows(tab_id);
+}
+function synchronize_sequence_tab_rows(sequence_id){
+
+    var dan = "1";
+}
+
 function add_new_plugin_location_job_row(id_parameter, num_parameter){
     var row_var = $("<td/>").attr({"id": id_parameter + num_parameter}).append($("<a/>").attr(
     {"href": "#"}).append($("<span/>").text("")));
