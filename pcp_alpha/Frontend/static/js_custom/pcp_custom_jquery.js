@@ -362,12 +362,14 @@ function drop_target(hover_object){
                     } else {
                         selected_row = hover_object[0];
                     }
-                    var selected_row_id = selected_row.id.substring(6, selected_row.id.length);
-                    if (job_row_is_mutable(selected_row_id)) {
-                        $(selected_row.children[1]).empty(); //plugin column
-                        $(selected_row.children[2]).empty(); //location column
-                        selected_row.children[1].append(row_js.PluginName);
-                        selected_row.children[2].append(row_js.Location);
+                    if (selected_row != undefined){
+                        var selected_row_id = selected_row.id.substring(6, selected_row.id.length);
+                        if (job_row_is_mutable(selected_row_id)) {
+                            $(selected_row.children[1]).empty(); //plugin column
+                            $(selected_row.children[2]).empty(); //location column
+                            selected_row.children[1].append(row_js.PluginName);
+                            selected_row.children[2].append(row_js.Location);
+                        }
                     }
                 }
                 set_w3_job_status();
