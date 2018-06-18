@@ -1,3 +1,8 @@
+branches:
+  only:
+    - master
+    - dev
+    - qa
 matrix:
   include:
     - sudo: required
@@ -8,11 +13,6 @@ matrix:
         - docker
       env:
         - CC_TEST_REPORTER_ID=6444ce234e6ec1703cda414367cc0ef773c9645e0248ec579e4201d366575aaf
-      branches:
-        only:
-          - master
-          - dev
-          - qa
       before_install:
         - git clone  https://github.com/ramrod-project/frontend-ui.git
       install:
@@ -66,11 +66,6 @@ matrix:
         - "8.9.3"
       services:
         - docker
-      branches:
-        only:
-          - master
-          - dev
-          - qa
       install:
         - cd websocket_server
         # - if [ "$TRAVIS_BRANCH" != "master"  ];
