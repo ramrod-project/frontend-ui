@@ -4,5 +4,4 @@ node_modules*
 README.md
 LICENSE
 .git*
-package-lock.json
 test*

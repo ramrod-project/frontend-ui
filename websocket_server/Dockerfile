@@ -9,7 +9,7 @@ RUN npm i -g npm
 
 COPY ./package.json .
 
-RUN npm install --production
+RUN npm i
 
 COPY . .
 
