@@ -7,8 +7,7 @@ matrix:
       services:
         - docker
       env:
-        global:
-          - CC_TEST_REPORTER_ID=6444ce234e6ec1703cda414367cc0ef773c9645e0248ec579e4201d366575aaf
+        - CC_TEST_REPORTER_ID=6444ce234e6ec1703cda414367cc0ef773c9645e0248ec579e4201d366575aaf
       branches:
         only:
           - master
@@ -54,7 +53,6 @@ matrix:
         - docker stop frontend
         - docker stop rethinkdb
         - docker network prune -f
-
     - sudo: required
       language: node_js
       node_js:
@@ -62,14 +60,14 @@ matrix:
       services:
         - docker
       install:
-        - npm install --production
+        - cd websocket_server
+        - npm i
       before_script:
         - if [ "$TRAVIS_BRANCH" != "master"  ];
           then docker run -d --rm --name rethinkdb -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG"
           ramrodpcp/database-brain:$TRAVIS_BRANCH;
           else docker run -d --rm --name rethinkdb -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG" 
           ramrodpcp/database-brain:latest; fi
-        - cd websocket_server
         - npm test
         - docker stop rethinkdb
       script:
