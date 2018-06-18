@@ -20,7 +20,10 @@
     "websocket": "^1.0.25"
   },
   "dependencies": {
+    "eslint": "^4.19.1",
     "express": "^4.16.3",
+    "istanbul": "^0.4.5",
+    "npmlog": "^4.1.2",
     "package.json": "^2.0.1",
     "redis": "^2.8.0",
     "rethinkdb": "^2.3.3",

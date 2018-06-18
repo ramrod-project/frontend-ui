@@ -68,6 +68,7 @@ matrix:
         - docker
       install:
         - cd websocket_server
+        - npm i -g npm@6.1.0
         - npm i
       before_script:
         - if [ "$TRAVIS_BRANCH" != "master"  ];
