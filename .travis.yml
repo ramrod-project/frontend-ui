@@ -71,7 +71,13 @@ matrix:
       install:
         - npm install --production
       before_script:
+        - if [ "$TRAVIS_BRANCH" != "master"  ];
+          then docker run -d --rm --name rethinkdb -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG"
+          ramrodpcp/database-brain:$TRAVIS_BRANCH;
+          else docker run -d --rm --name rethinkdb -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG" 
+          ramrodpcp/database-brain:latest; fi
         - npm test
+        - docker stop rethinkdb
       script:
         - if [ "$TRAVIS_BRANCH" != "master"  ];
           then docker build -t ramrodpcp/websocket-server:$TRAVIS_BRANCH . ;
