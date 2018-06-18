@@ -7,12 +7,13 @@ from brain import connect, r
 
 from pcp_alpha.test.test_w4_switch_to_done import switch_to_done
 # from rethinkdb.errors import ReqlOpFailedError
-from pcp_alpha.Backend.db_dir.project_db import check_dev_env
 from pcp_alpha.Backend.db_dir.custom_data import location_generated_num
 from pcp_alpha.Backend.db_dir.project_db import rtdb
-from pcp_alpha.Backend.db_dir.custom_queries import get_specific_brain_targets, get_specific_command
-from pcp_alpha.Backend.pcp_app.views import get_commands_controller, execute_sequence_controller, \
-    w4_output_controller, w4_output_controller_download, new_target_form, val_target_form
+from pcp_alpha.Backend.db_dir.custom_queries import get_specific_brain_targets, \
+    get_specific_command, get_brain_targets
+from pcp_alpha.Backend.pcp_app.views import get_commands_controller, \
+    execute_sequence_controller, w4_output_controller, w4_output_controller_download, \
+    new_target_form, val_target_form, val_edit_target_form, edit_target_form
 
 ECHO_JOB_ID = str(uuid4())
 NOW = time()
@@ -42,6 +43,10 @@ SAMPLE_OUTPUT = {
 
 @pytest.fixture(scope="function")
 def dummy_output_data():
+    """
+    This test is used for other functions test
+    in order to have data to test
+    """
     conn = connect()
     r.db("Brain").table("Jobs").insert(
         SAMPLE_JOB
@@ -56,27 +61,44 @@ def dummy_output_data():
 
 @pytest.mark.incremental
 class TestDataHandling(object):
+    """
+    This class is used to test ui features.
+    """
     @staticmethod
-    def status_code_test(url_str, function_obj, rf):
-        response = None
-        if check_dev_env() is not None:
-            request = rf.get(url_str)
+    def status_code_test(url_str, function_obj, rf, target_id=None):
+        """
+        This function is used for current file to test
+        status codes
+        """
+        request = rf.get(url_str)
+        if target_id is not None:
+            response = function_obj(request, target_id)
+        else:
             response = function_obj(request)
         return response
 
     @staticmethod
     def get_test(url_str, function_obj, rf):
-        response = None
-        if check_dev_env() is not None:
-            request = rf.get(url_str, HTTP_USER_AGENT="Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
-            response = function_obj(request)
+        """
+        This function is used with functions from
+        pcp_app/views.py
+        """
+        request = rf.get(url_str, HTTP_USER_AGENT="Mozilla/5.0 "
+                                                  "(Windows NT 6.1; WOW64; rv:40.0) "
+                                                  "Gecko/20100101 Firefox/40.1")
+        response = function_obj(request)
         return response
-    
+
     @staticmethod
-    def post_test(url_str, post_data, function_obj, rf):
-        response = None
-        if check_dev_env() is not None:
-            request = rf.post(url_str, post_data)
+    def post_test(url_str, post_data, function_obj, rf, target_id=None):
+        """
+        This function is used for forms to imitate user's inputting
+        data and doing a request.POST
+        """
+        request = rf.post(url_str, post_data)
+        if target_id is not None:
+            response = function_obj(request, target_id)
+        else:
             response = function_obj(request)
         return response
 
@@ -86,14 +108,13 @@ class TestDataHandling(object):
         This test is replicating when a user clicks on a
         plugin from W1 and command list will be displayed in W2.
         """
-        if check_dev_env() is not None:
-            cur_var = rtdb.db("Plugins").table("Plugin1").pluck('OptionalInput',
-                                                                'Inputs',
-                                                                'Tooltip',
-                                                                'CommandName',
-                                                                'Output').run(connect())
-            for plugin_item in cur_var:
-                assert isinstance(plugin_item, dict)
+        cur_var = rtdb.db("Plugins").table("Plugin1").pluck('OptionalInput',
+                                                            'Inputs',
+                                                            'Tooltip',
+                                                            'CommandName',
+                                                            'Output').run(connect())
+        for plugin_item in cur_var:
+            assert isinstance(plugin_item, dict)
 
     def test_capability_ui(self, rf):
         """
@@ -114,11 +135,9 @@ class TestDataHandling(object):
         command list will be displayed in W2.  But this test fails on purpose.
         """
         home_url = '/action/get_command_list/?plugin_name=Plugin8'
-
-        if check_dev_env() is not None:
-            request = rf.get(home_url)
-            response = get_commands_controller(request)
-            assert "`Plugins.Plugin8` does not exist" in str(response.content)
+        request = rf.get(home_url)
+        response = get_commands_controller(request)
+        assert "`Plugins.Plugin8` does not exist" in str(response.content)
 
     @staticmethod
     def test_execute_w3_data():
@@ -126,28 +145,26 @@ class TestDataHandling(object):
         This test is replicating when the user clicks on
         'Execute Sequence' button at the bottom right of w3.
         """
+        job_command = ""
+        target_item = ""
+        brain_db = "Brain"
+        plugin_table = "Plugin1"
+        command = "echo"
+        jobs_table = "Jobs"
 
-        if check_dev_env() is not None:
-            job_command = ""
-            target_item = ""
-            brain_db = "Brain"
-            plugin_table = "Plugin1"
-            command = "echo"
-            jobs_table = "Jobs"
+        for command_item in get_specific_command(plugin_table, command):
+            job_command = command_item
 
-            for command_item in get_specific_command(plugin_table, command):
-                job_command = command_item
-
-            for target_item in get_specific_brain_targets(plugin_table):
-                break
-            inserted = rtdb.db(brain_db).table(jobs_table).insert([
-                {"id": ECHO_JOB_ID,
-                 "JobTarget": target_item,
-                 "Status": "Ready",
-                 "StartTime": 0,
-                 "JobCommand": job_command}
-            ]).run(connect())
-            assert inserted['inserted'] == 1
+        for target_item in get_specific_brain_targets(plugin_table):
+            break
+        inserted = rtdb.db(brain_db).table(jobs_table).insert([
+            {"id": ECHO_JOB_ID,
+             "JobTarget": target_item,
+             "Status": "Ready",
+             "StartTime": 0,
+             "JobCommand": job_command}
+        ]).run(connect())
+        assert inserted['inserted'] == 1
 
     def test_execute_w3_data_ui(self, rf):
         """
@@ -187,11 +204,10 @@ class TestDataHandling(object):
                   "%7B%22Value%22%3A%22sdfsdfsdf%22%2C%22Type%22%3A%22textbox%22%2C%22Na" \
                   "me%22%3A%22EchoString%22%2C%22Tooltip%22%3A%22This%20string%20will%20b" \
                   "e%20echoed%20back%22%7D%5D%7D%7D%5"
-        if check_dev_env() is not None:
-            request = rf.get(url_var)
-            with pytest.raises(json.JSONDecodeError):
-                response = execute_sequence_controller(request)
-                assert not response.status_code == 200
+        request = rf.get(url_var)
+        with pytest.raises(json.JSONDecodeError):
+            response = execute_sequence_controller(request)
+            assert not response.status_code == 200
 
     @staticmethod
     def test_execute_w4_data_ui(rf):
@@ -209,20 +225,19 @@ class TestDataHandling(object):
                     "%3A%5B%7B%22Value%22%3A%22sdfsdfsdf%22%2C%22Type%22%3A%22textbox%22" \
                     "%2C%22Name%22%3A%22EchoString%22%2C%22Tooltip%22%3A%22This%20string%" \
                     "20will%20be%20echoed%20back%22%7D%5D%7D%7D%5D"
-        if check_dev_env() is not None:
-            process_obj = Process(target=switch_to_done)
-            process_obj.start()
-            sleep(2)
-            response = execute_sequence_controller(rf.get(first_url))
-            assert "inserted" in str(response.content)
-            assert response.status_code == 200
-            sleep(5)
-            second_url = "/action/get_output_data/?job_id={}".format(json.loads(
-                response.getvalue().decode())['generated_keys'][0])
-            assert w4_output_controller(rf.get(second_url)).status_code == 200
-            assert "sdfsdfsd" in str(w4_output_controller(rf.get(second_url)).content)
-            process_obj.terminate()
-            process_obj.join(timeout=2)
+        process_obj = Process(target=switch_to_done)
+        process_obj.start()
+        sleep(2)
+        response = execute_sequence_controller(rf.get(first_url))
+        assert "inserted" in str(response.content)
+        assert response.status_code == 200
+        sleep(5)
+        second_url = "/action/get_output_data/?job_id={}".format(json.loads(
+            response.getvalue().decode())['generated_keys'][0])
+        assert w4_output_controller(rf.get(second_url)).status_code == 200
+        assert "sdfsdfsd" in str(w4_output_controller(rf.get(second_url)).content)
+        process_obj.terminate()
+        process_obj.join(timeout=2)
 
     @staticmethod
     def test_target_form_post(rf):
@@ -230,7 +245,7 @@ class TestDataHandling(object):
 
         Sends POST to the val_target_form method
         to ensure it processes POST requests.
-        
+
         Arguments:
             rf {RequestFactory} -- used for mocking
             requests.
@@ -242,24 +257,25 @@ class TestDataHandling(object):
             "optional_char": ""
         }
         url_var = "/action/val_target_form"
-        if check_dev_env() is not None:
-            response = TestDataHandling.post_test(url_var, post_data, val_target_form, rf)
-            assert response.status_code == 302
-            assert response.url == "/"
-            response = TestDataHandling.post_test(url_var, {}, val_target_form, rf)
-            assert response.status_code == 200
+        response = TestDataHandling.post_test(url_var, post_data, val_target_form, rf)
+        assert response.status_code == 302
+        assert response.url == "/"
+        response = TestDataHandling.post_test(url_var, {}, val_target_form, rf)
+        assert response.status_code == 200
 
     @staticmethod
     def test_w4_download(dummy_output_data, rf):
+        """
+        test download output data from W4
+        """
         url_var = "/action/get_full_output_data?job_id=138thg-eg98198-sf98gy3-feh8h8"
-        if check_dev_env() is not None:
-            response = TestDataHandling.get_test(
-                url_var,
-                w4_output_controller_download,
-                rf
-            )
-            assert response.status_code == 200
-            assert response.content.decode("utf-8") == SAMPLE_OUTPUT["Content"]
+        response = TestDataHandling.get_test(
+            url_var,
+            w4_output_controller_download,
+            rf
+        )
+        assert response.status_code == 200
+        assert response.content.decode("utf-8") == SAMPLE_OUTPUT["Content"]
 
     @staticmethod
     def test_execute_w4_data_ui_fail(rf):
@@ -268,10 +284,9 @@ class TestDataHandling(object):
         on 'Execute Sequence' button at the bottom right of w3. With wrong data.
         """
         url_var = "/action/get_output_data/?job_id=60d5405c-81b0-4248-aead-9e4f8d38cd14"
-        if check_dev_env() is not None:
-            request = rf.get(url_var)
-            response = w4_output_controller(request)
-            assert response.status_code == 418
+        request = rf.get(url_var)
+        response = w4_output_controller(request)
+        assert response.status_code == 418
 
     @staticmethod
     def test_display_w4_data():
@@ -281,16 +296,15 @@ class TestDataHandling(object):
         """
         brain_db = "Brain"
         output_table = "Outputs"
-        if check_dev_env() is not None:
-            process_var = Process(target=switch_to_done)
-            process_var.start()
-            sleep(2)
-            command_document = rtdb.db(brain_db).table(output_table).filter({
-                "JobCommand": {'id': ECHO_JOB_ID}}).run(connect())
-            for query_item in command_document:
-                assert isinstance(query_item, dict)
-            process_var.terminate()
-            process_var.join(timeout=2)
+        process_var = Process(target=switch_to_done)
+        process_var.start()
+        sleep(2)
+        command_document = rtdb.db(brain_db).table(output_table).filter({
+            "JobCommand": {'id': ECHO_JOB_ID}}).run(connect())
+        for query_item in command_document:
+            assert isinstance(query_item, dict)
+        process_var.terminate()
+        process_var.join(timeout=2)
 
     def test_execute_w3_data_two(self, rf):
         """
@@ -333,23 +347,95 @@ class TestDataHandling(object):
         This test is replicating the data if the form is validated it
         will insert the new target to Brain.Targets table.
         """
-        if check_dev_env() is not None:
-            plugin_name = "Plugin1"
-            location_num = location_generated_num("172.16.5.")
-            port_num = "8002"
-            optional_char = ""
-            inserted_new_target = rtdb.db("Brain").table("Targets").insert([
-                {"PluginName": plugin_name,
-                 "Location": location_num,
-                 "Port": port_num,
-                 "Optional": optional_char}
-            ]).run(connect())
-            assert inserted_new_target['inserted'] == 1
+        plugin_name = "Plugin1"
+        location_num = location_generated_num("172.16.5.")
+        port_num = "8002"
+        optional_char = ""
+        inserted_new_target = rtdb.db("Brain").table("Targets").insert([
+            {"PluginName": plugin_name,
+             "Location": location_num,
+             "Port": port_num,
+             "Optional": optional_char}
+        ]).run(connect())
+        assert inserted_new_target['inserted'] == 1
 
     def test_validate_form(self, rf):
         """
         This test checks the url_var validation is ran correctly.
         """
         url_var = "/action/val_target_form/"
-        status_obj = self.status_code_test(url_str=url_var, function_obj=val_target_form, rf=rf)
+        status_obj = self.status_code_test(url_str=url_var,
+                                           function_obj=val_target_form,
+                                           rf=rf)
         assert status_obj.status_code == 200
+
+    def test_render_edit_target_form(self, rf):
+        """
+        This test checks if it renders the
+        form correctly to edit targets.
+        """
+        target_key = ""
+        for target_item in get_brain_targets():
+            target_key = target_item["id"]
+        url_var = "/edit_target_form/{}".format(target_key)
+        status_obj = self.status_code_test(url_str=url_var,
+                                           function_obj=edit_target_form,
+                                           rf=rf, target_id=target_key)
+        assert status_obj.status_code == 200
+
+    @staticmethod
+    def test_edit_target_form():
+        """
+        This test is imitating editing a new target and
+        updating it back to Brain.Targets.
+        """
+        target_key = ""
+        for target_item in get_brain_targets():
+            target_key = target_item["id"]
+
+        plugin_name = "Plugin1"
+        location_num = location_generated_num("172.16.5.")
+        port_num = "8005"
+        optional_char = "optional here"
+        r.db("Brain").table("Targets").get(target_key).update(
+            {"PluginName": plugin_name,
+             "id": target_key,
+             "Location": location_num,
+             "Port": port_num,
+             "Optional": optional_char}
+        ).run(connect())
+        update_new_target2 = r.db("Brain").table("Targets").get(target_key).update(
+            {"PluginName": plugin_name,
+             "Location": location_num,
+             "Port": port_num[:2] + "1",
+             "Optional": optional_char}
+        ).run(connect())
+        assert update_new_target2['replaced'] == 1
+
+    @staticmethod
+    def test_edit_target_form_post(rf):
+        """
+        This test imitates a editing a target by using the
+        form and doing a request.POST
+        """
+        target_key = ""
+        for target_item in get_brain_targets():
+            target_key = target_item["id"]
+
+        post_data = {
+            "plugin_name": "Plugin1",
+            "location_num": "127.0.0.1",
+            "port_num": "8000",
+            "optional_char": ""
+        }
+        url_var = "action/val_edit_target_form/{}/".format(target_key)
+        response = TestDataHandling.post_test(url_var,
+                                              post_data,
+                                              val_edit_target_form,
+                                              rf, target_id=target_key)
+        assert response.status_code == 302
+        assert response.url == "/"
+        response = TestDataHandling.post_test(url_var, {},
+                                              val_edit_target_form,
+                                              rf, target_id=target_key)
+        assert response.status_code == 302

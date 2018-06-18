@@ -7,7 +7,8 @@ This file was created for project pcp to add jquery functionality and other java
 var inc = 0;
 var hover_int = 0;
 $(document).ready(function() {
-	$("tr.clickable-row").click(get_commands_func);   // displays commands in w2
+	$("tr td.clickable-row-col1").click(get_commands_func);   // displays commands in w2
+	$("tr td.clickable-row-col2").click(get_commands_func);   // displays commands in w2
 
 	var row_selection = $('#target_table').DataTable({  //for w1+w3
 	    searching: false,
@@ -99,9 +100,10 @@ function filter_w1(){
 }
 function get_commands_func(){
 //    console.log("get_commands_func");  // debug
+//    console.log($(this)[0].parentElement.id);
 
     // plugin name the user clicked
-    var row_id = $(this)[0].id.substring(10, $(this)[0].id.length);
+    var row_id = $(this)[0].parentElement.id.substring(10, $(this)[0].id.length);
     var plugin_name_var = $("#name_tag_id"+row_id+" a span")[1].innerText;
     var check_content_var = false;
 
