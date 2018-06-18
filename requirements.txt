@@ -1,6 +1,7 @@
 pytest-django
-pytest
+pytest>=3.6
+pytest-cov
 django==2.0.1
 rethinkdb
-ramrodbrain>=0.1.2
+ramrodbrain>=0.1.25
 ua-parser
