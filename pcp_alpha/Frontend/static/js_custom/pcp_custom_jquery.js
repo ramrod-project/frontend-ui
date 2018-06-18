@@ -315,7 +315,7 @@ function hover_w3_for_target(){
 
 //    future animation
 function hover_leave(){
-    console.log("hover_leave");
+//    console.log("hover_leave");  // debug
     hover_int = 0;
 }
 
@@ -345,7 +345,7 @@ function hover_drop(){
 
 // Drop target to W3
 function drop_target(hover_object){
-    console.log("drop_target");
+//    console.log("drop_target");  // debug
     $(".gridSelect, .divw3row").droppable({
         drop: function (event, ui) {
             if (hover_int != 0){
@@ -411,7 +411,7 @@ function drag_end_command(event){
 }
 
 function drop_command(ev) {
-    console.log("drop_command");
+//    console.log("drop_command");  // debug
     ev.preventDefault();
     var command_json = ev.dataTransfer.getData("text");
     $("#w3_drop_to_all").css("display", "none");
@@ -427,7 +427,7 @@ function drop_command(ev) {
     set_w3_job_status();
 }
 function set_w3_job_status(){
-    console.log("set_w3_job_status");
+//    console.log("set_w3_job_status");  // debug
     var num_jobs = $("#addjob_button")[0].value;
     var w3_rows = $("#third_box_content tr");
 
@@ -455,7 +455,7 @@ function set_w3_job_status(){
 
 
 function drop_command_to_multiple(ev) {
-    console.log("drop_command_to_multiple");
+//    console.log("drop_command_to_multiple");  // debug
     ev.preventDefault();
     var command_json = ev.dataTransfer.getData("text");
     $("#w3_drop_to_all").css("display", "none");
@@ -473,7 +473,7 @@ function drop_command_to_multiple(ev) {
 }
 
 function drop_command_into_hole(command, command_json, command_td, row_id){
-    console.log("drop_command_into_hole");
+//    console.log("drop_command_into_hole");  // debug
     var current_status = $("#jobstatusid"+row_id+" span");
     if ((current_status.length == 0) ||
         (current_status.length >=1 && command_td.length == 1 && ( current_status[0].innerText == "Preparing" ||
@@ -502,7 +502,11 @@ function drop_command_into_hole(command, command_json, command_td, row_id){
 
 // Execute Sequence function down below are for w3+w4
 function execute_sequence(){
-    console.log("execute_sequence function has been called");
+//    console.log("execute_sequence function has been called");  // debug
+    $(".gridSelect tbody tr, .gridSelect2 tbody tr").draggable({
+        disabled: true
+    });
+    hide_drop_all();
     var jobs = []
     var num_jobs = $("#addjob_button")[0].value;
     var w3_rows = $("#third_box_content tr");
@@ -565,7 +569,7 @@ Functions down below are for w4
 */
 // Modify function add depth parameter, increment depth when it errors
 function execute_sequence_output(specific_id, updateid, counter=0, backoff=2000){
-    console.log("execute_sequence_output function");
+//    console.log("execute_sequence_output function");  // debug
     $.ajax({
         type: "GET",
         url: "/action/get_output_data/",
@@ -573,6 +577,9 @@ function execute_sequence_output(specific_id, updateid, counter=0, backoff=2000)
         datatype: 'json',
         success: function(data) {
             console.log("SUCCESS @ execute_sequence_output  function");
+            $(".gridSelect tbody tr, .gridSelect2 tbody tr").draggable({
+                disabled: false
+            });
             for (var j = 1; j <= inc; j++){
                 if($("#jobstatusid"+j)[0].innerText == 'Error'){
                 } else {
@@ -621,6 +628,9 @@ function execute_sequence_output(specific_id, updateid, counter=0, backoff=2000)
         if(counter == 10){
 //            console.log("About to BREAK");
             // W4 errors out or the job doesn't work for whatever reason.
+            $(".gridSelect tbody tr, .gridSelect2 tbody tr").draggable({
+                disabled: false
+            });
             $("#updateid"+updateid).empty();
             $("#updateid"+updateid).attr({"class": ""});
             $("#updateid"+updateid).append("No data to return at the moment :(");
