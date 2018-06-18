@@ -17,9 +17,31 @@ describe('', function () {
 
     this.timeout(3000);
 
+    const newJob = {
+        "JobTarget":{
+            "PluginName": "advancer",
+            "Location": "8.8.8.8",
+            "Port": "80"
+        },
+        "JobCommand":{
+            "CommandName": "TestJob",
+            "Tooltip": "for testing jobs",
+            "Inputs":[]
+        },
+        "Status": "Ready",
+        "StartTime" : 0
+    };
+
     before(function (done) {
         testws = new wsclient();
-        done();
+        rdb.connect( {host: 'localhost', port: 28015}, function(err, conn) {
+            if (err) throw err;
+            rdbconn = conn;
+            rdb.db('Brain').tableList().run(rdbconn, function (err, result) {
+                if (err) throw err;
+                done();
+            });
+        });
     });
 
     after(function(done) {
@@ -76,20 +98,20 @@ describe('', function () {
         if (connection.connected) {
             connection.once('message', function (message) {
                 expect(typeof(JSON.parse(message.utf8Data))).to.equal('object');
-                data = JSON.parse(message.utf8Data)
-                expect(data.new_val.messagetype).to.equal("test message");
-                expect(data.new_val.data).to.equal("test string data");
+                data = JSON.parse(message.utf8Data);
+                expect(data.status).to.equal("Done");
                 done();
             });
         }
-        rdb.db('test').table('messages').insert(
-            {
-                "messagetype": "test message",
-                "data": "test string data"
-            }
-        ).run(rdbconn, function (err, result) {
+        rdb.db('Brain').table('Jobs').insert(newJob)
+        .run(rdbconn, function (err, result) {
             if (err) throw err;
+            rdb.db('Brain').table('Jobs').get(result.generated_keys[0])
+            .update({"Status": "Done"})
+            .run(rdbconn, function (err, result) {
+                if (err) throw err;
+            });
         });
-    });*/
+    });
 
 })
