@@ -68,6 +68,9 @@ matrix:
         - docker
       install:
         - cd websocket_server
+        - if [ "$TRAVIS_BRANCH" != "master"  ];
+          then docker build -t ramrodpcp/websocket-server:$TRAVIS_BRANCH . ;
+          else docker build -t ramrodpcp/websocket-server:latest . ; fi
         - npm i -g npm@6.1.0
         - npm i
       before_script:
@@ -80,9 +83,6 @@ matrix:
         - npm test
         - docker stop rethinkdb
       script:
-        - if [ "$TRAVIS_BRANCH" != "master"  ];
-          then docker build -t ramrodpcp/websocket-server:$TRAVIS_BRANCH . ;
-          else docker build -t ramrodpcp/websocket-server:latest . ; fi
         - if [ "$TRAVIS_BRANCH" != "master"  ];
           then docker run -d --rm --name websocket -p 3000:3000 -e "STAGE=QA" -e "LOGLEVEL=DEBUG"
           --network test ramrodpcp/websocket-server:$TRAVIS_BRANCH;
