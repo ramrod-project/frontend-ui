@@ -6,6 +6,8 @@ This file was created for project pcp to add jquery functionality and other java
 
 var inc = 0;
 var hover_int = 0;
+var sequences = {}
+
 $(document).ready(function() {
 	$("tr.clickable-row").click(get_commands_func);   // displays commands in w2
 
@@ -30,6 +32,7 @@ $(document).ready(function() {
     $("#searchNameHere_id").change(filter_w1);
     $("#searchNameHere_id").keyup(filter_w1);
     $("#w1_command_active_filter").css("display", "none");
+    $("#new_jobq_button").click(add_sequence_tab);
 
 });
 
@@ -168,6 +171,21 @@ function update_argument(event){
 Functions down below are for w3
 -----------------------------------------------------------------------------------------------------
 */
+function add_sequence_tab(e){
+    var next_tab =  $("#jobq_tabs").children().length;
+    $(this).closest('li').before('<li onclick="synchronize_job_sequence_tabs('+next_tab+')"><a href="#jobq_'+next_tab+'" data-toggle="tab">'+next_tab+'</a></li>');
+    $('#jobq_content').append('<div class="tab-pane" id="jobq_'+next_tab+'">New Data '+next_tab+'</div>');
+    console.warn("adding sequence ");
+    //ADD THE OUTPUT TAB TOO!
+    var output_tab = $("#output_tabs").append('<li><a href="#outq_'+next_tab+'" data-toggle="tab">'+next_tab+'</a></li>');
+    $('#outq_content').append('<div class="tab-pane" id="outq_'+next_tab+'">New Data '+next_tab+'</div>');
+    var syscheck=1;
+}
+function synchronize_job_sequence_tabs(tab_id){
+    var other_tab = $('#output_tabs a[href="#outq_'+tab_id+'"]');
+    other_tab.tab('show');
+
+}
 function add_new_plugin_location_job_row(id_parameter, num_parameter){
     var row_var = $("<td/>").attr({"id": id_parameter + num_parameter}).append($("<a/>").attr(
     {"href": "#"}).append($("<span/>").text("")));
