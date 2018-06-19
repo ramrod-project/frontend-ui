@@ -15,6 +15,8 @@ var exec_int = 0;
 $(document).ready(function() {
 	$("tr td.clickable-row-col1").click(get_commands_func);   // displays commands in w2
 	$("tr td.clickable-row-col2").click(get_commands_func);   // displays commands in w2
+	$("tr td.clickable-row-col3").click(get_commands_func);   // displays commands in w2
+	$("tr td span a.btn-linkedin").click(add_target_to_job_sc_button);  // target to job shortcut button
 
 	var row_selection = $('#target_table').DataTable({  //for w1+w3
 	    searching: false,
@@ -199,6 +201,19 @@ function update_argument(event){
 Functions down below are for w3
 -----------------------------------------------------------------------------------------------------
 */
+function add_target_to_job_sc_button(){
+//    console.log("add_target_to_job_sc");  // debug
+
+    add_new_job();
+    var row_id = $(this)[0].parentElement.parentElement.parentElement.id.substring(10, $(this)[0].id.length);
+    var plugin_name_var = $("#name_tag_id"+row_id+" a span")[1].innerText;
+    var location_num_var = $("#address_tag_id"+row_id)[0].innerText
+    $("#pluginid"+inc).append(plugin_name_var);
+    $("#addressid"+inc).append(location_num_var);
+
+
+}
+
 function hide_current_sequence(e){
     sequences[active_sequence] = new Set();
     synchronize_sequence_tab_rows(active_sequence);
@@ -487,7 +502,7 @@ function drop_command(ev) {
     set_w3_job_status();
 }
 function set_w3_job_status(){
-//    console.log("set_w3_job_status");  // debug
+    console.log("set_w3_job_status");
     var num_jobs = $("#addjob_button")[0].value;
     var w3_rows = $("#third_box_content tr");
 
