@@ -340,11 +340,11 @@ desired effect
         <div class="col-md-6">
             <div class="nav-tabs-custom">
                 <!-- W3 Sequence Tabs -->
-                <ul class="nav nav-tabs newTabContent">
+                <ul id="jobq_tabs" class="nav nav-tabs newTabContent">
                     <li class="pull-left header"><i class="fa fa-tasks"></i> Jobs Queue </li>
-                    <li class="active"><a href="#tab_1" data-toggle="tab">Seq A</a></li>
+                    <li onclick="synchronize_job_sequence_tabs(1)" class="active"><a href="#jobq_1" data-toggle="tab">A</a></li>
                     <!--<li><a href="#tab_3" data-toggle="tab">Seq B</a></li>-->
-                    <li><a href="#tab_4" data-toggle="tab" class="fa fa-plus"></a></li>
+                    <li id="new_jobq_button"><a href="#tab_n" value=1 class="fa fa-plus"></a></li>
 
                     <!--Minimize and Maximize buttons-->
                     <!--<li class="pull-right">-->
@@ -354,40 +354,36 @@ desired effect
                         <!--</button>-->
                     <!--</li>-->
                     <!--/Minimize and Maximize buttons-->
-
-                    <li class="pull-right"><button type="submit" class="btn btn-default" id="clear_buttonid">Clear</button></li>
+                    <li class="pull-right"><button type="submit" class="btn btn-default" id="clear_buttonid">Clear All</button></li>
+                    <li class="pull-right"><button type="submit" class="btn btn-default" id="clear_seq_buttonid">Clear Sequence</button></li>
                 </ul>
                 <!-- /W3 Tabs -->
                 <div class="box box-primary">
                     <div class="box-body">
-                        <div class="tab-content">
-                            <div id="w3_drop_target_to_all" style="outline: 1px dashed #ABABAB; outline-offset: 1px; text-align: center; display: none; "><br>Drop Here to apply to <strong>all</strong> jobs<br><br></div>
-                            <div id="w3_drop_to_all" style="outline: 1px dashed #ABABAB; outline-offset: 1px; text-align: center; display: none; "><br>Drop Here to apply to <strong>all</strong> jobs<br><br></div>
-                            <div id="example3_wrapper" class="dataTables_wrapper form-inline dt-bootstrap"><div class="row"><div class="col-sm-6"></div><div class="col-sm-6"></div></div><div class="row"><div class="col-sm-12">
+                        <div id="w3_drop_to_all" style="outline: 1px dashed #ABABAB; outline-offset: 1px; text-align: center; display: none; "><br>Drop Here to apply the command to <strong>all</strong> jobs<br><br></div>
+                        <div id="w3_drop_target_to_all" style="outline: 1px dashed #ABABAB; outline-offset: 1px; text-align: center; display: none; "><br>Drop Here to apply to <strong>all</strong> jobs<br><br></div>
+                        <div id="jobq_content" class="tab-content">
+                            <div id="jobq_1" class="tab-pane active"> </div>
+                            <div id="example3_wrapper" class="dataTables_wrapper form-inline dt-bootstrap">
                                 <table id="job_table" class="table table-bordered table-hover dataTable gridSelect2" role="grid" aria-describedby="target_table_info">
                                 <thead>
-                                <tr role="row">
-                                    <th class="sorting_asc" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Rendering engine: activate to sort column descending">
-                                        Job #</th>
-                                    <th class="sorting" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">
-                                        Plugin Name</th>
-                                    <th class="sorting" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">
-                                        Host</th>
-                                    <th class="sorting" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">
-                                        Command</th>
-                                    <th class="sorting_asc" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Rendering engine: activate to sort column descending">
-                                        Status</th>
-                                </tr>
+                                    <tr role="row">
+                                        <th class="sorting_asc" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Rendering engine: activate to sort column descending">
+                                            Job #</th>
+                                        <th class="sorting" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">
+                                            Plugin Name</th>
+                                        <th class="sorting" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">
+                                            Host</th>
+                                        <th class="sorting" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">
+                                            Command</th>
+                                        <th class="sorting_asc" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Rendering engine: activate to sort column descending">
+                                            Status</th>
+                                    </tr>
                                 </thead>
                                 <tbody class="thirdBoxContent" id="third_box_content">
-                                <a name="thirdboxname">
-
-                                </a>
+                                <a name="thirdboxname"></a>
                                 </tbody>
-                                <div id="hiddenArgsId" class="hiddenArgsClass" hidden></div>
-                            </table>
-                            </div>
-                            </div>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -404,24 +400,18 @@ desired effect
         <div class="col-md-6">
             <div class="nav-tabs-custom">
                 <!-- W4 Tabs -->
-                <ul class="nav nav-tabs">
+                <ul id="output_tabs" class="nav nav-tabs">
                     <li class="pull-left header"><i class="fa fa-check-square-o"></i> Job Output</li>
-                    <li class="active"><a href="#tab_1" data-toggle="tab">Seq A</a></li>
-                    <!--<li><a href="#tab_3" data-toggle="tab" class="fa fa-plus"></a></li>-->
-
-                    <!--Minimize and Maximize buttons-->
-                    <!--<li class="pull-right">-->
-                        <!--<button type="button" class="btn bg-grey btn-sm" data-widget="collapse"><i class="fa fa-minus"></i>-->
-                        <!--</button>-->
-                        <!--<button type="button" class="btn bg-grey btn-sm" data-widget="remove"><i class="fa fa-times"></i>-->
-                        <!--</button>-->
-                    <!--</li>-->
-                    <!--/Minimize and Maximize buttons-->
+                    <li class="active" onclick="synchronize_output_sequence_tabs(1);"><a href="#outq_1" data-toggle="tab">A</a></li>
                 </ul>
                 <!-- /W4 Tabs -->
                 <!--Content-->
                 <div class="box box-primary">
                     <div class="box-body">
+                        <div id="outq_content" class="tab-content">
+                            <div id="outq_1" class="tab-pane active"> </div>
+
+                        </div>
                         <table class="table no-margin">
                             <thead>
                                 <tr>

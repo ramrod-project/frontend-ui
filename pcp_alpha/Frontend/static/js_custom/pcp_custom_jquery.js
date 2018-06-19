@@ -6,6 +6,12 @@ This file was created for project pcp to add jquery functionality and other java
 
 var inc = 0;
 var hover_int = 0;
+var sequences = {"1": new Set()};
+var id_map = {};
+var id_reverse_map = {};
+var active_sequence = "1";
+var exec_int = 0;
+
 $(document).ready(function() {
 	$("tr td.clickable-row-col1").click(get_commands_func);   // displays commands in w2
 	$("tr td.clickable-row-col2").click(get_commands_func);   // displays commands in w2
@@ -33,7 +39,8 @@ $(document).ready(function() {
     $("#searchNameHere_id").change(filter_w1);
     $("#searchNameHere_id").keyup(filter_w1);
     $("#w1_command_active_filter").css("display", "none");
-
+    $("#new_jobq_button").click(add_sequence_tab);
+    $("#clear_seq_buttonid").click(hide_current_sequence);
     $("#w3_drop_target_to_all").droppable({
         drop: function (event, ui){
             if (hover_int != 0){
@@ -41,7 +48,7 @@ $(document).ready(function() {
                 if (selected_var.length == 1){
                     var num_jobs = $("#addjob_button")[0].value;
                     for (var i=1; i<=num_jobs; i++){
-                        if (job_row_is_mutable(i)) {
+                        if (($("#jobrow"+i).css("display") != "none") && job_row_is_mutable(i)) {
                             var row_id = selected_var[0].id;
                             var row_id_str = row_id.substring(10,row_id.length);
                             var row_js = JSON.parse($("#nameidjson" + row_id_str)[0].innerText);
@@ -102,6 +109,7 @@ function filter_w1(){
 }
 function get_commands_func(){
 //    console.log("get_commands_func");  // debug
+//    console.log($(this)[0].parentElement.id);
 
     // plugin name the user clicked
     var row_id = $(this)[0].parentElement.id.substring(10, $(this)[0].id.length);
@@ -206,6 +214,53 @@ function add_target_to_job_sc_button(){
 
 }
 
+function hide_current_sequence(e){
+    sequences[active_sequence] = new Set();
+    synchronize_sequence_tab_rows(active_sequence);
+}
+function add_sequence_tab(e){
+    e.preventDefault();
+    var next_tab =  $("#jobq_tabs").children().length;
+    sequences[next_tab] = new Set();
+    $(this).closest('li').before('<li onclick="synchronize_job_sequence_tabs('+next_tab+')"><a href="#jobq_'+next_tab+'" data-toggle="tab">'+next_tab+'</a></li>');
+    $('#jobq_content').append('<div class="tab-pane" id="jobq_'+next_tab+'"></div>');
+    console.warn("adding sequence ");
+    //ADD THE OUTPUT TAB TOO!
+    var output_tab = $("#output_tabs").append('<li onclick="synchronize_output_sequence_tabs('+next_tab+')"><a href="#outq_'+next_tab+'" data-toggle="tab">'+next_tab+'</a></li>');
+    $('#outq_content').append('<div class="tab-pane" id="outq_'+next_tab+'"></div>');
+    $("#outq_"+next_tab).tab('show');
+    $("#jobq_"+next_tab).tab('show')
+}
+function synchronize_job_sequence_tabs(tab_id){
+    active_sequence = tab_id;
+    var other_tab = $('#output_tabs a[href="#outq_'+tab_id+'"]');
+    other_tab.tab('show');
+    synchronize_sequence_tab_rows(tab_id);
+}
+function synchronize_output_sequence_tabs(tab_id){
+    active_sequence = tab_id;
+    var other_tab = $('#jobq_tabs a[href="#jobq_'+tab_id+'"]');
+    other_tab.tab('show');
+    synchronize_sequence_tab_rows(tab_id);
+}
+function synchronize_sequence_tab_rows(sequence_id){
+    var job_row_ids = $("#third_box_content tr" );
+    var ouput_row_objs = $("#W4Rows tr");
+    for (var i = 1; i <= job_row_ids.length; i++){
+        var output_i = i-1; //because numbers are dumb
+        var job_obj = $("#jobrow"+i);
+        var output_obj = $(ouput_row_objs[output_i]);
+        if (sequences[sequence_id].has(String(i))){
+            job_obj.show();
+            output_obj.show();
+        } else {
+            job_obj.hide();
+            output_obj.hide();
+        }
+    }
+    var dan = "1";
+}
+
 function add_new_plugin_location_job_row(id_parameter, num_parameter){
     var row_var = $("<td/>").attr({"id": id_parameter + num_parameter}).append($("<a/>").attr(
     {"href": "#"}).append($("<span/>").text("")));
@@ -218,6 +273,7 @@ function add_new_job(){
     $("#addjob_button")[0].value = inc;
 
     var value = $("#addjob_button")[0].value;
+    sequences[active_sequence].add(value);
     // content for w3
     if(value == 1) {
         $(".thirdBoxContent").append($("<tr/>").attr({"role": "row",
@@ -270,6 +326,11 @@ function add_new_job(){
 function clear_new_jobs(){
     $(".thirdBoxContent").empty();
     $("#W4Rows").empty();
+    id_reverse_map = {};
+    id_map = {}
+    for (var key in sequences){
+        sequences[key] = new Set();
+    }
     inc = 0;
     $("#addjob_button")[0].value = 0;
 }
@@ -329,7 +390,7 @@ function hover_w3_for_target(){
 
 //    future animation
 function hover_leave(){
-    console.log("hover_leave");
+//    console.log("hover_leave");  // debug
     hover_int = 0;
 }
 
@@ -346,7 +407,7 @@ function hover_drop(){
     var command_text = hover_object[0].children[3].innerText;
     var status_text = hover_object[0].children[4].innerText;
 
-    if (plugin_name_text && location_text && command_text != "" && status_text == false){
+    if (plugin_name_text && location_text && command_text != "" && status_text == false && exec_int != 1){
         $("#jobstatusid"+hover_object_num).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
     }
 
@@ -359,7 +420,7 @@ function hover_drop(){
 
 // Drop target to W3
 function drop_target(hover_object){
-    console.log("drop_target");
+//    console.log("drop_target");  // debug
     $(".gridSelect, .divw3row").droppable({
         drop: function (event, ui) {
             if (hover_int != 0){
@@ -372,7 +433,7 @@ function drop_target(hover_object){
                     var selected_row = undefined;
 
                     if (int != 0){
-                        selected_row = hover_object.nextUntil()[(int -1)];
+                        selected_row = hover_object.nextUntil(':hidden')[(int -1)];
                     } else {
                         selected_row = hover_object[0];
                     }
@@ -425,7 +486,7 @@ function drag_end_command(event){
 }
 
 function drop_command(ev) {
-    console.log("drop_command");
+//    console.log("drop_command");  // debug
     ev.preventDefault();
     var command_json = ev.dataTransfer.getData("text");
     $("#w3_drop_to_all").css("display", "none");
@@ -453,8 +514,10 @@ function set_w3_job_status(){
         var w3_status = what.children[4].innerText;
         var error_msg = 0;
 
-        if(plugin_name_text && command_text && w3_status != "Done"){
+
+        if(plugin_name_text && command_text && w3_status != "Done" && exec_int != 1){
             $("#jobstatusid"+(j+1)).empty()
+
             $("#jobstatusid"+(j+1)).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
         } else {
             console.log("Status is done and plugin and command are filled up in the job row");
@@ -469,7 +532,7 @@ function set_w3_job_status(){
 
 
 function drop_command_to_multiple(ev) {
-    console.log("drop_command_to_multiple");
+//    console.log("drop_command_to_multiple");  // debug
     ev.preventDefault();
     var command_json = ev.dataTransfer.getData("text");
     $("#w3_drop_to_all").css("display", "none");
@@ -480,14 +543,17 @@ function drop_command_to_multiple(ev) {
         add_new_job();
     }
     for (var j = 1; j <= num_jobs; j++){
-        var command_td = $("#commandid"+j);
-        drop_command_into_hole(command, command_json, command_td, j)
+        var command_row = $("#jobrow"+j);
+        if ($("#jobrow"+j).css('display') != 'none'){
+            var command_td = $("#commandid"+j);
+            drop_command_into_hole(command, command_json, command_td, j)
+        }
     }
     set_w3_job_status();
 }
 
 function drop_command_into_hole(command, command_json, command_td, row_id){
-    console.log("drop_command_into_hole");
+//    console.log("drop_command_into_hole");  // debug
     var current_status = $("#jobstatusid"+row_id+" span");
     if ((current_status.length == 0) ||
         (current_status.length >=1 && command_td.length == 1 && ( current_status[0].innerText == "Preparing" ||
@@ -516,18 +582,27 @@ function drop_command_into_hole(command, command_json, command_td, row_id){
 
 // Execute Sequence function down below are for w3+w4
 function execute_sequence(){
-    console.log("execute_sequence function has been called");
+//    console.log("execute_sequence function has been called");  // debug
+    exec_int = 1;
+    hide_drop_all();
     var jobs = []
     var num_jobs = $("#addjob_button")[0].value;
     var w3_rows = $("#third_box_content tr");
 
     for (var j = 0; j < num_jobs; j++){
+        if ($(w3_rows[j]).css('display') == 'none'){
+            jobs.push({});
+            continue;
+        }
         var w3_status = w3_rows[j].children[4].innerText;
         if(w3_status == false){
             $("#updatestatusid"+(j+1)).append($("<span/>").attr({"class": "label label-danger"}).text("Error"));
             $("#jobstatusid"+(j+1)).append($("<span/>").attr({"class": "label label-danger"}).text("Error"));
             jobs.push({});
         } else if (w3_status == "Preparing") {
+            $(".gridSelect, #jobrow"+(j+1)).droppable({
+                disabled: true
+            });
             $("#updatestatusid"+(j+1)).empty();
             $("#updatestatusid"+(j+1)).append($("<span/>").attr({"class": "label label-success"}).text("Ready"));
             $("#jobstatusid"+(j+1)).empty();
@@ -561,6 +636,8 @@ function execute_sequence(){
             job_id = job_ids[0];
             for (var index = 0; index < job_ids.length; ++index) {
                 if (job_ids[index] != "invalid-job"){
+                    id_reverse_map[job_ids[index]] = index+1;
+                    id_map[index+1] = job_ids[index];
                     execute_sequence_output(job_ids[index], index+1);
                 }
             }
@@ -579,7 +656,7 @@ Functions down below are for w4
 */
 // Modify function add depth parameter, increment depth when it errors
 function execute_sequence_output(specific_id, updateid, counter=0, backoff=2000){
-    console.log("execute_sequence_output function");
+//    console.log("execute_sequence_output function");  // debug
     $.ajax({
         type: "GET",
         url: "/action/get_output_data/",
@@ -588,7 +665,7 @@ function execute_sequence_output(specific_id, updateid, counter=0, backoff=2000)
         success: function(data) {
             console.log("SUCCESS @ execute_sequence_output  function");
             for (var j = 1; j <= inc; j++){
-                if($("#jobstatusid"+j)[0].innerText == 'Error'){
+                if($("#jobstatusid"+j)[0].innerText == 'Error' || $("#jobstatusid"+j)[0].innerText == '' || $("#jobstatusid"+j)[0].innerText == 'Preparing'){
                 } else {
                     $("#updatestatusid"+j).empty();
                     $("#updatestatusid"+j).append($("<span/>").attr({"class": "label label-info"}).text("Done"));
