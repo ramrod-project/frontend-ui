@@ -41,6 +41,8 @@ $(document).ready(function() {
     $("#w1_command_active_filter").css("display", "none");
     $("#new_jobq_button").click(add_sequence_tab);
     $("#clear_seq_buttonid").click(hide_current_sequence);
+    $("#persist_button").click(save_job_state);
+    $("#loader_button").click(load_job_state);
     $("#w3_drop_target_to_all").droppable({
         drop: function (event, ui){
             var selected_var = ui.helper.children();
@@ -199,6 +201,66 @@ function update_argument(event){
 Functions down below are for w3
 -----------------------------------------------------------------------------------------------------
 */
+function load_job_state(){
+    $.ajax({
+        type: "GET",
+        url: "/action/load_state/",
+        datatype: 'json',
+        success: function(data) {
+            var job_ids = data;
+            if (sequences.length == 1 && sequences["1"].length == 0){
+                sequences = data.sequences;
+                active_sequence = data.active_sequence;
+                id_map = data.id_map;
+                id_reverse_map = data.id_reverse_map;
+                for (var i = 0; i < data.jobs.length; i++){
+                    var job_id = i + 1;
+
+                }
+            }
+
+        }
+    })
+}
+
+function save_job_state(){
+    var data_package = {"id_map": id_map,
+                        "id_reverse_map": id_reverse_map,
+                        "jobs": [],
+                        "sequences": sequences,
+                        "active_sequence": active_sequence};
+    var num_jobs = $("#addjob_button")[0].value;
+    for (var i = 1; i <= Number(num_jobs); i++){
+        var plugin_name = $("#pluginid"+i)[0].innerText;
+        var address = $("#addressid"+i)[0].innerText;
+        var job_cell = $("#commandid"+i+" div");
+        var job_str = undefined;
+        var job_js = null;
+
+        if (job_cell.length >= 1){
+            job_str = job_cell[0].innerText;
+            if (job_str != undefined){
+                job_js = JSON.parse(job_str);
+            }
+        }
+        data_package.jobs.push({"plugin": plugin_name,
+                                "address": address,
+                                 "job": job_js});
+    }
+    var data_json = JSON.stringify(data_package);
+    $.ajax({
+        type: "POST",
+        url: "/action/save_state/",
+        data: {"current_state": data_json},
+        datatype: 'json',
+        success: function(data) {
+            var job_ids = data;
+
+        }
+    })
+    var call_db = "1";
+}
+
 function add_target_to_job_sc_button(){
 //    console.log("add_target_to_job_sc");  // debug
 
