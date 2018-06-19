@@ -52,3 +52,5 @@
 venv*
 .coverage
 .travis_*
+*node_modules*
+*package-lock.json

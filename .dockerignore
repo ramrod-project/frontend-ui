@@ -2,3 +2,4 @@
 .travis.yml
 LICENSE
 readme.txt
+websocket_server*

@@ -6,6 +6,7 @@ This file was created for project pcp to add jquery functionality and other java
 
 var inc = 0;
 var hover_int = 0;
+var exec_int = 0;
 $(document).ready(function() {
 	$("tr td.clickable-row-col1").click(get_commands_func);   // displays commands in w2
 	$("tr td.clickable-row-col2").click(get_commands_func);   // displays commands in w2
@@ -315,7 +316,7 @@ function hover_w3_for_target(){
 
 //    future animation
 function hover_leave(){
-    console.log("hover_leave");
+//    console.log("hover_leave");  // debug
     hover_int = 0;
 }
 
@@ -332,7 +333,7 @@ function hover_drop(){
     var command_text = hover_object[0].children[3].innerText;
     var status_text = hover_object[0].children[4].innerText;
 
-    if (plugin_name_text && location_text && command_text != "" && status_text == false){
+    if (plugin_name_text && location_text && command_text != "" && status_text == false && exec_int != 1){
         $("#jobstatusid"+hover_object_num).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
     }
 
@@ -345,7 +346,7 @@ function hover_drop(){
 
 // Drop target to W3
 function drop_target(hover_object){
-    console.log("drop_target");
+//    console.log("drop_target");  // debug
     $(".gridSelect, .divw3row").droppable({
         drop: function (event, ui) {
             if (hover_int != 0){
@@ -411,7 +412,7 @@ function drag_end_command(event){
 }
 
 function drop_command(ev) {
-    console.log("drop_command");
+//    console.log("drop_command");  // debug
     ev.preventDefault();
     var command_json = ev.dataTransfer.getData("text");
     $("#w3_drop_to_all").css("display", "none");
@@ -427,7 +428,7 @@ function drop_command(ev) {
     set_w3_job_status();
 }
 function set_w3_job_status(){
-    console.log("set_w3_job_status");
+//    console.log("set_w3_job_status");  // debug
     var num_jobs = $("#addjob_button")[0].value;
     var w3_rows = $("#third_box_content tr");
 
@@ -439,7 +440,7 @@ function set_w3_job_status(){
         var w3_status = what.children[4].innerText;
         var error_msg = 0;
 
-        if(plugin_name_text && command_text && w3_status != "Done"){
+        if(plugin_name_text && command_text && w3_status != "Done" && exec_int != 1){
             $("#jobstatusid"+(j+1)).empty()
             $("#jobstatusid"+(j+1)).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
         } else {
@@ -455,7 +456,7 @@ function set_w3_job_status(){
 
 
 function drop_command_to_multiple(ev) {
-    console.log("drop_command_to_multiple");
+//    console.log("drop_command_to_multiple");  // debug
     ev.preventDefault();
     var command_json = ev.dataTransfer.getData("text");
     $("#w3_drop_to_all").css("display", "none");
@@ -473,7 +474,7 @@ function drop_command_to_multiple(ev) {
 }
 
 function drop_command_into_hole(command, command_json, command_td, row_id){
-    console.log("drop_command_into_hole");
+//    console.log("drop_command_into_hole");  // debug
     var current_status = $("#jobstatusid"+row_id+" span");
     if ((current_status.length == 0) ||
         (current_status.length >=1 && command_td.length == 1 && ( current_status[0].innerText == "Preparing" ||
@@ -502,7 +503,9 @@ function drop_command_into_hole(command, command_json, command_td, row_id){
 
 // Execute Sequence function down below are for w3+w4
 function execute_sequence(){
-    console.log("execute_sequence function has been called");
+//    console.log("execute_sequence function has been called");  // debug
+    exec_int = 1;
+    hide_drop_all();
     var jobs = []
     var num_jobs = $("#addjob_button")[0].value;
     var w3_rows = $("#third_box_content tr");
@@ -514,6 +517,9 @@ function execute_sequence(){
             $("#jobstatusid"+(j+1)).append($("<span/>").attr({"class": "label label-danger"}).text("Error"));
             jobs.push({});
         } else if (w3_status == "Preparing") {
+            $(".gridSelect, #jobrow"+(j+1)).droppable({
+                disabled: true
+            });
             $("#updatestatusid"+(j+1)).empty();
             $("#updatestatusid"+(j+1)).append($("<span/>").attr({"class": "label label-success"}).text("Ready"));
             $("#jobstatusid"+(j+1)).empty();
@@ -565,7 +571,7 @@ Functions down below are for w4
 */
 // Modify function add depth parameter, increment depth when it errors
 function execute_sequence_output(specific_id, updateid, counter=0, backoff=2000){
-    console.log("execute_sequence_output function");
+//    console.log("execute_sequence_output function");  // debug
     $.ajax({
         type: "GET",
         url: "/action/get_output_data/",
