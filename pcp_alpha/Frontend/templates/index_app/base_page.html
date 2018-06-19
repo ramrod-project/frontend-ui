@@ -232,12 +232,12 @@ desired effect
                                                     <span>{{ items.Location }} </span>
                                                     </a>
                                                 </td>
-                                                <td style="text-align: center; width: 80px;">
+                                                <td id="action_tad_id{{ forloop.counter0 }}" style="text-align: center; width: 80px;" class="clickable-row-col3" onclick="#">
                                                     <span id="edit_target_id">
                                                         <a href="/edit_target_form/{{ items.id }}/" target="_blank" class="btn btn-social-icon btn-bitbucket btn-xs"><i class="fa fa-edit"></i></a>
                                                     </span>
-                                                    <span id="add_job_sc_id">
-                                                        <a href="#" target="_blank" class="btn btn-social-icon btn-linkedin btn-xs"><i class="fa fa-tasks"></i></a>
+                                                    <span id="add_job_sc_id_attr">
+                                                        <a href="#" id="add_job_sc_id{{ forloop.counter0 }}" class="btn btn-social-icon btn-linkedin btn-xs"><i class="fa fa-tasks"></i></a>
                                                     </span>
                                                 </td>
                                             </tr>

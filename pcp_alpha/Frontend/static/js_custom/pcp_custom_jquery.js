@@ -9,6 +9,8 @@ var hover_int = 0;
 $(document).ready(function() {
 	$("tr td.clickable-row-col1").click(get_commands_func);   // displays commands in w2
 	$("tr td.clickable-row-col2").click(get_commands_func);   // displays commands in w2
+	$("tr td.clickable-row-col3").click(get_commands_func);   // displays commands in w2
+	$("tr td span a.btn-linkedin").click(add_target_to_job_sc_button);  // target to job shortcut button
 
 	var row_selection = $('#target_table').DataTable({  //for w1+w3
 	    searching: false,
@@ -100,7 +102,6 @@ function filter_w1(){
 }
 function get_commands_func(){
 //    console.log("get_commands_func");  // debug
-//    console.log($(this)[0].parentElement.id);
 
     // plugin name the user clicked
     var row_id = $(this)[0].parentElement.id.substring(10, $(this)[0].id.length);
@@ -192,6 +193,19 @@ function update_argument(event){
 Functions down below are for w3
 -----------------------------------------------------------------------------------------------------
 */
+function add_target_to_job_sc_button(){
+//    console.log("add_target_to_job_sc");  // debug
+
+    add_new_job();
+    var row_id = $(this)[0].parentElement.parentElement.parentElement.id.substring(10, $(this)[0].id.length);
+    var plugin_name_var = $("#name_tag_id"+row_id+" a span")[1].innerText;
+    var location_num_var = $("#address_tag_id"+row_id)[0].innerText
+    $("#pluginid"+inc).append(plugin_name_var);
+    $("#addressid"+inc).append(location_num_var);
+
+
+}
+
 function add_new_plugin_location_job_row(id_parameter, num_parameter){
     var row_var = $("<td/>").attr({"id": id_parameter + num_parameter}).append($("<a/>").attr(
     {"href": "#"}).append($("<span/>").text("")));
