@@ -9,6 +9,7 @@ var hover_int = 0;
 var sequences = {"1": new Set()};
 var id_map = {};
 var id_reverse_map = {};
+var ws_map = {};
 var active_sequence = "1";
 var exec_int = 0;
 
@@ -62,6 +63,56 @@ $(document).ready(function() {
     });
 
 });
+
+/*
+-----------------------------------------------------------------------------------------------------
+Websockets functions
+-----------------------------------------------------------------------------------------------------
+*/
+
+function open_websocket(selection, callback) {
+    // Create a new websocket
+    var server = 'ws://' + window.location.hostname + ':3000/monitor';
+    var ws = new WebSocket(server);
+    console.log("Created new websocket to " + server);
+
+    // Handle connection opening
+    // Use 'selection' string to select feed
+    ws.onopen = function () {
+        ws.send(selection);
+        console.log("Websocket connected to feed " + selection);
+    }
+
+    // receive message
+    ws.onmessage = function (message) {
+        callback(message);
+    }
+    return ws;
+}
+
+
+// ** TESTING ONLY **
+// Testing the websocket - for job status
+function test_ws_callback(message) {
+    console.log(message);
+    var data = {};
+    if ('data' in message) {
+        data = JSON.parse(message.data);
+    }
+    console.log(data);
+    var job_id = null;
+    if ("id" in data) {
+        job_id = data.id;
+    }
+    console.log(job_id);
+    console.log(id_reverse_map);
+    if (job_id in id_reverse_map) {
+         console.log("In map!");
+    }
+}
+ws_map["status"] = open_websocket("status", test_ws_callback);
+// ** TESTING ONLY **
+
 
 /*
 -----------------------------------------------------------------------------------------------------
