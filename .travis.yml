@@ -79,6 +79,7 @@ matrix:
         - chmod +x ./cc-test-reporter
         - ./cc-test-reporter before-build
       before_script:
+        - pwd
         - docker network create test
         - if [ "$TRAVIS_BRANCH" != "master"  ];
           then docker run -d --rm --name rethinkdb -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG"
