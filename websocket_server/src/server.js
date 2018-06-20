@@ -93,6 +93,10 @@ wss.on("connection", function (ws) {
                         if (err) throw err;
                         cursor.each(function (err, row) {
                             if (err) throw err;
+                            if (!(row.old_val === null)) {
+                                if (row.new_val === null) return null;
+                                if (row.new_val.Status === row.old_val.Status) return null;
+                            }
                             var sendData = {"id":row.new_val.id, "status":row.new_val.Status};
                             ws.send(JSON.stringify(sendData, null, 2));
                         });
@@ -112,7 +116,7 @@ wss.on("connection", function (ws) {
                         if (err) throw err;
                         cursor.each(function (err, row) {
                             if (err) throw err;
-                            if ("old_val" in row) {
+                            if ("old_val" in row && (!(row.old_val === null) || (row.new_val === null))) {
                                 return null;
                             }
                             var sendData = {"id":row.new_val.OutputJob.id, "content":row.new_val.Content};
