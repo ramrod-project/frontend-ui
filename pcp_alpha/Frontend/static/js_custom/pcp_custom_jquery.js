@@ -23,10 +23,19 @@ $(document).ready(function() {
 	    paging: false,
 	    bInfo: false,
         rowReorder: true,
-        select: true
+        select: true                                    // highlight target row in w1
 	});
 
-    $(".gridSelect tbody tr").click(target_select_func(row_selection));  // highlight target in w1 to drag to w3
+    row_selection.on('select', function(e, dt, type, indexes) {  // user clicks on target row to start drag
+        var selected_var = $(".gridSelect tbody tr.selected");
+        if(selected_var.length > 0){
+            console.log("draggable object for more than one object");
+            drag_target();
+        } else {
+            console.log("draggable object for one object");
+        }
+    });
+
 	$("#addjob_button").click(function(){
 
 	});
@@ -435,18 +444,6 @@ function clear_new_jobs(){
 // Drag and drop function(s) for w1+w3 or w2+w3
 // Drag and drop function(s) for targets
 // Note: Drop function needs to be validated
-function target_select_func(row_selection){
-//    console.log("target_select_func function was called");
-    row_selection.on('select', function(e, dt, type, indexes) {
-        var selected_var = $(".gridSelect tbody tr.selected");
-        if(selected_var.length > 0){
-            console.log("draggable object for more than one object");
-            drag_target();
-        } else {
-            console.log("draggable object for one object");
-        }
-    });
-}
 
 // DRAG
 function drag_target(){
@@ -454,13 +451,21 @@ function drag_target(){
 	$(".gridSelect tbody tr, .gridSelect2 tbody tr").draggable({
 	    helper: function(){
 	        var selected_var = $(".gridSelect tbody tr.selected");
-            if (selected_var.length === 0) {
-                selected_var = $(this).addClass('selected');
-            } else if (selected_var.length == 1) {
+            var container_to_drag;
+
+	        if (selected_var[0] == $(this)[0]){
+	            container_to_drag = selected_var;
+	        } else {
+	            container_to_drag = $(this);
+	        }
+
+            if (container_to_drag.length === 0) {
+                container_to_drag = $(this).addClass('selected');
+            } else if (container_to_drag.length == 1) {
                 display_drop_all();
             }
             var container = $('<table/>').attr({'id':'draggingContainer'});
-            container.append(selected_var.clone().removeClass("selected"));
+            container.append(container_to_drag.clone().removeClass("selected"));
             hover_w3_for_target();
             return container;
 	    },
