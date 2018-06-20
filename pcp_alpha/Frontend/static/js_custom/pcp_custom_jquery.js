@@ -14,6 +14,8 @@ var active_sequence = "1";
 var exec_int = 0;
 
 $(document).ready(function() {
+    ws_map["status"] = open_websocket("status", status_change_ws_callback);
+
 	$("tr td.clickable-row-col1").click(get_commands_func);   // displays commands in w2
 	$("tr td.clickable-row-col2").click(get_commands_func);   // displays commands in w2
 	$("tr td.clickable-row-col3").click(get_commands_func);   // displays commands in w2
@@ -97,10 +99,29 @@ function open_websocket(selection, callback) {
     // receive message
     ws.onmessage = function (message) {
         callback(message);
-    }
+    };
     return ws;
 }
 
+function status_change_ws_callback(message) {
+    console.log(message);
+    var data = null;
+    if ('data' in message && message.data != null && message.data[0] == "{") {
+        data = JSON.parse(message.data);
+        var job_id = null;
+        if ("id" in data) {
+            job_id = data.id;
+            if (job_id in id_reverse_map) {
+                var job_dom_id = id_reverse_map[job_id];
+                $("#jobstatusid"+job_dom_id).empty();
+                $("#jobstatusid"+job_dom_id).append($("<span/>").attr({"class": "label label-info"}).text(data.status));
+                $("#updatestatusid"+job_dom_id).empty();
+                $("#updatestatusid"+job_dom_id).append($("<span/>").attr({"class": "label label-info"}).text(data.status));
+                execute_sequence_output(job_id);
+            }
+        }
+    }
+}
 
 // ** TESTING ONLY **
 // Testing the websocket - for job status
@@ -121,7 +142,7 @@ function test_ws_callback(message) {
          console.log("In map!");
     }
 }
-ws_map["status"] = open_websocket("status", test_ws_callback);
+//ws_map["status"] = open_websocket("status", test_ws_callback);
 // ** TESTING ONLY **
 
 
@@ -353,8 +374,7 @@ function save_job_state(){
                 $("#upload_status").addClass("fa-cloud-upload");
                 }, 3000 );
         }
-    })
-    var call_db = "1";
+    });
 }
 
 function add_target_to_job_sc_button(){
@@ -800,7 +820,7 @@ function execute_sequence(){
                 if (job_ids[index] != "invalid-job"){
                     id_reverse_map[job_ids[index]] = index+1;
                     id_map[index+1] = job_ids[index];
-                    execute_sequence_output(job_ids[index]);
+                    //execute_sequence_output(job_ids[index]);
                 }
             }
         },
