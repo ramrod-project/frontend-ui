@@ -6,10 +6,49 @@ import brain
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.template import loader
+from django.views.decorators.csrf import csrf_exempt
 from ua_parser import user_agent_parser
 from Backend.db_dir.custom_queries import get_specific_commands, insert_brain_jobs_w3, \
-    get_specific_brain_output, get_brain_output_content, insert_new_target, get_brain_targets
+    get_specific_brain_output, get_brain_output_content, insert_new_target, get_brain_targets, \
+    persist_jobs_state, load_jobs_state
 from .forms import TargetForm
+
+
+@csrf_exempt
+def persist_job_state(request):
+    """
+    current_state = {"id_map": {},
+                     "id_reverse_map": {},
+                     "jobs": [],
+                     "sequences": {},
+                     "active_sequence": ""}
+
+    persist_job_state ensures the current UI state is stored in the database
+    :param request: user request
+    :return: <str> json output
+    """
+    if request.method == 'POST':
+        current_state = request.POST.get('current_state')
+        current_state = json.loads(current_state)
+        return HttpResponse(json.dumps(persist_jobs_state(current_state)),
+                            content_type="application/json")
+
+
+def load_job_state(request):
+    """
+    current_state = {"id_map": {},
+                     "id_reverse_map": {},
+                     "jobs": [],
+                     "sequences": {},
+                     "active_sequence": ""}
+
+    persist_job_state ensures the current UI state is stored in the database
+    :param request: user request
+    :return: <str> json output
+    """
+    if request.method == 'GET':
+        return HttpResponse(json.dumps(load_jobs_state()),
+                            content_type="application/json")
 
 
 def get_commands_controller(request):
