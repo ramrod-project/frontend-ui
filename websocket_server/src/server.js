@@ -7,11 +7,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var express = require("express");
 var http = require("http");
 var WebSocket = require("ws");
-var rdb = require('rethinkdb');
+var rdb = require("rethinkdb");
 var app = express();
 
-app.get('/', function(req, res) {
-    res.sendFile(__dirname + '/index.html')
+app.get("/", function(req, res) {
+    res.sendFile(__dirname + "/index.html")
 })
 
 // Create http server to initialize the 
@@ -52,7 +52,7 @@ rdb.connect( {host: rethinkHost, port: rethinkPort}, function(err, conn) {
 var wss = new WebSocket.Server({ server: server, path: "/monitor" });
 
 // Error catching
-wss.on('error', function (err) {
+wss.on("error", function (err) {
     consle.log(err);
 });
 
@@ -63,37 +63,37 @@ function heartbeat () {
 
 // Define Websockets listener callbacks for
 // handling incoming connections
-wss.on('connection', function (ws) {
+wss.on("connection", function (ws) {
 
     // Live connection detection
     ws.isAlive = true;
-    ws.on('pong', heartbeat);
+    ws.on("pong", heartbeat);
 
     // Log closed connections
-    ws.on('close', function (code, reason) {
+    ws.on("close", function (code, reason) {
         console.log("Connection closed because:", reason, "giving code:", code);
     });
 
     // Handle reception of Websockets messages from 
     // speaker client. 
-    ws.on('message', function (message) {
+    ws.on("message", function (message) {
 
         // Switch statement to determine which changefeed
         // to subscribe to.
-        // This handler 'routes' all incoming websocket connection initial
+        // This handler "routes" all incoming websocket connection initial
         // setups.
         switch (message) {
             // Handle job status monitoring
-            case 'status':
+            case "status":
                 if (connection.open) {
                     ws.send("Waiting for changes in job statuses...");
-                    rdb.db('Brain').table('Jobs').filter(rdb.row("Status").ne("Ready"))
+                    rdb.db("Brain").table("Jobs").filter(rdb.row("Status").ne("Ready"))
                     .changes({includeInitial: true})
                     .run(connection, function (err, cursor) {
                         if (err) throw err;
                         cursor.each(function (err, row) {
                             if (err) throw err;
-                            var sendData = {'id':row.new_val.id, 'status':row.new_val.Status};
+                            var sendData = {"id":row.new_val.id, "status":row.new_val.Status};
                             ws.send(JSON.stringify(sendData, null, 2));
                         });
                     });
@@ -103,23 +103,27 @@ wss.on('connection', function (ws) {
                 }
                 break;
             // Handle job output monitoring
-            /*case 'output':
+            case "output":
                 if (connection.open) {
-                    ws.send("Waiting for job outputs...");
-                    rdb.db('Brain').table('Outputs')
-                    .changes()
+                    ws.send("Waiting for changes in job outputs...");
+                    rdb.db("Brain").table("Outputs")
+                    .changes({includeInitial: true})
                     .run(connection, function (err, cursor) {
                         if (err) throw err;
                         cursor.each(function (err, row) {
                             if (err) throw err;
-                            ws.send(JSON.stringify(row, null, 2));
+                            if ("old_val" in row) {
+                                return null;
+                            }
+                            var sendData = {"id":row.new_val.OutputJob.id, "content":row.new_val.Content};
+                            ws.send(JSON.stringify(sendData, null, 2));
                         });
                     });
                 } else {
                     console.log("Connection closed! Reconnecting...");
                     reconnect();
                 }
-                break;*/
+                break;
             default:
                 ws.send(message + " not a valid feed!");
         }
