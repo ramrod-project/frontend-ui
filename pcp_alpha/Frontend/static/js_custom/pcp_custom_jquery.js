@@ -41,6 +41,8 @@ $(document).ready(function() {
     $("#w1_command_active_filter").css("display", "none");
     $("#new_jobq_button").click(add_sequence_tab);
     $("#clear_seq_buttonid").click(hide_current_sequence);
+    $("#persist_button").click(save_job_state);
+    $("#loader_button").click(load_job_state);
     $("#w3_drop_target_to_all").droppable({
         drop: function (event, ui){
             var selected_var = ui.helper.children();
@@ -199,6 +201,102 @@ function update_argument(event){
 Functions down below are for w3
 -----------------------------------------------------------------------------------------------------
 */
+
+
+function load_job_state(){
+    $.ajax({
+        type: "GET",
+        url: "/action/load_state/",
+        datatype: 'json',
+        success: function(data) {
+            clear_new_jobs();
+            for (var i = 0; i < data.jobs.length; i++){
+                var job_id = i + 1;
+                add_new_job();
+                $("#pluginid"+job_id).append(data.jobs[i].plugin);
+                $("#addressid"+job_id).append(data.jobs[i].address);
+                var command_td = $("#commandid"+job_id);
+                drop_command_into_hole(data.jobs[i].job,
+                                       JSON.stringify(data.jobs[i].job),
+                                        command_td,
+                                        job_id);
+            }
+            sequences = JSON.parse(JSON.stringify(data.sequences), json_list_to_set);
+            active_sequence = data.active_sequence;
+            id_map = data.id_map;
+            id_reverse_map = data.id_reverse_map;
+            for(var i in sequences){
+                if ($('#jobq_tabs a[href="#jobq_'+i+'"]').length == 0){
+                    add_sequence_tab(false);
+                }
+            }
+            set_w3_job_status();
+            synchronize_job_sequence_tabs(active_sequence);
+            synchronize_output_sequence_tabs(active_sequence);
+        }
+    })
+}
+function json_set_to_list(key, value) {
+  if (typeof value === 'object' && value instanceof Set) {
+    return [...value];
+  }
+  return value;
+}
+function json_list_to_set(key, value) {
+  if (typeof value === 'object' && value.constructor === Array) {
+    return new Set(value);
+  }
+  return value;
+}
+
+function save_job_state(){
+    $("#upload_status").removeClass("fa-cloud-upload");
+    $("#upload_status").removeClass("fa-money");
+    $("#upload_status").addClass("fa-hourglass-end");
+    var local_sequences = JSON.parse(JSON.stringify(sequences, json_set_to_list));
+    var data_package = {"id_map": id_map,
+                        "id_reverse_map": id_reverse_map,
+                        "jobs": [],
+                        "sequences": local_sequences,
+                        "active_sequence": active_sequence};
+    var num_jobs = $("#addjob_button")[0].value;
+    for (var i = 1; i <= Number(num_jobs); i++){
+        var plugin_name = $("#pluginid"+i)[0].innerText;
+        var address = $("#addressid"+i)[0].innerText;
+        var job_cell = $("#commandid"+i+" div");
+        var job_str = undefined;
+        var job_js = null;
+
+        if (job_cell.length >= 1){
+            job_str = job_cell[0].innerText;
+            if (job_str != undefined){
+                job_js = JSON.parse(job_str);
+            }
+        }
+        data_package.jobs.push({"plugin": plugin_name,
+                                "address": address,
+                                 "job": job_js,
+                                 "status": null});
+    }
+    var data_json = JSON.stringify(data_package);
+    $.ajax({
+        type: "POST",
+        url: "/action/save_state/",
+        data: {"current_state": data_json},
+        datatype: 'json',
+        success: function(data) {
+            var job_ids = data;
+            $("#upload_status").removeClass("fa-hourglass-end");
+            $("#upload_status").addClass("fa-money");
+            setTimeout( function() {
+                $("#upload_status").removeClass("fa-money");
+                $("#upload_status").addClass("fa-cloud-upload");
+                }, 3000 );
+        }
+    })
+    var call_db = "1";
+}
+
 function add_target_to_job_sc_button(){
 //    console.log("add_target_to_job_sc");  // debug
 
@@ -216,11 +314,12 @@ function hide_current_sequence(e){
     sequences[active_sequence] = new Set();
     synchronize_sequence_tab_rows(active_sequence);
 }
-function add_sequence_tab(e){
-    e.preventDefault();
+function add_sequence_tab(clear=true){
     var next_tab =  $("#jobq_tabs").children().length;
-    sequences[next_tab] = new Set();
-    $(this).closest('li').before('<li onclick="synchronize_job_sequence_tabs('+next_tab+')"><a href="#jobq_'+next_tab+'" data-toggle="tab">'+next_tab+'</a></li>');
+    if (clear){
+        sequences[next_tab] = new Set();
+    }
+    $('#new_jobq_button').before('<li onclick="synchronize_job_sequence_tabs('+next_tab+')"><a href="#jobq_'+next_tab+'" data-toggle="tab">'+next_tab+'</a></li>');
     $('#jobq_content').append('<div class="tab-pane" id="jobq_'+next_tab+'"></div>');
     console.warn("adding sequence ");
     //ADD THE OUTPUT TAB TOO!
