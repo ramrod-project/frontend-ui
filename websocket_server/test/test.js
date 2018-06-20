@@ -140,12 +140,11 @@ describe("", function () {
         var timeout = setTimeout(done, EXPECTED_TIMEOUT); // This will call done when timeout is reached.
         if (status_connection.connected) {
             status_connection.once("message", function (message) {
-                if (message.utf8Data === ("Waiting for changes in job outputs..." || "Waiting for changes in job statuses...")) {
-                    break;
+                if (!(message.utf8Data === ("Waiting for changes in job outputs..." || "Waiting for changes in job statuses..."))) {
+                    clearTimeout(timeout);
+                    // this should never happen, is the expected behavior.
+                    done(new Error("Should not have received message" + message.utf8Data));
                 }
-                clearTimeout(timeout);
-                // this should never happen, is the expected behavior.
-                done(new Error("Should not have received message" + message.utf8Data));
             });
         }
         rdb.db("Brain").table("Jobs").get("t3stid")
