@@ -537,6 +537,9 @@ function drag_target(){
 
 	        if (selected_var[0] == $(this)[0]){
 	            container_to_drag = selected_var;
+	        } else if ($(this)[0].className == selected_var[0].className ||
+	        $(this)[0].className == selected_var[1].className) {
+	            container_to_drag = selected_var;
 	        } else {
 	            container_to_drag = $(this);
 	        }
