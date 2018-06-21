@@ -88,17 +88,31 @@ wss.on("connection", function (ws) {
             if (connection.open) {
                 ws.send("Waiting for changes in job statuses...");
                 rdb.db("Brain").table("Jobs").filter(rdb.row("Status").ne("Ready"))
-                    .changes({includeInitial: true})
+                    .changes({includeInitial: true,
+                              squash: false})
                     .run(connection, function (err, cursor) {
                         if (err) throw err;
                         cursor.each(function (err, row) {
                             if (err) throw err;
-                            if (!(row.old_val === null)) {
-                                if (row.new_val === null) return null;
-                                if (row.new_val.Status === row.old_val.Status) return null;
+                            //console.warn(row);
+                            if ("old_val" in row ) {
+                                //console.warn("old_val present");
+                                if ("new_val" in row && row.new_val !== null) {
+                                    //console.warn("new_val present");
+                                    if ("Status" in row.new_val){
+                                        //console.warn("status present");
+                                        //console.warn(ws.readyState);
+                                        //console.warn("=========");
+                                        if (ws.readyState == 1){
+                                            //console.warn("ws is good");
+                                            var sendData = {"id":row.new_val.id, "status":row.new_val.Status};
+                                            ws.send(JSON.stringify(sendData, null, 2));
+                                        }
+                                    }
+                                }
+                            } else {
+                                return null;
                             }
-                            var sendData = {"id":row.new_val.id, "status":row.new_val.Status};
-                            ws.send(JSON.stringify(sendData, null, 2));
                         });
                     });
             } else {
@@ -150,7 +164,7 @@ var clientCheck = setInterval(function ping() {
         ws.isAlive = false;
         ws.ping((err) => {Error(err);});
     });
-}, 1000);
+}, 500);
 
 // Start HTTP server on either port 3000 or the port specified
 // by the environment variable PORT
