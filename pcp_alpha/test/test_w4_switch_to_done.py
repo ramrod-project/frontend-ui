@@ -1,6 +1,6 @@
 from time import sleep
 import rethinkdb as rtdb
-from rethinkdb.errors import ReqlOpFailedError
+from rethinkdb.errors import ReqlOpFailedError, ReqlDriverError
 
 
 def switch_to_done():
@@ -24,6 +24,6 @@ if __name__ == "__main__":
     while True:
         try:
             switch_to_done()
-        except ReqlOpFailedError:
+        except (ReqlOpFailedError, ReqlDriverError):
             sleep(5)
 
