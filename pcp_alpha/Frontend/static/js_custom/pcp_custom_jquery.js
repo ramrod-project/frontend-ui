@@ -498,7 +498,7 @@ function clear_new_jobs(){
 
 // DRAG
 function drag_target(){
-    console.log("drag_target");
+//    console.log("drag_target");  //debug
 	$(".gridSelect tbody tr, .gridSelect2 tbody tr").draggable({
 	    helper: function(){
 	        var selected_var = $(".gridSelect tbody tr.selected");
@@ -577,7 +577,7 @@ function hover_drop(){
 
 // Drop target to W3
 function drop_target(hover_object){
-    console.log("drop_target");  // debug
+//    console.log("drop_target");  // debug
     // hover_object is the row that is being hovered over
     // selected_var.length == # of targets dragging
     // hover_object.nextUntil().length == # of rows of every sequence in W3 - 1
@@ -677,7 +677,7 @@ function drop_command(ev) {
     set_w3_job_status();
 }
 function set_w3_job_status(){
-    console.log("set_w3_job_status");
+//    console.log("set_w3_job_status");  // debug
     var num_jobs = $("#addjob_button")[0].value;
     var w3_rows = $("#third_box_content tr");
 
