@@ -3,7 +3,7 @@
 This file was created for project pcp to add jquery functionality and other javascript resources.
 -----------------------------------------------------------------------------------------------------
 */
-
+var MAX_MANUAL_CHECK_COUNT = 30;
 var inc = 0;
 var hover_int = 0;
 var sequences = {"1": new Set()};
@@ -14,6 +14,8 @@ var active_sequence = "1";
 var exec_int = 0;
 
 $(document).ready(function() {
+    ws_map["status"] = open_websocket("status", status_change_ws_callback);
+
 	$("tr td.clickable-row-col1").click(get_commands_func);   // displays commands in w2
 	$("tr td.clickable-row-col2").click(get_commands_func);   // displays commands in w2
 	$("tr td.clickable-row-col3").click(get_commands_func);   // displays commands in w2
@@ -97,10 +99,29 @@ function open_websocket(selection, callback) {
     // receive message
     ws.onmessage = function (message) {
         callback(message);
-    }
+    };
     return ws;
 }
 
+function status_change_ws_callback(message) {
+    console.log(message);
+    var data = null;
+    if ('data' in message && message.data != null && message.data[0] == "{") {
+        data = JSON.parse(message.data);
+        var job_id = null;
+        if ("id" in data) {
+            job_id = data.id;
+            if (job_id in id_reverse_map) {
+                var job_dom_id = id_reverse_map[job_id];
+                $("#jobstatusid"+job_dom_id).empty();
+                $("#jobstatusid"+job_dom_id).append($("<span/>").attr({"class": "label label-info"}).text(data.status));
+                $("#updatestatusid"+job_dom_id).empty();
+                $("#updatestatusid"+job_dom_id).append($("<span/>").attr({"class": "label label-info"}).text(data.status));
+                execute_sequence_output(job_id);
+            }
+        }
+    }
+}
 
 // ** TESTING ONLY **
 // Testing the websocket - for job status
@@ -121,7 +142,7 @@ function test_ws_callback(message) {
          console.log("In map!");
     }
 }
-ws_map["status"] = open_websocket("status", test_ws_callback);
+//ws_map["status"] = open_websocket("status", test_ws_callback);
 // ** TESTING ONLY **
 
 
@@ -264,6 +285,9 @@ Functions down below are for w3
 
 
 function load_job_state(){
+    $("#download_status").removeClass("fa-cloud-download");
+    $("#download_status").removeClass("fa-money");
+    $("#download_status").addClass("fa-hourglass-end");
     $.ajax({
         type: "GET",
         url: "/action/load_state/",
@@ -275,11 +299,13 @@ function load_job_state(){
                 add_new_job();
                 $("#pluginid"+job_id).append(data.jobs[i].plugin);
                 $("#addressid"+job_id).append(data.jobs[i].address);
-                var command_td = $("#commandid"+job_id);
-                drop_command_into_hole(data.jobs[i].job,
-                                       JSON.stringify(data.jobs[i].job),
-                                        command_td,
-                                        job_id);
+                if (data.jobs[i].job != null){
+                    var command_td = $("#commandid"+job_id);
+                    drop_command_into_hole(data.jobs[i].job,
+                                           JSON.stringify(data.jobs[i].job),
+                                            command_td,
+                                            job_id);
+                }
             }
             sequences = JSON.parse(JSON.stringify(data.sequences), json_list_to_set);
             active_sequence = data.active_sequence;
@@ -293,6 +319,12 @@ function load_job_state(){
             set_w3_job_status();
             synchronize_job_sequence_tabs(active_sequence);
             synchronize_output_sequence_tabs(active_sequence);
+            $("#download_status").removeClass("fa-hourglass-end");
+            $("#download_status").addClass("fa-money");
+            setTimeout( function() {
+                $("#download_status").removeClass("fa-money");
+                $("#download_status").addClass("fa-cloud-download");
+                }, 3000);
         }
     })
 }
@@ -353,8 +385,7 @@ function save_job_state(){
                 $("#upload_status").addClass("fa-cloud-upload");
                 }, 3000 );
         }
-    })
-    var call_db = "1";
+    });
 }
 
 function add_target_to_job_sc_button(){
@@ -816,9 +847,16 @@ function execute_sequence(){
             job_id = job_ids[0];
             for (var index = 0; index < job_ids.length; ++index) {
                 if (job_ids[index] != "invalid-job"){
-                    id_reverse_map[job_ids[index]] = index+1;
+                    var dom_id = index+1;
+                    id_reverse_map[job_ids[index]] = dom_id;
                     id_map[index+1] = job_ids[index];
-                    execute_sequence_output(job_ids[index]);
+                    if (ws_map['status'].readyState === ws_map['status'].OPEN){
+                        $("#updateid"+dom_id).empty();
+                        $("#updateid"+dom_id).attr({"class": "fa fa-refresh fa-spin"});
+                    } else {
+                        execute_sequence_output(job_ids[index]);
+                    }
+
                 }
             }
         },
@@ -856,11 +894,9 @@ function render_job_output_to_page(job_guid, data){
 function render_job_output_timeout(job_guid){
     var updateid = id_reverse_map[job_guid];
     $("#updateid"+updateid).empty();
-    $("#updateid"+updateid).append("No data to return at the moment :(");
-    $("#updateid"+updateid).parent().css("background-color", "white");
-    $("#updateid"+updateid).empty();
     $("#updateid"+updateid).attr({"class": ""});
     $("#updateid"+updateid).append("No data to return at the moment :(");
+    $("#updateid"+updateid).parent().append($("<i/>").attr({"class": "fa fa-wrench", "onclick": "execute_sequence_output_retry('"+job_guid+"')"}));
     $("#updateid"+updateid).parent().css("background-color", "white");
     // W3 status
     $("#jobstatusid"+updateid).empty();
@@ -870,6 +906,11 @@ function render_job_output_timeout(job_guid){
     $("#updatestatusid"+updateid).append($("<span/>").attr({"class": "label label-danger"}).text("Error"));
 }
 
+function execute_sequence_output_retry(job_guid){
+    var updateid = id_reverse_map[job_guid];
+    $("#updateid"+updateid).parent().children()[1].remove(); //remove the wrench
+    execute_sequence_output(job_guid);
+}
 
 // Modify function add depth parameter, increment depth when it errors
 function execute_sequence_output(specific_id, counter=0, backoff=2000){
@@ -903,7 +944,7 @@ function execute_sequence_output(specific_id, counter=0, backoff=2000){
         console.log("FAIL @ execute_sequence_output  function");
 
         var status = data.status;
-        if(counter == 10){
+        if(counter >= MAX_MANUAL_CHECK_COUNT){
             render_job_output_timeout(specific_id);
         } else {
             counter++;
