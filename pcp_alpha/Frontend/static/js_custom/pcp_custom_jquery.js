@@ -75,6 +75,10 @@ $(document).ready(function() {
 
 });
 
+function debug_local(param1){
+    return console.log(JSON.stringify(param1));
+}
+
 /*
 -----------------------------------------------------------------------------------------------------
 Websockets functions
@@ -577,11 +581,16 @@ function hover_drop(){
 
 // Drop target to W3
 function drop_target(hover_object){
-//    console.log("drop_target");  // debug
+    console.log("drop_target");  // debug
+    // hover_object is the row that is being hovered over
+    // selected_var.length == # of targets dragging
+    // hover_object.nextUntil().length == # of rows of every sequence in W3 - 1
+    // next_location_num not being used but maybe in the future
     $(".gridSelect, .divw3row").droppable({
         drop: function (event, ui) {
             if (hover_int != 0){
                 var selected_var = ui.helper.children();
+                var list_cap = 0;
 
                 for(var int = 0; int < selected_var.length; int++){
                     var row_id = selected_var[int].id;
@@ -590,7 +599,20 @@ function drop_target(hover_object){
                     var selected_row = undefined;
 
                     if (int != 0){
-                        selected_row = hover_object.nextUntil(':hidden')[(int -1)];
+                        var counter = list_cap;
+                        while(hover_object.nextUntil().length > counter){
+                            var next_plugin_name = hover_object.nextUntil()[counter].children[1].innerText;
+                            var next_location_num = hover_object.nextUntil()[counter].children[2].innerText;
+                            if (hover_object.nextUntil()[counter].style.display != 'none' && next_plugin_name.length < 1){
+                                selected_row = hover_object.nextUntil()[counter];
+                                counter++;
+                                list_cap = counter;
+                                break;
+                            }
+                            counter++;
+                            list_cap = counter;
+                        }
+//                        selected_row = hover_object.nextUntil(':hidden')[(int -1)];  // this was used before
                     } else {
                         selected_row = hover_object[0];
                     }
