@@ -285,6 +285,9 @@ Functions down below are for w3
 
 
 function load_job_state(){
+    $("#download_status").removeClass("fa-cloud-download");
+    $("#download_status").removeClass("fa-money");
+    $("#download_status").addClass("fa-hourglass-end");
     $.ajax({
         type: "GET",
         url: "/action/load_state/",
@@ -316,6 +319,12 @@ function load_job_state(){
             set_w3_job_status();
             synchronize_job_sequence_tabs(active_sequence);
             synchronize_output_sequence_tabs(active_sequence);
+            $("#download_status").removeClass("fa-hourglass-end");
+            $("#download_status").addClass("fa-money");
+            setTimeout( function() {
+                $("#download_status").removeClass("fa-money");
+                $("#download_status").addClass("fa-cloud-download");
+                }, 3000);
         }
     })
 }
@@ -867,11 +876,9 @@ function render_job_output_to_page(job_guid, data){
 function render_job_output_timeout(job_guid){
     var updateid = id_reverse_map[job_guid];
     $("#updateid"+updateid).empty();
-    $("#updateid"+updateid).append("No data to return at the moment :(");
-    $("#updateid"+updateid).parent().css("background-color", "white");
-    $("#updateid"+updateid).empty();
     $("#updateid"+updateid).attr({"class": ""});
     $("#updateid"+updateid).append("No data to return at the moment :(");
+    $("#updateid"+updateid).parent().append($("<i/>").attr({"class": "fa fa-wrench", "onclick": "execute_sequence_output_retry('"+job_guid+"')"}));
     $("#updateid"+updateid).parent().css("background-color", "white");
     // W3 status
     $("#jobstatusid"+updateid).empty();
@@ -881,6 +888,11 @@ function render_job_output_timeout(job_guid){
     $("#updatestatusid"+updateid).append($("<span/>").attr({"class": "label label-danger"}).text("Error"));
 }
 
+function execute_sequence_output_retry(job_guid){
+    var updateid = id_reverse_map[job_guid];
+    $("#updateid"+updateid).parent().children()[1].remove(); //remove the wrench
+    execute_sequence_output(job_guid);
+}
 
 // Modify function add depth parameter, increment depth when it errors
 function execute_sequence_output(specific_id, counter=0, backoff=2000){
@@ -914,7 +926,7 @@ function execute_sequence_output(specific_id, counter=0, backoff=2000){
         console.log("FAIL @ execute_sequence_output  function");
 
         var status = data.status;
-        if(counter == MAX_MANUAL_CHECK_COUNT){
+        if(counter >= MAX_MANUAL_CHECK_COUNT){
             render_job_output_timeout(specific_id);
         } else {
             counter++;
