@@ -11,8 +11,8 @@ var rdb = require("rethinkdb");
 var app = express();
 
 app.get("/", function(req, res) {
-    res.sendFile(__dirname + "/index.html")
-})
+    res.sendFile(__dirname + "/index.html");
+});
 
 // Create http server to initialize the 
 // websockets server.
@@ -53,7 +53,7 @@ var wss = new WebSocket.Server({ server: server, path: "/monitor" });
 
 // Error catching
 wss.on("error", function (err) {
-    consle.log(err);
+    console.log(err);
 });
 
 // Heartbeat
@@ -83,11 +83,11 @@ wss.on("connection", function (ws) {
         // This handler "routes" all incoming websocket connection initial
         // setups.
         switch (message) {
-            // Handle job status monitoring
-            case "status":
-                if (connection.open) {
-                    ws.send("Waiting for changes in job statuses...");
-                    rdb.db("Brain").table("Jobs").filter(rdb.row("Status").ne("Ready"))
+        // Handle job status monitoring
+        case "status":
+            if (connection.open) {
+                ws.send("Waiting for changes in job statuses...");
+                rdb.db("Brain").table("Jobs").filter(rdb.row("Status").ne("Ready"))
                     .changes({includeInitial: true})
                     .run(connection, function (err, cursor) {
                         if (err) throw err;
@@ -101,16 +101,16 @@ wss.on("connection", function (ws) {
                             ws.send(JSON.stringify(sendData, null, 2));
                         });
                     });
-                } else {
-                    console.log("Connection closed! Reconnecting...");
-                    reconnect();
-                }
-                break;
-            // Handle job output monitoring
-            case "output":
-                if (connection.open) {
-                    ws.send("Waiting for changes in job outputs...");
-                    rdb.db("Brain").table("Outputs")
+            } else {
+                console.log("Connection closed! Reconnecting...");
+                // reconnect();
+            }
+            break;
+        // Handle job output monitoring
+        case "output":
+            if (connection.open) {
+                ws.send("Waiting for changes in job outputs...");
+                rdb.db("Brain").table("Outputs")
                     .changes({includeInitial: true})
                     .run(connection, function (err, cursor) {
                         if (err) throw err;
@@ -123,13 +123,13 @@ wss.on("connection", function (ws) {
                             ws.send(JSON.stringify(sendData, null, 2));
                         });
                     });
-                } else {
-                    console.log("Connection closed! Reconnecting...");
-                    reconnect();
-                }
-                break;
-            default:
-                ws.send(message + " not a valid feed!");
+            } else {
+                console.log("Connection closed! Reconnecting...");
+                // reconnect();
+            }
+            break;
+        default:
+            ws.send(message + " not a valid feed!");
         }
 
     });
@@ -148,7 +148,7 @@ var clientCheck = setInterval(function ping() {
             return ws.terminate();
         }
         ws.isAlive = false;
-        ws.ping((err) => {Error(err)});
+        ws.ping((err) => {Error(err);});
     });
 }, 1000);
 
