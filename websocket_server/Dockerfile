@@ -1,11 +1,6 @@
-FROM alpine:3.7
-
-RUN apk update && \
-    apk add nodejs=8.9.3-r1 nodejs-npm=8.9.3-r1
+FROM mhart/alpine-node:10.5.0
 
 WORKDIR /srv/node-app
-
-RUN npm update -g
 
 COPY ./package.json .
 
