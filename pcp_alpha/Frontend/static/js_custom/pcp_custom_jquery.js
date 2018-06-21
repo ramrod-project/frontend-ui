@@ -75,10 +75,6 @@ $(document).ready(function() {
 
 });
 
-function debug_local(param1){
-    return console.log(JSON.stringify(param1));
-}
-
 /*
 -----------------------------------------------------------------------------------------------------
 Websockets functions
