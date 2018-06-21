@@ -83,6 +83,11 @@ def execute_sequence_controller(request):
 
 
 def _w4_get_content(job_id):
+    """
+    Checking on specific data
+    :param job_id: user request
+    :return: content depending on job status
+    """
     updated_job = get_specific_brain_output(job_id)
     if not updated_job:
         result = {
@@ -99,6 +104,11 @@ def _w4_get_content(job_id):
 
 
 def w4_output_controller(request):
+    """
+    Outputs data in W4
+    :param request: user request
+    :return: job content
+    """
     response = None
     if request.method == 'GET':
         controller_job_id = request.GET.get('job_id')
@@ -110,6 +120,11 @@ def w4_output_controller(request):
 
 
 def w4_output_controller_download(request):
+    """
+    User can download content in W4 by clicking on link
+    :param request: user request
+    :return: content data onto a file
+    """
     response = None
     if request.method == 'GET':
         user_agent = user_agent_parser.ParseOS(request.META.get("HTTP_USER_AGENT"))
@@ -216,3 +231,17 @@ def val_edit_target_form(request, target_id):
     else:
         form = TargetForm()
     return redirect('/edit_target_form/{}/'.format(target_id))
+
+
+def delete_specific_target(request, target_id):
+    """
+    This function deletes a specific target from Brain.Targets
+    :param request: user request
+    :param target_id: target it
+    :return: home page and deletion of the specific target user requested
+    """
+    if request.method == 'GET':
+        brain_connection = brain.connect()
+        brain.r.db("Brain").table("Targets").get(str(target_id)).delete(
+            return_changes=True).run(brain_connection)
+        return redirect('/')
