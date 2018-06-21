@@ -28,12 +28,12 @@ DEBUG = True
 
 
 # Will add host ip address to ALLOWED_HOST list
-# s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-# s.connect(("8.8.8.8", 80))
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+s.connect(("8.8.8.8", 80))
 
 
-ALLOWED_HOSTS = ['frontend', '127.0.0.1', '192.168.43.83', '192.168.1.24', '192.168.1.29', '192.168.1.89']
-# s.close()
+ALLOWED_HOSTS = ['frontend', '127.0.0.1', ''.join(s.getsockname()[0]), '192.168.43.83', '192.168.1.13']
+s.close()
 
 
 # Application definition
