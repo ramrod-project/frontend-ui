@@ -98,6 +98,14 @@ wss.on("connection", function (ws) {
                             if ( ("old_val" in row ) &&
                                  ("new_val" in row && row.new_val !== null) &&
                                  ("Status" in row.new_val) &&
+                                 (
+                                   (row.old_val  == null)
+                                   ||
+                                   (  (row.old_val  !== null)&&
+                                      ("Status" in row.old_val ) &&
+                                      (row.old_val.Status != row.new_val.Status)
+                                   )
+                                 ) &&
                                  (ws.readyState == 1) ){
                                     var sendData = {"id":row.new_val.id, "status":row.new_val.Status};
                                     ws.send(JSON.stringify(sendData, null, 2));
