@@ -11,9 +11,9 @@ def switch_to_done(straight_to_done=True):
                 query_item['new_val'].get("Status") != "Done":
             print(query_item['new_val']['id'])
             print(query_item['new_val']['Status'])
-            sleep(5)
             current_status = query_item['new_val'].get("Status")
             if not straight_to_done:
+                sleep(5)
                 if current_status == BJ.PENDING:
                     new_status = BJ.transition(current_status, BJ.ACTIVE)
                 else:
