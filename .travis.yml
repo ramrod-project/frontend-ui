@@ -89,15 +89,16 @@ matrix:
         - sleep 3
         - npm test
         - ./cc-test-reporter after-build -t lcov --exit-code 0
-        - docker stop rethinkdb
       script:
         - if [ "$TRAVIS_BRANCH" != "master"  ];
-          then docker run -d --rm --name websocket -p 3000:3000 -e "STAGE=QA" -e "LOGLEVEL=DEBUG"
+          then docker run -d --name websocket -p 3000:3000 -e "STAGE=QA" -e "LOGLEVEL=DEBUG"
           --name websocket --network test ramrodpcp/websocket-server:$TRAVIS_BRANCH;
-          else docker run -d --rm --name websocket -p 3000:3000 -e "STAGE=QA" -e "LOGLEVEL=DEBUG"
+          else docker run -d --name websocket -p 3000:3000 -e "STAGE=QA" -e "LOGLEVEL=DEBUG"
           --name websocket --network test ramrodpcp/websocket-server:latest; fi
         - sleep 5
         - docker logs websocket
+        - docker stop websocket
+        - docker stop rethinkdb
       after_success:
         - if [[ "$TRAVIS_PULL_REQUEST" == "false" ]];
           then echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin; fi
