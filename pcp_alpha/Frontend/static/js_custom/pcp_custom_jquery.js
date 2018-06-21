@@ -3,7 +3,7 @@
 This file was created for project pcp to add jquery functionality and other javascript resources.
 -----------------------------------------------------------------------------------------------------
 */
-
+var MAX_MANUAL_CHECK_COUNT = 30;
 var inc = 0;
 var hover_int = 0;
 var sequences = {"1": new Set()};
@@ -296,11 +296,13 @@ function load_job_state(){
                 add_new_job();
                 $("#pluginid"+job_id).append(data.jobs[i].plugin);
                 $("#addressid"+job_id).append(data.jobs[i].address);
-                var command_td = $("#commandid"+job_id);
-                drop_command_into_hole(data.jobs[i].job,
-                                       JSON.stringify(data.jobs[i].job),
-                                        command_td,
-                                        job_id);
+                if (data.jobs[i].job != null){
+                    var command_td = $("#commandid"+job_id);
+                    drop_command_into_hole(data.jobs[i].job,
+                                           JSON.stringify(data.jobs[i].job),
+                                            command_td,
+                                            job_id);
+                }
             }
             sequences = JSON.parse(JSON.stringify(data.sequences), json_list_to_set);
             active_sequence = data.active_sequence;
@@ -818,9 +820,16 @@ function execute_sequence(){
             job_id = job_ids[0];
             for (var index = 0; index < job_ids.length; ++index) {
                 if (job_ids[index] != "invalid-job"){
-                    id_reverse_map[job_ids[index]] = index+1;
+                    var dom_id = index+1;
+                    id_reverse_map[job_ids[index]] = dom_id;
                     id_map[index+1] = job_ids[index];
-                    //execute_sequence_output(job_ids[index]);
+                    if (ws_map['status'].readyState === ws_map['status'].OPEN){
+                        $("#updateid"+dom_id).empty();
+                        $("#updateid"+dom_id).attr({"class": "fa fa-refresh fa-spin"});
+                    } else {
+                        execute_sequence_output(job_ids[index]);
+                    }
+
                 }
             }
         },
@@ -905,7 +914,7 @@ function execute_sequence_output(specific_id, counter=0, backoff=2000){
         console.log("FAIL @ execute_sequence_output  function");
 
         var status = data.status;
-        if(counter == 10){
+        if(counter == MAX_MANUAL_CHECK_COUNT){
             render_job_output_timeout(specific_id);
         } else {
             counter++;
