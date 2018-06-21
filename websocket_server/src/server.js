@@ -95,21 +95,12 @@ wss.on("connection", function (ws) {
                         cursor.each(function (err, row) {
                             if (err) throw err;
                             //console.warn(row);
-                            if ("old_val" in row ) {
-                                //console.warn("old_val present");
-                                if ("new_val" in row && row.new_val !== null) {
-                                    //console.warn("new_val present");
-                                    if ("Status" in row.new_val){
-                                        //console.warn("status present");
-                                        //console.warn(ws.readyState);
-                                        //console.warn("=========");
-                                        if (ws.readyState == 1){
-                                            //console.warn("ws is good");
-                                            var sendData = {"id":row.new_val.id, "status":row.new_val.Status};
-                                            ws.send(JSON.stringify(sendData, null, 2));
-                                        }
-                                    }
-                                }
+                            if ( ("old_val" in row ) &&
+                                 ("new_val" in row && row.new_val !== null) &&
+                                 ("Status" in row.new_val) &&
+                                 (ws.readyState == 1) ){
+                                    var sendData = {"id":row.new_val.id, "status":row.new_val.Status};
+                                    ws.send(JSON.stringify(sendData, null, 2));
                             } else {
                                 return null;
                             }
