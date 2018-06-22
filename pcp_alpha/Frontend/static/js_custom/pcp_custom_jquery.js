@@ -4,6 +4,7 @@ This file was created for project pcp to add jquery functionality and other java
 -----------------------------------------------------------------------------------------------------
 */
 var MAX_MANUAL_CHECK_COUNT = 30;
+var INITIAL_JOB_STATUS = "Ready";
 var inc = 0;
 var hover_int = 0;
 var sequences = {"1": new Set()};
@@ -114,10 +115,12 @@ function status_change_ws_callback(message) {
             if (job_id in id_reverse_map) {
                 var job_dom_id = id_reverse_map[job_id];
                 $("#jobstatusid"+job_dom_id).empty();
-                $("#jobstatusid"+job_dom_id).append($("<span/>").attr({"class": "label label-info"}).text(data.status));
+                $("#jobstatusid"+job_dom_id).append($("<span/>").attr({"class": "label label-"+data.status}).text(data.status));
                 $("#updatestatusid"+job_dom_id).empty();
-                $("#updatestatusid"+job_dom_id).append($("<span/>").attr({"class": "label label-info"}).text(data.status));
-                execute_sequence_output(job_id);
+                $("#updatestatusid"+job_dom_id).append($("<span/>").attr({"class": "label label-"+data.status}).text(data.status));
+                if (data.status == "Done"){
+                    execute_sequence_output(job_id);
+                }
             }
         }
     }
@@ -807,9 +810,9 @@ function prepare_jobs_list(){
                 disabled: true
             });
             $("#updatestatusid"+(j+1)).empty();
-            $("#updatestatusid"+(j+1)).append($("<span/>").attr({"class": "label label-success"}).text("Ready"));
+            $("#updatestatusid"+(j+1)).append($("<span/>").attr({"class": "label label-"+INITIAL_JOB_STATUS}).text(INITIAL_JOB_STATUS));
             $("#jobstatusid"+(j+1)).empty();
-            $("#jobstatusid"+(j+1)).append($("<span/>").attr({"class": "label label-success"}).text("Ready"));
+            $("#jobstatusid"+(j+1)).append($("<span/>").attr({"class": "label label-"+INITIAL_JOB_STATUS}).text(INITIAL_JOB_STATUS));
 
             var uid = j+1;
             var terminal = $("#updateid"+uid).parent();
@@ -820,7 +823,7 @@ function prepare_jobs_list(){
             var job = {"JobTarget": {"PluginName": plugin_name,
                                      "Location": location,
                                      "Port":  0,},
-                       "Status": "Ready",
+                       "Status": INITIAL_JOB_STATUS,
                        "StartTime": 0,
                        "JobCommand": command};
             jobs.push(job);
@@ -888,9 +891,9 @@ function render_job_output_to_page(job_guid, data){
     $("#updateid"+updateid).append($("<div style='background-color: white'/>").append(download_link));
     $("#updateid"+updateid).parent().css("background-color", "Fuchsia");
     $("#updatestatusid"+updateid).empty();
-    $("#updatestatusid"+updateid).append($("<span/>").attr({"class": "label label-info"}).text("Done"));
+    $("#updatestatusid"+updateid).append($("<span/>").attr({"class": "label label-Done"}).text("Done"));
     $("#jobstatusid"+updateid).empty();
-    $("#jobstatusid"+updateid).append($("<span/>").attr({"class": "label label-info"}).text("Done"));
+    $("#jobstatusid"+updateid).append($("<span/>").attr({"class": "label label-Done"}).text("Done"));
 }
 
 function render_job_output_timeout(job_guid){
@@ -902,10 +905,10 @@ function render_job_output_timeout(job_guid){
     $("#updateid"+updateid).parent().css("background-color", "white");
     // W3 status
     $("#jobstatusid"+updateid).empty();
-    $("#jobstatusid"+updateid).append($("<span/>").attr({"class": "label label-danger"}).text("Error"));
+    $("#jobstatusid"+updateid).append($("<span/>").attr({"class": "label label-Error"}).text("Error"));
     // W4 status
     $("#updatestatusid"+updateid).empty();
-    $("#updatestatusid"+updateid).append($("<span/>").attr({"class": "label label-danger"}).text("Error"));
+    $("#updatestatusid"+updateid).append($("<span/>").attr({"class": "label label-Error"}).text("Error"));
 }
 
 function execute_sequence_output_retry(job_guid){
