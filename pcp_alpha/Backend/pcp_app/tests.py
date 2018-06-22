@@ -13,7 +13,8 @@ from pcp_alpha.Backend.db_dir.custom_queries import get_specific_brain_targets, 
     get_specific_command, get_brain_targets
 from pcp_alpha.Backend.pcp_app.views import get_commands_controller, \
     execute_sequence_controller, w4_output_controller, w4_output_controller_download, \
-    new_target_form, val_target_form, val_edit_target_form, edit_target_form
+    new_target_form, val_target_form, val_edit_target_form, edit_target_form, \
+    delete_specific_target
 
 ECHO_JOB_ID = str(uuid4())
 NOW = time()
@@ -78,7 +79,7 @@ class TestDataHandling(object):
         return response
 
     @staticmethod
-    def get_test(url_str, function_obj, rf):
+    def get_test(url_str, function_obj, rf, target_id=None):
         """
         This function is used with functions from
         pcp_app/views.py
@@ -86,7 +87,11 @@ class TestDataHandling(object):
         request = rf.get(url_str, HTTP_USER_AGENT="Mozilla/5.0 "
                                                   "(Windows NT 6.1; WOW64; rv:40.0) "
                                                   "Gecko/20100101 Firefox/40.1")
-        response = function_obj(request)
+        # response = function_obj(request)
+        if target_id is not None:
+            response = function_obj(request, target_id)
+        else:
+            response = function_obj(request)
         return response
 
     @staticmethod
@@ -439,3 +444,17 @@ class TestDataHandling(object):
                                               val_edit_target_form,
                                               rf, target_id=target_key)
         assert response.status_code == 302
+
+    @staticmethod
+    def test_edit_target_delete_get(rf):
+        """
+        This test imitates deleting a target from the
+        edit target form and doing a request.GET
+        """
+        target_key = ""
+        for target_item in get_brain_targets():
+            target_key = target_item["id"]
+        url_var = "delete_target_row/{}/".format(target_key)
+        response = TestDataHandling.get_test(url_var, delete_specific_target, rf, target_id=target_key)
+        assert response.status_code == 302
+        assert response.url == "/"
