@@ -538,11 +538,13 @@ function drag_target(){
 	        var selected_var = $(".gridSelect tbody tr.selected");
             var container_to_drag;
 
-	        if (selected_var[0] == $(this)[0]){
+	        if (selected_var[0] == $(this)[0]){  // single highlighted selected on W1
 	            container_to_drag = selected_var;
+	        // multiple highlighted selected on W1
 	        } else if (selected_var[0].classList.contains('selected') && $(this)[0].classList.contains('selected')) {
 	            container_to_drag = selected_var;
-	        } else {
+	        // not highlighted selected on W1
+	        } else if (!$(this)[0].classList.contains('divw3row')){
 	            container_to_drag = $(this);
 	        }
 
