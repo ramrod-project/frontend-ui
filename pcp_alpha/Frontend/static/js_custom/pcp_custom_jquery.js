@@ -3,24 +3,45 @@
 This file was created for project pcp to add jquery functionality and other javascript resources.
 -----------------------------------------------------------------------------------------------------
 */
-
+var MAX_MANUAL_CHECK_COUNT = 30;
+var INITIAL_JOB_STATUS = "Ready";
 var inc = 0;
 var hover_int = 0;
+var sequences = {"1": new Set()};
+var id_map = {};
+var id_reverse_map = {};
+var ws_map = {};
+var active_sequence = "1";
+var exec_int = 0;
+
 $(document).ready(function() {
-	$("tr.clickable-row").click(get_commands_func);   // displays commands in w2
+    ws_map["status"] = open_websocket("status", status_change_ws_callback);
+
+	$("tr td.clickable-row-col1").click(get_commands_func);   // displays commands in w2
+	$("tr td.clickable-row-col2").click(get_commands_func);   // displays commands in w2
+	$("tr td.clickable-row-col3").click(get_commands_func);   // displays commands in w2
+	$("tr td span a.btn-linkedin").click(add_target_to_job_sc_button);  // target to job shortcut button
 
 	var row_selection = $('#target_table').DataTable({  //for w1+w3
 	    searching: false,
 	    paging: false,
 	    bInfo: false,
         rowReorder: true,
-        select: true
+        select: true                                    // highlight target row in w1
 	});
 
-    $(".gridSelect tbody tr").click(target_select_func(row_selection));  // highlight target in w1 to drag to w3
+    row_selection.on('select', function(e, dt, type, indexes) {  // user clicks on target row to start drag
+        var selected_var = $(".gridSelect tbody tr.selected");
+        if(selected_var.length > 0){
+            console.log("draggable object for more than one object");
+            drag_target();
+        } else {
+            console.log("draggable object for one object");
+        }
+    });
+
 	$("#addjob_button").click(function(){
-	    inc++;
-	    $("#addjob_button")[0].value = inc;
+
 	});
 	$("#addjob_button").click(add_new_job);               // add new job in w3
 	$("#clear_buttonid").click(clear_new_jobs);           // clear content in w3
@@ -28,7 +49,105 @@ $(document).ready(function() {
     $("#w3_drop_to_all").attr({"ondrop": "drop_command_to_multiple(event)",
                                "ondragover": "allowDropCommand(event)"});
     $("#dvader_nooo_id").click(easter_egg_one);           // dvader nooo audio
+    $("#searchNameHere_id").change(filter_w1);
+    $("#searchNameHere_id").keyup(filter_w1);
+    $("#w1_command_active_filter").css("display", "none");
+    $("#new_jobq_button").click(add_sequence_tab);
+    $("#clear_seq_buttonid").click(hide_current_sequence);
+    $("#persist_button").click(save_job_state);
+    $("#loader_button").click(load_job_state);
+    $("#w3_drop_target_to_all").droppable({
+        drop: function (event, ui){
+            var selected_var = ui.helper.children();
+            if (selected_var.length == 1){
+                var num_jobs = $("#addjob_button")[0].value;
+                for (var i=1; i<=num_jobs; i++){
+                    if (($("#jobrow"+i).css("display") != "none") && job_row_is_mutable(i)) {
+                        var row_id = selected_var[0].id;
+                        var row_id_str = row_id.substring(10,row_id.length);
+                        var row_js = JSON.parse($("#nameidjson" + row_id_str)[0].innerText);
+                        $("#addressid"+i)[0].innerText = row_js.Location;
+                        $("#pluginid"+i)[0].innerText = row_js.PluginName;
+                    }
+                }
+                set_w3_job_status();
+                $('.selected');
+            }
+        }
+    });
+
 });
+
+/*
+-----------------------------------------------------------------------------------------------------
+Websockets functions
+-----------------------------------------------------------------------------------------------------
+*/
+
+function open_websocket(selection, callback) {
+    // Create a new websocket
+    var server = 'ws://' + window.location.hostname + ':3000/monitor';
+    var ws = new WebSocket(server);
+    console.log("Created new websocket to " + server);
+
+    // Handle connection opening
+    // Use 'selection' string to select feed
+    ws.onopen = function () {
+        ws.send(selection);
+        console.log("Websocket connected to feed " + selection);
+    }
+
+    // receive message
+    ws.onmessage = function (message) {
+        callback(message);
+    };
+    return ws;
+}
+
+function status_change_ws_callback(message) {
+    console.log(message);
+    var data = null;
+    if ('data' in message && message.data != null && message.data[0] == "{") {
+        data = JSON.parse(message.data);
+        var job_id = null;
+        if ("id" in data) {
+            job_id = data.id;
+            if (job_id in id_reverse_map) {
+                var job_dom_id = id_reverse_map[job_id];
+                $("#jobstatusid"+job_dom_id).empty();
+                $("#jobstatusid"+job_dom_id).append($("<span/>").attr({"class": "label label-"+data.status}).text(data.status));
+                $("#updatestatusid"+job_dom_id).empty();
+                $("#updatestatusid"+job_dom_id).append($("<span/>").attr({"class": "label label-"+data.status}).text(data.status));
+                if (data.status == "Done"){
+                    execute_sequence_output(job_id);
+                }
+            }
+        }
+    }
+}
+
+// ** TESTING ONLY **
+// Testing the websocket - for job status
+function test_ws_callback(message) {
+    console.log(message);
+    var data = {};
+    if ('data' in message) {
+        data = JSON.parse(message.data);
+    }
+    console.log(data);
+    var job_id = null;
+    if ("id" in data) {
+        job_id = data.id;
+    }
+    console.log(job_id);
+    console.log(id_reverse_map);
+    if (job_id in id_reverse_map) {
+         console.log("In map!");
+    }
+}
+//ws_map["status"] = open_websocket("status", test_ws_callback);
+// ** TESTING ONLY **
+
 
 /*
 -----------------------------------------------------------------------------------------------------
@@ -50,11 +169,34 @@ Functions down below are for w2
 // List of commands based off of plugin name
 var current_command_template = {}
 
+function filter_w1(){
+    var filter_content = $("#searchNameHere_id")[0].value.toLowerCase();
+    var filter_display = $("#w1_command_active_filter");
+    var num_targets = 2;
+    if (filter_content.length == 0){
+        filter_display.css("display", "none");
+    } else {
+        filter_display.css("display", "");
+        filter_display[0].innerText = "Currently filtering on: "+filter_content;
+    }
+    var to_filter = $("#target_box_contentid tr");
+    for (var row_i = 0; row_i < to_filter.length; row_i++){
+        var row_id = to_filter[row_i].id.substring(10, to_filter[row_i].id.length);
+        var target_json = $("#name_tag_id"+row_id+" a span")[0].innerHTML;
+        var target = JSON.parse(target_json);
+        if (target.PluginName.toLowerCase().includes(filter_content)  || target.Location.toLowerCase().includes(filter_content) ){
+            $(to_filter[row_i]).css("display", "");
+        } else {
+            $(to_filter[row_i]).css("display", "none");
+        }
+    }
+}
 function get_commands_func(){
 //    console.log("get_commands_func");  // debug
+//    console.log($(this)[0].parentElement.id);
 
     // plugin name the user clicked
-    var row_id = $(this)[0].id.substring(10, $(this)[0].id.length);
+    var row_id = $(this)[0].parentElement.id.substring(10, $(this)[0].id.length);
     var plugin_name_var = $("#name_tag_id"+row_id+" a span")[1].innerText;
     var check_content_var = false;
 
@@ -143,6 +285,173 @@ function update_argument(event){
 Functions down below are for w3
 -----------------------------------------------------------------------------------------------------
 */
+
+
+function load_job_state(){
+    $("#download_status").removeClass("fa-cloud-download");
+    $("#download_status").removeClass("fa-money");
+    $("#download_status").addClass("fa-hourglass-end");
+    $.ajax({
+        type: "GET",
+        url: "/action/load_state/",
+        datatype: 'json',
+        success: function(data) {
+            clear_new_jobs();
+            for (var i = 0; i < data.jobs.length; i++){
+                var job_id = i + 1;
+                add_new_job();
+                $("#pluginid"+job_id).append(data.jobs[i].plugin);
+                $("#addressid"+job_id).append(data.jobs[i].address);
+                if (data.jobs[i].job != null){
+                    var command_td = $("#commandid"+job_id);
+                    drop_command_into_hole(data.jobs[i].job,
+                                           JSON.stringify(data.jobs[i].job),
+                                            command_td,
+                                            job_id);
+                }
+            }
+            sequences = JSON.parse(JSON.stringify(data.sequences), json_list_to_set);
+            active_sequence = data.active_sequence;
+            id_map = data.id_map;
+            id_reverse_map = data.id_reverse_map;
+            for(var i in sequences){
+                if ($('#jobq_tabs a[href="#jobq_'+i+'"]').length == 0){
+                    add_sequence_tab(false);
+                }
+            }
+            set_w3_job_status();
+            synchronize_job_sequence_tabs(active_sequence);
+            synchronize_output_sequence_tabs(active_sequence);
+            $("#download_status").removeClass("fa-hourglass-end");
+            $("#download_status").addClass("fa-money");
+            setTimeout( function() {
+                $("#download_status").removeClass("fa-money");
+                $("#download_status").addClass("fa-cloud-download");
+                }, 3000);
+        }
+    })
+}
+function json_set_to_list(key, value) {
+  if (typeof value === 'object' && value instanceof Set) {
+    return [...value];
+  }
+  return value;
+}
+function json_list_to_set(key, value) {
+  if (typeof value === 'object' && value.constructor === Array) {
+    return new Set(value);
+  }
+  return value;
+}
+
+function save_job_state(){
+    $("#upload_status").removeClass("fa-cloud-upload");
+    $("#upload_status").removeClass("fa-money");
+    $("#upload_status").addClass("fa-hourglass-end");
+    var local_sequences = JSON.parse(JSON.stringify(sequences, json_set_to_list));
+    var data_package = {"id_map": id_map,
+                        "id_reverse_map": id_reverse_map,
+                        "jobs": [],
+                        "sequences": local_sequences,
+                        "active_sequence": active_sequence};
+    var num_jobs = $("#addjob_button")[0].value;
+    for (var i = 1; i <= Number(num_jobs); i++){
+        var plugin_name = $("#pluginid"+i)[0].innerText;
+        var address = $("#addressid"+i)[0].innerText;
+        var job_cell = $("#commandid"+i+" div");
+        var job_str = undefined;
+        var job_js = null;
+
+        if (job_cell.length >= 1){
+            job_str = job_cell[0].innerText;
+            if (job_str != undefined){
+                job_js = JSON.parse(job_str);
+            }
+        }
+        data_package.jobs.push({"plugin": plugin_name,
+                                "address": address,
+                                 "job": job_js,
+                                 "status": null});
+    }
+    var data_json = JSON.stringify(data_package);
+    $.ajax({
+        type: "POST",
+        url: "/action/save_state/",
+        data: {"current_state": data_json},
+        datatype: 'json',
+        success: function(data) {
+            var job_ids = data;
+            $("#upload_status").removeClass("fa-hourglass-end");
+            $("#upload_status").addClass("fa-money");
+            setTimeout( function() {
+                $("#upload_status").removeClass("fa-money");
+                $("#upload_status").addClass("fa-cloud-upload");
+                }, 3000 );
+        }
+    });
+}
+
+function add_target_to_job_sc_button(){
+//    console.log("add_target_to_job_sc");  // debug
+
+    add_new_job();
+    var row_id = $(this)[0].parentElement.parentElement.parentElement.id.substring(10, $(this)[0].id.length);
+    var plugin_name_var = $("#name_tag_id"+row_id+" a span")[1].innerText;
+    var location_num_var = $("#address_tag_id"+row_id)[0].innerText
+    $("#pluginid"+inc).append(plugin_name_var);
+    $("#addressid"+inc).append(location_num_var);
+
+
+}
+
+function hide_current_sequence(e){
+    sequences[active_sequence] = new Set();
+    synchronize_sequence_tab_rows(active_sequence);
+}
+function add_sequence_tab(clear=true){
+    var next_tab =  $("#jobq_tabs").children().length;
+    if (clear){
+        sequences[next_tab] = new Set();
+    }
+    $('#new_jobq_button').before('<li onclick="synchronize_job_sequence_tabs('+next_tab+')"><a href="#jobq_'+next_tab+'" data-toggle="tab">'+next_tab+'</a></li>');
+    $('#jobq_content').append('<div class="tab-pane" id="jobq_'+next_tab+'"></div>');
+    console.warn("adding sequence ");
+    //ADD THE OUTPUT TAB TOO!
+    var output_tab = $("#output_tabs").append('<li onclick="synchronize_output_sequence_tabs('+next_tab+')"><a href="#outq_'+next_tab+'" data-toggle="tab">'+next_tab+'</a></li>');
+    $('#outq_content').append('<div class="tab-pane" id="outq_'+next_tab+'"></div>');
+    $("#outq_"+next_tab).tab('show');
+    $("#jobq_"+next_tab).tab('show')
+}
+function synchronize_job_sequence_tabs(tab_id){
+    active_sequence = tab_id;
+    var other_tab = $('#output_tabs a[href="#outq_'+tab_id+'"]');
+    other_tab.tab('show');
+    synchronize_sequence_tab_rows(tab_id);
+}
+function synchronize_output_sequence_tabs(tab_id){
+    active_sequence = tab_id;
+    var other_tab = $('#jobq_tabs a[href="#jobq_'+tab_id+'"]');
+    other_tab.tab('show');
+    synchronize_sequence_tab_rows(tab_id);
+}
+function synchronize_sequence_tab_rows(sequence_id){
+    var job_row_ids = $("#third_box_content tr" );
+    var ouput_row_objs = $("#W4Rows tr");
+    for (var i = 1; i <= job_row_ids.length; i++){
+        var output_i = i-1; //because numbers are dumb
+        var job_obj = $("#jobrow"+i);
+        var output_obj = $(ouput_row_objs[output_i]);
+        if (sequences[sequence_id].has(String(i))){
+            job_obj.show();
+            output_obj.show();
+        } else {
+            job_obj.hide();
+            output_obj.hide();
+        }
+    }
+    var dan = "1";
+}
+
 function add_new_plugin_location_job_row(id_parameter, num_parameter){
     var row_var = $("<td/>").attr({"id": id_parameter + num_parameter}).append($("<a/>").attr(
     {"href": "#"}).append($("<span/>").text("")));
@@ -151,7 +460,11 @@ function add_new_plugin_location_job_row(id_parameter, num_parameter){
 
 // Add new job
 function add_new_job(){
+    inc++;
+    $("#addjob_button")[0].value = inc;
+
     var value = $("#addjob_button")[0].value;
+    sequences[active_sequence].add(value);
     // content for w3
     if(value == 1) {
         $(".thirdBoxContent").append($("<tr/>").attr({"role": "row",
@@ -204,6 +517,11 @@ function add_new_job(){
 function clear_new_jobs(){
     $(".thirdBoxContent").empty();
     $("#W4Rows").empty();
+    id_reverse_map = {};
+    id_map = {}
+    for (var key in sequences){
+        sequences[key] = new Set();
+    }
     inc = 0;
     $("#addjob_button")[0].value = 0;
 }
@@ -211,45 +529,59 @@ function clear_new_jobs(){
 // Drag and drop function(s) for w1+w3 or w2+w3
 // Drag and drop function(s) for targets
 // Note: Drop function needs to be validated
-function target_select_func(row_selection){
-//    console.log("target_select_func function was called");
-    row_selection.on('select', function(e, dt, type, indexes) {
-        var selected_var = $(".gridSelect tbody tr.selected");
-        if(selected_var.length > 0){
-            console.log("draggable object for more than one object");
-            drag_target();
-        } else {
-            console.log("draggable object for one object");
-        }
-    });
-}
 
 // DRAG
 function drag_target(){
-    console.log("drag_target");
+//    console.log("drag_target");  //debug
 	$(".gridSelect tbody tr, .gridSelect2 tbody tr").draggable({
 	    helper: function(){
 	        var selected_var = $(".gridSelect tbody tr.selected");
-            if (selected_var.length === 0) {
-                selected_var = $(this).addClass('selected');
+            var container_to_drag;
+
+	        if (selected_var[0] == $(this)[0]){
+	            container_to_drag = selected_var;
+	        } else if (selected_var[0].classList.contains('selected') && $(this)[0].classList.contains('selected')) {
+	            container_to_drag = selected_var;
+	        } else {
+	            container_to_drag = $(this);
+	        }
+
+            if (container_to_drag.length === 0) {
+                container_to_drag = $(this).addClass('selected');
+            } else if (container_to_drag.length == 1) {
+                display_drop_all();
             }
             var container = $('<table/>').attr({'id':'draggingContainer'});
-            container.append(selected_var.clone().removeClass("selected"));
+            container.append(container_to_drag.clone().removeClass("selected"));
             hover_w3_for_target();
             return container;
-	    }
+	    },
+	    revert: function(){
+	        hide_drop_all();
+	        return true;
+        }
 	});
+}
+function display_drop_all(){
+    $("#w3_drop_target_to_all").css("display", "");
+    hover_int = 1;
+}
+function hide_drop_all(){
+    $("#w3_drop_target_to_all").css("display", "none");
+    hover_int = 0;
 }
 
 function hover_w3_for_target(){
 //    console.log("hover_w3_for_target");
+    $("#w3_drop_target_to_all").mouseover(hover_drop);
+    $("#w3_drop_target_to_all").mouseover(hover_leave);
     $("#third_box_content tr").mouseover(hover_drop);
     $("#third_box_content tr").mouseleave(hover_leave);
 }
 
 //    future animation
 function hover_leave(){
-    console.log("hover_leave");
+//    console.log("hover_leave");  // debug
     hover_int = 0;
 }
 
@@ -264,12 +596,14 @@ function hover_drop(){
     var plugin_name_text = hover_object[0].children[1].innerText;
     var location_text = hover_object[0].children[2].innerText;
     var command_text = hover_object[0].children[3].innerText;
-    var status_text = hover_object[0].children[4].innerText;
-
-    if (plugin_name_text && location_text && command_text != "" && status_text == false){
+    var status_td = hover_object[0].children[4];
+    var status_text = false;
+    if (status_td != undefined){
+        status_text = hover_object[0].children[4].innerText;
+    }
+    if (plugin_name_text && location_text && command_text != "" && status_text == false && exec_int != 1){
         $("#jobstatusid"+hover_object_num).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
     }
-
     if (hover_int != 0){
         drop_target(hover_object);
     } else {
@@ -279,11 +613,16 @@ function hover_drop(){
 
 // Drop target to W3
 function drop_target(hover_object){
-    console.log("drop_target");
+//    console.log("drop_target");  // debug
+    // hover_object is the row that is being hovered over
+    // selected_var.length == # of targets dragging
+    // hover_object.nextUntil().length == # of rows of every sequence in W3 - 1
+    // next_location_num not being used but maybe in the future
     $(".gridSelect, .divw3row").droppable({
         drop: function (event, ui) {
             if (hover_int != 0){
                 var selected_var = ui.helper.children();
+                var list_cap = 0;
 
                 for(var int = 0; int < selected_var.length; int++){
                     var row_id = selected_var[int].id;
@@ -292,16 +631,31 @@ function drop_target(hover_object){
                     var selected_row = undefined;
 
                     if (int != 0){
-                        selected_row = hover_object.nextUntil()[(int -1)];
+                        var counter = list_cap;
+                        while(hover_object.nextUntil().length > counter){
+                            var next_plugin_name = hover_object.nextUntil()[counter].children[1].innerText;
+                            var next_location_num = hover_object.nextUntil()[counter].children[2].innerText;
+                            if (hover_object.nextUntil()[counter].style.display != 'none' && next_plugin_name.length < 1){
+                                selected_row = hover_object.nextUntil()[counter];
+                                counter++;
+                                list_cap = counter;
+                                break;
+                            }
+                            counter++;
+                            list_cap = counter;
+                        }
+//                        selected_row = hover_object.nextUntil(':hidden')[(int -1)];  // this was used before
                     } else {
                         selected_row = hover_object[0];
                     }
-                    var selected_row_id = selected_row.id.substring(6, selected_row.id.length);
-                    if (job_row_is_mutable(selected_row_id)) {
-                        $(selected_row.children[1]).empty(); //plugin column
-                        $(selected_row.children[2]).empty(); //location column
-                        selected_row.children[1].append(row_js.PluginName);
-                        selected_row.children[2].append(row_js.Location);
+                    if (selected_row != undefined){
+                        var selected_row_id = selected_row.id.substring(6, selected_row.id.length);
+                        if (job_row_is_mutable(selected_row_id)) {
+                            $(selected_row.children[1]).empty(); //plugin column
+                            $(selected_row.children[2]).empty(); //location column
+                            selected_row.children[1].append(row_js.PluginName);
+                            selected_row.children[2].append(row_js.Location);
+                        }
                     }
                 }
                 set_w3_job_status();
@@ -314,7 +668,7 @@ function drop_target(hover_object){
 function job_row_is_mutable(job_row){
     var result = false;
     var num_jobs = $("#addjob_button")[0].value;
-    if (job_row <= num_jobs){
+    if (Number(job_row) <= Number(num_jobs)){
         var current_status = $("#jobstatusid"+job_row+" span");
         result =  ((current_status.length == 0) ||
                    (current_status.length >=1 && ( current_status[0].innerText == "Preparing" ||
@@ -343,7 +697,7 @@ function drag_end_command(event){
 }
 
 function drop_command(ev) {
-    console.log("drop_command");
+//    console.log("drop_command");  // debug
     ev.preventDefault();
     var command_json = ev.dataTransfer.getData("text");
     $("#w3_drop_to_all").css("display", "none");
@@ -359,7 +713,7 @@ function drop_command(ev) {
     set_w3_job_status();
 }
 function set_w3_job_status(){
-    console.log("set_w3_job_status");
+//    console.log("set_w3_job_status");  // debug
     var num_jobs = $("#addjob_button")[0].value;
     var w3_rows = $("#third_box_content tr");
 
@@ -371,8 +725,10 @@ function set_w3_job_status(){
         var w3_status = what.children[4].innerText;
         var error_msg = 0;
 
-        if(plugin_name_text && command_text && w3_status != "Done"){
+
+        if(plugin_name_text && command_text && w3_status != "Done" && exec_int != 1){
             $("#jobstatusid"+(j+1)).empty()
+
             $("#jobstatusid"+(j+1)).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
         } else {
             console.log("Status is done and plugin and command are filled up in the job row");
@@ -387,22 +743,28 @@ function set_w3_job_status(){
 
 
 function drop_command_to_multiple(ev) {
-    console.log("drop_command_to_multiple");
+//    console.log("drop_command_to_multiple");  // debug
     ev.preventDefault();
     var command_json = ev.dataTransfer.getData("text");
     $("#w3_drop_to_all").css("display", "none");
     var command = JSON.parse(command_json);
     var num_jobs = $("#addjob_button")[0].value;
-
+    if (num_jobs < 1){
+        num_jobs++;
+        add_new_job();
+    }
     for (var j = 1; j <= num_jobs; j++){
-        var command_td = $("#commandid"+j);
-        drop_command_into_hole(command, command_json, command_td, j)
+        var command_row = $("#jobrow"+j);
+        if ($("#jobrow"+j).css('display') != 'none'){
+            var command_td = $("#commandid"+j);
+            drop_command_into_hole(command, command_json, command_td, j)
+        }
     }
     set_w3_job_status();
 }
 
 function drop_command_into_hole(command, command_json, command_td, row_id){
-    console.log("drop_command_into_hole");
+//    console.log("drop_command_into_hole");  // debug
     var current_status = $("#jobstatusid"+row_id+" span");
     if ((current_status.length == 0) ||
         (current_status.length >=1 && command_td.length == 1 && ( current_status[0].innerText == "Preparing" ||
@@ -429,24 +791,28 @@ function drop_command_into_hole(command, command_json, command_td, row_id){
     }
 }
 
-// Execute Sequence function down below are for w3+w4
-function execute_sequence(){
-    console.log("execute_sequence function has been called");
-    var jobs = []
+function prepare_jobs_list(){
+    var jobs = [];
     var num_jobs = $("#addjob_button")[0].value;
     var w3_rows = $("#third_box_content tr");
-
     for (var j = 0; j < num_jobs; j++){
+        if ($(w3_rows[j]).css('display') == 'none'){
+            jobs.push({});
+            continue;
+        }
         var w3_status = w3_rows[j].children[4].innerText;
         if(w3_status == false){
             $("#updatestatusid"+(j+1)).append($("<span/>").attr({"class": "label label-danger"}).text("Error"));
             $("#jobstatusid"+(j+1)).append($("<span/>").attr({"class": "label label-danger"}).text("Error"));
             jobs.push({});
         } else if (w3_status == "Preparing") {
+            $(".gridSelect, #jobrow"+(j+1)).droppable({
+                disabled: true
+            });
             $("#updatestatusid"+(j+1)).empty();
-            $("#updatestatusid"+(j+1)).append($("<span/>").attr({"class": "label label-success"}).text("Ready"));
+            $("#updatestatusid"+(j+1)).append($("<span/>").attr({"class": "label label-"+INITIAL_JOB_STATUS}).text(INITIAL_JOB_STATUS));
             $("#jobstatusid"+(j+1)).empty();
-            $("#jobstatusid"+(j+1)).append($("<span/>").attr({"class": "label label-success"}).text("Ready"));
+            $("#jobstatusid"+(j+1)).append($("<span/>").attr({"class": "label label-"+INITIAL_JOB_STATUS}).text(INITIAL_JOB_STATUS));
 
             var uid = j+1;
             var terminal = $("#updateid"+uid).parent();
@@ -457,14 +823,24 @@ function execute_sequence(){
             var job = {"JobTarget": {"PluginName": plugin_name,
                                      "Location": location,
                                      "Port":  0,},
-                       "Status": "Ready",
+                       "Status": INITIAL_JOB_STATUS,
                        "StartTime": 0,
-                       "JobCommand": command}
+                       "JobCommand": command};
             jobs.push(job);
         } else {
             jobs.push({});
         }
     }
+    return jobs;
+}
+
+// Execute Sequence function down below are for w3+w4
+function execute_sequence(){
+//    console.log("execute_sequence function has been called");  // debug
+    exec_int = 1;
+    hide_drop_all();
+    var jobs = prepare_jobs_list();
+
     var jobs_json = JSON.stringify(jobs);
     $.ajax({
         type: "GET",
@@ -476,12 +852,24 @@ function execute_sequence(){
             job_id = job_ids[0];
             for (var index = 0; index < job_ids.length; ++index) {
                 if (job_ids[index] != "invalid-job"){
-                    execute_sequence_output(job_ids[index], index+1);
+                    var dom_id = index+1;
+                    id_reverse_map[job_ids[index]] = dom_id;
+                    id_map[index+1] = job_ids[index];
+                    if (ws_map['status'].readyState === ws_map['status'].OPEN){
+                        $("#updateid"+dom_id).empty();
+                        $("#updateid"+dom_id).attr({"class": "fa fa-refresh fa-spin"});
+                    } else {
+                        execute_sequence_output(job_ids[index]);
+                    }
+
                 }
             }
         },
         error: function (data) {
             console.log("ERROR @ execute_sequence function")
+        },
+        complete: function(data){
+            exec_int = 0;
         }
 
     })
@@ -492,9 +880,47 @@ function execute_sequence(){
 Functions down below are for w4
 -----------------------------------------------------------------------------------------------------
 */
+function render_job_output_to_page(job_guid, data){
+    var updateid = id_reverse_map[job_guid];
+    $("#updateid"+updateid).empty();
+    $("#updateid"+updateid).attr({"class": ""});
+    $('<pre id="updatecontent'+updateid+'"></pre>').appendTo("#updateid"+updateid);
+    $("#updatecontent"+updateid).append(JSON.stringify(data['Content']));
+    var download_link = $('<a>[Download]</a>');
+    download_link.attr({"href": "/action/get_full_output_data/?job_id="+job_guid});
+    $("#updateid"+updateid).append($("<div style='background-color: white'/>").append(download_link));
+    $("#updateid"+updateid).parent().css("background-color", "Fuchsia");
+    $("#updatestatusid"+updateid).empty();
+    $("#updatestatusid"+updateid).append($("<span/>").attr({"class": "label label-Done"}).text("Done"));
+    $("#jobstatusid"+updateid).empty();
+    $("#jobstatusid"+updateid).append($("<span/>").attr({"class": "label label-Done"}).text("Done"));
+}
+
+function render_job_output_timeout(job_guid){
+    var updateid = id_reverse_map[job_guid];
+    $("#updateid"+updateid).empty();
+    $("#updateid"+updateid).attr({"class": ""});
+    $("#updateid"+updateid).append("No data to return at the moment :(");
+    $("#updateid"+updateid).parent().append($("<i/>").attr({"class": "fa fa-wrench", "onclick": "execute_sequence_output_retry('"+job_guid+"')"}));
+    $("#updateid"+updateid).parent().css("background-color", "white");
+    // W3 status
+    $("#jobstatusid"+updateid).empty();
+    $("#jobstatusid"+updateid).append($("<span/>").attr({"class": "label label-Error"}).text("Error"));
+    // W4 status
+    $("#updatestatusid"+updateid).empty();
+    $("#updatestatusid"+updateid).append($("<span/>").attr({"class": "label label-Error"}).text("Error"));
+}
+
+function execute_sequence_output_retry(job_guid){
+    var updateid = id_reverse_map[job_guid];
+    $("#updateid"+updateid).parent().children()[1].remove(); //remove the wrench
+    execute_sequence_output(job_guid);
+}
+
 // Modify function add depth parameter, increment depth when it errors
-function execute_sequence_output(specific_id, updateid, counter=0, backoff=2000){
-    console.log("execute_sequence_output function");
+function execute_sequence_output(specific_id, counter=0, backoff=2000){
+//    console.log("execute_sequence_output function");  // debug
+    var updateid = id_reverse_map[specific_id];
     $.ajax({
         type: "GET",
         url: "/action/get_output_data/",
@@ -502,33 +928,11 @@ function execute_sequence_output(specific_id, updateid, counter=0, backoff=2000)
         datatype: 'json',
         success: function(data) {
             console.log("SUCCESS @ execute_sequence_output  function");
-            for (var j = 1; j <= inc; j++){
-                if($("#jobstatusid"+j)[0].innerText == 'Error'){
-                } else {
-                    $("#updatestatusid"+j).empty();
-                    $("#updatestatusid"+j).append($("<span/>").attr({"class": "label label-info"}).text("Done"));
-                    $("#jobstatusid"+j).empty();
-                    $("#jobstatusid"+j).append($("<span/>").attr({"class": "label label-info"}).text("Done"));
-                }
-            }
 
             if (data != 0){  // returns query
-                //data output here
-                $("#updateid"+updateid).empty();
-                $("#updateid"+updateid).attr({"class": ""});
-                $('<pre id="updatecontent'+updateid+'"></pre>').appendTo("#updateid"+updateid);
-                $("#updatecontent"+updateid).append(JSON.stringify(data['Content']));
-                var download_link = $('<a>[Download]</a>');
-                download_link.attr({"href": "/action/get_full_output_data/?job_id="+specific_id});
-                //download_link.appendTo($("#updateid"+updateid));
-                $("#updateid"+updateid).append($("<div style='background-color: white'/>").append(download_link));
-                $("#updateid"+updateid).parent().css("background-color", "Fuchsia");
-
-
+                render_job_output_to_page(specific_id, data);
             } else {  // doesn't return query
-                $("#updateid"+updateid).empty();
-                $("#updateid"+updateid).append("No data to return at the moment :(");
-                $("#updateid"+updateid).parent().css("background-color", "white");
+                render_job_output_timeout(specific_id);
             }
         },
         error: function (data) {
@@ -545,27 +949,11 @@ function execute_sequence_output(specific_id, updateid, counter=0, backoff=2000)
         console.log("FAIL @ execute_sequence_output  function");
 
         var status = data.status;
-        var reason = data.responseJSON.reason;
-
-        if(counter == 10){
-//            console.log("About to BREAK");
-            // W4 errors out or the job doesn't work for whatever reason.
-            $("#updateid"+updateid).empty();
-            $("#updateid"+updateid).attr({"class": ""});
-            $("#updateid"+updateid).append("No data to return at the moment :(");
-            $("#updateid"+updateid).parent().css("background-color", "white");
-
-            // W3 status
-            $("#jobstatusid"+updateid).empty();
-            $("#jobstatusid"+updateid).append($("<span/>").attr({"class": "label label-danger"}).text("Error"));
-            // W4 status
-            $("#updatestatusid"+updateid).empty();
-            $("#updatestatusid"+updateid).append($("<span/>").attr({"class": "label label-danger"}).text("Error"));
+        if(counter >= MAX_MANUAL_CHECK_COUNT){
+            render_job_output_timeout(specific_id);
         } else {
             counter++;
-//            console.log("Check again");
-            setTimeout( function() { execute_sequence_output(specific_id, updateid, counter); }, backoff*2 );
+            setTimeout( function() { execute_sequence_output(specific_id, counter); }, backoff*2 );
         }
-
     })
 }

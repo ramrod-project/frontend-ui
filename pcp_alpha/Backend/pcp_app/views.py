@@ -2,13 +2,53 @@
 Views python file for pcp_app 'django' app.
 """
 import json
+import brain
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.template import loader
+from django.views.decorators.csrf import csrf_exempt
 from ua_parser import user_agent_parser
 from Backend.db_dir.custom_queries import get_specific_commands, insert_brain_jobs_w3, \
-    get_specific_brain_output, get_brain_output_content, insert_new_target, get_brain_targets
+    get_specific_brain_output, get_brain_output_content, insert_new_target, get_brain_targets, \
+    persist_jobs_state, load_jobs_state
 from .forms import TargetForm
+
+
+@csrf_exempt
+def persist_job_state(request):
+    """
+    current_state = {"id_map": {},
+                     "id_reverse_map": {},
+                     "jobs": [],
+                     "sequences": {},
+                     "active_sequence": ""}
+
+    persist_job_state ensures the current UI state is stored in the database
+    :param request: user request
+    :return: <str> json output
+    """
+    if request.method == 'POST':
+        current_state = request.POST.get('current_state')
+        current_state = json.loads(current_state)
+        return HttpResponse(json.dumps(persist_jobs_state(current_state)),
+                            content_type="application/json")
+
+
+def load_job_state(request):
+    """
+    current_state = {"id_map": {},
+                     "id_reverse_map": {},
+                     "jobs": [],
+                     "sequences": {},
+                     "active_sequence": ""}
+
+    persist_job_state ensures the current UI state is stored in the database
+    :param request: user request
+    :return: <str> json output
+    """
+    if request.method == 'GET':
+        return HttpResponse(json.dumps(load_jobs_state()),
+                            content_type="application/json")
 
 
 def get_commands_controller(request):
@@ -19,9 +59,7 @@ def get_commands_controller(request):
     :return: list of capabilities as a json
     """
     user_select = None
-    if request.method != 'GET':
-        print("get_commands_controller function returned == {}".format(str(user_select)))
-    else:
+    if request.method == 'GET':
         user_select = request.GET.get('plugin_name')
     return HttpResponse(json.dumps(get_specific_commands(user_select)),
                         content_type="application/json")
@@ -35,9 +73,7 @@ def execute_sequence_controller(request):
     :return: returns data from w3 to the ui
     """
     response = None
-    if request.method != 'GET':
-        print("execute_sequence_controller function returned == {}".format(str(response)))
-    else:
+    if request.method == 'GET':
         jobs = json.loads(request.GET.get('jobs'))
 
         # inserting to Brain.Jobs
@@ -47,6 +83,11 @@ def execute_sequence_controller(request):
 
 
 def _w4_get_content(job_id):
+    """
+    Checking on specific data
+    :param job_id: user request
+    :return: content depending on job status
+    """
     updated_job = get_specific_brain_output(job_id)
     if not updated_job:
         result = {
@@ -63,10 +104,13 @@ def _w4_get_content(job_id):
 
 
 def w4_output_controller(request):
+    """
+    Outputs data in W4
+    :param request: user request
+    :return: job content
+    """
     response = None
-    if request.method != 'GET':
-        print("w4_output_controller function returned == {}".format(str(response)))
-    else:
+    if request.method == 'GET':
         controller_job_id = request.GET.get('job_id')
         result = _w4_get_content(controller_job_id)
         response = HttpResponse(json.dumps(result),
@@ -76,11 +120,17 @@ def w4_output_controller(request):
 
 
 def w4_output_controller_download(request):
+    """
+    User can download content in W4 by clicking on link
+    :param request: user request
+    :return: content data onto a file
+    """
+    response = None
     if request.method == 'GET':
-        ua = user_agent_parser.ParseOS(request.META.get("HTTP_USER_AGENT"))
+        user_agent = user_agent_parser.ParseOS(request.META.get("HTTP_USER_AGENT"))
         controller_job_id = request.GET.get('job_id')
         content = get_brain_output_content(controller_job_id, max_size=None)
-        if "windows" in ua.get("family").lower() and isinstance(content, str):
+        if "windows" in user_agent.get("family").lower() and isinstance(content, str):
             content = content.replace("\n", "\r\n")
         response = HttpResponse(content,
                                 content_type='application/octet-stream')
@@ -134,3 +184,64 @@ def val_target_form(request):
         form = TargetForm()
     template = loader.get_template('pcp_app/target_form.html')
     return HttpResponse(template.render(context=None, request=request))
+
+
+def edit_target_form(request, target_id):
+    """
+    This function render the edit form after the user clicks
+    on the edit button from Target List or W1
+    :param request: user request
+    :param target_id: target id
+    :return: template with target info as placeholders
+    """
+    template = loader.get_template('pcp_app/edit_target_form.html')
+    brain_connection = brain.connect()
+    get_brain_target = brain.r.db("Brain").table("Targets").filter(
+        {"id": str(target_id)}).run(brain_connection)
+    return HttpResponse(template.render(
+        context={"edit_target_dict": get_brain_target, },
+        request=request))
+
+
+def val_edit_target_form(request, target_id):
+    """
+    This function validates the input fields and after successfully
+    validating the target will update with the new input fields
+    :param request: user request
+    :param target_id: target id
+    :return: home page with an updated target list
+    """
+    if request.method == 'POST':
+        edit_plugin_name = request.POST.get('plugin_name')
+        edit_location_num = request.POST.get('location_num')
+        edit_port_num = request.POST.get('port_num')
+        edit_optional_char = request.POST.get('optional_char')
+
+        # edit form template
+        form = TargetForm(request.POST)
+
+        if form.is_valid():
+            brain_connection = brain.connect()
+            brain.r.db("Brain").table("Targets").get(str(target_id)).update(
+                {"PluginName": str(edit_plugin_name),
+                 "Location": str(edit_location_num),
+                 "Port": str(edit_port_num),
+                 "Optional": str(edit_optional_char)}).run(brain_connection)
+            return redirect('/')
+    else:
+        form = TargetForm()
+    return redirect('/edit_target_form/{}/'.format(target_id))
+
+
+def delete_specific_target(request, target_id):
+    """
+    This function deletes a specific target from Brain.Targets
+    :param request: user request
+    :param target_id: target it
+    :return: home page and deletion of the specific target user requested
+    """
+    if request.method == 'GET':
+        brain_connection = brain.connect()
+        brain.r.db("Brain").table("Targets").get(str(target_id)).delete(
+            return_changes=True).run(brain_connection)
+        return redirect('/')

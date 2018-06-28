@@ -1,6 +1,8 @@
 import json
 import brain.queries
 
+from .project_db import connect, rtdb
+
 
 # Note: Refactor this file as a CRUD class in the future
 def get_brain_targets():
@@ -111,11 +113,42 @@ def insert_new_target(plugin_name, location_num, port_num, optional_char):
     :param optional_char: user input optional
     :return: the insert
     """
-    inserted_new_target = brain.queries.insert_new_target(plugin_name,
-                                                          location_num,
-                                                          port_num,
-                                                          optional_char,
-                                                          verify_target=False)
+    target_dict = {
+        "PluginName": plugin_name,
+        "Location": location_num,
+        "Port": port_num,
+        "Optional": {"init": optional_char}
+    }
+    inserted_new_target = brain.queries.insert_target(target_dict)
     print("log: db New target was inserted to Brain.Targets")
     print("{}\n".format(inserted_new_target))
     return inserted_new_target
+
+
+def persist_jobs_state(current_state):
+    """
+
+    :param current_state:
+    :return:
+    """
+    conn = connect()
+    rbx = rtdb.db("Brain")
+    current_state["id"] = 1  # static ID so it overwrites
+    if not rbx.table_list().contains("UIW3").run(conn):
+        rbx.table_create("UIW3").run(conn)
+    output = rbx.table("UIW3").insert(current_state,
+                                      conflict="replace").run(conn)
+    return output
+
+
+def load_jobs_state():
+    """
+    :return:
+    """
+    output = None
+    conn = connect()
+    rbx = rtdb.db("Brain")
+    if rbx.table_list().contains("UIW3").run(conn):
+        output = rbx.table("UIW3").get(1).run(conn)
+    return output
+
