@@ -245,3 +245,9 @@ def delete_specific_target(request, target_id):
         brain.r.db("Brain").table("Targets").get(str(target_id)).delete(
             return_changes=True).run(brain_connection)
         return redirect('/')
+
+
+def file_upload_list(request):
+    print("*"*33)
+    print("file_upload_list function has been called")
+    pass
