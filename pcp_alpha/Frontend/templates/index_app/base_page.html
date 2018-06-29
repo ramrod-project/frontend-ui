@@ -485,7 +485,7 @@ desired effect
 {#              </div>#}
 
               <div id="dropzone">
-                  <form action="/file_upload1/" class="dropzone needsclick dz-clickable" enctype="multipart/form-data" id="dropzone_testid">
+                  <form action="/file_upload1/" class="dropzone needsclick dz-clickable" enctype="multipart/form-data" id="dropzone_testid">{% csrf_token %}
                       <div class="dz-message dz-default needsclick">
                         Drop files here or click to upload.<br>
                       </div>
@@ -570,6 +570,8 @@ desired effect
 <script src="{% static 'external_jquery/jquery-ui.js' %}"></script>
 <!-- DropZone -->
 <script src="{% static 'External_js_files/dropzone.js' %}"></script>
+{#custom dropzone js file#}
+<!--<script src="{% static 'js_custom/pcp_custom_dropzone.js' %}"></script>-->
 <!--for template inheritance-->
 {% block extra_js %}{% endblock extra_js %}
 </body>

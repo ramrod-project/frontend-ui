@@ -137,4 +137,13 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'Frontend/static'),
 )
 
-# pytet
+# pytest
+
+#######################
+# Upload Files Setting
+#######################
+# The folder you would want to save the uploaded files to
+MEDIA_URL = '/media/'
+# Path to folder where to save upload files locally
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+
