@@ -262,10 +262,18 @@ function get_commands_func(){
                     var new_input = document.createElement("input");
                     new_input.label = "argumentid_("+input_i+")";
                     new_input.id = "argumentid_"+input_i;
+                    new_input.title = current_command_template['Inputs'][input_i]["Tooltip"];
                     new_input.onchange = update_argument;
                     new_input.onkeyup = update_argument;
                     new_input.placeholder = current_command_template["Inputs"][input_i]['Value'];
                     $("#commandIdBuilder").append($("<br>")).append(new_input);
+                    $("#"+new_input.id).tooltip({
+                                                  position: {
+                                                    my: "left top",
+                                                    at: "right+5 top-5",
+                                                    collision: "none"
+                                                  }
+                                                });
                 }
             });
         },
