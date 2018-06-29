@@ -44,6 +44,7 @@ $(document).ready(function() {
 
 	});
 	$("#addjob_button").click(add_new_job);               // add new job in w3
+    $("#addjob_top_button").click(add_new_job);               // add new job in w3
 	$("#clear_buttonid").click(clear_new_jobs);           // clear content in w3
 	$("#execute_button").click(execute_sequence);         // execute sequence button in 23
     $("#w3_drop_to_all").attr({"ondrop": "drop_command_to_multiple(event)",
