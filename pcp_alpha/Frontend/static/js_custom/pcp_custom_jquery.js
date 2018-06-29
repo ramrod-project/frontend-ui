@@ -888,7 +888,7 @@ function render_job_output_to_page(job_guid, data){
     $('<pre id="updatecontent'+updateid+'"></pre>').appendTo("#updateid"+updateid);
     $("#updatecontent"+updateid).append(JSON.stringify(data['Content']));
     var download_link = $('<a>[Download]</a>');
-    download_link.attr({"href": "/action/get_full_output_data/?job_id="+job_guid});
+    download_link.attr({"href": "/action/get_full_output_data/?job_id="+job_guid+"&job_number="+updateid});
     $("#updateid"+updateid).append($("<div style='background-color: white'/>").append(download_link));
     $("#updateid"+updateid).parent().css("background-color", "Fuchsia");
     $("#updatestatusid"+updateid).empty();
