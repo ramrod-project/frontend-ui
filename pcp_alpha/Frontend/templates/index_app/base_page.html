@@ -485,12 +485,12 @@ desired effect
 {#              </div>#}
 
               <div id="dropzone">
-                  <form action="/file_upload1/" class="dropzone needsclick dz-clickable" enctype="multipart/form-data" id="dropzone_testid">{% csrf_token %}
+                  <div class="dropzone needsclick dz-clickable" id="dropzone_testid">{% csrf_token %}
                       <div class="dz-message dz-default needsclick">
                         Drop files here or click to upload.<br>
                       </div>
 {#                      <input type="file" name="file" />#}
-                  </form>
+                  </div>
               </div>
 
             </a>
@@ -500,20 +500,7 @@ desired effect
         <!-- /.control-sidebar-menu -->
           <!--File Uploaded List-->
         <h3 class="control-sidebar-heading">List of File(s) Uploaded</h3>
-        <ul class="control-sidebar-menu">
-          <li>
-            <a href="javascript:;">
-              <h4 class="control-sidebar-subheading">
-                File 1
-                <span class="pull-right-container">
-                    <span class="label label-danger pull-right">70%</span>
-                  </span>
-              </h4>
-              <div class="progress progress-xxs">
-                <div class="progress-bar progress-bar-danger" style="width: 70%"></div>
-              </div>
-            </a>
-          </li>
+        <ul class="control-sidebar-menu upload_file_list">
         </ul>
           <!--/File Uploaded List-->
         <!--<a id="bb_id" href="#">Testing for two</a>-->
@@ -571,7 +558,7 @@ desired effect
 <!-- DropZone -->
 <script src="{% static 'External_js_files/dropzone.js' %}"></script>
 {#custom dropzone js file#}
-<!--<script src="{% static 'js_custom/pcp_custom_dropzone.js' %}"></script>-->
+<script src="{% static 'js_custom/pcp_custom_dropzone.js' %}"></script>
 <!--for template inheritance-->
 {% block extra_js %}{% endblock extra_js %}
 </body>

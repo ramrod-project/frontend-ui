@@ -3,17 +3,14 @@ Views python file for pcp_app 'django' app.
 """
 import json
 import brain
-import sys
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.template import loader
 from django.views.decorators.csrf import csrf_exempt
-from django.core.files.storage import FileSystemStorage
-from django.http import JsonResponse
 from ua_parser import user_agent_parser
 from Backend.db_dir.custom_queries import get_specific_commands, insert_brain_jobs_w3, \
     get_specific_brain_output, get_brain_output_content, insert_new_target, get_brain_targets, \
-    persist_jobs_state, load_jobs_state
+    persist_jobs_state, load_jobs_state, upload_file_to_brain
 from .forms import TargetForm
 
 
@@ -251,22 +248,16 @@ def delete_specific_target(request, target_id):
 
 
 def file_upload_list(request):
-    """
-    This function is FILE UPLOAAADDDDDDDDD
-    :param request:
-    :return:
-    """
     if request.method == 'POST':
         file = request.FILES['file']
         print("file == {}".format(file))
         print("file.content_type == {}".format(file.content_type))
         print("file.read() == {}".format(file.read()))
 
-        try:
-            fs = FileSystemStorage()
-            fs.save(str(file), file)
-        except:
-            e = sys.exc_info()[0]
-            print(e)
+        # upload_file_to_brain()
+    return HttpResponse()
 
-        return HttpResponse()
+
+def del_file_from_list(request):
+    print("\nDelete file from upload list\n")
+    return HttpResponse()
