@@ -478,51 +478,36 @@ function add_new_job(){
     var value = $("#addjob_button")[0].value;
     sequences[active_sequence].add(value);
     // content for w3
-    if(value == 1) {
-        $(".thirdBoxContent").append($("<tr/>").attr({"role": "row",
-                                                      "onclick": "#",
-                                                      "id":"jobrow" + value,
-                                                      "class": "draggable_tr divw3row"}).append(
-            $("<td/>").append($("<a/>").attr({"href": "#"}).append($("<span/>").text("1"))),
-            add_new_plugin_location_job_row("pluginid", value),
-            add_new_plugin_location_job_row("addressid", value),
-            $("<td/>").attr({"id": "commandid" + value,
-                             "ondrop": "drop_command(event)",
-                             "ondragover": "allowDropCommand(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text(""))),
-            $("<td/>").attr({"id": "jobstatusid" + value})
-        ));
+    $(".thirdBoxContent").append($("<tr/>").attr({"role": "row",
+                                                  "onclick": "#",
+                                                  "id":"jobrow"+value,
+                                                  "class": "draggable_tr divw3row"}).append(
+        $("<td/>").append($("<div/>").append($("<a/>").attr({"href": '#',
+                                                             'id': 'trashjob'+value}).addClass("fa fa-trash-o")).append($("<span/>").text(value).addClass("pull-right"))),
+        add_new_plugin_location_job_row("pluginid", value),
+        add_new_plugin_location_job_row("addressid", value),
+        $("<td/>").attr({"id": "commandid" + value,
+                         "ondrop": "drop_command(event)",
+                         "ondragover": "allowDropCommand(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text(""))),
+        $("<td/>").attr({"id": "jobstatusid" + value})
+    ));
 
-        // W4 Rows
-        $(".W4BodyContent").append($("<tr/>").append(
-        $("<th/>").text("1"),
-        $("<th/>").append($("<a/>").attr({'id': 'updateid1'}).text("terminal1")),
-        $("<th/>").attr({"id": "updatestatusid" + value})
-        ));
+    // W4 Rows
+    $(".W4BodyContent").append($("<tr/>").append(
+    $("<th/>").text(value),
+    $("<th/>").append($("<a/>").attr({'id': 'updateid'+value}).text("terminal" + value)),
+    $("<th/>").attr({"id": "updatestatusid" + value})
+    ));
+    $("#trashjob"+value).click(delete_job_from_w3);
 
-    }
-    else {
-        $(".thirdBoxContent").append($("<tr/>").attr({"role": "row",
-                                                      "onclick": "#",
-                                                      "id":"jobrow"+value,
-                                                      "class": "draggable_tr divw3row"}).append(
-            $("<td/>").append($("<a/>").attr({"href": "#"}).append($("<span/>").text(value))),
-            add_new_plugin_location_job_row("pluginid", value),
-            add_new_plugin_location_job_row("addressid", value),
-            $("<td/>").attr({"id": "commandid" + value,
-                             "ondrop": "drop_command(event)",
-                             "ondragover": "allowDropCommand(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text(""))),
-            $("<td/>").attr({"id": "jobstatusid" + value})
-        ));
-
-        // W4 Rows
-        $(".W4BodyContent").append($("<tr/>").append(
-        $("<th/>").text(value),
-        $("<th/>").append($("<a/>").attr({'id': 'updateid'+value}).text("terminal" + value)),
-        $("<th/>").attr({"id": "updatestatusid" + value})
-        ));
-    }
-
-
+}
+function delete_job_from_w3(e){
+    var source = event.target || event.srcElement;
+    var job_item = source.id.substring(8,source.id.length);
+    sequences[active_sequence].delete(job_item);
+    $("#jobrow"+job_item).hide();
+    synchronize_output_sequence_tabs(active_sequence);
+    var dan = "ok";
 }
 
 // Clear job content in w3
