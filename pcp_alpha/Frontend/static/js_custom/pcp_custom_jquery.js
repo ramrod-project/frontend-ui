@@ -44,6 +44,7 @@ $(document).ready(function() {
 
 	});
 	$("#addjob_button").click(add_new_job);               // add new job in w3
+    $("#addjob_top_button").click(add_new_job);               // add new job in w3
 	$("#clear_buttonid").click(clear_new_jobs);           // clear content in w3
 	$("#execute_button").click(execute_sequence);         // execute sequence button in 23
     $("#w3_drop_to_all").attr({"ondrop": "drop_command_to_multiple(event)",
@@ -254,17 +255,28 @@ function get_commands_func(){
 
                 //footer
                 $(".theContentArgument").empty();
-                $(".theContentArgument").append($("<a id='commandIdBuilder'/>").text($(this)[0].text))
-                $(".theContentArgument").append($("<div id='JSON_Command_DATA'/>").text(JSON.stringify(current_command_template)))
+                $(".theContentArgument").append($("<div id='commandIdBuilder'/>").text($(this)[0].text));
+                $(".theContentArgument").append($("<div id='JSON_Command_DATA'/>").text(JSON.stringify(current_command_template)));
                 for (var input_i = 0; input_i < current_command_template['Inputs'].length; input_i++){
                     //currently assumes input type is textbox
                     var new_input = document.createElement("input");
                     new_input.label = "argumentid_("+input_i+")";
                     new_input.id = "argumentid_"+input_i;
+                    new_input.title = current_command_template['Inputs'][input_i]["Tooltip"];
                     new_input.onchange = update_argument;
                     new_input.onkeyup = update_argument;
                     new_input.placeholder = current_command_template["Inputs"][input_i]['Value'];
-                    $("#commandIdBuilder").append($("<br>")).append(new_input);
+                    var new_input_holder = $("<div/>").append(new_input);
+                    $("#commandIdBuilder").append(new_input_holder);
+                    $("#"+new_input.id).tooltip({
+                                                  classes: {"ui-tooltip": "highlight"},
+                                                  items: 'span',
+                                                  position: {
+                                                    my: "left top",
+                                                    at: "right+5",
+                                                    collision: "none"
+                                                  }
+                                                });
                 }
             });
         },
@@ -466,51 +478,36 @@ function add_new_job(){
     var value = $("#addjob_button")[0].value;
     sequences[active_sequence].add(value);
     // content for w3
-    if(value == 1) {
-        $(".thirdBoxContent").append($("<tr/>").attr({"role": "row",
-                                                      "onclick": "#",
-                                                      "id":"jobrow" + value,
-                                                      "class": "draggable_tr divw3row"}).append(
-            $("<td/>").append($("<a/>").attr({"href": "#"}).append($("<span/>").text("1"))),
-            add_new_plugin_location_job_row("pluginid", value),
-            add_new_plugin_location_job_row("addressid", value),
-            $("<td/>").attr({"id": "commandid" + value,
-                             "ondrop": "drop_command(event)",
-                             "ondragover": "allowDropCommand(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text(""))),
-            $("<td/>").attr({"id": "jobstatusid" + value})
-        ));
+    $(".thirdBoxContent").append($("<tr/>").attr({"role": "row",
+                                                  "onclick": "#",
+                                                  "id":"jobrow"+value,
+                                                  "class": "draggable_tr divw3row"}).append(
+        $("<td/>").append($("<div/>").append($("<a/>").attr({"href": '#',
+                                                             'id': 'trashjob'+value}).addClass("fa fa-trash-o")).append($("<span/>").text(value).addClass("pull-right"))),
+        add_new_plugin_location_job_row("pluginid", value),
+        add_new_plugin_location_job_row("addressid", value),
+        $("<td/>").attr({"id": "commandid" + value,
+                         "ondrop": "drop_command(event)",
+                         "ondragover": "allowDropCommand(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text(""))),
+        $("<td/>").attr({"id": "jobstatusid" + value})
+    ));
 
-        // W4 Rows
-        $(".W4BodyContent").append($("<tr/>").append(
-        $("<th/>").text("1"),
-        $("<th/>").append($("<a/>").attr({'id': 'updateid1'}).text("terminal1")),
-        $("<th/>").attr({"id": "updatestatusid" + value})
-        ));
+    // W4 Rows
+    $(".W4BodyContent").append($("<tr/>").append(
+    $("<th/>").text(value),
+    $("<th/>").append($("<a/>").attr({'id': 'updateid'+value}).text("terminal" + value)),
+    $("<th/>").attr({"id": "updatestatusid" + value})
+    ));
+    $("#trashjob"+value).click(delete_job_from_w3);
 
-    }
-    else {
-        $(".thirdBoxContent").append($("<tr/>").attr({"role": "row",
-                                                      "onclick": "#",
-                                                      "id":"jobrow"+value,
-                                                      "class": "draggable_tr divw3row"}).append(
-            $("<td/>").append($("<a/>").attr({"href": "#"}).append($("<span/>").text(value))),
-            add_new_plugin_location_job_row("pluginid", value),
-            add_new_plugin_location_job_row("addressid", value),
-            $("<td/>").attr({"id": "commandid" + value,
-                             "ondrop": "drop_command(event)",
-                             "ondragover": "allowDropCommand(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text(""))),
-            $("<td/>").attr({"id": "jobstatusid" + value})
-        ));
-
-        // W4 Rows
-        $(".W4BodyContent").append($("<tr/>").append(
-        $("<th/>").text(value),
-        $("<th/>").append($("<a/>").attr({'id': 'updateid'+value}).text("terminal" + value)),
-        $("<th/>").attr({"id": "updatestatusid" + value})
-        ));
-    }
-
-
+}
+function delete_job_from_w3(e){
+    var source = event.target || event.srcElement;
+    var job_item = source.id.substring(8,source.id.length);
+    sequences[active_sequence].delete(job_item);
+    $("#jobrow"+job_item).hide();
+    synchronize_output_sequence_tabs(active_sequence);
+    var dan = "ok";
 }
 
 // Clear job content in w3

@@ -1,5 +1,6 @@
 import json
 import brain.queries
+# from brain.binary import put, get, list_files
 
 from .project_db import connect, rtdb
 
@@ -151,4 +152,15 @@ def load_jobs_state():
     if rbx.table_list().contains("UIW3").run(conn):
         output = rbx.table("UIW3").get(1).run(conn)
     return output
+
+
+def upload_file_to_brain(file_name, binary_file_obj):
+
+    # try:
+    #     put({"Name": file_name,
+    #          "Content": binary_file_obj})
+    # except ValueError:
+    #     return 1
+    # return 0
+    pass
 
