@@ -1,0 +1,1 @@
+This "media" directory was to test upload files locally

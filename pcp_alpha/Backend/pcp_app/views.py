@@ -258,6 +258,7 @@ def file_upload_list(request):
     return HttpResponse()
 
 
-def del_file_from_list(request):
-    print("\nDelete file from upload list\n")
-    return HttpResponse()
+# pcp-328
+# def del_file_from_list(request):
+#     print("\nDelete file from upload list\n")
+#     return HttpResponse()
