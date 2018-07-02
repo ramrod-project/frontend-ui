@@ -255,8 +255,8 @@ function get_commands_func(){
 
                 //footer
                 $(".theContentArgument").empty();
-                $(".theContentArgument").append($("<a id='commandIdBuilder'/>").text($(this)[0].text))
-                $(".theContentArgument").append($("<div id='JSON_Command_DATA'/>").text(JSON.stringify(current_command_template)))
+                $(".theContentArgument").append($("<div id='commandIdBuilder'/>").text($(this)[0].text));
+                $(".theContentArgument").append($("<div id='JSON_Command_DATA'/>").text(JSON.stringify(current_command_template)));
                 for (var input_i = 0; input_i < current_command_template['Inputs'].length; input_i++){
                     //currently assumes input type is textbox
                     var new_input = document.createElement("input");
@@ -266,11 +266,14 @@ function get_commands_func(){
                     new_input.onchange = update_argument;
                     new_input.onkeyup = update_argument;
                     new_input.placeholder = current_command_template["Inputs"][input_i]['Value'];
-                    $("#commandIdBuilder").append($("<br>")).append(new_input);
+                    var new_input_holder = $("<div/>").append(new_input);
+                    $("#commandIdBuilder").append(new_input_holder);
                     $("#"+new_input.id).tooltip({
+                                                  classes: {"ui-tooltip": "highlight"},
+                                                  items: 'span',
                                                   position: {
                                                     my: "left top",
-                                                    at: "right+5 top-5",
+                                                    at: "right+5",
                                                     collision: "none"
                                                   }
                                                 });
