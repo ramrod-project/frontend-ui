@@ -34,7 +34,11 @@ SAMPLE_JOB = {
     "JobTarget": SAMPLE_TARGET,
     "Status": "Done",
     "StartTime": NOW,
-    "JobCommand": "Do stuff"
+    "JobCommand": {"CommandName": "Do stuff",
+                   "Tooltip": "",
+                   "Output": False,
+                   "Inputs": [],
+                   "OptionalInputs": []}
 }
 SAMPLE_OUTPUT = {
     "OutputJob": SAMPLE_JOB,
