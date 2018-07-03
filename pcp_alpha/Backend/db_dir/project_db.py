@@ -224,7 +224,6 @@ def confirm_plugin_db_info():
     Plugins db exist and if any tables exist within the
     Plugins db.  If db and tables don't exist they will
     be created only locally.
-    :return: nothing at the moment
     """
     db_con_var = connect()
     if check_prod_env():  # For Production Environment
