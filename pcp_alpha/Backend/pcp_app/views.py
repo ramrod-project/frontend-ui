@@ -248,6 +248,11 @@ def delete_specific_target(request, target_id):
 
 
 def file_upload_list(request):
+    """
+    This function is the controller for file uploads
+    :param request: user request
+    :return: response if file can be uploaded or not
+    """
     if request.method == 'POST':
         file = request.FILES['file']
         print("file == {}".format(file))

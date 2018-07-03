@@ -497,6 +497,6 @@ class TestDataHandling(object):
             "active_sequence": "1"
         }
         with pytest.raises(json.JSONDecodeError):
-            current_state = json.loads(post_data)
+            current_state = json.loads(str(post_data))
             response = TestDataHandling.post_test(url_var, current_state, persist_job_state, rf)
             assert response.status_code == 302
