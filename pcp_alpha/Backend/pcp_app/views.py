@@ -10,7 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 from ua_parser import user_agent_parser
 from Backend.db_dir.custom_queries import get_specific_commands, insert_brain_jobs_w3, \
     get_specific_brain_output, get_brain_output_content, insert_new_target, get_brain_targets, \
-    persist_jobs_state, load_jobs_state, upload_file_to_brain
+    persist_jobs_state, load_jobs_state, upload_file_to_brain, del_file_upload_from_brain
 from .forms import TargetForm
 
 
@@ -275,17 +275,21 @@ def file_upload_list(request):
     :param request: user request
     :return: response if file can be uploaded or not
     """
+    json_return = ""
     if request.method == 'POST':
         file = request.FILES['file']
-        print("file == {}".format(file))
-        print("file.content_type == {}".format(file.content_type))
-        print("file.read() == {}".format(file.read()))
+        json_return = upload_file_to_brain(str(file), file.read())
+    return HttpResponse(json.dumps(json_return), content_type='application/json')
 
-        upload_file_to_brain(str(file), file.read())
+
+def del_file_from_list(request, file_id):
+    """
+    pcp-328
+    :param request:
+    :param file_id:
+    :return:
+    """
+    if request.method == 'GET':
+        print("delete this Brain.Files field id == {}".format(file_id))
+        del_file_upload_from_brain(file_id)
     return HttpResponse()
-
-
-# pcp-328
-# def del_file_from_list(request):
-#     print("\nDelete file from upload list\n")
-#     return HttpResponse()
