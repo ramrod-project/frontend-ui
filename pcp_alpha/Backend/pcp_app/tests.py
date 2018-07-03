@@ -3,6 +3,7 @@ from time import sleep, time
 from uuid import uuid4
 import json
 import pytest
+import ast
 from brain import connect, r
 
 from pcp_alpha.test.test_w4_switch_to_done import switch_to_done
@@ -478,6 +479,24 @@ class TestDataHandling(object):
         :return: status code
         """
         url_var = "action/save_state/"
+        post_data = {"replaced": 1, "inserted": 0, "deleted": 0, "errors": 0, "unchanged": 0, "skipped": 0}
+
+        with pytest.raises(json.JSONDecodeError):
+            current_state = json.loads(str(post_data))
+            response = TestDataHandling.post_test(url_var, current_state, persist_job_state, rf)
+            assert response.status_code == 302
+            response = TestDataHandling.post_test(url_var, {}, persist_job_state, rf)
+            assert response.status_code == 302
+
+    @staticmethod
+    def test_job_state2(rf):
+        """
+        This test imitates saving a job state in W3
+        as a second test
+        :param rf: request factory
+        :return: status code
+        """
+        url_var = "action/save_state/"
         post_data = {
             "id_map": {"1": "9859bfb8-8676-4595-8ce2-176957574875"},
             "id_reverse_map": {"9859bfb8-8676-4595-8ce2-176957574875": 1},
@@ -498,7 +517,10 @@ class TestDataHandling(object):
             "sequences": {"1": ["1"]},
             "active_sequence": "1"
         }
+
         with pytest.raises(json.JSONDecodeError):
             current_state = json.loads(str(post_data))
             response = TestDataHandling.post_test(url_var, current_state, persist_job_state, rf)
+            assert response.status_code == 302
+            response = TestDataHandling.post_test(url_var, {}, persist_job_state, rf)
             assert response.status_code == 302
