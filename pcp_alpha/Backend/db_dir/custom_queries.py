@@ -1,6 +1,6 @@
 import json
 import brain.queries
-from brain.binary import put_buffer, put
+from brain.binary import put_buffer
 import brain
 
 from .project_db import connect, rtdb

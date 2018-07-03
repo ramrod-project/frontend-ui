@@ -277,7 +277,7 @@ class TestDataHandling(object):
         """
         test download output data from W4
         """
-        url_var = "/action/get_full_output_data?job_id=138thg-eg98198-sf98gy3-feh8h8&job_number=7777"
+        url_var = "/action/get_full_output_data?job_id=138thg-eg98198-sf98gy3-feh8h8"
         response = TestDataHandling.get_test(
             url_var,
             w4_output_controller_download,
