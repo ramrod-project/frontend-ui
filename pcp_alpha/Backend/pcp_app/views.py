@@ -8,7 +8,7 @@ from django.shortcuts import redirect
 from django.template import loader
 from django.views.decorators.csrf import csrf_exempt
 from ua_parser import user_agent_parser
-from pcp_alpha.Backend.db_dir.custom_queries import get_specific_commands, insert_brain_jobs_w3, \
+from Backend.db_dir.custom_queries import get_specific_commands, insert_brain_jobs_w3, \
     get_specific_brain_output, get_brain_output_content, insert_new_target, get_brain_targets, \
     persist_jobs_state, load_jobs_state, upload_file_to_brain
 from .forms import TargetForm
