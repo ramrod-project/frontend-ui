@@ -14,7 +14,7 @@ from pcp_alpha.Backend.db_dir.custom_queries import get_specific_brain_targets, 
 from pcp_alpha.Backend.pcp_app.views import get_commands_controller, \
     execute_sequence_controller, w4_output_controller, w4_output_controller_download, \
     new_target_form, val_target_form, val_edit_target_form, edit_target_form, \
-    delete_specific_target
+    delete_specific_target, file_upload_list
 
 ECHO_JOB_ID = str(uuid4())
 NOW = time()
@@ -458,3 +458,8 @@ class TestDataHandling(object):
         response = TestDataHandling.get_test(url_var, delete_specific_target, rf, target_id=target_key)
         assert response.status_code == 302
         assert response.url == "/"
+
+    def test_file_upload(self, rf):
+        url_var = "file_upload/"
+        response = TestDataHandling.get_test(url_var, file_upload_list, rf)
+        assert response.status_code == 200

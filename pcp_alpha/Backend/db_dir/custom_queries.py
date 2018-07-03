@@ -1,6 +1,7 @@
 import json
 import brain.queries
-# from brain.binary import put, get, list_files
+from brain.binary import put_buffer, put
+import brain
 
 from .project_db import connect, rtdb
 
@@ -156,11 +157,12 @@ def load_jobs_state():
 
 def upload_file_to_brain(file_name, binary_file_obj):
 
-    # try:
-    #     put({"Name": file_name,
-    #          "Content": binary_file_obj})
-    # except ValueError:
-    #     return 1
-    # return 0
-    pass
+    try:
+        put_buffer(file_name, binary_file_obj)
+    except ValueError:
+        return 1
+    print("")
+    for item in rtdb.db("Brain").table("Files").run(connect()):
+        print(item)
+    return 0
 

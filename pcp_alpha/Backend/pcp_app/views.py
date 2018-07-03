@@ -254,11 +254,11 @@ def file_upload_list(request):
         print("file.content_type == {}".format(file.content_type))
         print("file.read() == {}".format(file.read()))
 
-        # upload_file_to_brain()
+        upload_file_to_brain(str(file), file.read())
     return HttpResponse()
 
 
 # pcp-328
-def del_file_from_list(request):
-    print("\nDelete file from upload list\n")
-    return HttpResponse()
+# def del_file_from_list(request):
+#     print("\nDelete file from upload list\n")
+#     return HttpResponse()
