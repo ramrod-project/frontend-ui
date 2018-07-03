@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from Backend.db_dir.custom_queries import get_brain_targets
+from pcp_alpha.Backend.db_dir.custom_queries import get_brain_targets
 
 
 def get_target_list(request):
