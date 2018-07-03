@@ -459,7 +459,8 @@ class TestDataHandling(object):
         assert response.status_code == 302
         assert response.url == "/"
 
-    def test_file_upload(self, rf):
+    @staticmethod
+    def test_file_upload(rf):
         """
         This test imitates uploading a file
         :param rf: request factory
@@ -469,7 +470,8 @@ class TestDataHandling(object):
         response = TestDataHandling.get_test(url_var, file_upload_list, rf)
         assert response.status_code == 200
 
-    def test_job_state(self, rf):
+    @staticmethod
+    def test_job_state(rf):
         """
         This test imitates saving a job state in W3
         :param rf: request factory
