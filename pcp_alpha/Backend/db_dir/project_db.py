@@ -230,7 +230,6 @@ def confirm_plugin_db_info():
     if check_prod_env():  # For Production Environment
         if rtdb.db_list().contains("Plugins").run(db_con_var):
             print("\nlog: db Plugins exist")
-
             if rtdb.db("Plugins").table_list().run(db_con_var):
                 print("log: db Plugins tables are listed down below:\n{}"
                       .format(rtdb.db("Plugins").table_list()
@@ -249,7 +248,6 @@ def confirm_plugin_db_info():
             print("\nlog: db Plugins exist locally")
             non_existing_tables = tables_check("Plugins", ["Plugin1"])
             tables_create("Plugins", non_existing_tables)
-
         rtdb.db("Plugins").table("Plugin1").insert(
             _TEST_COMMANDS
         ).run(db_con_var)
