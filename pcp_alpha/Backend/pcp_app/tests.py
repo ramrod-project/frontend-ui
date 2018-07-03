@@ -531,8 +531,7 @@ class TestDataHandling(object):
     @staticmethod
     def test_job_state3(rf):
         """
-        This test imitates saving a job state in W3
-        as a second test
+        This test imitates load a job state in W3
         :param rf: request factory
         :return: status code
         """
