@@ -496,11 +496,15 @@ desired effect
                   </div>
               </div>
 
-{#              <div class="progress">#}
-{#                  <div class="progress-bar progress-bar-primary" role="progressbar" data-dz-uploadprogress>#}
-{#                      <span class="progress-text"></span>#}
-{#                  </div>#}
-{#              </div>#}
+              <div class="progress progress-xxs" style="visibility: hidden;">
+                  <div class="progress-bar progress-bar-danger" role="progressbar" data-dz-uploadprogress>
+                      <span class="progress-text"></span>
+                  </div>
+              </div>
+
+              <div class="file_upload_msg" style="visibility: hidden;">
+
+              </div>
 
             </a>
           </li>
@@ -510,6 +514,21 @@ desired effect
           <!--File Uploaded List-->
         <h3 class="control-sidebar-heading">List of File(s) Uploaded</h3>
         <ul class="control-sidebar-menu upload_file_list">
+            {% if file_upload_dict %}
+              {% for file_items in file_upload_dict %}
+                <li>
+                    <a href="/del_file_upload/{{ file_items.id }}/" class="del_file_upload_c">
+                        <h4 class="control-sidebar-subheading">
+                            {{ file_items.Name }}
+                            <span class="btn btn-social-icon btn-danger btn-xs pull-right del_file_upload_c">
+                                <i class="fa fa-close">
+                                </i>
+                            </span>
+                        </h4>
+                    </a>
+                </li>
+              {% endfor %}
+            {% endif %}
         </ul>
           <!--/File Uploaded List-->
         <!--<a id="bb_id" href="#">Testing for two</a>-->

@@ -155,14 +155,45 @@ def load_jobs_state():
     return output
 
 
-def upload_file_to_brain(file_name, binary_file_obj):
+def get_file_uploads():
+    """
 
+    :return:
+    """
+    items = []
+    for file_item in rtdb.db("Brain").table("Files").run(connect()):
+        # file_item['json'] = json.dumps(file_item)
+        items.append(file_item)
+    return items
+
+
+def upload_file_to_brain(file_name, binary_file_obj):
+    """
+
+    :param file_name:
+    :param binary_file_obj:
+    :return:
+    """
+    bool_return = 0
     try:
-        put_buffer(file_name, binary_file_obj)
+        for item in rtdb.db("Brain").table("Files").run(connect()):
+            if item['Name'] == file_name:
+                bool_return = 1
+        if bool_return == 0:
+            put_buffer(file_name, binary_file_obj)
     except ValueError:
-        # return 1
-        print("ValueError occurred HERE")
-    for item in rtdb.db("Brain").table("Files").run(connect()):
-        print(item)
-    return 0
+        bool_return = 1
+    return bool_return
+
+
+def del_file_upload_from_brain(file_id):
+    bool_return = 0
+    try:
+        rtdb.db("Brain").table("Files").get(str(file_id)).delete().run(connect())
+    except:
+        print("EXCEPTION")
+    file_del = rtdb.db("Brain").table("Files").get(str(file_id)).run(connect())
+    if file_del is None:
+        bool_return = 1
+    return bool_return
 
