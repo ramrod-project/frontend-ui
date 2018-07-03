@@ -1,6 +1,6 @@
 FROM alpine:3.7
 
-RUN apk add --no-cach python3 && \
+RUN apk add --no-cach python3 libmagic && \
     python3 -m ensurepip && \
     rm -r /usr/lib/python*/ensurepip && \
     pip3 install --upgrade pip setuptools && \
