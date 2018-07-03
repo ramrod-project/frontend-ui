@@ -8,7 +8,7 @@ RUN apk add --no-cach python3 && \
     if [[ ! -e /usr/bin/python ]]; then ln -sf /usr/bin/python3 /usr/bin/python; fi && \
     rm -r /root/.cache
 
-RUN pip3 install django==2.0.1 docker rethinkdb ramrodbrain>=0.1.32 ua-parser
+RUN pip3 install --force-reinstall django==2.0.1 docker rethinkdb ramrodbrain>=0.1.32 ua-parser
 
 WORKDIR /srv/app
 
