@@ -425,7 +425,7 @@ function add_sequence_tab(clear=true){
     if (clear){
         sequences[next_tab] = new Set();
     }
-    $('#new_jobq_button').before('<li onclick="synchronize_job_sequence_tabs('+next_tab+')"><a href="#jobq_'+next_tab+'" data-toggle="tab">'+next_tab+'</a></li>');
+    $('#new_jobq_button').before('<li id="jobB_'+next_tab+'" onclick="synchronize_job_sequence_tabs('+next_tab+')"><a href="#jobq_'+next_tab+'" data-toggle="tab">'+next_tab+'</a></li>');
     $('#jobq_content').append('<div class="tab-pane" id="jobq_'+next_tab+'"></div>');
     console.warn("adding sequence ");
     //ADD THE OUTPUT TAB TOO!
@@ -518,6 +518,10 @@ function clear_new_jobs(){
     id_map = {}
     for (var key in sequences){
         sequences[key] = new Set();
+        var seq_button = $("#jobB_"+key);
+        if (seq_button.length > 0){
+            seq_button.remove();
+        }
     }
     inc = 0;
     $("#addjob_button")[0].value = 0;
