@@ -87,7 +87,7 @@ desired effect
         <ul class="nav navbar-nav">
           <!-- Control Sidebar Toggle Button -->
           <li>
-            <a href="#" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>
+            <a href="#" data-toggle="control-sidebar"><i class="fa fa-file-text" data-toggle="tooltip" title="Upload File"></i></a>
           </li>
         </ul>
       </div>
@@ -456,7 +456,7 @@ desired effect
   <footer class="main-footer">
     <!-- To the right -->
     <div class="pull-right hidden-xs">
-        <strong>Version 1.0.3</strong>
+        <strong>Version 1.0.4</strong>
     </div>
     <!-- Default to the left -->
     <strong>Demo Version for the <a id="dvader_nooo_id" href="#">PCP Project</a></strong> :)
@@ -466,44 +466,46 @@ desired effect
   <aside class="control-sidebar control-sidebar-dark">
     <!-- Create the tabs -->
     <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
-      <li class="active"><a href="#control-sidebar-home-tab" data-toggle="tab"><i class="fa fa-home"></i></a></li>
+      <li class="active"><a href="#control-sidebar-home-tab" data-toggle="tab"><i class="fa fa-dropbox"></i></a></li>
       <li><a href="#control-sidebar-settings-tab" data-toggle="tab"><i class="fa fa-gears"></i></a></li>
     </ul>
     <!-- Tab panes -->
     <div class="tab-content">
       <!-- Home tab content -->
       <div class="tab-pane active" id="control-sidebar-home-tab">
-        <h3 class="control-sidebar-heading">Recent Activity</h3>
+        <h3 class="control-sidebar-heading">File Upload</h3>
+
         <ul class="control-sidebar-menu">
           <li>
+              <!--drop zone here-->
             <a href="javascript:;">
-              <i class="menu-icon fa fa-bell bg-red"></i>
+{#              <i class="menu-icon fa fa-bell bg-red"></i>#}
 
-              <div class="menu-info">
-                <h4 class="control-sidebar-subheading">Notification HERE</h4>
+{#              <div class="menu-info">#}
+{#                <h4 class="control-sidebar-subheading">DropZone HERE</h4>#}
 
-                <p>Detail notification HERE</p>
+                <!--<p>Detail notification HERE</p>-->
+{#              </div>#}
+
+              <div id="dropzone">
+                  <div class="dropzone needsclick dz-clickable" id="dropzone_testid">{% csrf_token %}
+                      <div class="dz-message dz-default needsclick">
+                        Drop files here or click to upload.<br>
+                      </div>
+{#                      <input type="file" name="file" />#}
+                  </div>
               </div>
+
             </a>
           </li>
         </ul>
+
         <!-- /.control-sidebar-menu -->
-        <h3 class="control-sidebar-heading">Tasks Progress</h3>
-        <ul class="control-sidebar-menu">
-          <li>
-            <a href="javascript:;">
-              <h4 class="control-sidebar-subheading">
-                Custom Template Design
-                <span class="pull-right-container">
-                    <span class="label label-danger pull-right">70%</span>
-                  </span>
-              </h4>
-              <div class="progress progress-xxs">
-                <div class="progress-bar progress-bar-danger" style="width: 70%"></div>
-              </div>
-            </a>
-          </li>
+          <!--File Uploaded List-->
+        <h3 class="control-sidebar-heading">List of File(s) Uploaded</h3>
+        <ul class="control-sidebar-menu upload_file_list">
         </ul>
+          <!--/File Uploaded List-->
         <!--<a id="bb_id" href="#">Testing for two</a>-->
         <!-- /.control-sidebar-menu -->
       </div>
@@ -550,12 +552,16 @@ desired effect
 <script src="{% static 'AdminLTE/bower_components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
 <!-- AdminLTE App -->
 <script src="{% static 'AdminLTE/dist/js/adminlte.min.js' %}"></script>
-<!-- GET list of commands -->
+<!-- Project's custom js file -->
 <script src="{% static 'js_custom/pcp_custom_jquery.js' %}"></script>
+<!--Data Table jQuery-->
 <script src="{% static 'DataTables/js/jquery.dataTables.min.js' %}"></script>
 <script src="{% static 'DataTables/datatables.min.js' %}"></script>
-
 <script src="{% static 'external_jquery/jquery-ui.js' %}"></script>
+<!-- DropZone -->
+<script src="{% static 'External_js_files/dropzone.js' %}"></script>
+{#custom dropzone js file#}
+<script src="{% static 'js_custom/pcp_custom_dropzone.js' %}"></script>
 <!--for template inheritance-->
 {% block extra_js %}{% endblock extra_js %}
 </body>

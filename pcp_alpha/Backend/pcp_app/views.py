@@ -10,7 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 from ua_parser import user_agent_parser
 from Backend.db_dir.custom_queries import get_specific_commands, insert_brain_jobs_w3, \
     get_specific_brain_output, get_brain_output_content, insert_new_target, get_brain_targets, \
-    persist_jobs_state, load_jobs_state
+    persist_jobs_state, load_jobs_state, upload_file_to_brain
 from .forms import TargetForm
 
 
@@ -267,3 +267,25 @@ def delete_specific_target(request, target_id):
         brain.r.db("Brain").table("Targets").get(str(target_id)).delete(
             return_changes=True).run(brain_connection)
         return redirect('/')
+
+
+def file_upload_list(request):
+    """
+    This function is the controller for file uploads
+    :param request: user request
+    :return: response if file can be uploaded or not
+    """
+    if request.method == 'POST':
+        file = request.FILES['file']
+        print("file == {}".format(file))
+        print("file.content_type == {}".format(file.content_type))
+        print("file.read() == {}".format(file.read()))
+
+        upload_file_to_brain(str(file), file.read())
+    return HttpResponse()
+
+
+# pcp-328
+# def del_file_from_list(request):
+#     print("\nDelete file from upload list\n")
+#     return HttpResponse()
