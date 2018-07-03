@@ -1,6 +1,6 @@
 import json
 import brain.queries
-from brain.binary import put_buffer, put
+from brain.binary import put_buffer
 import brain
 
 from .project_db import connect, rtdb
@@ -162,7 +162,6 @@ def upload_file_to_brain(file_name, binary_file_obj):
     except ValueError:
         # return 1
         print("ValueError occurred HERE")
-    print("")
     for item in rtdb.db("Brain").table("Files").run(connect()):
         print(item)
     return 0

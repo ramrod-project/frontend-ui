@@ -5,7 +5,7 @@ import json
 import pytest
 from brain import connect, r
 
-from pcp_alpha.test.test_w4_switch_to_done import switch_to_done
+from test.test_w4_switch_to_done import switch_to_done
 # from rethinkdb.errors import ReqlOpFailedError
 from pcp_alpha.Backend.db_dir.custom_data import location_generated_num
 from pcp_alpha.Backend.db_dir.project_db import rtdb
@@ -14,7 +14,7 @@ from pcp_alpha.Backend.db_dir.custom_queries import get_specific_brain_targets, 
 from pcp_alpha.Backend.pcp_app.views import get_commands_controller, \
     execute_sequence_controller, w4_output_controller, w4_output_controller_download, \
     new_target_form, val_target_form, val_edit_target_form, edit_target_form, \
-    delete_specific_target
+    delete_specific_target, file_upload_list, persist_job_state, load_job_state
 
 ECHO_JOB_ID = str(uuid4())
 NOW = time()
@@ -34,7 +34,11 @@ SAMPLE_JOB = {
     "JobTarget": SAMPLE_TARGET,
     "Status": "Done",
     "StartTime": NOW,
-    "JobCommand": "Do stuff"
+    "JobCommand": {"CommandName": "Do stuff",
+                   "Tooltip": "",
+                   "Output": False,
+                   "Inputs": [],
+                   "OptionalInputs": []}
 }
 SAMPLE_OUTPUT = {
     "OutputJob": SAMPLE_JOB,
@@ -458,3 +462,79 @@ class TestDataHandling(object):
         response = TestDataHandling.get_test(url_var, delete_specific_target, rf, target_id=target_key)
         assert response.status_code == 302
         assert response.url == "/"
+
+    @staticmethod
+    def test_file_upload(rf):
+        """
+        This test imitates uploading a file
+        :param rf: request factory
+        :return: status code
+        """
+        url_var = "file_upload/"
+        response = TestDataHandling.get_test(url_var, file_upload_list, rf)
+        assert response.status_code == 200
+
+    @staticmethod
+    def test_job_state(rf):
+        """
+        This test imitates saving a job state in W3
+        :param rf: request factory
+        :return: status code
+        """
+        url_var = "action/save_state/"
+        post_data = {"replaced": 1, "inserted": 0, "deleted": 0, "errors": 0, "unchanged": 0, "skipped": 0}
+
+        with pytest.raises(json.JSONDecodeError):
+            current_state = json.loads(str(post_data))
+            response = TestDataHandling.post_test(url_var, current_state, persist_job_state, rf)
+            assert response.status_code == 302
+            response = TestDataHandling.post_test(url_var, {}, persist_job_state, rf)
+            assert response.status_code == 302
+
+    @staticmethod
+    def test_job_state2(rf):
+        """
+        This test imitates saving a job state in W3
+        as a second test
+        :param rf: request factory
+        :return: status code
+        """
+        url_var = "action/save_state/"
+        post_data = {
+            "id_map": {"1": "9859bfb8-8676-4595-8ce2-176957574875"},
+            "id_reverse_map": {"9859bfb8-8676-4595-8ce2-176957574875": 1},
+            "jobs": [{"plugin": "Plugin1",
+                      "address": "172.16.5.49",
+                      "job": {"Output": True,
+                              "OptionalInputs": [],
+                              "Tooltip":"\nEcho\n\nClient Returns this string "
+                                        "verbatim\n\nArguments:\n1. String to "
+                                        "Echo\n\nReturns:\nString\n",
+                              "CommandName": "echo",
+                              "Inputs":[{"Tooltip": "This string will be echoed back",
+                                         "Type": "textbox",
+                                         "Name": "EchoString",
+                                         "Value": "dd"}],
+                              "id": "c8999a01-91fb-43f7-8bc5-7aa8ec789688"},
+                      "status": "None"}],
+            "sequences": {"1": ["1"]},
+            "active_sequence": "1"
+        }
+
+        with pytest.raises(json.JSONDecodeError):
+            current_state = json.loads(str(post_data))
+            response = TestDataHandling.post_test(url_var, current_state, persist_job_state, rf)
+            assert response.status_code == 302
+            response = TestDataHandling.post_test(url_var, {}, persist_job_state, rf)
+            assert response.status_code == 302
+
+    @staticmethod
+    def test_job_state3(rf):
+        """
+        This test imitates load a job state in W3
+        :param rf: request factory
+        :return: status code
+        """
+        url_var = "action/load_state/"
+        response = TestDataHandling.get_test(url_var, load_job_state, rf)
+        assert response.status_code == 200
