@@ -3,16 +3,15 @@ from time import sleep, time
 from uuid import uuid4
 import json
 import pytest
-import ast
 from brain import connect, r
 
-from pcp_alpha.test.test_w4_switch_to_done import switch_to_done
+from test.test_w4_switch_to_done import switch_to_done
 # from rethinkdb.errors import ReqlOpFailedError
-from pcp_alpha.Backend.db_dir.custom_data import location_generated_num
-from pcp_alpha.Backend.db_dir.project_db import rtdb
-from pcp_alpha.Backend.db_dir.custom_queries import get_specific_brain_targets, \
+from Backend.db_dir.custom_data import location_generated_num
+from Backend.db_dir.project_db import rtdb
+from Backend.db_dir.custom_queries import get_specific_brain_targets, \
     get_specific_command, get_brain_targets
-from pcp_alpha.Backend.pcp_app.views import get_commands_controller, \
+from Backend.pcp_app.views import get_commands_controller, \
     execute_sequence_controller, w4_output_controller, w4_output_controller_download, \
     new_target_form, val_target_form, val_edit_target_form, edit_target_form, \
     delete_specific_target, file_upload_list, persist_job_state
