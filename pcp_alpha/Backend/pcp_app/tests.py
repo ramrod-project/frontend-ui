@@ -34,7 +34,11 @@ SAMPLE_JOB = {
     "JobTarget": SAMPLE_TARGET,
     "Status": "Done",
     "StartTime": NOW,
-    "JobCommand": "Do stuff"
+    "JobCommand": {"CommandName": "Do stuff",
+                   "Tooltip": "",
+                   "Output": False,
+                   "Inputs": [],
+                   "OptionalInputs": []}
 }
 SAMPLE_OUTPUT = {
     "OutputJob": SAMPLE_JOB,
@@ -273,7 +277,7 @@ class TestDataHandling(object):
         """
         test download output data from W4
         """
-        url_var = "/action/get_full_output_data?job_id=138thg-eg98198-sf98gy3-feh8h8"
+        url_var = "/action/get_full_output_data?job_id=138thg-eg98198-sf98gy3-feh8h8&job_number=7777"
         response = TestDataHandling.get_test(
             url_var,
             w4_output_controller_download,

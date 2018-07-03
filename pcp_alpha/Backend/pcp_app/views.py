@@ -119,6 +119,24 @@ def w4_output_controller(request):
     return response
 
 
+def w4_output_controller_download_filename(job_id, job_number):
+    """
+
+    :param job_id:
+    :param job_number:
+    :return:
+    """
+    filename = job_id
+    job = get_specific_brain_output(job_id)
+    if job:
+        filename = "{}_{}_{}_{}".format(job_number,
+                                        job['JobTarget']['PluginName'],
+                                        job['JobTarget']['Location'],
+                                        job['JobCommand']['CommandName'])
+    filename = "{}.txt".format(filename)
+    return filename
+
+
 def w4_output_controller_download(request):
     """
     User can download content in W4 by clicking on link
@@ -126,16 +144,20 @@ def w4_output_controller_download(request):
     :return: content data onto a file
     """
     response = None
+    fng = w4_output_controller_download_filename  # file name generator :-D
     if request.method == 'GET':
         user_agent = user_agent_parser.ParseOS(request.META.get("HTTP_USER_AGENT"))
         controller_job_id = request.GET.get('job_id')
+        controller_job_number = request.GET.get('job_number', "")
         content = get_brain_output_content(controller_job_id, max_size=None)
         if "windows" in user_agent.get("family").lower() and isinstance(content, str):
             content = content.replace("\n", "\r\n")
         response = HttpResponse(content,
                                 content_type='application/octet-stream')
-        response['Content-Disposition'] = 'attachment; \
-                                           filename="{}.txt"'.format(controller_job_id)
+        content_dispo = 'attachment; \
+                         filename="{}"'.format(fng(controller_job_id,
+                                                   controller_job_number))
+        response['Content-Disposition'] = content_dispo
         response.status_code = 200
     return response
 
