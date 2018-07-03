@@ -7,14 +7,14 @@ from brain import connect, r
 
 from test.test_w4_switch_to_done import switch_to_done
 # from rethinkdb.errors import ReqlOpFailedError
-from Backend.db_dir.custom_data import location_generated_num
-from Backend.db_dir.project_db import rtdb
-from Backend.db_dir.custom_queries import get_specific_brain_targets, \
+from pcp_alpha.Backend.db_dir.custom_data import location_generated_num
+from pcp_alpha.Backend.db_dir.project_db import rtdb
+from pcp_alpha.Backend.db_dir.custom_queries import get_specific_brain_targets, \
     get_specific_command, get_brain_targets
-from Backend.pcp_app.views import get_commands_controller, \
+from pcp_alpha.Backend.pcp_app.views import get_commands_controller, \
     execute_sequence_controller, w4_output_controller, w4_output_controller_download, \
     new_target_form, val_target_form, val_edit_target_form, edit_target_form, \
-    delete_specific_target, file_upload_list, persist_job_state
+    delete_specific_target, file_upload_list, persist_job_state, load_job_state
 
 ECHO_JOB_ID = str(uuid4())
 NOW = time()
@@ -523,3 +523,15 @@ class TestDataHandling(object):
             assert response.status_code == 302
             response = TestDataHandling.post_test(url_var, {}, persist_job_state, rf)
             assert response.status_code == 302
+
+    @staticmethod
+    def test_job_state3(rf):
+        """
+        This test imitates saving a job state in W3
+        as a second test
+        :param rf: request factory
+        :return: status code
+        """
+        url_var = "action/load_state/"
+        response = TestDataHandling.get_test(url_var, load_job_state, rf)
+        assert response.status_code == 200
