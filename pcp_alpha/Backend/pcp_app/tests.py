@@ -14,7 +14,7 @@ from pcp_alpha.Backend.db_dir.custom_queries import get_specific_brain_targets, 
 from pcp_alpha.Backend.pcp_app.views import get_commands_controller, \
     execute_sequence_controller, w4_output_controller, w4_output_controller_download, \
     new_target_form, val_target_form, val_edit_target_form, edit_target_form, \
-    delete_specific_target, file_upload_list
+    delete_specific_target, file_upload_list, persist_job_state
 
 ECHO_JOB_ID = str(uuid4())
 NOW = time()
@@ -460,6 +460,43 @@ class TestDataHandling(object):
         assert response.url == "/"
 
     def test_file_upload(self, rf):
+        """
+        This test imitates uploading a file
+        :param rf: request factory
+        :return: status code
+        """
         url_var = "file_upload/"
         response = TestDataHandling.get_test(url_var, file_upload_list, rf)
         assert response.status_code == 200
+
+    def test_job_state(self, rf):
+        """
+        This test imitates saving a job state in W3
+        :param rf: request factory
+        :return: status code
+        """
+        url_var = "action/save_state/"
+        post_data = {
+            "id_map": {"1": "9859bfb8-8676-4595-8ce2-176957574875"},
+            "id_reverse_map": {"9859bfb8-8676-4595-8ce2-176957574875": 1},
+            "jobs": [{"plugin": "Plugin1",
+                      "address": "172.16.5.49",
+                      "job": {"Output": True,
+                              "OptionalInputs": [],
+                              "Tooltip":"\nEcho\n\nClient Returns this string "
+                                        "verbatim\n\nArguments:\n1. String to "
+                                        "Echo\n\nReturns:\nString\n",
+                              "CommandName": "echo",
+                              "Inputs":[{"Tooltip": "This string will be echoed back",
+                                         "Type": "textbox",
+                                         "Name": "EchoString",
+                                         "Value": "dd"}],
+                              "id": "c8999a01-91fb-43f7-8bc5-7aa8ec789688"},
+                      "status": "None"}],
+            "sequences": {"1": ["1"]},
+            "active_sequence": "1"
+        }
+        with pytest.raises(json.JSONDecodeError):
+            current_state = json.loads(post_data)
+            response = TestDataHandling.post_test(url_var, current_state, persist_job_state, rf)
+            assert response.status_code == 302
