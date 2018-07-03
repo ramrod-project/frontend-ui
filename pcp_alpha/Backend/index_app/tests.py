@@ -1,6 +1,6 @@
 import pytest
 from brain import connect
-from pcp_alpha.Backend.db_dir.project_db import check_dev_env, rtdb
+from Backend.db_dir.project_db import check_dev_env, rtdb
 from .views import get_target_list
 
 
