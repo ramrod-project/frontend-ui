@@ -32,6 +32,7 @@ var myDropzone = new Dropzone("#dropzone_testid", {
         $(".dz-preview")[0].style.visibility = "hidden";
         $(".progress")[0].style.visibility = "";
         $(".file_upload_msg")[0].style.visibility = "hidden";
+        $(".file_upload_msg")[0].style.display = "none";
         var progressElement = $(".progress-bar");
         progressElement[0].style.width = progress + "%";
     },
@@ -45,9 +46,16 @@ var myDropzone = new Dropzone("#dropzone_testid", {
 
         this.on("success", function(file, response){
            if(response.errors > 0){
-               console.log("message: file already exist.");
                $(".file_upload_msg")[0].style.visibility = "";
-               $(".file_upload_msg").text("File already exists.")
+               $(".file_upload_msg")[0].style.display = "";
+               $(".file_upload_msg").text(response.first_error);
+               $(".file_upload_msg").append($("<span>")
+                                        .attr({"class": "btn btn-social-icon btn-xs pull-right"})
+                                        .append($("<i/>")
+                                            .attr({"class": "fa fa-close",
+                                                   "onclick": "clear_upload_message()"})
+                                        )
+                                    );
            } else {
                $(".progress")[0].style.visibility = "hidden";
                add_file_to_dropzone_list(file.upload.filename);
@@ -55,6 +63,12 @@ var myDropzone = new Dropzone("#dropzone_testid", {
         });
     }
 });
+
+function clear_upload_message(){
+    $(".file_upload_msg")[0].style.visibility = "hidden";
+    $(".file_upload_msg")[0].style.display = "none";
+    $(".file_upload_msg span").remove();
+}
 
 function remove_file_from_dropzone_list(file_dom_id){
     var filename = dom_filename_map[file_dom_id];
@@ -78,28 +92,28 @@ function add_file_to_dropzone_list(filename){
         .append($("<li/>")
             .append($("<hr/>"))
             .append($("<div/>")
-                .attr({"class": "del_file_upload_c"}))
-            .append($("<h4/>")
-                .attr({"class": "control-sidebar-subheading file_upload_name brain_filename"})
-                .text(filename))
-            .append($("<div/>")
-                .append($("<span>")
-                    .attr({"class": "btn btn-social-icon btn-danger btn-xs pull-right"})
-                    .append($("<i/>")
-                        .attr({"class": "fa fa-close",
-                               "onclick": "remove_file_from_dropzone_list("+next_id+")"})
+                .attr({"class": "del_file_upload_c"})
+                .append($("<h4/>")
+                    .attr({"class": "control-sidebar-subheading file_upload_name brain_filename"})
+                    .text(filename))
+                .append($("<div/>")
+                    .append($("<span>")
+                        .attr({"class": "btn btn-social-icon btn-danger btn-xs pull-right"})
+                        .append($("<i/>")
+                            .attr({"class": "fa fa-close",
+                                   "onclick": "remove_file_from_dropzone_list("+next_id+")"})
+                        )
                     )
-                )
-                .append($("<span>")
-                    .attr({"class": "btn btn-social-icon  btn-info btn-xs pull-left"})
-                    .append($("<a/>")
-                        .attr({"class": "fa fa-download",
-                               "href": "/file_download/"+filename+"/"})
+                    .append($("<span>")
+                        .attr({"class": "btn btn-social-icon  btn-info btn-xs pull-left"})
+                        .append($("<a/>")
+                            .attr({"class": "fa fa-download",
+                                   "href": "/file_download/"+filename+"/"})
+                        )
                     )
                 )
             )
             .append($("<br/>"))
-
         );
 
 }
