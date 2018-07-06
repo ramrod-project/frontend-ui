@@ -60,13 +60,13 @@ function remove_file_from_dropzone_list(file_dom_id){
     var filename = dom_filename_map[file_dom_id];
     if (filename != undefined){
         $.ajax({
-        type: "GET",
-        url: "/del_file_upload/"+filename+"/",
-        datatype: 'json',
-        success: function(data) {
-            populate_file_listing();
-        }
-    });
+            type: "GET",
+            url: "/del_file_upload/"+filename+"/",
+            datatype: 'json',
+            success: function(data) {
+                populate_file_listing();
+            }
+        });
     }
 }
 
