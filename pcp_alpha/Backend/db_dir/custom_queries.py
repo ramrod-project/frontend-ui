@@ -1,6 +1,6 @@
 import json
 import brain.queries
-from brain.binary import put_buffer
+from brain.binary import put_buffer, list_dir, get, delete
 import brain
 
 from .project_db import connect, rtdb
@@ -155,18 +155,6 @@ def load_jobs_state():
     return output
 
 
-def get_file_uploads():
-    """
-
-    :return:
-    """
-    items = []
-    for file_item in rtdb.db("Brain").table("Files").run(connect()):
-        # file_item['json'] = json.dumps(file_item)
-        items.append(file_item)
-    return items
-
-
 def upload_file_to_brain(file_name, binary_file_obj):
     """
 
@@ -174,26 +162,47 @@ def upload_file_to_brain(file_name, binary_file_obj):
     :param binary_file_obj:
     :return:
     """
-    bool_return = 0
-    try:
-        for item in rtdb.db("Brain").table("Files").run(connect()):
-            if item['Name'] == file_name:
-                bool_return = 1
-        if bool_return == 0:
-            put_buffer(file_name, binary_file_obj)
-    except ValueError:
-        bool_return = 1
-    return bool_return
+    outcome = put_buffer(file_name, binary_file_obj)
+    return outcome
 
 
 def del_file_upload_from_brain(file_id):
-    bool_return = 0
+    success = True
     try:
-        rtdb.db("Brain").table("Files").get(str(file_id)).delete().run(connect())
-    except:
-        print("EXCEPTION")
-    file_del = rtdb.db("Brain").table("Files").get(str(file_id)).run(connect())
-    if file_del is None:
-        bool_return = 1
-    return bool_return
+        delete(file_id)
+    except ValueError:
+        success = False
+    return success
 
+
+def get_file_uploads():
+    """
+        alias function
+    :return:
+    """
+    return get_brain_files()
+
+
+def get_brain_files():
+    """
+
+    :return: <list> of <str>
+    """
+    try:
+        response = list_dir()
+    except ValueError:
+        response = []
+    return response
+
+
+def get_brain_file(file_id):
+    """
+
+    :param file_id:
+    :return:
+    """
+    try:
+        response = get(file_id)
+    except ValueError:
+        response = None
+    return response
