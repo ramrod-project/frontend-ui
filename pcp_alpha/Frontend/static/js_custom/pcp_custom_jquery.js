@@ -210,20 +210,29 @@ Functions down below are for w2
 var current_command_template = {}
 
 function filter_w1(){
-    var filter_content = $("#searchNameHere_id")[0].value.toLowerCase();
-    var filter_display = $("#w1_command_active_filter");
-    var num_targets = 2;
+    var filter_content,
+        filter_display,
+        num_targets,
+        to_filter,
+        row_i,
+        row_id,
+        target_json,
+        target;
+
+    filter_content = $("#searchNameHere_id")[0].value.toLowerCase();
+    filter_display = $("#w1_command_active_filter");
+    num_targets = 2;
     if (filter_content.length == 0){
         filter_display.css("display", "none");
     } else {
         filter_display.css("display", "");
         filter_display[0].innerText = "Currently filtering on: "+filter_content;
     }
-    var to_filter = $("#target_box_contentid tr");
-    for (var row_i = 0; row_i < to_filter.length; row_i++){
-        var row_id = to_filter[row_i].id.substring(10, to_filter[row_i].id.length);
-        var target_json = $("#name_tag_id"+row_id+" a span")[0].innerHTML;
-        var target = JSON.parse(target_json);
+    to_filter = $("#target_box_contentid tr");
+    for (row_i = 0; row_i < to_filter.length; row_i++){
+        row_id = to_filter[row_i].id.substring(10, to_filter[row_i].id.length);
+        target_json = $("#name_tag_id"+row_id+" a span")[0].innerHTML;
+        target = JSON.parse(target_json);
         if (target.PluginName.toLowerCase().includes(filter_content)  || target.Location.toLowerCase().includes(filter_content) ){
             $(to_filter[row_i]).css("display", "");
         } else {
@@ -387,7 +396,7 @@ function load_job_state(){
                 }
             }
             sequence_starttime_map = data.sequence_starttime_map; // must remain below add_sequence_tab loop
-            set_w3_job_status();
+            set_w3_job_status(full_update=true);
             synchronize_job_sequence_tabs(active_sequence);
             synchronize_output_sequence_tabs(active_sequence);
             $("#download_status").removeClass("fa-hourglass-end");
