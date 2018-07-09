@@ -739,7 +739,6 @@ function set_w3_job_status(full_update=false){
         var location_text = what.children[2].innerText;
         var command_text = what.children[3].innerText;
         var w3_status = what.children[4].innerText;
-        var error_msg = 0;
 
         var job_id = j+1;
 
