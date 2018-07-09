@@ -53,8 +53,11 @@ $(document).ready(function() {
                                                     sequence_starttime_map[active_sequence] = dateText;
                                              },
                                              onSelect: function (selectedDateTime){
-                                                var date_component = Number(selectedDateTime.substring(0,selectedDateTime.length-6))/1000;
-                                                var time_component = selectedDateTime.substring(selectedDateTime.length-5, selectedDateTime.length).split(':');
+                                                var date_component = Number(selectedDateTime
+                                                    .substring(0,selectedDateTime.length-6))/1000;
+                                                var time_component = selectedDateTime
+                                                    .substring(selectedDateTime.length-5, selectedDateTime.length)
+                                                    .split(':');
                                                 var time_in_sec = Number(time_component[0])*60*60 + Number(time_component[1])*60;
                                                 var final_time = Number(date_component) + Number(time_in_sec);
                                                 $("#job_sequence_timer")[0].value = final_time.toString();
@@ -132,9 +135,15 @@ function open_websocket(selection, callback) {
 
 function status_change_update_dom(job_dom_id, status){
     $("#jobstatusid"+job_dom_id).empty();
-    $("#jobstatusid"+job_dom_id).append($("<span/>").attr({"class": "label label-"+status}).text(status));
+    $("#jobstatusid"+job_dom_id)
+        .append($("<span/>")
+            .attr({"class": "label label-"+status})
+            .text(status));
     $("#updatestatusid"+job_dom_id).empty();
-    $("#updatestatusid"+job_dom_id).append($("<span/>").attr({"class": "label label-"+status}).text(status));
+    $("#updatestatusid"+job_dom_id)
+        .append($("<span/>")
+            .attr({"class": "label label-"+status})
+            .text(status));
     if (status == "Done"){
         execute_sequence_output(id_map[job_dom_id]);
     }
@@ -261,12 +270,18 @@ function get_commands_func(){
                 $(".theContent").append($("<li/>").text(data));
             } else {  // no commands for plugin
                 for(var i = 0; i < data.length; i++) {
-                    $(".theContent").append($("<li id='commandid' class='commandclass' onclick='#'/>").append(
-                    $("<a id='acommandid' class='acommandclass' href='#'/>").text(data[i].CommandName)));
+                    $(".theContent")
+                        .append($("<li id='commandid' class='commandclass' onclick='#'/>")
+                            .append($("<a id='acommandid' class='acommandclass' href='#'/>")
+                                .text(data[i].CommandName)));
                 }
             }
-            $(".theContent").append("<div/>").attr({"style": "width:250px"});
-            $(".theContentHeader").append("<h2 class='box-title'/>").text(plugin_name_var + "  command list");
+            $(".theContent")
+                .append("<div/>")
+                .attr({"style": "width:250px"});
+            $(".theContentHeader")
+                .append("<h2 class='box-title'/>")
+                .text(plugin_name_var + "  command list");
 
             // User selects a command from W2
             $("a.acommandclass").click(function(){
@@ -279,14 +294,23 @@ function get_commands_func(){
                 }
                 //tooltip
                 $(".tooltipHeader").empty();
-                $(".tooltipHeader").append($("<p/>").append($("<b/>").text("Tooltip:")));
+                $(".tooltipHeader")
+                    .append($("<p/>")
+                        .append($("<b/>")
+                            .text("Tooltip:")));
                 $(".tooltipContent").empty();
-                $(".tooltipContent").append("<pre>" + current_command_template.Tooltip + "</pre>");
+                $(".tooltipContent")
+                    .append("<pre>" + current_command_template.Tooltip + "</pre>");
 
                 //footer
                 $(".theContentArgument").empty();
-                $(".theContentArgument").append($("<div id='commandIdBuilder'/>").text($(this)[0].text));
-                $(".theContentArgument").append($("<div id='JSON_Command_DATA'/>").addClass("text-muted small").text(JSON.stringify(current_command_template)));
+                $(".theContentArgument")
+                    .append($("<div id='commandIdBuilder'/>")
+                        .text($(this)[0].text));
+                $(".theContentArgument")
+                    .append($("<div id='JSON_Command_DATA'/>")
+                        .addClass("text-muted small")
+                        .text(JSON.stringify(current_command_template)));
                 for (var input_i = 0; input_i < current_command_template['Inputs'].length; input_i++){
                     //currently assumes input type is textbox
                     var new_input = document.createElement("input");
@@ -462,12 +486,16 @@ function add_sequence_tab(clear=true){
     }
     var new_tab_start_time =  Math.floor((new Date().valueOf()) / 1000);
     sequence_starttime_map[next_tab] = new_tab_start_time.toString();
-    $('#new_jobq_button').before('<li id="jobB_'+next_tab+'" onclick="synchronize_job_sequence_tabs('+next_tab+')"><a href="#jobq_'+next_tab+'" data-toggle="tab">'+next_tab+'</a></li>');
-    $('#jobq_content').append('<div class="tab-pane" id="jobq_'+next_tab+'"></div>');
+    $('#new_jobq_button')
+        .before('<li id="jobB_'+next_tab+'" onclick="synchronize_job_sequence_tabs('+next_tab+')"><a href="#jobq_'+next_tab+'" data-toggle="tab">'+next_tab+'</a></li>');
+    $('#jobq_content')
+        .append('<div class="tab-pane" id="jobq_'+next_tab+'"></div>');
     console.warn("adding sequence ");
     //ADD THE OUTPUT TAB TOO!
-    var output_tab = $("#output_tabs").append('<li id="outB_'+next_tab+'" onclick="synchronize_output_sequence_tabs('+next_tab+')"><a href="#outq_'+next_tab+'" data-toggle="tab">'+next_tab+'</a></li>');
-    $('#outq_content').append('<div class="tab-pane" id="outq_'+next_tab+'"></div>');
+    var output_tab = $("#output_tabs")
+        .append('<li id="outB_'+next_tab+'" onclick="synchronize_output_sequence_tabs('+next_tab+')"><a href="#outq_'+next_tab+'" data-toggle="tab">'+next_tab+'</a></li>');
+    $('#outq_content')
+        .append('<div class="tab-pane" id="outq_'+next_tab+'"></div>');
     $("#outq_"+next_tab).tab('show');
     $("#jobq_"+next_tab).tab('show')
 }
@@ -503,7 +531,9 @@ function synchronize_sequence_tab_rows(sequence_id){
 }
 
 function add_new_plugin_location_job_row(id_parameter, num_parameter){
-    var row_var = $("<td/>").attr({"id": id_parameter + num_parameter}).append($("<a/>").attr(
+    var row_var = $("<td/>")
+        .attr({"id": id_parameter + num_parameter})
+        .append($("<a/>").attr(
     {"href": "#"}).append($("<span/>").text("")));
     return row_var;
 }
@@ -516,26 +546,38 @@ function add_new_job(){
     var value = $("#addjob_button")[0].value;
     sequences[active_sequence].add(value);
     // content for w3
-    $(".thirdBoxContent").append($("<tr/>").attr({"role": "row",
-                                                  "onclick": "#",
-                                                  "id":"jobrow"+value,
-                                                  "class": "draggable_tr divw3row"}).append(
-        $("<td/>").append($("<div/>").append($("<a/>").attr({"href": '#',
-                                                             'id': 'trashjob'+value}).addClass("fa fa-trash-o")).append($("<span/>").text(value).addClass("pull-right"))),
+    $(".thirdBoxContent")
+        .append($("<tr/>")
+            .attr({"role": "row","onclick": "#","id":"jobrow"+value,"class": "draggable_tr divw3row"})
+            .append($("<td/>")
+                    .append($("<div/>")
+                        .append($("<a/>")
+                            .attr({"href": '#','id': 'trashjob'+value})
+                            .addClass("fa fa-trash-o"))
+                        .append($("<span/>")
+                            .text(value)
+                            .addClass("pull-right"))),
         add_new_plugin_location_job_row("pluginid", value),
         add_new_plugin_location_job_row("addressid", value),
         $("<td/>").attr({"id": "commandid" + value,
                          "ondrop": "drop_command(event)",
-                         "ondragover": "allowDropCommand(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text(""))),
+                         "ondragover": "allowDropCommand(event)"})
+            .append($("<a/>")
+                .attr({"href": "#"})
+                .append($("<span/>")
+                    .text(""))),
         $("<td/>").attr({"id": "jobstatusid" + value})
     ));
 
     // W4 Rows
-    $(".W4BodyContent").append($("<tr/>").append(
-    $("<th/>").text(value),
-    $("<th/>").append($("<a/>").attr({'id': 'updateid'+value}).text("terminal" + value)),
-    $("<th/>").attr({"id": "updatestatusid" + value})
-    ));
+    $(".W4BodyContent")
+        .append($("<tr/>")
+            .append($("<th/>")
+                    .text(value),$("<th/>")
+                    .append($("<a/>")
+                        .attr({'id': 'updateid'+value})
+                        .text("terminal" + value)),
+    $("<th/>").attr({"id": "updatestatusid" + value})));
     $("#trashjob"+value).click(delete_job_from_w3);
 
 }
@@ -649,7 +691,10 @@ function hover_drop(){
         status_text = hover_object[0].children[4].innerText;
     }
     if (plugin_name_text && location_text && command_text != "" && status_text == false && exec_int != 1){
-        $("#jobstatusid"+hover_object_num).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
+        $("#jobstatusid"+hover_object_num)
+            .append($("<span/>")
+                .attr({"class": "label label-warning"})
+                .text("Preparing"));
     }
     if (hover_int != 0){
         drop_target(hover_object);
@@ -776,19 +821,31 @@ function set_w3_job_status(full_update=false){
 
         if(plugin_name_text && command_text && !(job_id in id_status_map) && exec_int != 1){
             $("#jobstatusid"+(j+1)).empty();
-            $("#jobstatusid"+(j+1)).append($("<span/>").attr({"class": "label label-Valid"}).text("Valid"));
+            $("#jobstatusid"+(j+1))
+                .append($("<span/>")
+                    .attr({"class": "label label-Valid"})
+                    .text("Valid"));
         } else if (job_id in id_status_map){
             var known_status = id_status_map[job_id];
             $("#jobstatusid"+(j+1)).empty();
-            $("#jobstatusid"+(j+1)).append($("<span/>").attr({"class": "label label-"+known_status}).text(known_status));
+            $("#jobstatusid"+(j+1))
+                .append($("<span/>")
+                    .attr({"class": "label label-"+known_status})
+                    .text(known_status));
             $("#updatestatusid"+(j+1)).empty();
-            $("#updatestatusid"+(j+1)).append($("<span/>").attr({"class": "label label-"+known_status}).text(known_status));
+            $("#updatestatusid"+(j+1))
+                .append($("<span/>")
+                    .attr({"class": "label label-"+known_status})
+                    .text(known_status));
             if (full_update){
                 status_change_update_dom(job_id, known_status);
             }
         } else {
             $("#jobstatusid"+(j+1)).empty();
-            $("#jobstatusid"+(j+1)).append($("<span/>").attr({"class": "label label-Invalid"}).text("Invalid"));
+            $("#jobstatusid"+(j+1))
+                .append($("<span/>")
+                    .attr({"class": "label label-Invalid"})
+                    .text("Invalid"));
             console.log("Status is done and plugin and command are filled up in the job row");
         }
     }
@@ -857,17 +914,29 @@ function prepare_jobs_list(){
         }
         var w3_status = w3_rows[j].children[4].innerText;
         if(w3_status == false){
-            $("#updatestatusid"+(j+1)).append($("<span/>").attr({"class": "label label-danger"}).text("Error"));
-            $("#jobstatusid"+(j+1)).append($("<span/>").attr({"class": "label label-danger"}).text("Error"));
+            $("#updatestatusid"+(j+1))
+                .append($("<span/>")
+                    .attr({"class": "label label-danger"})
+                    .text("Error"));
+            $("#jobstatusid"+(j+1))
+                .append($("<span/>")
+                    .attr({"class": "label label-danger"})
+                    .text("Error"));
             jobs.push({});
         } else if (w3_status == "Valid") {
             $(".gridSelect, #jobrow"+(j+1)).droppable({
                 disabled: true
             });
             $("#updatestatusid"+(j+1)).empty();
-            $("#updatestatusid"+(j+1)).append($("<span/>").attr({"class": "label label-"+INITIAL_JOB_STATUS}).text(INITIAL_JOB_STATUS));
+            $("#updatestatusid"+(j+1))
+                .append($("<span/>")
+                    .attr({"class": "label label-"+INITIAL_JOB_STATUS})
+                    .text(INITIAL_JOB_STATUS));
             $("#jobstatusid"+(j+1)).empty();
-            $("#jobstatusid"+(j+1)).append($("<span/>").attr({"class": "label label-"+INITIAL_JOB_STATUS}).text(INITIAL_JOB_STATUS));
+            $("#jobstatusid"+(j+1))
+                .append($("<span/>")
+                    .attr({"class": "label label-"+INITIAL_JOB_STATUS})
+                    .text(INITIAL_JOB_STATUS));
 
             var uid = j+1;
             var terminal = $("#updateid"+uid).parent();
@@ -944,27 +1013,45 @@ function render_job_output_to_page(job_guid, data){
     $("#updatecontent"+updateid).append(JSON.stringify(data['Content']));
     var download_link = $('<a>[Download]</a>');
     download_link.attr({"href": "/action/get_full_output_data/?job_id="+job_guid+"&job_number="+updateid});
-    $("#updateid"+updateid).append($("<div style='background-color: white'/>").append(download_link));
+    $("#updateid"+updateid)
+        .append($("<div style='background-color: white'/>")
+            .append(download_link));
     $("#updateid"+updateid).parent().css("background-color", "Fuchsia");
     $("#updatestatusid"+updateid).empty();
-    $("#updatestatusid"+updateid).append($("<span/>").attr({"class": "label label-Done"}).text("Done"));
+    $("#updatestatusid"+updateid)
+        .append($("<span/>")
+            .attr({"class": "label label-Done"})
+            .text("Done"));
     $("#jobstatusid"+updateid).empty();
-    $("#jobstatusid"+updateid).append($("<span/>").attr({"class": "label label-Done"}).text("Done"));
+    $("#jobstatusid"+updateid)
+        .append($("<span/>")
+            .attr({"class": "label label-Done"})
+            .text("Done"));
 }
 
 function render_job_output_timeout(job_guid){
     var updateid = id_reverse_map[job_guid];
     $("#updateid"+updateid).empty();
     $("#updateid"+updateid).attr({"class": ""});
-    $("#updateid"+updateid).append("No data to return at the moment :(");
-    $("#updateid"+updateid).parent().append($("<i/>").attr({"class": "fa fa-wrench", "onclick": "execute_sequence_output_retry('"+job_guid+"')"}));
+    $("#updateid"+updateid)
+        .append("No data to return at the moment :(");
+    $("#updateid"+updateid)
+        .parent()
+        .append($("<i/>")
+            .attr({"class": "fa fa-wrench", "onclick": "execute_sequence_output_retry('"+job_guid+"')"}));
     $("#updateid"+updateid).parent().css("background-color", "white");
     // W3 status
     $("#jobstatusid"+updateid).empty();
-    $("#jobstatusid"+updateid).append($("<span/>").attr({"class": "label label-Error"}).text("Error"));
+    $("#jobstatusid"+updateid)
+        .append($("<span/>")
+            .attr({"class": "label label-Error"})
+            .text("Error"));
     // W4 status
     $("#updatestatusid"+updateid).empty();
-    $("#updatestatusid"+updateid).append($("<span/>").attr({"class": "label label-Error"}).text("Error"));
+    $("#updatestatusid"+updateid)
+        .append($("<span/>")
+            .attr({"class": "label label-Error"})
+            .text("Error"));
 }
 
 function execute_sequence_output_retry(job_guid){
