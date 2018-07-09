@@ -312,7 +312,7 @@ def get_file(request, file_id):
     User downloads file
     :param request: user request
     :param file_id: file id from the ui -> url
-    :return:
+    :return: response
     """
     brain_data = get_brain_file(file_id)
     if brain_data:
