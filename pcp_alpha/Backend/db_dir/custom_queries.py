@@ -1,5 +1,7 @@
 import json
 import brain.queries
+from brain.binary import put_buffer, list_dir, get, delete
+import brain
 
 from .project_db import connect, rtdb
 
@@ -152,3 +154,55 @@ def load_jobs_state():
         output = rbx.table("UIW3").get(1).run(conn)
     return output
 
+
+def upload_file_to_brain(file_name, binary_file_obj):
+    """
+
+    :param file_name:
+    :param binary_file_obj:
+    :return:
+    """
+    outcome = put_buffer(file_name, binary_file_obj)
+    return outcome
+
+
+def del_file_upload_from_brain(file_id):
+    success = True
+    try:
+        delete(file_id)
+    except ValueError:
+        success = False
+    return success
+
+
+def get_file_uploads():
+    """
+        alias function
+    :return:
+    """
+    return get_brain_files()
+
+
+def get_brain_files():
+    """
+
+    :return: <list> of <str>
+    """
+    try:
+        response = list_dir()
+    except ValueError:
+        response = []
+    return response
+
+
+def get_brain_file(file_id):
+    """
+
+    :param file_id:
+    :return:
+    """
+    try:
+        response = get(file_id)
+    except ValueError:
+        response = None
+    return response

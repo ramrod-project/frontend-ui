@@ -8,7 +8,9 @@ var INITIAL_JOB_STATUS = "Ready";
 var inc = 0;
 var hover_int = 0;
 var sequences = {"1": new Set()};
+var sequence_starttime_map = {"1":  Math.floor((new Date().valueOf())/1000).toString()};
 var id_map = {};
+var id_status_map = {};
 var id_reverse_map = {};
 var ws_map = {};
 var active_sequence = "1";
@@ -16,7 +18,8 @@ var exec_int = 0;
 
 $(document).ready(function() {
     ws_map["status"] = open_websocket("status", status_change_ws_callback);
-
+    clear_new_jobs();
+    synchronize_job_sequence_tabs(active_sequence);
 	$("tr td.clickable-row-col1").click(get_commands_func);   // displays commands in w2
 	$("tr td.clickable-row-col2").click(get_commands_func);   // displays commands in w2
 	$("tr td.clickable-row-col3").click(get_commands_func);   // displays commands in w2
@@ -40,10 +43,33 @@ $(document).ready(function() {
         }
     });
 
-	$("#addjob_button").click(function(){
 
-	});
+
+    $("#job_sequence_timer").datetimepicker({dateFormat:"@",
+                                             minDate: new Date(),
+                                             onClose: function(dateText, inst) {
+                                                    $("#job_sequence_timer")[0].value = dateText; //TODO: Convert to Human Readable
+                                                    $("#job_sequence_timer")[0].title = dateText;
+                                                    sequence_starttime_map[active_sequence] = dateText;
+                                             },
+                                             onSelect: function (selectedDateTime){
+                                                var date_component = Number(selectedDateTime.substring(0,selectedDateTime.length-6))/1000;
+                                                var time_component = selectedDateTime.substring(selectedDateTime.length-5, selectedDateTime.length).split(':');
+                                                var time_in_sec = Number(time_component[0])*60*60 + Number(time_component[1])*60;
+                                                var final_time = Number(date_component) + Number(time_in_sec);
+                                                $("#job_sequence_timer")[0].value = final_time.toString();
+                                             }});
+    $("#job_sequence_timer").tooltip({
+                                  classes: {"ui-tooltip": "ui-corner-all ui-widget-shadow ui-state-error"},
+                                  items: 'span',
+                                   content: "Warning: Not yet supported, brain will support user-selected StartTime in Sprint 5",
+                                });
+
+
+
+
 	$("#addjob_button").click(add_new_job);               // add new job in w3
+    $("#addjob_top_button").click(add_new_job);               // add new job in w3
 	$("#clear_buttonid").click(clear_new_jobs);           // clear content in w3
 	$("#execute_button").click(execute_sequence);         // execute sequence button in 23
     $("#w3_drop_to_all").attr({"ondrop": "drop_command_to_multiple(event)",
@@ -104,6 +130,16 @@ function open_websocket(selection, callback) {
     return ws;
 }
 
+function status_change_update_dom(job_dom_id, status){
+    $("#jobstatusid"+job_dom_id).empty();
+    $("#jobstatusid"+job_dom_id).append($("<span/>").attr({"class": "label label-"+status}).text(status));
+    $("#updatestatusid"+job_dom_id).empty();
+    $("#updatestatusid"+job_dom_id).append($("<span/>").attr({"class": "label label-"+status}).text(status));
+    if (status == "Done"){
+        execute_sequence_output(id_map[job_dom_id]);
+    }
+}
+
 function status_change_ws_callback(message) {
     console.log(message);
     var data = null;
@@ -114,13 +150,8 @@ function status_change_ws_callback(message) {
             job_id = data.id;
             if (job_id in id_reverse_map) {
                 var job_dom_id = id_reverse_map[job_id];
-                $("#jobstatusid"+job_dom_id).empty();
-                $("#jobstatusid"+job_dom_id).append($("<span/>").attr({"class": "label label-"+data.status}).text(data.status));
-                $("#updatestatusid"+job_dom_id).empty();
-                $("#updatestatusid"+job_dom_id).append($("<span/>").attr({"class": "label label-"+data.status}).text(data.status));
-                if (data.status == "Done"){
-                    execute_sequence_output(job_id);
-                }
+                id_status_map[job_dom_id] = data.status;
+                status_change_update_dom(job_dom_id, data.status);
             }
         }
     }
@@ -254,17 +285,28 @@ function get_commands_func(){
 
                 //footer
                 $(".theContentArgument").empty();
-                $(".theContentArgument").append($("<a id='commandIdBuilder'/>").text($(this)[0].text))
-                $(".theContentArgument").append($("<div id='JSON_Command_DATA'/>").text(JSON.stringify(current_command_template)))
+                $(".theContentArgument").append($("<div id='commandIdBuilder'/>").text($(this)[0].text));
+                $(".theContentArgument").append($("<div id='JSON_Command_DATA'/>").addClass("text-muted small").text(JSON.stringify(current_command_template)));
                 for (var input_i = 0; input_i < current_command_template['Inputs'].length; input_i++){
                     //currently assumes input type is textbox
                     var new_input = document.createElement("input");
                     new_input.label = "argumentid_("+input_i+")";
                     new_input.id = "argumentid_"+input_i;
+                    new_input.title = current_command_template['Inputs'][input_i]["Tooltip"];
                     new_input.onchange = update_argument;
                     new_input.onkeyup = update_argument;
                     new_input.placeholder = current_command_template["Inputs"][input_i]['Value'];
-                    $("#commandIdBuilder").append($("<br>")).append(new_input);
+                    var new_input_holder = $("<div/>").append(new_input);
+                    $("#commandIdBuilder").append(new_input_holder);
+                    $("#"+new_input.id).tooltip({
+                                                  classes: {"ui-tooltip": "highlight"},
+                                                  items: 'span',
+                                                  position: {
+                                                    my: "left top",
+                                                    at: "right+5",
+                                                    collision: "none"
+                                                  }
+                                                });
                 }
             });
         },
@@ -314,11 +356,13 @@ function load_job_state(){
             active_sequence = data.active_sequence;
             id_map = data.id_map;
             id_reverse_map = data.id_reverse_map;
+            id_status_map = data.id_status_map;
             for(var i in sequences){
                 if ($('#jobq_tabs a[href="#jobq_'+i+'"]').length == 0){
                     add_sequence_tab(false);
                 }
             }
+            sequence_starttime_map = data.sequence_starttime_map; // must remain below add_sequence_tab loop
             set_w3_job_status();
             synchronize_job_sequence_tabs(active_sequence);
             synchronize_output_sequence_tabs(active_sequence);
@@ -351,6 +395,8 @@ function save_job_state(){
     var local_sequences = JSON.parse(JSON.stringify(sequences, json_set_to_list));
     var data_package = {"id_map": id_map,
                         "id_reverse_map": id_reverse_map,
+                        "id_status_map": id_status_map,
+                        "sequence_starttime_map": sequence_starttime_map,
                         "jobs": [],
                         "sequences": local_sequences,
                         "active_sequence": active_sequence};
@@ -397,9 +443,10 @@ function add_target_to_job_sc_button(){
     add_new_job();
     var row_id = $(this)[0].parentElement.parentElement.parentElement.id.substring(10, $(this)[0].id.length);
     var plugin_name_var = $("#name_tag_id"+row_id+" a span")[1].innerText;
-    var location_num_var = $("#address_tag_id"+row_id)[0].innerText
+    var location_num_var = $("#address_tag_id"+row_id)[0].innerText;
     $("#pluginid"+inc).append(plugin_name_var);
     $("#addressid"+inc).append(location_num_var);
+    set_w3_job_status();
 
 
 }
@@ -413,11 +460,13 @@ function add_sequence_tab(clear=true){
     if (clear){
         sequences[next_tab] = new Set();
     }
-    $('#new_jobq_button').before('<li onclick="synchronize_job_sequence_tabs('+next_tab+')"><a href="#jobq_'+next_tab+'" data-toggle="tab">'+next_tab+'</a></li>');
+    var new_tab_start_time =  Math.floor((new Date().valueOf()) / 1000);
+    sequence_starttime_map[next_tab] = new_tab_start_time.toString();
+    $('#new_jobq_button').before('<li id="jobB_'+next_tab+'" onclick="synchronize_job_sequence_tabs('+next_tab+')"><a href="#jobq_'+next_tab+'" data-toggle="tab">'+next_tab+'</a></li>');
     $('#jobq_content').append('<div class="tab-pane" id="jobq_'+next_tab+'"></div>');
     console.warn("adding sequence ");
     //ADD THE OUTPUT TAB TOO!
-    var output_tab = $("#output_tabs").append('<li onclick="synchronize_output_sequence_tabs('+next_tab+')"><a href="#outq_'+next_tab+'" data-toggle="tab">'+next_tab+'</a></li>');
+    var output_tab = $("#output_tabs").append('<li id="outB_'+next_tab+'" onclick="synchronize_output_sequence_tabs('+next_tab+')"><a href="#outq_'+next_tab+'" data-toggle="tab">'+next_tab+'</a></li>');
     $('#outq_content').append('<div class="tab-pane" id="outq_'+next_tab+'"></div>');
     $("#outq_"+next_tab).tab('show');
     $("#jobq_"+next_tab).tab('show')
@@ -426,6 +475,7 @@ function synchronize_job_sequence_tabs(tab_id){
     active_sequence = tab_id;
     var other_tab = $('#output_tabs a[href="#outq_'+tab_id+'"]');
     other_tab.tab('show');
+    $("#job_sequence_timer")[0].value = sequence_starttime_map[tab_id];
     synchronize_sequence_tab_rows(tab_id);
 }
 function synchronize_output_sequence_tabs(tab_id){
@@ -466,51 +516,36 @@ function add_new_job(){
     var value = $("#addjob_button")[0].value;
     sequences[active_sequence].add(value);
     // content for w3
-    if(value == 1) {
-        $(".thirdBoxContent").append($("<tr/>").attr({"role": "row",
-                                                      "onclick": "#",
-                                                      "id":"jobrow" + value,
-                                                      "class": "draggable_tr divw3row"}).append(
-            $("<td/>").append($("<a/>").attr({"href": "#"}).append($("<span/>").text("1"))),
-            add_new_plugin_location_job_row("pluginid", value),
-            add_new_plugin_location_job_row("addressid", value),
-            $("<td/>").attr({"id": "commandid" + value,
-                             "ondrop": "drop_command(event)",
-                             "ondragover": "allowDropCommand(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text(""))),
-            $("<td/>").attr({"id": "jobstatusid" + value})
-        ));
+    $(".thirdBoxContent").append($("<tr/>").attr({"role": "row",
+                                                  "onclick": "#",
+                                                  "id":"jobrow"+value,
+                                                  "class": "draggable_tr divw3row"}).append(
+        $("<td/>").append($("<div/>").append($("<a/>").attr({"href": '#',
+                                                             'id': 'trashjob'+value}).addClass("fa fa-trash-o")).append($("<span/>").text(value).addClass("pull-right"))),
+        add_new_plugin_location_job_row("pluginid", value),
+        add_new_plugin_location_job_row("addressid", value),
+        $("<td/>").attr({"id": "commandid" + value,
+                         "ondrop": "drop_command(event)",
+                         "ondragover": "allowDropCommand(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text(""))),
+        $("<td/>").attr({"id": "jobstatusid" + value})
+    ));
 
-        // W4 Rows
-        $(".W4BodyContent").append($("<tr/>").append(
-        $("<th/>").text("1"),
-        $("<th/>").append($("<a/>").attr({'id': 'updateid1'}).text("terminal1")),
-        $("<th/>").attr({"id": "updatestatusid" + value})
-        ));
+    // W4 Rows
+    $(".W4BodyContent").append($("<tr/>").append(
+    $("<th/>").text(value),
+    $("<th/>").append($("<a/>").attr({'id': 'updateid'+value}).text("terminal" + value)),
+    $("<th/>").attr({"id": "updatestatusid" + value})
+    ));
+    $("#trashjob"+value).click(delete_job_from_w3);
 
-    }
-    else {
-        $(".thirdBoxContent").append($("<tr/>").attr({"role": "row",
-                                                      "onclick": "#",
-                                                      "id":"jobrow"+value,
-                                                      "class": "draggable_tr divw3row"}).append(
-            $("<td/>").append($("<a/>").attr({"href": "#"}).append($("<span/>").text(value))),
-            add_new_plugin_location_job_row("pluginid", value),
-            add_new_plugin_location_job_row("addressid", value),
-            $("<td/>").attr({"id": "commandid" + value,
-                             "ondrop": "drop_command(event)",
-                             "ondragover": "allowDropCommand(event)"}).append($("<a/>").attr({"href": "#"}).append($("<span/>").text(""))),
-            $("<td/>").attr({"id": "jobstatusid" + value})
-        ));
-
-        // W4 Rows
-        $(".W4BodyContent").append($("<tr/>").append(
-        $("<th/>").text(value),
-        $("<th/>").append($("<a/>").attr({'id': 'updateid'+value}).text("terminal" + value)),
-        $("<th/>").attr({"id": "updatestatusid" + value})
-        ));
-    }
-
-
+}
+function delete_job_from_w3(e){
+    var source = event.target || event.srcElement;
+    var job_item = source.id.substring(8,source.id.length);
+    sequences[active_sequence].delete(job_item);
+    $("#jobrow"+job_item).hide();
+    synchronize_output_sequence_tabs(active_sequence);
+    var dan = "ok";
 }
 
 // Clear job content in w3
@@ -518,11 +553,23 @@ function clear_new_jobs(){
     $(".thirdBoxContent").empty();
     $("#W4Rows").empty();
     id_reverse_map = {};
-    id_map = {}
+    id_map = {};
+    id_status_map = {};
     for (var key in sequences){
         sequences[key] = new Set();
+        var seq_button = $("#jobB_"+key);
+        if (seq_button.length > 0){
+            seq_button.remove();
+        }
+        var out_button = $("#outB_"+key);
+        if (out_button.length > 0){
+            out_button.remove();
+        }
     }
     inc = 0;
+    active_sequence = "1";
+    var new_default_start_time = Math.floor((new Date().valueOf())/1000);
+    sequence_starttime_map = {"1": new_default_start_time.toString()};
     $("#addjob_button")[0].value = 0;
 }
 
@@ -671,7 +718,9 @@ function job_row_is_mutable(job_row){
     if (Number(job_row) <= Number(num_jobs)){
         var current_status = $("#jobstatusid"+job_row+" span");
         result =  ((current_status.length == 0) ||
-                   (current_status.length >=1 && ( current_status[0].innerText == "Preparing" ||
+                   (current_status.length >=1 && ( current_status[0].innerText == "Valid" ||
+                                                   current_status[0].innerText == "Invalid" ||
+                                                   current_status[0].innerText == "Preparing" ||
                                                    current_status[0].innerText == "Stopped"  ||
                                                    current_status[0].innerText == "Error")));
     }
@@ -712,8 +761,7 @@ function drop_command(ev) {
     drop_command_into_hole(command, command_json, command_hole, row_id);
     set_w3_job_status();
 }
-function set_w3_job_status(){
-//    console.log("set_w3_job_status");  // debug
+function set_w3_job_status(full_update=false){
     var num_jobs = $("#addjob_button")[0].value;
     var w3_rows = $("#third_box_content tr");
 
@@ -723,22 +771,27 @@ function set_w3_job_status(){
         var location_text = what.children[2].innerText;
         var command_text = what.children[3].innerText;
         var w3_status = what.children[4].innerText;
-        var error_msg = 0;
 
+        var job_id = j+1;
 
-        if(plugin_name_text && command_text && w3_status != "Done" && exec_int != 1){
-            $("#jobstatusid"+(j+1)).empty()
-
-            $("#jobstatusid"+(j+1)).append($("<span/>").attr({"class": "label label-warning"}).text("Preparing"));
+        if(plugin_name_text && command_text && !(job_id in id_status_map) && exec_int != 1){
+            $("#jobstatusid"+(j+1)).empty();
+            $("#jobstatusid"+(j+1)).append($("<span/>").attr({"class": "label label-Valid"}).text("Valid"));
+        } else if (job_id in id_status_map){
+            var known_status = id_status_map[job_id];
+            $("#jobstatusid"+(j+1)).empty();
+            $("#jobstatusid"+(j+1)).append($("<span/>").attr({"class": "label label-"+known_status}).text(known_status));
+            $("#updatestatusid"+(j+1)).empty();
+            $("#updatestatusid"+(j+1)).append($("<span/>").attr({"class": "label label-"+known_status}).text(known_status));
+            if (full_update){
+                status_change_update_dom(job_id, known_status);
+            }
         } else {
+            $("#jobstatusid"+(j+1)).empty();
+            $("#jobstatusid"+(j+1)).append($("<span/>").attr({"class": "label label-Invalid"}).text("Invalid"));
             console.log("Status is done and plugin and command are filled up in the job row");
-//            error_msg = 1;
         }
     }
-    //
-//    if (error_msg == 1){
-//
-//    }
 }
 
 
@@ -767,7 +820,9 @@ function drop_command_into_hole(command, command_json, command_td, row_id){
 //    console.log("drop_command_into_hole");  // debug
     var current_status = $("#jobstatusid"+row_id+" span");
     if ((current_status.length == 0) ||
-        (current_status.length >=1 && command_td.length == 1 && ( current_status[0].innerText == "Preparing" ||
+        (current_status.length >=1 && command_td.length == 1 && ( current_status[0].innerText == "Invalid" ||
+                                                                  current_status[0].innerText == "Valid" ||
+                                                                  current_status[0].innerText == "Preparing" ||
                                                                   current_status[0].innerText == "Stopped"  ||
                                                                   current_status[0].innerText == "Error")
         )
@@ -805,7 +860,7 @@ function prepare_jobs_list(){
             $("#updatestatusid"+(j+1)).append($("<span/>").attr({"class": "label label-danger"}).text("Error"));
             $("#jobstatusid"+(j+1)).append($("<span/>").attr({"class": "label label-danger"}).text("Error"));
             jobs.push({});
-        } else if (w3_status == "Preparing") {
+        } else if (w3_status == "Valid") {
             $(".gridSelect, #jobrow"+(j+1)).droppable({
                 disabled: true
             });
@@ -824,8 +879,9 @@ function prepare_jobs_list(){
                                      "Location": location,
                                      "Port":  0,},
                        "Status": INITIAL_JOB_STATUS,
-                       "StartTime": 0,
+                       "StartTime": Number(sequence_starttime_map[active_sequence])+(j/1000),
                        "JobCommand": command};
+            id_status_map[uid] = INITIAL_JOB_STATUS;
             jobs.push(job);
         } else {
             jobs.push({});
@@ -887,7 +943,7 @@ function render_job_output_to_page(job_guid, data){
     $('<pre id="updatecontent'+updateid+'"></pre>').appendTo("#updateid"+updateid);
     $("#updatecontent"+updateid).append(JSON.stringify(data['Content']));
     var download_link = $('<a>[Download]</a>');
-    download_link.attr({"href": "/action/get_full_output_data/?job_id="+job_guid});
+    download_link.attr({"href": "/action/get_full_output_data/?job_id="+job_guid+"&job_number="+updateid});
     $("#updateid"+updateid).append($("<div style='background-color: white'/>").append(download_link));
     $("#updateid"+updateid).parent().css("background-color", "Fuchsia");
     $("#updatestatusid"+updateid).empty();

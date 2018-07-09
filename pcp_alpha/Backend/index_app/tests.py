@@ -1,7 +1,7 @@
 import pytest
 from brain import connect
 from pcp_alpha.Backend.db_dir.project_db import check_dev_env, rtdb
-from .views import get_target_list
+from .views import get_index_data
 
 
 @pytest.mark.incremental
@@ -28,5 +28,5 @@ class TestIndex(object):
 
         if check_dev_env() is not None:
             request = rf.get(home_url)
-            response = get_target_list(request)
+            response = get_index_data(request)
             assert response.status_code == 200
