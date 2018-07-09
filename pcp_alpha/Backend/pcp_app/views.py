@@ -285,7 +285,8 @@ def file_upload_list(request):
 
 def del_file_from_list(request, file_id):
     """
-    pcp-328
+    Delete's file from Brain.Files and
+    in the user interface as well
     :param request:
     :param file_id:
     :return:
@@ -298,7 +299,7 @@ def del_file_from_list(request, file_id):
 
 def get_file_listing(request):
     """
-
+    Populates file list to ui
     :param request: user request
     :return:
     """
@@ -308,7 +309,7 @@ def get_file_listing(request):
 
 def get_file(request, file_id):
     """
-
+    User downloads file
     :param request: user request
     :param file_id: file id from the ui -> url
     :return:
