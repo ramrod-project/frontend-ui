@@ -449,7 +449,7 @@ class TestDataHandling(object):
         response = TestDataHandling.post_test(url_var, {},
                                               val_edit_target_form,
                                               rf, target_id=target_key)
-        assert response.status_code == 200
+        assert response.status_code == 302
 
     @staticmethod
     def test_edit_target_delete_get(rf):
@@ -478,7 +478,7 @@ class TestDataHandling(object):
         with pytest.raises(json.JSONDecodeError):
             post_data = json.loads(str(SAMPLE_FILE_ID))
             response = TestDataHandling.post_test(url_var, post_data, file_upload_list, rf)
-            assert response.status_code == 302
+            assert response.status_code == 200
             response = TestDataHandling.post_test(url_var, {}, file_upload_list, rf)
             assert response.status_code == 200
 
@@ -495,7 +495,7 @@ class TestDataHandling(object):
         with pytest.raises(json.JSONDecodeError):
             current_state = json.loads(str(post_data))
             response = TestDataHandling.post_test(url_var, current_state, persist_job_state, rf)
-            assert response.status_code == 302
+            assert response.status_code == 200
             response = TestDataHandling.post_test(url_var, {}, persist_job_state, rf)
             assert response.status_code == 200
 
@@ -532,7 +532,7 @@ class TestDataHandling(object):
         with pytest.raises(json.JSONDecodeError):
             current_state = json.loads(str(post_data))
             response = TestDataHandling.post_test(url_var, current_state, persist_job_state, rf)
-            assert response.status_code == 302
+            assert response.status_code == 200
             response = TestDataHandling.post_test(url_var, {}, persist_job_state, rf)
             assert response.status_code == 200
 
