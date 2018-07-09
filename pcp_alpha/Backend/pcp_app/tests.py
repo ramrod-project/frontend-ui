@@ -14,7 +14,8 @@ from pcp_alpha.Backend.db_dir.custom_queries import get_specific_brain_targets, 
 from pcp_alpha.Backend.pcp_app.views import get_commands_controller, \
     execute_sequence_controller, w4_output_controller, w4_output_controller_download, \
     new_target_form, val_target_form, val_edit_target_form, edit_target_form, \
-    delete_specific_target, file_upload_list, persist_job_state, load_job_state
+    delete_specific_target, file_upload_list, persist_job_state, load_job_state, \
+    del_file_from_list, get_file_listing, get_file
 
 ECHO_JOB_ID = str(uuid4())
 NOW = time()
@@ -44,6 +45,7 @@ SAMPLE_OUTPUT = {
     "OutputJob": SAMPLE_JOB,
     "Content": "Sample output string"
 }
+SAMPLE_FILE_ID = "test.txt"
 
 
 @pytest.fixture(scope="function")
@@ -473,6 +475,12 @@ class TestDataHandling(object):
         url_var = "file_upload/"
         response = TestDataHandling.get_test(url_var, file_upload_list, rf)
         assert response.status_code == 200
+        with pytest.raises(json.JSONDecodeError):
+            post_data = json.loads(str(SAMPLE_FILE_ID))
+            response = TestDataHandling.post_test(url_var, post_data, file_upload_list, rf)
+            assert response.status_code == 302
+            response = TestDataHandling.post_test(url_var, {}, file_upload_list, rf)
+            assert response.status_code == 302
 
     @staticmethod
     def test_job_state(rf):
@@ -537,4 +545,39 @@ class TestDataHandling(object):
         """
         url_var = "action/load_state/"
         response = TestDataHandling.get_test(url_var, load_job_state, rf)
+        assert response.status_code == 200
+
+    @staticmethod
+    def test_del_file_from_list(rf):
+        """
+        This test imitates deleting file from file list
+        :param rf:
+        :return:
+        """
+        url_var = "del_file_upload/{}/".format(SAMPLE_FILE_ID)
+        response = TestDataHandling.get_test(url_var, del_file_from_list, rf, target_id=SAMPLE_FILE_ID)
+        assert response.status_code == 200
+
+    @staticmethod
+    def test_get_file_list(rf):
+        """
+        This test imitates populating a list of
+        files to the ui from Brain.Files
+        :param rf:
+        :return:
+        """
+        url_var = "file_listing/"
+        response = TestDataHandling.get_test(url_var, get_file_listing, rf)
+        assert response.status_code == 200
+
+    @staticmethod
+    def test_get_file(rf):
+        """
+        This test imitates getting a file from
+        Brain.Files
+        :param rf:
+        :return:
+        """
+        url_var = "file_download/{}/".format(SAMPLE_FILE_ID)
+        response = TestDataHandling.get_test(url_var, get_file, rf, target_id=SAMPLE_FILE_ID)
         assert response.status_code == 200
