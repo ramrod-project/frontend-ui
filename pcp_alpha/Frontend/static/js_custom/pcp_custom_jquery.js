@@ -8,6 +8,7 @@ var INITIAL_JOB_STATUS = "Ready";
 var inc = 0;
 var hover_int = 0;
 var sequences = {"1": new Set()};
+var sequence_starttime_map = {"1":  Math.floor((new Date().valueOf())/1000).toString()};
 var id_map = {};
 var id_reverse_map = {};
 var ws_map = {};
@@ -16,7 +17,8 @@ var exec_int = 0;
 
 $(document).ready(function() {
     ws_map["status"] = open_websocket("status", status_change_ws_callback);
-
+    clear_new_jobs();
+    synchronize_job_sequence_tabs(active_sequence);
 	$("tr td.clickable-row-col1").click(get_commands_func);   // displays commands in w2
 	$("tr td.clickable-row-col2").click(get_commands_func);   // displays commands in w2
 	$("tr td.clickable-row-col3").click(get_commands_func);   // displays commands in w2
@@ -40,9 +42,31 @@ $(document).ready(function() {
         }
     });
 
-	$("#addjob_button").click(function(){
 
-	});
+
+    $("#job_sequence_timer").datetimepicker({dateFormat:"@",
+                                             minDate: new Date(),
+                                             onClose: function(dateText, inst) {
+                                                    $("#job_sequence_timer")[0].value = dateText; //TODO: Convert to Human Readable
+                                                    $("#job_sequence_timer")[0].title = dateText;
+                                                    sequence_starttime_map[active_sequence] = dateText;
+                                             },
+                                             onSelect: function (selectedDateTime){
+                                                var date_component = Number(selectedDateTime.substring(0,selectedDateTime.length-6))/1000;
+                                                var time_component = selectedDateTime.substring(selectedDateTime.length-5, selectedDateTime.length).split(':');
+                                                var time_in_sec = Number(time_component[0])*60*60 + Number(time_component[1])*60;
+                                                var final_time = Number(date_component) + Number(time_in_sec);
+                                                $("#job_sequence_timer")[0].value = final_time.toString();
+                                             }});
+    $("#job_sequence_timer").tooltip({
+                                  classes: {"ui-tooltip": "ui-corner-all ui-widget-shadow ui-state-error"},
+                                  items: 'span',
+                                   content: "Warning: Not yet supported, brain will support user-selected StartTime in Sprint 5",
+                                });
+
+
+
+
 	$("#addjob_button").click(add_new_job);               // add new job in w3
     $("#addjob_top_button").click(add_new_job);               // add new job in w3
 	$("#clear_buttonid").click(clear_new_jobs);           // clear content in w3
@@ -256,7 +280,7 @@ function get_commands_func(){
                 //footer
                 $(".theContentArgument").empty();
                 $(".theContentArgument").append($("<div id='commandIdBuilder'/>").text($(this)[0].text));
-                $(".theContentArgument").append($("<div id='JSON_Command_DATA'/>").text(JSON.stringify(current_command_template)));
+                $(".theContentArgument").append($("<div id='JSON_Command_DATA'/>").addClass("text-muted small").text(JSON.stringify(current_command_template)));
                 for (var input_i = 0; input_i < current_command_template['Inputs'].length; input_i++){
                     //currently assumes input type is textbox
                     var new_input = document.createElement("input");
@@ -331,6 +355,7 @@ function load_job_state(){
                     add_sequence_tab(false);
                 }
             }
+            sequence_starttime_map = data.sequence_starttime_map; // must remain below add_sequence_tab loop
             set_w3_job_status();
             synchronize_job_sequence_tabs(active_sequence);
             synchronize_output_sequence_tabs(active_sequence);
@@ -363,6 +388,7 @@ function save_job_state(){
     var local_sequences = JSON.parse(JSON.stringify(sequences, json_set_to_list));
     var data_package = {"id_map": id_map,
                         "id_reverse_map": id_reverse_map,
+                        "sequence_starttime_map": sequence_starttime_map,
                         "jobs": [],
                         "sequences": local_sequences,
                         "active_sequence": active_sequence};
@@ -425,6 +451,8 @@ function add_sequence_tab(clear=true){
     if (clear){
         sequences[next_tab] = new Set();
     }
+    var new_tab_start_time =  Math.floor((new Date().valueOf()) / 1000);
+    sequence_starttime_map[next_tab] = new_tab_start_time.toString();
     $('#new_jobq_button').before('<li id="jobB_'+next_tab+'" onclick="synchronize_job_sequence_tabs('+next_tab+')"><a href="#jobq_'+next_tab+'" data-toggle="tab">'+next_tab+'</a></li>');
     $('#jobq_content').append('<div class="tab-pane" id="jobq_'+next_tab+'"></div>');
     console.warn("adding sequence ");
@@ -438,6 +466,7 @@ function synchronize_job_sequence_tabs(tab_id){
     active_sequence = tab_id;
     var other_tab = $('#output_tabs a[href="#outq_'+tab_id+'"]');
     other_tab.tab('show');
+    $("#job_sequence_timer")[0].value = sequence_starttime_map[tab_id];
     synchronize_sequence_tab_rows(tab_id);
 }
 function synchronize_output_sequence_tabs(tab_id){
@@ -515,7 +544,8 @@ function clear_new_jobs(){
     $(".thirdBoxContent").empty();
     $("#W4Rows").empty();
     id_reverse_map = {};
-    id_map = {}
+    id_map = {};
+
     for (var key in sequences){
         sequences[key] = new Set();
         var seq_button = $("#jobB_"+key);
@@ -524,6 +554,9 @@ function clear_new_jobs(){
         }
     }
     inc = 0;
+    active_sequence = "1";
+    var new_default_start_time = Math.floor((new Date().valueOf())/1000);
+    sequence_starttime_map = {"1": new_default_start_time.toString()};
     $("#addjob_button")[0].value = 0;
 }
 
@@ -825,7 +858,7 @@ function prepare_jobs_list(){
                                      "Location": location,
                                      "Port":  0,},
                        "Status": INITIAL_JOB_STATUS,
-                       "StartTime": 0,
+                       "StartTime": Number(sequence_starttime_map[active_sequence])+(j/1000),
                        "JobCommand": command};
             jobs.push(job);
         } else {
