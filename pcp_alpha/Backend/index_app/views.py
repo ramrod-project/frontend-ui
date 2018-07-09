@@ -9,8 +9,6 @@ def get_index_data(request):
     :param request: user request
     :return: explained above
     """
-    for items in get_file_uploads():
-        print(items)
     return render(request,
                   'index_app/base_page.html',
                   context={'host_dict': get_brain_targets(),

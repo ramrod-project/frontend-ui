@@ -299,7 +299,7 @@ def del_file_from_list(request, file_id):
 def get_file_listing(request):
     """
 
-    :param request:
+    :param request: user request
     :return:
     """
     json_return = get_brain_files()
@@ -309,8 +309,8 @@ def get_file_listing(request):
 def get_file(request, file_id):
     """
 
-    :param request:
-    :param file_id:
+    :param request: user request
+    :param file_id: file id from the ui -> url
     :return:
     """
     brain_data = get_brain_file(file_id)
