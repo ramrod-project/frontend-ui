@@ -1,6 +1,5 @@
 // using dropzone.js
 
-
 var dom_filename_map = {};
 
 $(document).ready(function() {
