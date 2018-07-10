@@ -15,6 +15,10 @@ var id_reverse_map = {};
 var ws_map = {};
 var active_sequence = "1";
 var exec_int = 0;
+var testing_aleks1,
+    testing_aleks2,
+    testing_aleks3,
+    testing_aleks4;
 
 $(document).ready(function() {
     ws_map["status"] = open_websocket("status", status_change_ws_callback);
@@ -25,7 +29,7 @@ $(document).ready(function() {
 	$("tr td.clickable-row-col3").click(get_commands_func);   // displays commands in w2
 	$("tr td span a.btn-linkedin").click(add_target_to_job_sc_button);  // target to job shortcut button
 
-	var row_selection = $('#target_table').DataTable({  //for w1+w3
+	var target_row_selection = $('#target_table').DataTable({  //for w1+w3
 	    searching: false,
 	    paging: false,
 	    bInfo: false,
@@ -33,7 +37,7 @@ $(document).ready(function() {
         select: true                                    // highlight target row in w1
 	});
 
-    row_selection.on('select', function(e, dt, type, indexes) {  // user clicks on target row to start drag
+    target_row_selection.on('select', function(e, dt, type, indexes) {  // user clicks on target row to start drag
         var selected_var = $(".gridSelect tbody tr.selected");
         if(selected_var.length > 0){
             console.log("draggable object for more than one object");
@@ -248,6 +252,7 @@ function get_commands_func(){
     var row_id = $(this)[0].parentElement.id.substring(10, $(this)[0].id.length);
     var plugin_name_var = $("#name_tag_id"+row_id+" a span")[1].innerText;
     var check_content_var = false;
+    var quick_action_button;
 
     $.ajax({
         type: "GET",
@@ -320,6 +325,11 @@ function get_commands_func(){
                     .append($("<div id='JSON_Command_DATA'/>")
                         .addClass("text-muted small")
                         .text(JSON.stringify(current_command_template)));
+                quick_action_button = $("<a/>")
+                        .attr({"href": "#",
+                            "id": "add_command_to_job_id",
+                            "class":"btn btn-social-icon btn-linkedin btn-xs pull-right"})
+                        .append($("<i/>").attr({"id": "add_command_to_job_id2" ,"class": "fa fa-tasks"}));
                 for (var input_i = 0; input_i < current_command_template['Inputs'].length; input_i++){
                     //currently assumes input type is textbox
                     var new_input = document.createElement("input");
@@ -329,7 +339,7 @@ function get_commands_func(){
                     new_input.onchange = update_argument;
                     new_input.onkeyup = update_argument;
                     new_input.placeholder = current_command_template["Inputs"][input_i]['Value'];
-                    var new_input_holder = $("<div/>").append(new_input);
+                    var new_input_holder = $("<div/>").append(new_input).append(quick_action_button);
                     $("#commandIdBuilder").append(new_input_holder);
                     $("#"+new_input.id).tooltip({
                                                   classes: {"ui-tooltip": "highlight"},
@@ -341,6 +351,7 @@ function get_commands_func(){
                                                   }
                                                 });
                 }
+                $("a#add_command_to_job_id").click(add_command_to_job_sc_button);  // command to job shortcut button
             });
         },
         error: function (data) {
@@ -482,6 +493,17 @@ function add_target_to_job_sc_button(){
     set_w3_job_status();
 
 
+}
+
+function add_command_to_job_sc_button(){
+    var job_command_row,
+        command_temp_str;
+    add_new_job();  // new row in W3
+    job_command_row = $("tr td#commandid"+inc);  // new job row object
+    command_temp_str = JSON.stringify(current_command_template);  // command template as a string
+    // adding command template to W3 in command column
+    drop_command_into_hole(current_command_template, command_temp_str, job_command_row, ""+inc);
+    set_w3_job_status();  // setting w3 job status
 }
 
 function hide_current_sequence(e){
