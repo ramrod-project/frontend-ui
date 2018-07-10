@@ -72,6 +72,12 @@ $(document).ready(function() {
                                    content: "Warning: Not yet supported, brain will support user-selected StartTime in Sprint 5",
                                 });
 
+    $("#searchCommand_id").tooltip({
+                              classes: {"ui-tooltip": "ui-corner-all ui-widget-shadow ui-state-error"},
+                              items: 'span',
+                               content: "Warning: Not yet supported, will be supported in Sprint 5",
+                            });
+
 
 
 
