@@ -38,6 +38,9 @@ $(document).ready(function() {
 	    searching: false,
 	    paging: false,
 	    bInfo: false,
+        columnDefs: [
+            { type: 'natural-nohtml', targets: [0, 1] }
+        ],
         rowReorder: true,
         select: true                                    // highlight target row in w1
 	});
