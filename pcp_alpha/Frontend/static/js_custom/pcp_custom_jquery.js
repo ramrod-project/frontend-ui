@@ -517,14 +517,12 @@ function add_command_to_job_sc_button(){
     command_temp_str = JSON.stringify(current_command_template);  // command template as a string
 
     if (inc === 0 || !$(".gridSelect2 tbody tr").hasClass("selected")){
-        console.log("inc === 0");
         add_new_job();  // new row in W3
         job_command_row = $("tr td#commandid"+inc);  // new job row object
 
         // adding command template to W3 in command column
         drop_command_into_hole(current_command_template, command_temp_str, job_command_row, ""+inc);
     } else if (inc !== 0 && $(".gridSelect2 tbody tr").hasClass("selected")){
-        console.log("inc !== 0");
         // highlighted row data
         selected_row = $(".gridSelect2 tbody tr.selected");
         selected_row_num = selected_row[0].children[0].innerText;
