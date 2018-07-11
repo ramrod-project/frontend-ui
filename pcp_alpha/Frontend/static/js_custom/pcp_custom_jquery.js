@@ -15,12 +15,17 @@ var id_reverse_map = {};
 var ws_map = {};
 var active_sequence = "1";
 var exec_int = 0;
-var testing_aleks1,
-    testing_aleks2,
-    testing_aleks3,
-    testing_aleks4;
 
 $(document).ready(function() {
+    $('#job_table').DataTable({
+	    searching: false,
+	    paging: false,
+	    bInfo: false,
+        rowReorder: true,
+        select: true
+    });
+    $(".dataTables_empty").empty();
+
     ws_map["status"] = open_websocket("status", status_change_ws_callback);
     clear_new_jobs();
     synchronize_job_sequence_tabs(active_sequence);
@@ -217,7 +222,7 @@ Functions down below are for w2
 */
 
 // List of commands based off of plugin name
-var current_command_template = {}
+var current_command_template = {};
 
 function filter_w1(){
     var filter_content,
@@ -502,13 +507,33 @@ function add_target_to_job_sc_button(){
 }
 
 function add_command_to_job_sc_button(){
+    // console.log("add_command_to_job_sc_button");
     var job_command_row,
-        command_temp_str;
-    add_new_job();  // new row in W3
-    job_command_row = $("tr td#commandid"+inc);  // new job row object
+        command_temp_str,
+        selected_row,
+        selected_row_num,
+        selected_job_command_row;
+
     command_temp_str = JSON.stringify(current_command_template);  // command template as a string
-    // adding command template to W3 in command column
-    drop_command_into_hole(current_command_template, command_temp_str, job_command_row, ""+inc);
+
+    if (inc === 0 || !$(".gridSelect2 tbody tr").hasClass("selected")){
+        console.log("inc === 0");
+        add_new_job();  // new row in W3
+        job_command_row = $("tr td#commandid"+inc);  // new job row object
+
+        // adding command template to W3 in command column
+        drop_command_into_hole(current_command_template, command_temp_str, job_command_row, ""+inc);
+    } else if (inc !== 0 && $(".gridSelect2 tbody tr").hasClass("selected")){
+        console.log("inc !== 0");
+        // highlighted row data
+        selected_row = $(".gridSelect2 tbody tr.selected");
+        selected_row_num = selected_row[0].children[0].innerText;
+        selected_job_command_row = $("tr td#commandid"+selected_row_num);
+
+        // adding command template to W3 in command column
+        drop_command_into_hole(current_command_template, command_temp_str, selected_job_command_row, selected_row_num);
+    }
+
     set_w3_job_status();  // setting w3 job status
 }
 
@@ -606,6 +631,17 @@ function add_new_job(){
         $("<td/>").attr({"id": "jobstatusid" + value})
     ));
 
+    $('#job_table').on( 'click', 'tr#jobrow'+inc, function () {
+        if ($(this).hasClass('selected')) {
+            $(this).removeClass('selected');
+        }
+        else {
+            $('#job_table tbody tr.selected').removeClass('selected');
+            $(this).addClass('selected');
+        }
+    } );
+
+
     // W4 Rows
     $(".W4BodyContent")
         .append($("<tr/>")
@@ -658,8 +694,8 @@ function clear_new_jobs(){
 
 // DRAG
 function drag_target(){
-//    console.log("drag_target");  //debug
-	$(".gridSelect tbody tr, .gridSelect2 tbody tr").draggable({
+   // console.log("drag_target");
+	$(".gridSelect tbody tr").draggable({
 	    helper: function(){
 	        var selected_var = $(".gridSelect tbody tr.selected");
             var container_to_drag;
@@ -684,13 +720,15 @@ function drag_target(){
 	    },
 	    revert: function(){
 	        hide_drop_all();
+	        hover_int = 0;
 	        return true;
         }
 	});
 }
 function display_drop_all(){
+    // console.log("display_drop_all");
     $("#w3_drop_target_to_all").css("display", "");
-    hover_int = 1;
+    // hover_int = 1;
 }
 function hide_drop_all(){
     $("#w3_drop_target_to_all").css("display", "none");
@@ -712,7 +750,7 @@ function hover_leave(){
 }
 
 function hover_drop(){
-//    console.log("hover_drop");
+    // console.log("hover_drop");
     hover_int = 1;
     var hover_object = $(this);
     var hover_object_id = hover_object[0].id;
@@ -737,12 +775,13 @@ function hover_drop(){
         drop_target(hover_object);
     } else {
         console.log("not dragging the object over a validated job row");
+        hover_int = 0;
     }
 }
 
 // Drop target to W3
 function drop_target(hover_object){
-//    console.log("drop_target");  // debug
+    // console.log("drop_target");  // debug
     // hover_object is the row that is being hovered over
     // selected_var.length == # of targets dragging
     // hover_object.nextUntil().length == # of rows of every sequence in W3 - 1
@@ -911,7 +950,7 @@ function drop_command_to_multiple(ev) {
 }
 
 function drop_command_into_hole(command, command_json, command_td, row_id){
-//    console.log("drop_command_into_hole");  // debug
+   // console.log("drop_command_into_hole");
     var current_status = $("#jobstatusid"+row_id+" span");
     if ((current_status.length == 0) ||
         (current_status.length >=1 && command_td.length == 1 && ( current_status[0].innerText == "Invalid" ||
