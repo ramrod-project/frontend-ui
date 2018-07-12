@@ -17,6 +17,25 @@ var active_sequence = "1";
 var exec_int = 0;
 
 $(document).ready(function() {
+    var job_select_table = $('#job_table').DataTable({
+	    searching: false,
+	    paging: false,
+	    bInfo: false,
+        rowReorder: true,
+        select: true
+    });
+    // $(".dataTables_empty").empty();
+
+    $('#job_table tbody').on( 'click', 'tr', function () {
+        if ($(this).hasClass('selected')) {
+            $(this).removeClass('selected');
+        }
+        else {
+            job_select_table.$("tr.selected").removeClass('selected');
+            $(this).addClass('selected');
+        }
+    });
+
     ws_map["status"] = open_websocket("status", status_change_ws_callback);
     clear_new_jobs();
     synchronize_job_sequence_tabs(active_sequence);
@@ -25,15 +44,18 @@ $(document).ready(function() {
 	$("tr td.clickable-row-col3").click(get_commands_func);   // displays commands in w2
 	$("tr td span a.btn-linkedin").click(add_target_to_job_sc_button);  // target to job shortcut button
 
-	var row_selection = $('#target_table').DataTable({  //for w1+w3
+	var target_row_selection = $('#target_table').DataTable({  //for w1+w3
 	    searching: false,
 	    paging: false,
 	    bInfo: false,
+        columnDefs: [
+            { type: 'natural-nohtml', targets: [0, 1] }
+        ],
         rowReorder: true,
         select: true                                    // highlight target row in w1
 	});
 
-    row_selection.on('select', function(e, dt, type, indexes) {  // user clicks on target row to start drag
+    target_row_selection.on('select', function(e, dt, type, indexes) {  // user clicks on target row to start drag
         var selected_var = $(".gridSelect tbody tr.selected");
         if(selected_var.length > 0){
             console.log("draggable object for more than one object");
@@ -67,6 +89,12 @@ $(document).ready(function() {
                                   items: 'span',
                                    content: "Warning: Not yet supported, brain will support user-selected StartTime in Sprint 5",
                                 });
+
+    $("#searchCommand_id").tooltip({
+                              classes: {"ui-tooltip": "ui-corner-all ui-widget-shadow ui-state-error"},
+                              items: 'span',
+                               content: "Warning: Not yet supported, will be supported in Sprint 5",
+                            });
 
 
 
@@ -207,7 +235,7 @@ Functions down below are for w2
 */
 
 // List of commands based off of plugin name
-var current_command_template = {}
+var current_command_template = {};
 
 function filter_w1(){
     var filter_content,
@@ -248,6 +276,7 @@ function get_commands_func(){
     var row_id = $(this)[0].parentElement.id.substring(10, $(this)[0].id.length);
     var plugin_name_var = $("#name_tag_id"+row_id+" a span")[1].innerText;
     var check_content_var = false;
+    var quick_action_button;
 
     $.ajax({
         type: "GET",
@@ -320,6 +349,11 @@ function get_commands_func(){
                     .append($("<div id='JSON_Command_DATA'/>")
                         .addClass("text-muted small")
                         .text(JSON.stringify(current_command_template)));
+                quick_action_button = $("<a/>")
+                        .attr({"href": "#",
+                            "id": "add_command_to_job_id",
+                            "class":"btn btn-social-icon btn-linkedin btn-xs pull-right"})
+                        .append($("<i/>").attr({"id": "add_command_to_job_id2" ,"class": "fa fa-tasks"}));
                 for (var input_i = 0; input_i < current_command_template['Inputs'].length; input_i++){
                     //currently assumes input type is textbox
                     var new_input = document.createElement("input");
@@ -329,7 +363,7 @@ function get_commands_func(){
                     new_input.onchange = update_argument;
                     new_input.onkeyup = update_argument;
                     new_input.placeholder = current_command_template["Inputs"][input_i]['Value'];
-                    var new_input_holder = $("<div/>").append(new_input);
+                    var new_input_holder = $("<div/>").append(new_input).append(quick_action_button);
                     $("#commandIdBuilder").append(new_input_holder);
                     $("#"+new_input.id).tooltip({
                                                   classes: {"ui-tooltip": "highlight"},
@@ -341,6 +375,7 @@ function get_commands_func(){
                                                   }
                                                 });
                 }
+                $("a#add_command_to_job_id").click(add_command_to_job_sc_button);  // command to job shortcut button
             });
         },
         error: function (data) {
@@ -484,6 +519,76 @@ function add_target_to_job_sc_button(){
 
 }
 
+function add_command_to_job_sc_button(){
+    // console.log("add_command_to_job_sc_button");
+
+    var job_command_row,
+        command_temp_str,
+        selected_row,
+        selected_row_num,
+        selected_job_command_row,
+        counter_int,
+        next_job_row,
+        next_highlighted_row_num,
+        next_highlighted_job_command_row;
+
+    command_temp_str = JSON.stringify(current_command_template);  // command template as a string
+
+    if (inc === 0 || !$(".gridSelect2 tbody tr").hasClass("selected")){
+        add_new_job();  // new row in W3
+        job_command_row = $("tr td#commandid"+inc);  // new job row object
+
+        // adding command template to W3 in command column
+        drop_command_into_hole(current_command_template, command_temp_str, job_command_row, ""+inc);
+    }
+    // if more than one job row is highlighted
+    else if (inc !== 0 && $(".gridSelect2 tbody tr").hasClass("selected") &&
+        $(".gridSelect2 tbody tr.selected").nextUntil().hasClass("selected")){
+        counter_int = 0;
+
+        // first highlighted row data
+        selected_row = $(".gridSelect2 tbody tr.selected");
+        selected_row_num = selected_row[0].children[0].innerText;
+        selected_job_command_row = $("tr td#commandid"+selected_row_num);
+
+        // adding first command template to W3 in command column
+        drop_command_into_hole(current_command_template,
+                               command_temp_str,
+                               selected_job_command_row,
+                               selected_row_num);
+
+        // Checking for next highlighted job row
+        while(selected_row.nextUntil().length > counter_int){
+            next_job_row = selected_row.nextUntil()[counter_int];
+
+            // If job row is highlighted then add command to job row
+            if (next_job_row.classList.contains("selected") && next_job_row.style.display !== 'none'){
+                next_highlighted_row_num = next_job_row.children[0].innerText;
+                next_highlighted_job_command_row = $("tr td#commandid"+next_highlighted_row_num);
+                drop_command_into_hole(current_command_template,
+                                       command_temp_str,
+                                       next_highlighted_job_command_row,
+                                       next_highlighted_row_num);
+            }
+            counter_int++;
+        }
+
+    }
+    // only if one job row is highlighted
+    else if (inc !== 0 && $(".gridSelect2 tbody tr").hasClass("selected")){
+
+        // highlighted row data
+        selected_row = $(".gridSelect2 tbody tr.selected");
+        selected_row_num = selected_row[0].children[0].innerText;
+        selected_job_command_row = $("tr td#commandid"+selected_row_num);
+
+        // adding command template to W3 in command column
+        drop_command_into_hole(current_command_template, command_temp_str, selected_job_command_row, selected_row_num);
+    }
+
+    set_w3_job_status();  // setting w3 job status
+}
+
 function hide_current_sequence(e){
     sequences[active_sequence] = new Set();
     synchronize_sequence_tab_rows(active_sequence);
@@ -578,6 +683,18 @@ function add_new_job(){
         $("<td/>").attr({"id": "jobstatusid" + value})
     ));
 
+
+    // $('#job_table').on( 'click', 'tr#jobrow'+inc, function () {
+    //     if ($(this).hasClass('selected')) {
+    //         $(this).removeClass('selected');
+    //     }
+    //     else {
+    //         $('#job_table tbody tr.selected').removeClass('selected');
+    //         $(this).addClass('selected');
+    //     }
+    // });
+
+
     // W4 Rows
     $(".W4BodyContent")
         .append($("<tr/>")
@@ -630,8 +747,8 @@ function clear_new_jobs(){
 
 // DRAG
 function drag_target(){
-//    console.log("drag_target");  //debug
-	$(".gridSelect tbody tr, .gridSelect2 tbody tr").draggable({
+   // console.log("drag_target");
+	$(".gridSelect tbody tr").draggable({
 	    helper: function(){
 	        var selected_var = $(".gridSelect tbody tr.selected");
             var container_to_drag;
@@ -656,13 +773,15 @@ function drag_target(){
 	    },
 	    revert: function(){
 	        hide_drop_all();
+	        hover_int = 0;
 	        return true;
         }
 	});
 }
 function display_drop_all(){
+    // console.log("display_drop_all");
     $("#w3_drop_target_to_all").css("display", "");
-    hover_int = 1;
+    // hover_int = 1;
 }
 function hide_drop_all(){
     $("#w3_drop_target_to_all").css("display", "none");
@@ -684,7 +803,7 @@ function hover_leave(){
 }
 
 function hover_drop(){
-//    console.log("hover_drop");
+    // console.log("hover_drop");
     hover_int = 1;
     var hover_object = $(this);
     var hover_object_id = hover_object[0].id;
@@ -709,12 +828,13 @@ function hover_drop(){
         drop_target(hover_object);
     } else {
         console.log("not dragging the object over a validated job row");
+        hover_int = 0;
     }
 }
 
 // Drop target to W3
 function drop_target(hover_object){
-//    console.log("drop_target");  // debug
+    // console.log("drop_target");  // debug
     // hover_object is the row that is being hovered over
     // selected_var.length == # of targets dragging
     // hover_object.nextUntil().length == # of rows of every sequence in W3 - 1
@@ -883,7 +1003,7 @@ function drop_command_to_multiple(ev) {
 }
 
 function drop_command_into_hole(command, command_json, command_td, row_id){
-//    console.log("drop_command_into_hole");  // debug
+   // console.log("drop_command_into_hole");
     var current_status = $("#jobstatusid"+row_id+" span");
     if ((current_status.length == 0) ||
         (current_status.length >=1 && command_td.length == 1 && ( current_status[0].innerText == "Invalid" ||
