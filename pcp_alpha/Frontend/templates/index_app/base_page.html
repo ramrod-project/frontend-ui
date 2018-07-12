@@ -283,6 +283,12 @@ desired effect
         <!-- W2 Tabs -->
             <ul class="nav nav-tabs">
                 <li class="pull-left header"><i class="fa fa-exchange"></i> Command Builder</li>
+
+                <li class="pull-right">
+                    <span class="input-group input-group-sm" style="width: 150px;">
+                        <input class="form-control pull-right" id="searchCommand_id" name="searchCommandHere" placeholder="Search">
+                    </span>
+                </li>
                 <!--<li class="active"><a href="#tab_1" data-toggle="tab">tab 1 here</a></li>-->
                 <!--<li><a href="#tab_3" data-toggle="tab">tab 2 here</a></li>-->
 
@@ -372,24 +378,23 @@ desired effect
                         <div id="jobq_content" class="tab-content">
                             <div id="jobq_1" class="tab-pane active"> </div>
                             <div id="example3_wrapper" class="dataTables_wrapper form-inline dt-bootstrap">
-                                <table id="job_table" class="table table-bordered table-hover dataTable gridSelect2" role="grid" aria-describedby="target_table_info">
-                                <thead>
-                                    <tr role="row">
-                                        <th class="sorting_asc" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Rendering engine: activate to sort column descending">
-                                            Job #</th>
-                                        <th class="sorting" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">
-                                            Plugin Name</th>
-                                        <th class="sorting" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">
-                                            Host</th>
-                                        <th class="sorting" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">
-                                            Command</th>
-                                        <th class="sorting_asc" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Rendering engine: activate to sort column descending">
-                                            Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="thirdBoxContent" id="third_box_content">
-                                <a name="thirdboxname"></a>
-                                </tbody>
+                                <table id="job_table" class="table table-bordered table-hover dataTable display gridSelect2" role="grid" aria-describedby="target_table_info">
+                                    <thead>
+                                        <tr role="row">
+                                            <th class="sorting" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Job #: activate to sort column ascending">
+                                                Job #</th>
+                                            <th class="sorting" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Plugin Name: activate to sort column ascending">
+                                                Plugin Name</th>
+                                            <th class="sorting" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Host: activate to sort column ascending">
+                                                Host</th>
+                                            <th class="sorting" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Command: activate to sort column ascending">
+                                                Command</th>
+                                            <th class="sorting" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Status: activate to sort column ascending">
+                                                Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="thirdBoxContent" id="third_box_content">
+                                    </tbody>
                                 </table>
                             </div>
                         </div>
@@ -574,10 +579,15 @@ desired effect
 <script src="{% static 'external_jquery/jquery-ui.js' %}"></script>
 <!-- DropZone -->
 <script src="{% static 'External_js_files/dropzone.js' %}"></script>
+{#for sorting#}
+<script src="{% static 'External_js_files/natural.js' %}"></script>
+{#for multi select#}
+<script src="{% static 'DataTables/js/dataTables.select.min.js' %}"></script>
 {#custom dropzone js file#}
 <script src="{% static 'js_custom/pcp_custom_dropzone.js' %}"></script>
 <script src="{% static 'External_js_files/datetime-picker.js' %}"></script>
 <!--for template inheritance-->
+<script src="{% static 'js_custom/pcp_custom_targets.js' %}"></script>
 {% block extra_js %}{% endblock extra_js %}
 </body>
 </html>
