@@ -17,14 +17,24 @@ var active_sequence = "1";
 var exec_int = 0;
 
 $(document).ready(function() {
-    $('#job_table').DataTable({
+    var job_select_table = $('#job_table').DataTable({
 	    searching: false,
 	    paging: false,
 	    bInfo: false,
         rowReorder: true,
         select: true
     });
-    $(".dataTables_empty").empty();
+    // $(".dataTables_empty").empty();
+
+    $('#job_table tbody').on( 'click', 'tr', function () {
+        if ($(this).hasClass('selected')) {
+            $(this).removeClass('selected');
+        }
+        else {
+            job_select_table.$("tr.selected").removeClass('selected');
+            $(this).addClass('selected');
+        }
+    });
 
     ws_map["status"] = open_websocket("status", status_change_ws_callback);
     clear_new_jobs();
@@ -511,11 +521,16 @@ function add_target_to_job_sc_button(){
 
 function add_command_to_job_sc_button(){
     // console.log("add_command_to_job_sc_button");
+
     var job_command_row,
         command_temp_str,
         selected_row,
         selected_row_num,
-        selected_job_command_row;
+        selected_job_command_row,
+        counter_int,
+        next_job_row,
+        next_highlighted_row_num,
+        next_highlighted_job_command_row;
 
     command_temp_str = JSON.stringify(current_command_template);  // command template as a string
 
@@ -525,7 +540,43 @@ function add_command_to_job_sc_button(){
 
         // adding command template to W3 in command column
         drop_command_into_hole(current_command_template, command_temp_str, job_command_row, ""+inc);
-    } else if (inc !== 0 && $(".gridSelect2 tbody tr").hasClass("selected")){
+    }
+    // if more than one job row is highlighted
+    else if (inc !== 0 && $(".gridSelect2 tbody tr").hasClass("selected") &&
+        $(".gridSelect2 tbody tr.selected").nextUntil().hasClass("selected")){
+        counter_int = 0;
+
+        // first highlighted row data
+        selected_row = $(".gridSelect2 tbody tr.selected");
+        selected_row_num = selected_row[0].children[0].innerText;
+        selected_job_command_row = $("tr td#commandid"+selected_row_num);
+
+        // adding first command template to W3 in command column
+        drop_command_into_hole(current_command_template,
+                               command_temp_str,
+                               selected_job_command_row,
+                               selected_row_num);
+
+        // Checking for next highlighted job row
+        while(selected_row.nextUntil().length > counter_int){
+            next_job_row = selected_row.nextUntil()[counter_int];
+
+            // If job row is highlighted then add command to job row
+            if (next_job_row.classList.contains("selected") && next_job_row.style.display !== 'none'){
+                next_highlighted_row_num = next_job_row.children[0].innerText;
+                next_highlighted_job_command_row = $("tr td#commandid"+next_highlighted_row_num);
+                drop_command_into_hole(current_command_template,
+                                       command_temp_str,
+                                       next_highlighted_job_command_row,
+                                       next_highlighted_row_num);
+            }
+            counter_int++;
+        }
+
+    }
+    // only if one job row is highlighted
+    else if (inc !== 0 && $(".gridSelect2 tbody tr").hasClass("selected")){
+
         // highlighted row data
         selected_row = $(".gridSelect2 tbody tr.selected");
         selected_row_num = selected_row[0].children[0].innerText;
@@ -632,15 +683,16 @@ function add_new_job(){
         $("<td/>").attr({"id": "jobstatusid" + value})
     ));
 
-    $('#job_table').on( 'click', 'tr#jobrow'+inc, function () {
-        if ($(this).hasClass('selected')) {
-            $(this).removeClass('selected');
-        }
-        else {
-            $('#job_table tbody tr.selected').removeClass('selected');
-            $(this).addClass('selected');
-        }
-    } );
+
+    // $('#job_table').on( 'click', 'tr#jobrow'+inc, function () {
+    //     if ($(this).hasClass('selected')) {
+    //         $(this).removeClass('selected');
+    //     }
+    //     else {
+    //         $('#job_table tbody tr.selected').removeClass('selected');
+    //         $(this).addClass('selected');
+    //     }
+    // });
 
 
     // W4 Rows
