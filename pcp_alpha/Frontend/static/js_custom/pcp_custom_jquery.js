@@ -374,6 +374,7 @@ function get_commands_func(){
                                 .append(new_selector.css("display", "")));
 
                         $.each(Object.values(dom_filename_map), function(n) {
+                            current_command_template["Inputs"][input_i]['Value'] = dom_filename_map[n];
                             $(".mySelect").append($("<option/>").attr("value", n).text(Object.values(dom_filename_map)[n]));
                         });
                     }
