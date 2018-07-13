@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    populate_file_listing();
+    // populate_file_listing();
 
     $("#fg_name_help").hide();
     $("#plugin_name").change(verify_name);

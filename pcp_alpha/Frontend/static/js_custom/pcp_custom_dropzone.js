@@ -5,7 +5,7 @@ var dom_filename_map = {};
 function add_file_to_dropzone_list(filename){
     var file_list_dom = $(".upload_file_list");
     var next_id = file_list_dom.length;
-    dom_filename_map[next_id] = filename;
+    // dom_filename_map[next_id] = filename;
     file_list_dom
         .append($("<li/>")
             .append($("<hr/>"))
@@ -42,14 +42,18 @@ function populate_file_listing(){
     var file_refresh = $("#upload_file_refresh");
     file_refresh.addClass("fa-spin");
     file_list_dom.empty();
+    var counter_int;
     $.ajax({
         type: "GET",
         url: "/file_listing/",
         datatype: 'json',
         success: function(data) {
             var dan = data;
+            counter_int = 0;
             for (var idx in data){
                 var filename = data[idx];
+                dom_filename_map[counter_int] = filename;
+                counter_int++;
                 add_file_to_dropzone_list(filename);
             }
             file_refresh.removeClass("fa-spin");
