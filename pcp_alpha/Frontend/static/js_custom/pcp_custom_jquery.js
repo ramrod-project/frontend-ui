@@ -708,18 +708,6 @@ function add_new_job(){
         $("<td/>").attr({"id": "jobstatusid" + value})
     ));
 
-
-    // $('#job_table').on( 'click', 'tr#jobrow'+inc, function () {
-    //     if ($(this).hasClass('selected')) {
-    //         $(this).removeClass('selected');
-    //     }
-    //     else {
-    //         $('#job_table tbody tr.selected').removeClass('selected');
-    //         $(this).addClass('selected');
-    //     }
-    // });
-
-
     // W4 Rows
     $(".W4BodyContent")
         .append($("<tr/>")
@@ -732,7 +720,7 @@ function add_new_job(){
     $("#trashjob"+value).click(delete_job_from_w3);
 
 }
-function delete_job_from_w3(e){
+function delete_job_from_w3(event){
     var source = event.target || event.srcElement;
     var job_item = source.id.substring(8,source.id.length);
     sequences[active_sequence].delete(job_item);
