@@ -1,4 +1,9 @@
 $(document).ready(function() {
+    /*
+    Below populate_file_listing() was commented out because
+    it was duplicating two file lists
+    */
+
     // populate_file_listing();
 
     $("#fg_name_help").hide();
