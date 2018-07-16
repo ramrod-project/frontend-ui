@@ -276,7 +276,9 @@ function get_commands_func(){
     var row_id = $(this)[0].parentElement.id.substring(10, $(this)[0].id.length);
     var plugin_name_var = $("#name_tag_id"+row_id+" a span")[1].innerText;
     var check_content_var = false;
-    var quick_action_button;
+    var quick_action_button,
+        new_input,
+        new_selector;
 
     $.ajax({
         type: "GET",
@@ -349,31 +351,54 @@ function get_commands_func(){
                     .append($("<div id='JSON_Command_DATA'/>")
                         .addClass("text-muted small")
                         .text(JSON.stringify(current_command_template)));
+
+                // quick action button to add command template to a highlighted job row
                 quick_action_button = $("<a/>")
                         .attr({"href": "#",
                             "id": "add_command_to_job_id",
                             "class":"btn btn-social-icon btn-linkedin btn-xs pull-right"})
                         .append($("<i/>").attr({"id": "add_command_to_job_id2" ,"class": "fa fa-tasks"}));
+                $("#commandIdBuilder").append(quick_action_button);
+
+                new_input = document.createElement("input");
+                new_selector = $("<select/>")
+                    .attr({"class": "form-control mySelect", "style": "width:250px"}).css("display", "none");
                 for (var input_i = 0; input_i < current_command_template['Inputs'].length; input_i++){
-                    //currently assumes input type is textbox
-                    var new_input = document.createElement("input");
-                    new_input.label = "argumentid_("+input_i+")";
-                    new_input.id = "argumentid_"+input_i;
-                    new_input.title = current_command_template['Inputs'][input_i]["Tooltip"];
-                    new_input.onchange = update_argument;
-                    new_input.onkeyup = update_argument;
-                    new_input.placeholder = current_command_template["Inputs"][input_i]['Value'];
-                    var new_input_holder = $("<div/>").append(new_input).append(quick_action_button);
-                    $("#commandIdBuilder").append(new_input_holder);
-                    $("#"+new_input.id).tooltip({
-                                                  classes: {"ui-tooltip": "highlight"},
-                                                  items: 'span',
-                                                  position: {
-                                                    my: "left top",
-                                                    at: "right+5",
-                                                    collision: "none"
-                                                  }
-                                                });
+                    // if input.type == file_list
+                    if (current_command_template["Inputs"][input_i]['Type'] === 'file_list'){
+
+                        // file list dropdown
+                        $("#commandIdBuilder")
+                            .append($("<div/>")
+                                .attr({"class": "form-group"})
+                                .append(new_selector.css("display", "")));
+
+                        $.each(Object.values(dom_filename_map), function(n) {
+                            current_command_template["Inputs"][input_i]['Value'] = dom_filename_map[n];
+                            $(".mySelect").append($("<option/>").attr("value", n).text(Object.values(dom_filename_map)[n]));
+                        });
+                    }
+                    // if input.type == textbox
+                    else {
+                        new_input.label = "argumentid_("+input_i+")";
+                        new_input.id = "argumentid_"+input_i;
+                        new_input.title = current_command_template['Inputs'][input_i]["Tooltip"];
+                        new_input.onchange = update_argument;
+                        new_input.onkeyup = update_argument;
+                        new_input.placeholder = current_command_template["Inputs"][input_i]['Value'];
+
+                        var new_input_holder = $("<div/>").append(new_input);
+                        $("#commandIdBuilder").append(new_input_holder);
+                        $("#"+new_input.id).tooltip({
+                                                      classes: {"ui-tooltip": "highlight"},
+                                                      items: 'span',
+                                                      position: {
+                                                        my: "left top",
+                                                        at: "right+5",
+                                                        collision: "none"
+                                                      }
+                                                    });
+                    }
                 }
                 $("a#add_command_to_job_id").click(add_command_to_job_sc_button);  // command to job shortcut button
             });
@@ -683,18 +708,6 @@ function add_new_job(){
         $("<td/>").attr({"id": "jobstatusid" + value})
     ));
 
-
-    // $('#job_table').on( 'click', 'tr#jobrow'+inc, function () {
-    //     if ($(this).hasClass('selected')) {
-    //         $(this).removeClass('selected');
-    //     }
-    //     else {
-    //         $('#job_table tbody tr.selected').removeClass('selected');
-    //         $(this).addClass('selected');
-    //     }
-    // });
-
-
     // W4 Rows
     $(".W4BodyContent")
         .append($("<tr/>")
@@ -707,7 +720,7 @@ function add_new_job(){
     $("#trashjob"+value).click(delete_job_from_w3);
 
 }
-function delete_job_from_w3(e){
+function delete_job_from_w3(event){
     var source = event.target || event.srcElement;
     var job_item = source.id.substring(8,source.id.length);
     sequences[active_sequence].delete(job_item);
