@@ -75,7 +75,7 @@ _TEST_COMMANDS = [
         "Inputs": [
             {
                 "Name": "SourceFilePath",
-                "Type": "textbox",
+                "Type": "file_list",
                 "Tooltip": "Must be uploaded here first",
                 "Value": "File"
             },
