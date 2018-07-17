@@ -1,111 +1,65 @@
+sudo: required
+
+env:
+  global:
+    - CC_TEST_REPORTER_ID=6444ce234e6ec1703cda414367cc0ef773c9645e0248ec579e4201d366575aaf
+
+language: python
+
+python:
+  - "3.6"
+
+services:
+  - docker
+
 branches:
   only:
     - master
     - dev
     - qa
-matrix:
-  include:
-    - sudo: required
-      language: python
-      python:
-        - "3.6"
-      services:
-        - docker
-      env:
-        - CC_TEST_REPORTER_ID=6444ce234e6ec1703cda414367cc0ef773c9645e0248ec579e4201d366575aaf
-      before_install:
-        - git clone  https://github.com/ramrod-project/frontend-ui.git
-      install:
-        - pip install -r requirements.txt
-        - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-        - chmod +x ./cc-test-reporter
-        - ./cc-test-reporter before-build
-      before_script:
-        - if [ "$TRAVIS_BRANCH" != "master"  ];
-          then docker run -d --rm --name myP -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG"
-          ramrodpcp/database-brain:$TRAVIS_BRANCH;
-          else docker run -d --rm --name myP -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG" 
-          ramrodpcp/database-brain:latest; fi
-        - sleep 5
-        - STAGE=TESTING pytest --cov --cov-config .coveragerc --cov-report xml pcp_alpha
-        - docker stop myP
-        - ./cc-test-reporter after-build -t coverage.py --exit-code 0
-      script:
-        - if [ "$TRAVIS_BRANCH" != "master"  ];
-          then docker build -t ramrodpcp/frontend-ui:$TRAVIS_BRANCH . ;
-          else docker build -t ramrodpcp/frontend-ui:latest . ; fi
-        - docker network create test
-        - if [ "$TRAVIS_BRANCH" != "master"  ];
-          then docker run -d --rm --name rethinkdb -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG"
-          --network test ramrodpcp/database-brain:$TRAVIS_BRANCH;
-          else docker run -d --rm --name rethinkdb -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG"
-          --network test ramrodpcp/database-brain:latest; fi
-        - sleep 5
-        - if [ "$TRAVIS_BRANCH" != "master"  ];
-          then docker run -d --rm --name frontend -p 8080:8080 -e "STAGE=QA" -e "LOGLEVEL=DEBUG"
-          --network test ramrodpcp/frontend-ui:$TRAVIS_BRANCH;
-          else docker run -d --rm --name frontend -p 8080:8080 -e "STAGE=QA" -e "LOGLEVEL=DEBUG"
-          --network test ramrodpcp/frontend-ui:latest; fi
-        - sleep 10
-        - curl http://127.0.0.1:8080
-        - docker ps
-        - docker logs frontend
-        - docker stop frontend
-        - docker stop rethinkdb
-        - docker network prune -f
-      after_success:
-        - if [[ "$TRAVIS_PULL_REQUEST" == "false" ]];
-          then echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin; fi
-        - if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]];
-          then docker push ramrodpcp/frontend-ui:latest;
-          elif [[ "$TRAVIS_PULL_REQUEST" == "false" ]];
-          then docker push ramrodpcp/frontend-ui:$TRAVIS_BRANCH; fi
-    - sudo: required
-      language: node_js
-      node_js:
-        - "8.9.3"
-      services:
-        - docker
-      env:
-        - CC_TEST_REPORTER_ID=6444ce234e6ec1703cda414367cc0ef773c9645e0248ec579e4201d366575aaf
-      install:
-        - cd websocket_server
-        - if [ "$TRAVIS_BRANCH" != "master"  ];
-          then docker build -t ramrodpcp/websocket-server:$TRAVIS_BRANCH . ;
-          else docker build -t ramrodpcp/websocket-server:latest . ; fi
-        - npm i -g npm@6.1.0
-        - npm i
-        - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-        - chmod +x ./cc-test-reporter
-        - ./cc-test-reporter before-build
-      before_script:
-        - pwd
-        - docker network create test
-        - if [ "$TRAVIS_BRANCH" != "master"  ];
-          then docker run -d --rm --name rethinkdb -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG"
-          --network test ramrodpcp/database-brain:$TRAVIS_BRANCH;
-          else docker run -d --rm --name rethinkdb -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG" 
-          --network test ramrodpcp/database-brain:latest; fi
-        - sleep 3
-        - npm test
-        - ./cc-test-reporter after-build -t lcov --exit-code 0
-      script:
-        - if [ "$TRAVIS_BRANCH" != "master"  ];
-          then docker run -d --name websocket -p 3000:3000 -e "STAGE=QA" -e "LOGLEVEL=DEBUG"
-          --name websocket --network test ramrodpcp/websocket-server:$TRAVIS_BRANCH;
-          else docker run -d --name websocket -p 3000:3000 -e "STAGE=QA" -e "LOGLEVEL=DEBUG"
-          --name websocket --network test ramrodpcp/websocket-server:latest; fi
-        - sleep 5
-        - docker logs websocket
-        - docker stop websocket
-        - docker stop rethinkdb
-      after_success:
-        - if [[ "$TRAVIS_PULL_REQUEST" == "false" ]];
-          then echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin; fi
-        - if [[ "$TRAVIS_BRANCH" == "master" && "$TRAVIS_PULL_REQUEST" == "false" ]];
-          then docker push ramrodpcp/websocket-server:latest;
-          elif [[ "$TRAVIS_PULL_REQUEST" == "false" ]];
-          then docker push ramrodpcp/websocket-server:$TRAVIS_BRANCH; fi
+
+before_install:
+  - git clone  https://github.com/ramrod-project/frontend-ui.git
+  - if [ "$TRAVIS_BRANCH" == "master"  ]; 
+    then export TAG=latest; 
+    else export TAG=$TRAVIS_BRANCH; fi
+
+install:
+  - pip install -r requirements.txt
+  - travis_wait 10 docker pull ramrodpcp/database-brain:$TAG
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+
+before_script:
+  - docker run -d --rm --name myP -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG"
+    ramrodpcp/database-brain:$TAG
+  - sleep 5
+  - STAGE=TESTING pytest --cov --cov-config .coveragerc --cov-report xml pcp_alpha
+  - docker stop myP
+  - ./cc-test-reporter after-build -t coverage.py --exit-code 0
+
+script:
+  - docker build -t ramrodpcp/frontend-ui:$TAG .
+  - docker network create test
+  - docker run -d --rm --name rethinkdb -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG"
+    --network test ramrodpcp/database-brain:$TAG
+  - sleep 5
+  - docker run -d --rm --name frontend -p 8080:8080 -e "STAGE=QA" -e "LOGLEVEL=DEBUG"
+    --network test ramrodpcp/frontend-ui:$TAG
+  - sleep 10
+  - curl http://127.0.0.1:8080
+  - docker ps
+  - docker logs frontend
+  - docker stop frontend
+  - docker stop rethinkdb
+  - docker network prune -f
+
+after_success:
+  - if [[ "$TRAVIS_PULL_REQUEST" == "false" ]];
+    then echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin; fi
+  - if [[ "$TRAVIS_PULL_REQUEST" == "false" ]];
+    then docker push ramrodpcp/frontend-ui:$TAG; fi
 
 notifications:
   slack: ramrod-project:GDF82rRYDg3KSekrT3GA24qO
