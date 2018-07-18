@@ -1088,7 +1088,7 @@ function prepare_jobs_list(){
             var command = JSON.parse(command_json);
             var job = {"JobTarget": {"PluginName": plugin_name,
                                      "Location": location,
-                                     "Port":  0,},
+                                     "Port":  "0000",},
                        "Status": INITIAL_JOB_STATUS,
                        "StartTime": Number(sequence_starttime_map[active_sequence])+(j/1000),
                        "JobCommand": command};
