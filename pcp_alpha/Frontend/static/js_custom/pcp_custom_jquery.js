@@ -65,12 +65,18 @@ $(document).ready(function() {
         }
     });
 
-
-
+    // Date Time picker
+    var date_str,
+        time_str,
+        date_time_readable;
     $("#job_sequence_timer").datetimepicker({dateFormat:"@",
                                              minDate: new Date(),
                                              onClose: function(dateText, inst) {
-                                                    $("#job_sequence_timer")[0].value = dateText; //TODO: Convert to Human Readable
+                                                    date_str = String(inst.selectedMonth) + "-" + String(inst.selectedDay) + "-" + String(inst.selectedYear);
+                                                    time_str = inst.settings.timepicker.formattedTime;
+                                                    date_time_readable = date_str + ":" + time_str; // ui readable
+
+                                                    $("#job_sequence_timer")[0].value = date_time_readable;
                                                     $("#job_sequence_timer")[0].title = dateText;
                                                     sequence_starttime_map[active_sequence] = dateText;
                                              },
@@ -1117,11 +1123,12 @@ function prepare_jobs_list(){
             // var location = $("#addressid"+(j+1))[0].textContent;                             // former code
             var command_json = $("#commandid"+(j+1)+" div")[0].innerText;
             var command = JSON.parse(command_json);
+
             var job = {"JobTarget": {"PluginName": String(json_target_data.PluginName),
                                      "Location": String(json_target_data.Location),
                                      "Port":  String(json_target_data.Port),},
                        "Status": INITIAL_JOB_STATUS,
-                       "StartTime": Number(sequence_starttime_map[active_sequence])+(j/1000),
+                       "StartTime": Number(sequence_starttime_map[active_sequence])+(uid/1000),
                        "JobCommand": command};
             id_status_map[uid] = INITIAL_JOB_STATUS;
             jobs.push(job);
