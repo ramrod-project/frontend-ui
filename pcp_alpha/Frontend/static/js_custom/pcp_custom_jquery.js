@@ -885,10 +885,6 @@ function drop_target(hover_object){
                     var row_js = JSON.parse($("#nameidjson" + row_id_str)[0].innerText);
                     var selected_row = undefined;
 
-                    // json target data
-                    json_target_id = selected_var[int].children[0].children[0].children[0].id;
-                    json_target_data = $("#"+json_target_id)[0];
-
                     if (int !== 0){
                         var counter = list_cap;
                         while(hover_object.nextUntil().length > counter){
@@ -1118,7 +1114,7 @@ function prepare_jobs_list(){
             var uid = j+1;
             var terminal = $("#updateid"+uid).parent();
             var plugin_name_data = $("#pluginid"+(j+1))[0].textContent;  // correct json target data with plugin name
-            var json_target_data = JSON.parse($("#pluginid"+(j+1))[0].children[1].firstChild.data);
+            var json_target_data = JSON.parse($("#pluginid"+(j+1))[0].children[0].firstChild.data);
             // var plugin_name = plugin_name_data.substring(0, plugin_name_data.indexOf("{"));  // former code
             // var location = $("#addressid"+(j+1))[0].textContent;                             // former code
             var command_json = $("#commandid"+(j+1)+" div")[0].innerText;
