@@ -1114,7 +1114,7 @@ function prepare_jobs_list(){
             var uid = j+1;
             var terminal = $("#updateid"+uid).parent();
             var plugin_name_data = $("#pluginid"+(j+1))[0].textContent;  // correct json target data with plugin name
-            var json_target_data = JSON.parse($("#pluginid"+(j+1))[0].children[0].firstChild.data);
+            var json_target_data = JSON.parse($("#pluginid"+(j+1))[0].children[1].firstChild.data);
             // var plugin_name = plugin_name_data.substring(0, plugin_name_data.indexOf("{"));  // former code
             // var location = $("#addressid"+(j+1))[0].textContent;                             // former code
             var command_json = $("#commandid"+(j+1)+" div")[0].innerText;
