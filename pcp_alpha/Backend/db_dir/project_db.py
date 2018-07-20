@@ -130,6 +130,7 @@ def table_clear(database, table):
         err = sys.exc_info()[0]
         print("EXCEPT == {}".format(err))
 
+
 def tables_create(database, tables):
     """Create a list of tables in the database
 
@@ -173,8 +174,7 @@ def tables_check(database, tables):
     for i, table_name in enumerate(tables):
         # {database}.{table_name} does exist
         if rtdb.db(database).table_list().contains(
-                table_name
-            ).run(db_con_var):
+                table_name).run(db_con_var):
             print("\nlog: db {}.{} table exist locally"
                   .format(database, table_name))
             table_clear(database, table_name)
@@ -254,9 +254,9 @@ def confirm_plugin_db_info():
 
 
 def confirm_db_info():
-    """Runs all the db confirm functions
     """
-
+    Runs all the db confirm functions
+    """
     print("\nlog: ###### DB Logs ######")
     connect()
     confirm_brain_db_info()

@@ -1,12 +1,11 @@
 from django.urls import path
-
 from .views import get_commands_controller, new_target_form, val_target_form, execute_sequence_controller, \
     w4_output_controller, w4_output_controller_download, edit_target_form, val_edit_target_form, \
     persist_job_state, load_job_state, delete_specific_target, file_upload_list, del_file_from_list, \
     get_file_listing, get_file
 
-
 app_name = 'pcp_app'
+
 urlpatterns = [
     path('action/get_command_list/', get_commands_controller),  # url for get_commands_controller controller
     path('action/get_w3_data/', execute_sequence_controller),   # url for execute sequence in W3
