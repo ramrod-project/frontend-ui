@@ -65,12 +65,18 @@ $(document).ready(function() {
         }
     });
 
-
-
+    // Date Time picker
+    var date_str,
+        time_str,
+        date_time_readable;
     $("#job_sequence_timer").datetimepicker({dateFormat:"@",
                                              minDate: new Date(),
                                              onClose: function(dateText, inst) {
-                                                    $("#job_sequence_timer")[0].value = dateText; //TODO: Convert to Human Readable
+                                                    date_str = String(inst.selectedMonth) + "-" + String(inst.selectedDay) + "-" + String(inst.selectedYear);
+                                                    time_str = inst.settings.timepicker.formattedTime;
+                                                    date_time_readable = date_str + ":" + time_str; // ui readable
+
+                                                    $("#job_sequence_timer")[0].value = date_time_readable;
                                                     $("#job_sequence_timer")[0].title = dateText;
                                                     sequence_starttime_map[active_sequence] = dateText;
                                              },
@@ -360,10 +366,11 @@ function get_commands_func(){
                         .append($("<i/>").attr({"id": "add_command_to_job_id2" ,"class": "fa fa-tasks"}));
                 $("#commandIdBuilder").append(quick_action_button);
 
-                new_input = document.createElement("input");
                 new_selector = $("<select/>")
                     .attr({"class": "form-control mySelect", "style": "width:250px"}).css("display", "none");
                 for (var input_i = 0; input_i < current_command_template['Inputs'].length; input_i++){
+                    new_input = document.createElement("input");
+
                     // if input.type == file_list
                     if (current_command_template["Inputs"][input_i]['Type'] === 'file_list'){
 
@@ -531,13 +538,22 @@ function save_job_state(){
 }
 
 function add_target_to_job_sc_button(){
-//    console.log("add_target_to_job_sc");  // debug
+    // console.log("add_target_to_job_sc");  // debug
+    // json target data
+    var json_target_id,
+    json_target_data;
+    json_target_id = $(this)[0].parentElement.parentElement.parentElement.children[0].children[0].children[0].id;
+    json_target_data = $("#"+json_target_id)[0].innerText;
 
     add_new_job();
     var row_id = $(this)[0].parentElement.parentElement.parentElement.id.substring(10, $(this)[0].id.length);
     var plugin_name_var = $("#name_tag_id"+row_id+" a span")[1].innerText;
     var location_num_var = $("#address_tag_id"+row_id)[0].innerText;
-    $("#pluginid"+inc).append(plugin_name_var);
+    $("#pluginid"+inc)
+        .append(plugin_name_var)
+        .append($("<span/>")
+            .attr({"id": ""+json_target_id, "style": "display:none"})
+            .append(json_target_data));
     $("#addressid"+inc).append(location_num_var);
     set_w3_job_status();
 
@@ -679,6 +695,7 @@ function add_new_plugin_location_job_row(id_parameter, num_parameter){
 
 // Add new job
 function add_new_job(){
+    // console.log("add_new_job");
     inc++;
     $("#addjob_button")[0].value = inc;
 
@@ -852,10 +869,14 @@ function drop_target(hover_object){
     // selected_var.length == # of targets dragging
     // hover_object.nextUntil().length == # of rows of every sequence in W3 - 1
     // next_location_num not being used but maybe in the future
+    var json_target_id,
+        json_target_data;
+        // json_target_text_data;
     $(".gridSelect, .divw3row").droppable({
         drop: function (event, ui) {
             if (hover_int != 0){
                 var selected_var = ui.helper.children();
+                // console.log(selected_var);
                 var list_cap = 0;
 
                 for(var int = 0; int < selected_var.length; int++){
@@ -864,12 +885,12 @@ function drop_target(hover_object){
                     var row_js = JSON.parse($("#nameidjson" + row_id_str)[0].innerText);
                     var selected_row = undefined;
 
-                    if (int != 0){
+                    if (int !== 0){
                         var counter = list_cap;
                         while(hover_object.nextUntil().length > counter){
                             var next_plugin_name = hover_object.nextUntil()[counter].children[1].innerText;
                             var next_location_num = hover_object.nextUntil()[counter].children[2].innerText;
-                            if (hover_object.nextUntil()[counter].style.display != 'none' && next_plugin_name.length < 1){
+                            if (hover_object.nextUntil()[counter].style.display !== 'none' && next_plugin_name.length < 1){
                                 selected_row = hover_object.nextUntil()[counter];
                                 counter++;
                                 list_cap = counter;
@@ -880,15 +901,25 @@ function drop_target(hover_object){
                         }
 //                        selected_row = hover_object.nextUntil(':hidden')[(int -1)];  // this was used before
                     } else {
+                        // hover_object is the job row that you dropped container(s) to
                         selected_row = hover_object[0];
                     }
-                    if (selected_row != undefined){
+                    if (selected_row !== undefined){
                         var selected_row_id = selected_row.id.substring(6, selected_row.id.length);
                         if (job_row_is_mutable(selected_row_id)) {
                             $(selected_row.children[1]).empty(); //plugin column
                             $(selected_row.children[2]).empty(); //location column
                             selected_row.children[1].append(row_js.PluginName);
                             selected_row.children[2].append(row_js.Location);
+
+                            // json target data
+                            json_target_id = selected_var[int].children[0].children[0].children[0].id;
+                            json_target_data = $("#"+json_target_id)[0].innerText;
+
+                            $("#pluginid"+selected_row.rowIndex)
+                                .append($("<span/>")
+                                    .attr({"id": ""+json_target_id, "style": "display:none"})
+                                    .append(json_target_data));
                         }
                     }
                 }
@@ -1082,15 +1113,18 @@ function prepare_jobs_list(){
 
             var uid = j+1;
             var terminal = $("#updateid"+uid).parent();
-            var plugin_name = $("#pluginid"+(j+1))[0].textContent;
-            var location = $("#addressid"+(j+1))[0].textContent;
+            var plugin_name_data = $("#pluginid"+(j+1))[0].textContent;  // correct json target data with plugin name
+            var json_target_data = JSON.parse($("#pluginid"+(j+1))[0].children[1].firstChild.data);
+            // var plugin_name = plugin_name_data.substring(0, plugin_name_data.indexOf("{"));  // former code
+            // var location = $("#addressid"+(j+1))[0].textContent;                             // former code
             var command_json = $("#commandid"+(j+1)+" div")[0].innerText;
             var command = JSON.parse(command_json);
-            var job = {"JobTarget": {"PluginName": plugin_name,
-                                     "Location": location,
-                                     "Port":  0,},
+
+            var job = {"JobTarget": {"PluginName": String(json_target_data.PluginName),
+                                     "Location": String(json_target_data.Location),
+                                     "Port":  String(json_target_data.Port),},
                        "Status": INITIAL_JOB_STATUS,
-                       "StartTime": Number(sequence_starttime_map[active_sequence])+(j/1000),
+                       "StartTime": Number(sequence_starttime_map[active_sequence])+(uid/1000),
                        "JobCommand": command};
             id_status_map[uid] = INITIAL_JOB_STATUS;
             jobs.push(job);
