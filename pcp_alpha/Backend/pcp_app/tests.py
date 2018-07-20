@@ -41,6 +41,58 @@ SAMPLE_JOB = {
                    "Inputs": [],
                    "OptionalInputs": []}
 }
+
+SAMPLE_MULTIPLE_JOBS = [{},
+                        {'Status': 'Ready',
+                         'StartTime': 1532026993.002,
+                         'JobTarget': {'Port': '8002',
+                                       'PluginName': 'Plugin1',
+                                       'Location': '172.16.5.47'},
+                         'JobCommand': {'Output': True,
+                                        'Tooltip': '\nEcho\n\nClient Returns this string verbatim\n\n'
+                                                   'Arguments:\n1. String to Echo\n\nReturns:\nString\n',
+                                        'id': '1a0f09fd-4a1f-4d5c-adbd-9ff191db9144',
+                                        'CommandName': 'echo',
+                                        'Inputs': [{'Name': 'EchoString',
+                                                    'Tooltip': 'This string will be echoed back',
+                                                    'Type': 'textbox', 'Value': 'dd'}],
+                                        'OptionalInputs': []}},
+                        {'Status': 'Ready',
+                         'StartTime': 1532026993.003,
+                         'JobTarget': {'Port': '8002',
+                                       'PluginName': 'Plugin1',
+                                       'Location': '172.16.5.254'},
+                         'JobCommand': {'Output': True,
+                                        'Tooltip': '\nEcho\n\nClient Returns this string verbatim\n\n'
+                                                   'Arguments:\n1. String to Echo\n\nReturns:\nString\n',
+                                        'id': '1a0f09fd-4a1f-4d5c-adbd-9ff191db9144',
+                                        'CommandName': 'echo',
+                                        'Inputs': [{'Name': 'EchoString',
+                                                    'Tooltip': 'This string will be echoed back',
+                                                    'Type': 'textbox',
+                                                    'Value': 'dd'}],
+                                        'OptionalInputs': []}},
+                        {'Status': 'Ready',
+                         'StartTime': 1532026993.004,
+                         'JobTarget': {'Port': '8002',
+                                       'PluginName': 'Plugin1',
+                                       'Location': '172.16.5.177'},
+                         'JobCommand': {'Output': True,
+                                        'Tooltip': '\nEcho\n\nClient Returns this string verbatim\n\n'
+                                                   'Arguments:\n1. String to Echo\n\nReturns:\nString\n',
+                                        'id': '1a0f09fd-4a1f-4d5c-adbd-9ff191db9144',
+                                        'CommandName': 'echo',
+                                        'Inputs': [{'Name': 'EchoString',
+                                                    'Tooltip': 'This string will be echoed back',
+                                                    'Type': 'textbox',
+                                                    'Value': 'dd'}],
+                                        'OptionalInputs': []
+                                        }
+                         }
+                        ]
+
+
+
 SAMPLE_OUTPUT = {
     "OutputJob": SAMPLE_JOB,
     "Content": "Sample output string"
@@ -337,6 +389,19 @@ class TestDataHandling(object):
                   "%3A%22file2%22%2C%22Tooltip%22%3A%22Must%20be%20the%20fully%20qualified%20path" \
                   "%22%2C%22Name%22%3A%22DestinationFilePath%22%7D%5D%2C%22OptionalInputs%22%" \
                   "3A%5B%5D%2C%22id%22%3A%2220188422-03e0-4e33-848a-b528ef504517%22%7D%7D%5D"
+        status_obj = self.status_code_test(url_str=job_url,
+                                           function_obj=execute_sequence_controller,
+                                           rf=rf)
+        assert "inserted" in str(status_obj.content)
+        assert status_obj.status_code == 200
+
+    def test_execute_multiple_jobs_in_w3(self, rf):
+        """
+        This test is replicating when the user clicks on
+        'Execute Sequence' button at the bottom right of w3
+        with multiple job rows.
+        """
+        job_url = "/action/get_w3_data/?jobs={}".format(json.dumps(SAMPLE_MULTIPLE_JOBS))
         status_obj = self.status_code_test(url_str=job_url,
                                            function_obj=execute_sequence_controller,
                                            rf=rf)
