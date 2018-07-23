@@ -10,7 +10,8 @@ from django.views.decorators.csrf import csrf_exempt
 from ua_parser import user_agent_parser
 from Backend.db_dir.custom_queries import get_specific_commands, insert_brain_jobs_w3, \
     get_specific_brain_output, get_brain_output_content, insert_new_target, get_brain_targets, \
-    persist_jobs_state, load_jobs_state
+    persist_jobs_state, load_jobs_state, upload_file_to_brain, del_file_upload_from_brain, \
+    get_brain_files, get_brain_file
 from .forms import TargetForm
 
 
@@ -119,6 +120,24 @@ def w4_output_controller(request):
     return response
 
 
+def w4_output_controller_download_filename(job_id, job_number):
+    """
+
+    :param job_id:
+    :param job_number:
+    :return:
+    """
+    filename = job_id
+    job = get_specific_brain_output(job_id)
+    if job:
+        filename = "{}_{}_{}_{}".format(job_number,
+                                        job['JobTarget']['PluginName'],
+                                        job['JobTarget']['Location'],
+                                        job['JobCommand']['CommandName'])
+    filename = "{}.txt".format(filename)
+    return filename
+
+
 def w4_output_controller_download(request):
     """
     User can download content in W4 by clicking on link
@@ -126,16 +145,20 @@ def w4_output_controller_download(request):
     :return: content data onto a file
     """
     response = None
+    fng = w4_output_controller_download_filename  # file name generator :-D
     if request.method == 'GET':
         user_agent = user_agent_parser.ParseOS(request.META.get("HTTP_USER_AGENT"))
         controller_job_id = request.GET.get('job_id')
+        controller_job_number = request.GET.get('job_number', "")
         content = get_brain_output_content(controller_job_id, max_size=None)
         if "windows" in user_agent.get("family").lower() and isinstance(content, str):
             content = content.replace("\n", "\r\n")
         response = HttpResponse(content,
                                 content_type='application/octet-stream')
-        response['Content-Disposition'] = 'attachment; \
-                                           filename="{}.txt"'.format(controller_job_id)
+        content_dispo = 'attachment; \
+                         filename="{}"'.format(fng(controller_job_id,
+                                                   controller_job_number))
+        response['Content-Disposition'] = content_dispo
         response.status_code = 200
     return response
 
@@ -245,3 +268,62 @@ def delete_specific_target(request, target_id):
         brain.r.db("Brain").table("Targets").get(str(target_id)).delete(
             return_changes=True).run(brain_connection)
         return redirect('/')
+
+
+def file_upload_list(request):
+    """
+    This function is the controller for file uploads
+    :param request: user request
+    :return: response if file can be uploaded or not
+    """
+    json_return = ""
+    if request.method == 'POST':
+        file = request.FILES['file']
+        json_return = upload_file_to_brain(str(file), file.read())
+    return HttpResponse(json.dumps(json_return), content_type='application/json')
+
+
+def del_file_from_list(request, file_id):
+    """
+    Delete's file from Brain.Files and
+    in the user interface as well
+    :param request:
+    :param file_id:
+    :return:
+    """
+    if request.method == 'GET':
+        print("delete this Brain.Files field id == {}".format(file_id))
+        del_file_upload_from_brain(file_id)
+    return HttpResponse()
+
+
+def get_file_listing(request):
+    """
+    Populates file list to ui
+    :param request: user request
+    :return:
+    """
+    json_return = get_brain_files()
+    return HttpResponse(json.dumps(json_return), content_type='application/json')
+
+
+def get_file(request, file_id):
+    """
+    User downloads file
+    :param request: user request
+    :param file_id: file id from the ui -> url
+    :return: response
+    """
+    brain_data = get_brain_file(file_id)
+    if brain_data:
+        content = brain_data['Content']
+        response = HttpResponse(content,
+                                content_type='application/octet-stream')
+        content_dispo = 'attachment; \
+                         filename="{}"'.format(file_id)
+        response['Content-Disposition'] = content_dispo
+        response.status_code = 200
+    else:
+        response = HttpResponse()
+    return response
+

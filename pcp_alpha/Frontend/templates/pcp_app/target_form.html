@@ -23,36 +23,38 @@
                 <form class="form-horizontal">
                     <div class="box-body">
                         <!--Plugin Name-->
-                        <div class="form-group">
+                        <div id="fg_name" class="form-group">
                             <label for="plugin_name" class="col-sm-12 control-label content-header">Plugin Name</label>
-
                             <div class="col-sm-10">
                                 <input class="form-control" type="text" id="plugin_name" name="plugin_name" maxlength="200" placeholder="Plugin Name Here">
+                                <span id="fg_name_help" class="help-block">Plugin Name should be /[a-zA-Z0-9_]{3,100}/</span>
                             </div>
                         </div>
 
                         <!--Location Number-->
-                        <div class="form-group">
+                        <div id="fg_location" class="form-group">
                             <label for="location_num" class="col-sm-3 control-label">Location</label>
                             <div class="col-sm-10">
                                 <input class="form-control" id="location_num" name="location_num" placeholder="172.16.5. Something Here">
+                                <span id="fg_location_help" class="help-block">Location must be IPv4 or IPv6 address</span>
                             </div>
                         </div>
 
                         <!--Port Number-->
-                        <div class="form-group">
+                        <div id="fg_port" class="form-group">
                             <label for="port_num" class="col-sm-3 control-label">Port Number</label>
                             <div class="col-sm-10">
                                 <input class="form-control" id="port_num" name="port_num" placeholder="Port Number Here">
+                                <span id="fg_port_help" class="help-block">Port should be a number</span>
                             </div>
                         </div>
 
                         <!--Plugin Name-->
-                        <div class="form-group">
+                        <div id="fg_optional" class="form-group">
                             <label for="optional_char" class="col-sm-12 control-label content-header">Optional</label>
-
                             <div class="col-sm-10">
                                 <input class="form-control" type="text" id="optional_char" name="optional_char" maxlength="200" placeholder="Optional">
+                                <span id="fg_optional_help" class="help-block">Plugin Name should be ASCII</span>
                             </div>
                         </div>
 
@@ -61,7 +63,7 @@
                     <!-- box-footer -->
                     <div class="box-footer">
                         <a href="/" class="btn btn-default">Cancel</a>
-                        <button type="submit" value="Submit" class="btn btn-info pull-right">Submit</button>
+                        <button id="add_target_submit" onclick="this.disabled=true, this.form.submit()" onsubmit="return(verify_all);" type="submit" value="Submit" class="btn btn-info pull-right">Submit</button>
                     </div>
                     <!-- /.box-footer -->
                 </form>

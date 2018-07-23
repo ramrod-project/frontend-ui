@@ -5,7 +5,7 @@ import json
 import pytest
 from brain import connect, r
 
-from pcp_alpha.test.test_w4_switch_to_done import switch_to_done
+from test.test_w4_switch_to_done import switch_to_done
 # from rethinkdb.errors import ReqlOpFailedError
 from pcp_alpha.Backend.db_dir.custom_data import location_generated_num
 from pcp_alpha.Backend.db_dir.project_db import rtdb
@@ -14,7 +14,8 @@ from pcp_alpha.Backend.db_dir.custom_queries import get_specific_brain_targets, 
 from pcp_alpha.Backend.pcp_app.views import get_commands_controller, \
     execute_sequence_controller, w4_output_controller, w4_output_controller_download, \
     new_target_form, val_target_form, val_edit_target_form, edit_target_form, \
-    delete_specific_target
+    delete_specific_target, file_upload_list, persist_job_state, load_job_state, \
+    del_file_from_list, get_file_listing, get_file
 
 ECHO_JOB_ID = str(uuid4())
 NOW = time()
@@ -34,12 +35,69 @@ SAMPLE_JOB = {
     "JobTarget": SAMPLE_TARGET,
     "Status": "Done",
     "StartTime": NOW,
-    "JobCommand": "Do stuff"
+    "JobCommand": {"CommandName": "Do stuff",
+                   "Tooltip": "",
+                   "Output": False,
+                   "Inputs": [],
+                   "OptionalInputs": []}
 }
+
+SAMPLE_MULTIPLE_JOBS = [{},
+                        {'Status': 'Ready',
+                         'StartTime': 1532026993.002,
+                         'JobTarget': {'Port': '8002',
+                                       'PluginName': 'Plugin1',
+                                       'Location': '172.16.5.47'},
+                         'JobCommand': {'Output': True,
+                                        'Tooltip': '\nEcho\n\nClient Returns this string verbatim\n\n'
+                                                   'Arguments:\n1. String to Echo\n\nReturns:\nString\n',
+                                        'id': '1a0f09fd-4a1f-4d5c-adbd-9ff191db9144',
+                                        'CommandName': 'echo',
+                                        'Inputs': [{'Name': 'EchoString',
+                                                    'Tooltip': 'This string will be echoed back',
+                                                    'Type': 'textbox', 'Value': 'dd'}],
+                                        'OptionalInputs': []}},
+                        {'Status': 'Ready',
+                         'StartTime': 1532026993.003,
+                         'JobTarget': {'Port': '8002',
+                                       'PluginName': 'Plugin1',
+                                       'Location': '172.16.5.254'},
+                         'JobCommand': {'Output': True,
+                                        'Tooltip': '\nEcho\n\nClient Returns this string verbatim\n\n'
+                                                   'Arguments:\n1. String to Echo\n\nReturns:\nString\n',
+                                        'id': '1a0f09fd-4a1f-4d5c-adbd-9ff191db9144',
+                                        'CommandName': 'echo',
+                                        'Inputs': [{'Name': 'EchoString',
+                                                    'Tooltip': 'This string will be echoed back',
+                                                    'Type': 'textbox',
+                                                    'Value': 'dd'}],
+                                        'OptionalInputs': []}},
+                        {'Status': 'Ready',
+                         'StartTime': 1532026993.004,
+                         'JobTarget': {'Port': '8002',
+                                       'PluginName': 'Plugin1',
+                                       'Location': '172.16.5.177'},
+                         'JobCommand': {'Output': True,
+                                        'Tooltip': '\nEcho\n\nClient Returns this string verbatim\n\n'
+                                                   'Arguments:\n1. String to Echo\n\nReturns:\nString\n',
+                                        'id': '1a0f09fd-4a1f-4d5c-adbd-9ff191db9144',
+                                        'CommandName': 'echo',
+                                        'Inputs': [{'Name': 'EchoString',
+                                                    'Tooltip': 'This string will be echoed back',
+                                                    'Type': 'textbox',
+                                                    'Value': 'dd'}],
+                                        'OptionalInputs': []
+                                        }
+                         }
+                        ]
+
+
+
 SAMPLE_OUTPUT = {
     "OutputJob": SAMPLE_JOB,
     "Content": "Sample output string"
 }
+SAMPLE_FILE_ID = "test.txt"
 
 
 @pytest.fixture(scope="function")
@@ -337,6 +395,19 @@ class TestDataHandling(object):
         assert "inserted" in str(status_obj.content)
         assert status_obj.status_code == 200
 
+    def test_execute_multiple_jobs_in_w3(self, rf):
+        """
+        This test is replicating when the user clicks on
+        'Execute Sequence' button at the bottom right of w3
+        with multiple job rows.
+        """
+        job_url = "/action/get_w3_data/?jobs={}".format(json.dumps(SAMPLE_MULTIPLE_JOBS))
+        status_obj = self.status_code_test(url_str=job_url,
+                                           function_obj=execute_sequence_controller,
+                                           rf=rf)
+        assert "inserted" in str(status_obj.content)
+        assert status_obj.status_code == 200
+
     def test_render_target_form(self, rf):
         """
         This test checks if it renders the
@@ -458,3 +529,120 @@ class TestDataHandling(object):
         response = TestDataHandling.get_test(url_var, delete_specific_target, rf, target_id=target_key)
         assert response.status_code == 302
         assert response.url == "/"
+
+    @staticmethod
+    def test_file_upload(rf):
+        """
+        This test imitates uploading a file
+        :param rf: request factory
+        :return: status code
+        """
+        url_var = "file_upload/"
+        response = TestDataHandling.get_test(url_var, file_upload_list, rf)
+        assert response.status_code == 200
+        with pytest.raises(json.JSONDecodeError):
+            post_data = json.loads(str(SAMPLE_FILE_ID))
+            response = TestDataHandling.post_test(url_var, post_data, file_upload_list, rf)
+            assert response.status_code == 200
+            response = TestDataHandling.post_test(url_var, {}, file_upload_list, rf)
+            assert response.status_code == 200
+
+    @staticmethod
+    def test_job_state(rf):
+        """
+        This test imitates saving a job state in W3
+        :param rf: request factory
+        :return: status code
+        """
+        url_var = "action/save_state/"
+        post_data = {"replaced": 1, "inserted": 0, "deleted": 0, "errors": 0, "unchanged": 0, "skipped": 0}
+
+        with pytest.raises(json.JSONDecodeError):
+            current_state = json.loads(str(post_data))
+            response = TestDataHandling.post_test(url_var, current_state, persist_job_state, rf)
+            assert response.status_code == 200
+            response = TestDataHandling.post_test(url_var, {}, persist_job_state, rf)
+            assert response.status_code == 200
+
+    @staticmethod
+    def test_job_state2(rf):
+        """
+        This test imitates saving a job state in W3
+        as a second test
+        :param rf: request factory
+        :return: status code
+        """
+        url_var = "action/save_state/"
+        post_data = {
+            "id_map": {"1": "9859bfb8-8676-4595-8ce2-176957574875"},
+            "id_reverse_map": {"9859bfb8-8676-4595-8ce2-176957574875": 1},
+            "jobs": [{"plugin": "Plugin1",
+                      "address": "172.16.5.49",
+                      "job": {"Output": True,
+                              "OptionalInputs": [],
+                              "Tooltip":"\nEcho\n\nClient Returns this string "
+                                        "verbatim\n\nArguments:\n1. String to "
+                                        "Echo\n\nReturns:\nString\n",
+                              "CommandName": "echo",
+                              "Inputs":[{"Tooltip": "This string will be echoed back",
+                                         "Type": "textbox",
+                                         "Name": "EchoString",
+                                         "Value": "dd"}],
+                              "id": "c8999a01-91fb-43f7-8bc5-7aa8ec789688"},
+                      "status": "None"}],
+            "sequences": {"1": ["1"]},
+            "active_sequence": "1"
+        }
+
+        with pytest.raises(json.JSONDecodeError):
+            current_state = json.loads(str(post_data))
+            response = TestDataHandling.post_test(url_var, current_state, persist_job_state, rf)
+            assert response.status_code == 200
+            response = TestDataHandling.post_test(url_var, {}, persist_job_state, rf)
+            assert response.status_code == 200
+
+    @staticmethod
+    def test_job_state3(rf):
+        """
+        This test imitates load a job state in W3
+        :param rf: request factory
+        :return: status code
+        """
+        url_var = "action/load_state/"
+        response = TestDataHandling.get_test(url_var, load_job_state, rf)
+        assert response.status_code == 200
+
+    @staticmethod
+    def test_del_file_from_list(rf):
+        """
+        This test imitates deleting file from file list
+        :param rf:
+        :return:
+        """
+        url_var = "del_file_upload/{}/".format(SAMPLE_FILE_ID)
+        response = TestDataHandling.get_test(url_var, del_file_from_list, rf, target_id=SAMPLE_FILE_ID)
+        assert response.status_code == 200
+
+    @staticmethod
+    def test_get_file_list(rf):
+        """
+        This test imitates populating a list of
+        files to the ui from Brain.Files
+        :param rf:
+        :return:
+        """
+        url_var = "file_listing/"
+        response = TestDataHandling.get_test(url_var, get_file_listing, rf)
+        assert response.status_code == 200
+
+    @staticmethod
+    def test_get_file(rf):
+        """
+        This test imitates getting a file from
+        Brain.Files
+        :param rf:
+        :return:
+        """
+        url_var = "file_download/{}/".format(SAMPLE_FILE_ID)
+        response = TestDataHandling.get_test(url_var, get_file, rf, target_id=SAMPLE_FILE_ID)
+        assert response.status_code == 200
