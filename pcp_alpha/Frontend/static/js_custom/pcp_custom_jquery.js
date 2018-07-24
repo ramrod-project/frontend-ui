@@ -4,7 +4,7 @@ This file was created for project pcp to add jquery functionality and other java
 -----------------------------------------------------------------------------------------------------
 */
 var MAX_MANUAL_CHECK_COUNT = 30;
-var INITIAL_JOB_STATUS = "Ready";
+var INITIAL_JOB_STATUS = "Waiting";
 var inc = 0;
 var hover_int = 0;
 var sequences = {"1": new Set()};
@@ -68,17 +68,21 @@ $(document).ready(function() {
     // Date Time picker
     var date_str,
         time_str,
-        date_time_readable;
+        date_time_readable,
+        utc_str,
+        utc_to_unixts;
     $("#job_sequence_timer").datetimepicker({dateFormat:"@",
                                              minDate: new Date(),
                                              onClose: function(dateText, inst) {
-                                                    date_str = String(inst.selectedMonth) + "-" + String(inst.selectedDay) + "-" + String(inst.selectedYear);
+                                                    date_str = String(inst.selectedMonth) + "/" + String(inst.selectedDay) + "/" + String(inst.selectedYear);
                                                     time_str = inst.settings.timepicker.formattedTime;
                                                     date_time_readable = date_str + ":" + time_str; // ui readable
+                                                    utc_str = date_str + " " + time_str + ":00";
+                                                    utc_to_unixts = (new Date(utc_str).getTime()/1000);
 
                                                     $("#job_sequence_timer")[0].value = date_time_readable;
-                                                    $("#job_sequence_timer")[0].title = dateText;
-                                                    sequence_starttime_map[active_sequence] = dateText;
+                                                    $("#job_sequence_timer")[0].title = utc_to_unixts;
+                                                    sequence_starttime_map[active_sequence] = utc_to_unixts;
                                              },
                                              onSelect: function (selectedDateTime){
                                                 var date_component = Number(selectedDateTime
