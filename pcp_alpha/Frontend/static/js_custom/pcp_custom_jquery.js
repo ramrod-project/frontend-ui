@@ -74,11 +74,14 @@ $(document).ready(function() {
     $("#job_sequence_timer").datetimepicker({dateFormat:"@",
                                              minDate: new Date(),
                                              onClose: function(dateText, inst) {
+                                                    console.log(dateText);
                                                     date_str = String(inst.selectedMonth) + "/" + String(inst.selectedDay) + "/" + String(inst.selectedYear);
                                                     time_str = inst.settings.timepicker.formattedTime;
                                                     date_time_readable = date_str + ":" + time_str; // ui readable
                                                     utc_str = date_str + " " + time_str + ":00";
                                                     utc_to_unixts = (new Date(utc_str).getTime()/1000);
+                                                    console.log(utc_str);
+                                                    console.log(utc_to_unixts);
 
                                                     $("#job_sequence_timer")[0].value = date_time_readable;
                                                     $("#job_sequence_timer")[0].title = utc_to_unixts;
@@ -1153,9 +1156,13 @@ function execute_sequence(){
         data: {"jobs": jobs_json},
         datatype: 'json',
         success: function(data) {
+            console.log(data);
             var job_ids = data.generated_keys;
+            console.log(job_ids);
             job_id = job_ids[0];
+            console.log(job_id);
             for (var index = 0; index < job_ids.length; ++index) {
+                console.log(job_ids[index]);
                 if (job_ids[index] != "invalid-job"){
                     var dom_id = index+1;
                     id_reverse_map[job_ids[index]] = dom_id;

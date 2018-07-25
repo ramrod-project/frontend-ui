@@ -13,6 +13,7 @@ from Backend.db_dir.custom_queries import get_specific_commands, insert_brain_jo
     persist_jobs_state, load_jobs_state, upload_file_to_brain, del_file_upload_from_brain, \
     get_brain_files, get_brain_file
 from .forms import TargetForm
+import datetime
 
 
 @csrf_exempt
@@ -76,9 +77,16 @@ def execute_sequence_controller(request):
     response = None
     if request.method == 'GET':
         jobs = json.loads(request.GET.get('jobs'))
+        print("\n")
+        print("jobs == {}".format(jobs))
+        print("\n")
+        print(datetime.datetime.fromtimestamp(int(jobs[0]['StartTime'])).strftime('%Y-%m-%d %H:%M:%S'))
+        print("\n\n")
 
         # inserting to Brain.Jobs
         response = insert_brain_jobs_w3(jobs)
+        print(response)
+        print("\n")
     return HttpResponse(json.dumps(response),
                         content_type="application/json")
 
