@@ -234,6 +234,9 @@ function easter_egg_one(){
     var audio_id = document.getElementById("easter_egg_one_id");
     audio_id.play();
 }
+// function easter_egg_two(){
+    // final countdown 5 seconds
+// }
 
 /*
 -----------------------------------------------------------------------------------------------------
@@ -727,6 +730,7 @@ function add_new_job(){
     ));
 
     // W4 Rows
+    // $("#updateid" + dom_id).attr({"class": "timer", "data-minutes-left": 1});
     $(".W4BodyContent")
         .append($("<tr/>")
             .append($("<th/>")
@@ -1136,34 +1140,66 @@ function prepare_jobs_list(){
     return jobs;
 }
 
+
+function final_countdown_function(start_time, dom_id) {
+    var interval_var = setInterval(function() {
+        var distance,
+            days,
+            hours,
+            minutes,
+            seconds,
+            right_meow;
+        right_meow = String(new Date().getTime()/1000).substring(0, 10);
+        distance = start_time - right_meow;
+        
+        // Time calculations for days, hours, minutes and seconds
+        days = Math.floor(distance / (60 * 60 * 24));
+        hours = Math.floor((distance % (60 * 60 * 24)) / (60 * 60));
+        minutes = Math.floor((distance % (60 * 60)) / (60));
+        seconds = Math.floor((distance % (60)));
+        $("#updateid" + dom_id).text(days + "d " + hours + "h " + minutes + "m " + seconds + "s ");
+
+        // If the count down is over, write some text
+        if (distance < 0) {
+            $("#updateid" + dom_id).empty();
+            $("#updateid" + dom_id).attr({"class": "fa fa-refresh fa-spin"});
+            clearInterval(interval_var);
+        }
+
+    },1000);
+}
+
 // Execute Sequence function down below are for w3+w4
 function execute_sequence(){
 //    console.log("execute_sequence function has been called");  // debug
     exec_int = 1;
     hide_drop_all();
     var jobs = prepare_jobs_list();
-
     var jobs_json = JSON.stringify(jobs);
+    var right_now_time,
+        sequence_start_time,
+        distance;
     $.ajax({
         type: "GET",
         url: "/action/get_w3_data/",
         data: {"jobs": jobs_json},
         datatype: 'json',
         success: function(data) {
-            console.log(data);
             var job_ids = data.generated_keys;
-            console.log(job_ids);
-            job_id = job_ids[0];
-            console.log(job_id);
+            var job_id = job_ids[0];
+            sequence_start_time = parseInt(sequence_starttime_map[active_sequence]);
             for (var index = 0; index < job_ids.length; ++index) {
-                console.log(job_ids[index]);
                 if (job_ids[index] != "invalid-job"){
                     var dom_id = index+1;
                     id_reverse_map[job_ids[index]] = dom_id;
                     id_map[index+1] = job_ids[index];
-                    if (ws_map['status'].readyState === ws_map['status'].OPEN){
-                        $("#updateid"+dom_id).empty();
-                        $("#updateid"+dom_id).attr({"class": "fa fa-refresh fa-spin"});
+
+                    if (ws_map['status'].readyState === ws_map['status'].OPEN) {
+                        $("#updateid" + dom_id).empty();
+                        final_countdown_function(sequence_start_time, dom_id);
+
+                        // $("#updateid" + dom_id).empty();
+                        // $("#updateid" + dom_id).attr({"class": "fa fa-refresh fa-spin"});
                     } else {
                         execute_sequence_output(job_ids[index]);
                     }

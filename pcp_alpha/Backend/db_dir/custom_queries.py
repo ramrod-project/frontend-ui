@@ -66,7 +66,6 @@ def insert_brain_jobs_w3(w3_jobs):
     :param w3_jobs: controller job
     :return: nothing for the moment
     """
-    print("w3_jobs == {}\n".format(w3_jobs))
     assert isinstance(w3_jobs, list)
     inserted = {"generated_keys": [],
                 "inserted": 0}
@@ -75,14 +74,13 @@ def insert_brain_jobs_w3(w3_jobs):
             # fake an ID
             inserted["generated_keys"].append("invalid-job")
         else:
-            print("{}\n".format(param_item))
+            print("param_item:\n{}\n".format(param_item))
             attempted = brain.queries.insert_jobs([param_item], verify_jobs=False)
-            # inserted["generated_keys"] = param_item["JobCommand"]["id"]
             inserted["generated_keys"].extend(attempted["generated_keys"])
             inserted["inserted"] += 1
 
     print("log: db job from W3 was inserted to Brain.Jobs")
-    print("{}\n".format(inserted))
+    print("inserted:\n{}\n".format(inserted))
     return inserted
 
 
