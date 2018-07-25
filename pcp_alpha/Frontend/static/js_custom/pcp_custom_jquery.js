@@ -71,32 +71,26 @@ $(document).ready(function() {
         date_time_readable,
         utc_str,
         utc_to_unixts;
-    $("#job_sequence_timer").datetimepicker({dateFormat:"@",
+    $("#job_sequence_timer").datetimepicker({
                                              minDate: new Date(),
                                              onClose: function(dateText, inst) {
-                                                    console.log(dateText);
-                                                    date_str = String(inst.selectedMonth) + "/" + String(inst.selectedDay) + "/" + String(inst.selectedYear);
-                                                    time_str = inst.settings.timepicker.formattedTime;
-                                                    date_time_readable = date_str + ":" + time_str; // ui readable
-                                                    utc_str = date_str + " " + time_str + ":00";
-                                                    utc_to_unixts = (new Date(utc_str).getTime()/1000);
-                                                    console.log(utc_str);
-                                                    console.log(utc_to_unixts);
-
-                                                    $("#job_sequence_timer")[0].value = date_time_readable;
-                                                    $("#job_sequence_timer")[0].title = utc_to_unixts;
-                                                    sequence_starttime_map[active_sequence] = utc_to_unixts;
+                                                 var date_split = dateText.split(" ");
+                                                 var mdy = date_split[0].split("/");
+                                                 var hm = date_split[1].split(":");
+                                                 var dt_obj = new Date(Number(mdy[2]),
+                                                                       Number(mdy[0])-1,
+                                                                       mdy[1],
+                                                                       hm[0],
+                                                                       hm[1], 0, 0);
+                                                 var py_dt = Math.floor(dt_obj.getTime()/1000).toString();
+                                                 $("#job_sequence_time_unix")[0].value = py_dt;
+                                                 sequence_starttime_map[active_sequence] = py_dt;
                                              },
                                              onSelect: function (selectedDateTime){
-                                                var date_component = Number(selectedDateTime
-                                                    .substring(0,selectedDateTime.length-6))/1000;
-                                                var time_component = selectedDateTime
-                                                    .substring(selectedDateTime.length-5, selectedDateTime.length)
-                                                    .split(':');
-                                                var time_in_sec = Number(time_component[0])*60*60 + Number(time_component[1])*60;
-                                                var final_time = Number(date_component) + Number(time_in_sec);
-                                                $("#job_sequence_timer")[0].value = final_time.toString();
                                              }});
+    var startup_date = new Date();
+    $("#job_sequence_time_unix")[0].value = Math.floor(startup_date.getTime()/1000).toString();
+    $("#job_sequence_timer").datepicker( "setDate", startup_date );
     $("#job_sequence_timer").tooltip({
                                   classes: {"ui-tooltip": "ui-corner-all ui-widget-shadow ui-state-error"},
                                   items: 'span',

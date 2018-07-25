@@ -371,7 +371,11 @@ desired effect
                 <div class="box box-primary">
                     <div class="box-header">
                         <button type="submit" id="addjob_top_button" value="0" class="btn btn-default">Add Job</button>
-                        <span class="pull-right"><label>Sequence Start</label><input id="job_sequence_timer"/></span>
+                        <span class="pull-right">
+                            <label>Sequence Start</label>
+                            <input id="job_sequence_timer"/>
+                            <input disabled=true id="job_sequence_time_unix"/>
+                        </span>
                         <div id="w3_drop_to_all" style="outline: 1px dashed #ABABAB; outline-offset: 1px; text-align: center; display: none; "><br>Drop Here to apply the command to <strong>all</strong> jobs<br><br></div>
                         <div id="w3_drop_target_to_all" style="outline: 1px dashed #ABABAB; outline-offset: 1px; text-align: center; display: none; "><br>Drop Here to apply to <strong>all</strong> jobs<br><br></div>
                     </div>
