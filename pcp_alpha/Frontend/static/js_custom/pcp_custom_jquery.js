@@ -90,12 +90,6 @@ $(document).ready(function() {
                                                 var final_time = Number(date_component) + Number(time_in_sec);
                                                 $("#job_sequence_timer")[0].value = final_time.toString();
                                              }});
-    $("#job_sequence_timer").tooltip({
-                                  classes: {"ui-tooltip": "ui-corner-all ui-widget-shadow ui-state-error"},
-                                  items: 'span',
-                                   content: "Warning: Not yet supported, brain will support user-selected StartTime in Sprint 5",
-                                });
-
     $("#searchCommand_id").tooltip({
                               classes: {"ui-tooltip": "ui-corner-all ui-widget-shadow ui-state-error"},
                               items: 'span',
