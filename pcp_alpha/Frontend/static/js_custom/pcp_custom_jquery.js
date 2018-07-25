@@ -125,6 +125,10 @@ $(document).ready(function() {
                         var row_js = JSON.parse($("#nameidjson" + row_id_str)[0].innerText);
                         $("#addressid"+i)[0].innerText = row_js.Location;
                         $("#pluginid"+i)[0].innerText = row_js.PluginName;
+                        $("#pluginid"+i)
+                            .append($("<span/>")
+                                .attr({"style": "display:none"})
+                                .append($("#nameidjson" + row_id_str)[0].innerText));
                     }
                 }
                 set_w3_job_status();
@@ -437,6 +441,10 @@ function load_job_state(){
                 var job_id = i + 1;
                 add_new_job();
                 $("#pluginid"+job_id).append(data.jobs[i].plugin);
+                $("#pluginid"+job_id)
+                    .append($("<span/>")
+                        .attr({"style": "display:none"})
+                        .append(data.jobs[i].target_js));
                 $("#addressid"+job_id).append(data.jobs[i].address);
                 if (data.jobs[i].job != null){
                     var command_td = $("#commandid"+job_id);
@@ -497,6 +505,7 @@ function save_job_state(){
     var num_jobs = $("#addjob_button")[0].value;
     for (var i = 1; i <= Number(num_jobs); i++){
         var plugin_name = $("#pluginid"+i)[0].innerText;
+        var plugin_target = $("#pluginid"+i+" span")[0].innerText;
         var address = $("#addressid"+i)[0].innerText;
         var job_cell = $("#commandid"+i+" div");
         var job_str = undefined;
@@ -509,6 +518,7 @@ function save_job_state(){
             }
         }
         data_package.jobs.push({"plugin": plugin_name,
+                                "target_js": plugin_target,
                                 "address": address,
                                  "job": job_js,
                                  "status": null});
@@ -543,10 +553,11 @@ function add_target_to_job_sc_button(){
     var row_id = $(this)[0].parentElement.parentElement.parentElement.id.substring(10, $(this)[0].id.length);
     var plugin_name_var = $("#name_tag_id"+row_id+" a span")[1].innerText;
     var location_num_var = $("#address_tag_id"+row_id)[0].innerText;
+    $("#pluginid"+inc).empty();
     $("#pluginid"+inc)
         .append(plugin_name_var)
         .append($("<span/>")
-            .attr({"id": ""+json_target_id, "style": "display:none"})
+            .attr({"style": "display:none"})
             .append(json_target_data));
     $("#addressid"+inc).append(location_num_var);
     set_w3_job_status();
@@ -912,7 +923,7 @@ function drop_target(hover_object){
 
                             $("#pluginid"+selected_row.rowIndex)
                                 .append($("<span/>")
-                                    .attr({"id": ""+json_target_id, "style": "display:none"})
+                                    .attr({"style": "display:none"})
                                     .append(json_target_data));
                         }
                     }
@@ -1108,7 +1119,7 @@ function prepare_jobs_list(){
             var uid = j+1;
             var terminal = $("#updateid"+uid).parent();
             var plugin_name_data = $("#pluginid"+(j+1))[0].textContent;  // correct json target data with plugin name
-            var json_target_data = JSON.parse($("#pluginid"+(j+1))[0].children[1].firstChild.data);
+            var json_target_data = JSON.parse($("#pluginid"+(j+1)+" span")[0].innerText);
             // var plugin_name = plugin_name_data.substring(0, plugin_name_data.indexOf("{"));  // former code
             // var location = $("#addressid"+(j+1))[0].textContent;                             // former code
             var command_json = $("#commandid"+(j+1)+" div")[0].innerText;
