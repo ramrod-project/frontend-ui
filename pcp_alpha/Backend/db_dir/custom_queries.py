@@ -74,13 +74,13 @@ def insert_brain_jobs_w3(w3_jobs):
             # fake an ID
             inserted["generated_keys"].append("invalid-job")
         else:
-            print(param_item)
+            print("param_item:\n{}\n".format(param_item))
             attempted = brain.queries.insert_jobs([param_item], verify_jobs=False)
             inserted["generated_keys"].extend(attempted["generated_keys"])
             inserted["inserted"] += 1
 
     print("log: db job from W3 was inserted to Brain.Jobs")
-    print("{}\n".format(inserted))
+    print("inserted:\n{}\n".format(inserted))
     return inserted
 
 

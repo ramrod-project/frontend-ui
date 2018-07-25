@@ -4,7 +4,7 @@ This file was created for project pcp to add jquery functionality and other java
 -----------------------------------------------------------------------------------------------------
 */
 var MAX_MANUAL_CHECK_COUNT = 30;
-var INITIAL_JOB_STATUS = "Ready";
+var INITIAL_JOB_STATUS = "Waiting";
 var inc = 0;
 var hover_int = 0;
 var sequences = {"1": new Set()};
@@ -68,28 +68,35 @@ $(document).ready(function() {
     // Date Time picker
     var date_str,
         time_str,
-        date_time_readable;
-    $("#job_sequence_timer").datetimepicker({dateFormat:"@",
+        date_time_readable,
+        utc_str,
+        utc_to_unixts;
+    $("#job_sequence_timer").datetimepicker({
                                              minDate: new Date(),
                                              onClose: function(dateText, inst) {
-                                                    date_str = String(inst.selectedMonth) + "-" + String(inst.selectedDay) + "-" + String(inst.selectedYear);
-                                                    time_str = inst.settings.timepicker.formattedTime;
-                                                    date_time_readable = date_str + ":" + time_str; // ui readable
-
-                                                    $("#job_sequence_timer")[0].value = date_time_readable;
-                                                    $("#job_sequence_timer")[0].title = dateText;
-                                                    sequence_starttime_map[active_sequence] = dateText;
+                                                 var date_split = dateText.split(" ");
+                                                 var mdy = date_split[0].split("/");
+                                                 var hm = date_split[1].split(":");
+                                                 var dt_obj = new Date(Number(mdy[2]),
+                                                                       Number(mdy[0])-1,
+                                                                       mdy[1],
+                                                                       hm[0],
+                                                                       hm[1], 0, 0);
+                                                 var py_dt = Math.floor(dt_obj.getTime()/1000).toString();
+                                                 $("#job_sequence_time_unix")[0].value = py_dt;
+                                                 sequence_starttime_map[active_sequence] = py_dt;
                                              },
                                              onSelect: function (selectedDateTime){
-                                                var date_component = Number(selectedDateTime
-                                                    .substring(0,selectedDateTime.length-6))/1000;
-                                                var time_component = selectedDateTime
-                                                    .substring(selectedDateTime.length-5, selectedDateTime.length)
-                                                    .split(':');
-                                                var time_in_sec = Number(time_component[0])*60*60 + Number(time_component[1])*60;
-                                                var final_time = Number(date_component) + Number(time_in_sec);
-                                                $("#job_sequence_timer")[0].value = final_time.toString();
                                              }});
+    var startup_date = new Date();
+    $("#job_sequence_time_unix")[0].value = Math.floor(startup_date.getTime()/1000).toString();
+    $("#job_sequence_timer").datepicker( "setDate", startup_date );
+    $("#job_sequence_timer").tooltip({
+                                  classes: {"ui-tooltip": "ui-corner-all ui-widget-shadow ui-state-error"},
+                                  items: 'span',
+                                   content: "Warning: Not yet supported, brain will support user-selected StartTime in Sprint 5",
+                                });
+
     $("#searchCommand_id").tooltip({
                               classes: {"ui-tooltip": "ui-corner-all ui-widget-shadow ui-state-error"},
                               items: 'span',
@@ -231,6 +238,9 @@ function easter_egg_one(){
     var audio_id = document.getElementById("easter_egg_one_id");
     audio_id.play();
 }
+// function easter_egg_two(){
+    // final countdown 5 seconds
+// }
 
 /*
 -----------------------------------------------------------------------------------------------------
@@ -1140,14 +1150,43 @@ function prepare_jobs_list(){
     return jobs;
 }
 
+
+function final_countdown_function(start_time, dom_id) {
+    var interval_var = setInterval(function() {
+        var distance,
+            days,
+            hours,
+            minutes,
+            seconds,
+            right_meow;
+        right_meow = String(new Date().getTime()/1000).substring(0, 10);
+        distance = start_time - right_meow;
+
+        // Time calculations for days, hours, minutes and seconds
+        days = Math.floor(distance / (60 * 60 * 24));
+        hours = Math.floor((distance % (60 * 60 * 24)) / (60 * 60));
+        minutes = Math.floor((distance % (60 * 60)) / (60));
+        seconds = Math.floor((distance % (60)));
+        $("#updateid" + dom_id).text(days + "d " + hours + "h " + minutes + "m " + seconds + "s ");
+
+        // If the count down is over, write some text
+        if (distance < 0) {
+            $("#updateid" + dom_id).empty();
+            $("#updateid" + dom_id).attr({"class": "fa fa-refresh fa-spin"});
+            clearInterval(interval_var);
+        }
+
+    },1000);
+}
+
 // Execute Sequence function down below are for w3+w4
 function execute_sequence(){
 //    console.log("execute_sequence function has been called");  // debug
     exec_int = 1;
     hide_drop_all();
     var jobs = prepare_jobs_list();
-
     var jobs_json = JSON.stringify(jobs);
+    var sequence_start_time;
     $.ajax({
         type: "GET",
         url: "/action/get_w3_data/",
@@ -1156,14 +1195,19 @@ function execute_sequence(){
         success: function(data) {
             var job_ids = data.generated_keys;
             job_id = job_ids[0];
+            sequence_start_time = parseInt(sequence_starttime_map[active_sequence]);
             for (var index = 0; index < job_ids.length; ++index) {
                 if (job_ids[index] != "invalid-job"){
                     var dom_id = index+1;
                     id_reverse_map[job_ids[index]] = dom_id;
                     id_map[index+1] = job_ids[index];
-                    if (ws_map['status'].readyState === ws_map['status'].OPEN){
-                        $("#updateid"+dom_id).empty();
-                        $("#updateid"+dom_id).attr({"class": "fa fa-refresh fa-spin"});
+
+                    if (ws_map['status'].readyState === ws_map['status'].OPEN) {
+                        $("#updateid" + dom_id).empty();
+                        final_countdown_function(sequence_start_time, dom_id);
+
+                        // $("#updateid" + dom_id).empty();
+                        // $("#updateid" + dom_id).attr({"class": "fa fa-refresh fa-spin"});
                     } else {
                         execute_sequence_output(job_ids[index]);
                     }
