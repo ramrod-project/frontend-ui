@@ -22,7 +22,7 @@ $(document).ready(function() {
 	    searching: false,
 	    paging: false,
 	    bInfo: false,
-        rowReorder: true,
+        ordering: false,
         select: true
     });
     // $(".dataTables_empty").empty();
