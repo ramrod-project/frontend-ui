@@ -15,9 +15,10 @@ var id_reverse_map = {};
 var ws_map = {};
 var active_sequence = "1";
 var exec_int = 0;
+var job_select_table;
 
 $(document).ready(function() {
-    var job_select_table = $('#job_table').DataTable({
+    job_select_table = $('#job_table').DataTable({
 	    searching: false,
 	    paging: false,
 	    bInfo: false,
@@ -66,11 +67,6 @@ $(document).ready(function() {
     });
 
     // Date Time picker
-    var date_str,
-        time_str,
-        date_time_readable,
-        utc_str,
-        utc_to_unixts;
     $("#job_sequence_timer").datetimepicker({
                                              minDate: new Date(),
                                              onClose: function(dateText, inst) {
