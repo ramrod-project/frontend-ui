@@ -15,13 +15,14 @@ var id_reverse_map = {};
 var ws_map = {};
 var active_sequence = "1";
 var exec_int = 0;
+var job_select_table;
 
 $(document).ready(function() {
-    var job_select_table = $('#job_table').DataTable({
+    job_select_table = $('#job_table').DataTable({
 	    searching: false,
 	    paging: false,
 	    bInfo: false,
-        rowReorder: true,
+        ordering: false,
         select: true
     });
     // $(".dataTables_empty").empty();
@@ -66,11 +67,6 @@ $(document).ready(function() {
     });
 
     // Date Time picker
-    var date_str,
-        time_str,
-        date_time_readable,
-        utc_str,
-        utc_to_unixts;
     $("#job_sequence_timer").datetimepicker({
                                              minDate: new Date(),
                                              onClose: function(dateText, inst) {
@@ -586,11 +582,14 @@ function add_command_to_job_sc_button(){
         counter_int,
         next_job_row,
         next_highlighted_row_num,
-        next_highlighted_job_command_row;
+        next_highlighted_job_command_row,
+        loop_int,
+        append_new_row;
 
     command_temp_str = JSON.stringify(current_command_template);  // command template as a string
-
-    if (inc === 0 || !$(".gridSelect2 tbody tr").hasClass("selected")){
+    append_new_row = 0;
+    // if no job rows are displayed, it would create one and input the command in the command column
+    if (inc === 0){
         add_new_job();  // new row in W3
         job_command_row = $("tr td#commandid"+inc);  // new job row object
 
@@ -632,16 +631,33 @@ function add_command_to_job_sc_button(){
     }
     // only if one job row is highlighted
     else if (inc !== 0 && $(".gridSelect2 tbody tr").hasClass("selected")){
-
         // highlighted row data
         selected_row = $(".gridSelect2 tbody tr.selected");
         selected_row_num = selected_row[0].children[0].innerText;
         selected_job_command_row = $("tr td#commandid"+selected_row_num);
-
         // adding command template to W3 in command column
         drop_command_into_hole(current_command_template, command_temp_str, selected_job_command_row, selected_row_num);
     }
-
+    // if job rows exist and none of the job rows are selected.
+    else if (inc!==0  && !$(".gridSelect2 tbody tr").hasClass("selected")) {
+        for (loop_int = 1; loop_int <= inc; loop_int++){
+            // if a command box is empty in the latest job row (Iterate through job rows)
+            if (!$("#commandid"+loop_int)[0].textContent){
+                drop_command_into_hole(current_command_template, command_temp_str, $("#commandid"+loop_int), loop_int);
+                break;
+            } else {
+                // if all job rows iterated and are filled append_new_row = 1
+                append_new_row = 1;
+            }
+        }
+        // if all job rows iterated and ar filled, create  new job row
+        if (append_new_row === 1){
+            add_new_job();  // new row in W3
+            job_command_row = $("tr td#commandid"+inc);  // new job row object
+            // adding command template to W3 in command column
+            drop_command_into_hole(current_command_template, command_temp_str, job_command_row, ""+inc);
+        }
+    }
     set_w3_job_status();  // setting w3 job status
 }
 
