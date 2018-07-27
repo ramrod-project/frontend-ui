@@ -98,11 +98,6 @@ $(document).ready(function() {
     var startup_date = new Date();
     $("#job_sequence_time_unix")[0].value = Math.floor(startup_date.getTime()/1000).toString();
     $("#job_sequence_timer").datepicker( "setDate", startup_date );
-    $("#job_sequence_timer").tooltip({
-                                  classes: {"ui-tooltip": "ui-corner-all ui-widget-shadow ui-state-error"},
-                                  items: 'span',
-                                   content: "Warning: Not yet supported, brain will support user-selected StartTime in Sprint 5",
-                                });
 
     $("#searchCommand_id").tooltip({
                               classes: {"ui-tooltip": "ui-corner-all ui-widget-shadow ui-state-error"},
@@ -136,13 +131,9 @@ $(document).ready(function() {
                     if (($("#jobrow"+i).css("display") != "none") && job_row_is_mutable(i)) {
                         var row_id = selected_var[0].id;
                         var row_id_str = row_id.substring(10,row_id.length);
-                        var row_js = JSON.parse($("#nameidjson" + row_id_str)[0].innerText);
-                        $("#addressid"+i)[0].innerText = row_js.Location;
-                        $("#pluginid"+i)[0].innerText = row_js.PluginName;
-                        $("#pluginid"+i)
-                            .append($("<span/>")
-                                .attr({"style": "display:none"})
-                                .append($("#nameidjson" + row_id_str)[0].innerText));
+                        var row_js_str = $("#nameidjson" + row_id_str)[0].innerText;
+                        var row_js = JSON.parse(row_js_str);
+                        drop_target_into_job_row(i.toString(), row_js, row_js_str);
                     }
                 }
                 set_w3_job_status();
@@ -381,24 +372,35 @@ function get_commands_func(){
                         .append($("<i/>").attr({"id": "add_command_to_job_id2" ,"class": "fa fa-tasks"}));
                 $("#commandIdBuilder").append(quick_action_button);
 
-                new_selector = $("<select/>")
-                    .attr({"class": "form-control mySelect", "style": "width:250px"}).css("display", "none");
+
                 for (var input_i = 0; input_i < current_command_template['Inputs'].length; input_i++){
                     new_input = document.createElement("input");
 
                     // if input.type == file_list
                     if (current_command_template["Inputs"][input_i]['Type'] === 'file_list'){
-
+                        var file_list = $(".upload_file_list li div h4");
                         // file list dropdown
+                        new_selector = $("<select/>")
+                            .attr({"class": "form-control mySelect",
+                                   "style": "width:250px"})
+                            .attr("id", "argumentid_"+input_i)
+                            .css("display", "none");
+
                         $("#commandIdBuilder")
                             .append($("<div/>")
                                 .attr({"class": "form-group"})
                                 .append(new_selector.css("display", "")));
 
-                        $.each(Object.values(dom_filename_map), function(n) {
-                            current_command_template["Inputs"][input_i]['Value'] = dom_filename_map[n];
-                            $(".mySelect").append($("<option/>").attr("value", n).text(Object.values(dom_filename_map)[n]));
-                        });
+
+                        for (var n=0; n<file_list.length; n++){
+                            current_command_template["Inputs"][input_i]['Value'] = file_list[n].innerText;
+                            $(".mySelect")
+                                .change(update_argument)
+                                .append(
+                                    $("<option/>")
+                                        .attr("value", file_list[n].innerText)
+                                        .text(file_list[n].innerText));
+                        }
                     }
                     // if input.type == textbox
                     else {
@@ -442,7 +444,22 @@ function update_argument(event){
 Functions down below are for w3
 -----------------------------------------------------------------------------------------------------
 */
+function drop_target_into_job_row(job_row_id, target_js, target_js_str=""){
+    if (job_row_is_mutable(job_row_id)){
+        if (target_js_str.length == 0){
+            target_js_str = JSON.stringify(target_js)
+        }
+        $("#pluginid"+job_row_id).empty();
+        $("#addressid"+job_row_id).empty();
+        $("#addressid"+job_row_id)[0].innerText = target_js.Location;
+        $("#pluginid"+job_row_id)[0].innerText = target_js.PluginName+":"+target_js.Port;
+        $("#pluginid"+job_row_id)
+            .append($("<span/>")
+                .attr({"style": "display:none"})
+                .append(target_js_str));
 
+    }
+}
 
 function load_job_state(){
     $("#download_status").removeClass("fa-cloud-download");
@@ -457,12 +474,10 @@ function load_job_state(){
             for (var i = 0; i < data.jobs.length; i++){
                 var job_id = i + 1;
                 add_new_job();
-                $("#pluginid"+job_id).append(data.jobs[i].plugin);
-                $("#pluginid"+job_id)
-                    .append($("<span/>")
-                        .attr({"style": "display:none"})
-                        .append(data.jobs[i].target_js));
-                $("#addressid"+job_id).append(data.jobs[i].address);
+                if (data.jobs[i].target_js != null && data.jobs[i].target_js.length > 5){
+                    var job_target_js = JSON.parse(data.jobs[i].target_js);
+                    drop_target_into_job_row(job_id, job_target_js, data.jobs[i].target_js);
+                }
                 if (data.jobs[i].job != null){
                     var command_td = $("#commandid"+job_id);
                     drop_command_into_hole(data.jobs[i].job,
@@ -534,9 +549,7 @@ function save_job_state(){
                 job_js = JSON.parse(job_str);
             }
         }
-        data_package.jobs.push({"plugin": plugin_name,
-                                "target_js": plugin_target,
-                                "address": address,
+        data_package.jobs.push({"target_js": plugin_target,
                                  "job": job_js,
                                  "status": null});
     }
@@ -1012,11 +1025,7 @@ function drop_target(hover_object){
                             // json target data
                             json_target_id = selected_var[int].children[0].children[0].children[0].id;
                             json_target_data = $("#"+json_target_id)[0].innerText;
-
-                            $("#pluginid"+selected_row.rowIndex)
-                                .append($("<span/>")
-                                    .attr({"style": "display:none"})
-                                    .append(json_target_data));
+                            drop_target_into_job_row(selected_row_id, row_js);
                         }
                     }
                 }

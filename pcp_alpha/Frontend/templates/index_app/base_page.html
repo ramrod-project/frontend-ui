@@ -232,7 +232,7 @@ desired effect
                                                 </td>
                                                 <td id="address_tag_id{{ forloop.counter0 }}" class="clickable-row-col2" onclick="#">
                                                     <a href="#">
-                                                    <span>{{ items.Location }} </span>
+                                                    <span>{{ items.Location }}</span>
                                                     </a>
                                                 </td>
                                                 <td id="action_tad_id{{ forloop.counter0 }}" style="text-align: center; width: 80px;" class="clickable-row-col3" onclick="#">
@@ -374,8 +374,8 @@ desired effect
                         <button type="submit" id="addjob_top_button" value="0" class="btn btn-default">Add Job</button>
                         <span class="pull-right">
                             <label>Sequence Start</label>
-                            <input id="job_sequence_timer"/>
-                            <input disabled=true id="job_sequence_time_unix"/>
+                            <input size="13" id="job_sequence_timer"/>
+                            <input size="9" disabled=true id="job_sequence_time_unix"/>
                         </span>
                         <div id="w3_drop_to_all" style="outline: 1px dashed #ABABAB; outline-offset: 1px; text-align: center; display: none; "><br>Drop Here to apply the command to <strong>all</strong> jobs<br><br></div>
                         <div id="w3_drop_target_to_all" style="outline: 1px dashed #ABABAB; outline-offset: 1px; text-align: center; display: none; "><br>Drop Here to apply to <strong>all</strong> jobs<br><br></div>
