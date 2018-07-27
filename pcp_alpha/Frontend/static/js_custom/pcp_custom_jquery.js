@@ -361,8 +361,7 @@ function get_commands_func(){
                         .append($("<i/>").attr({"id": "add_command_to_job_id2" ,"class": "fa fa-tasks"}));
                 $("#commandIdBuilder").append(quick_action_button);
 
-                new_selector = $("<select/>")
-                    .attr({"class": "form-control mySelect", "style": "width:250px"}).css("display", "none");
+
                 for (var input_i = 0; input_i < current_command_template['Inputs'].length; input_i++){
                     new_input = document.createElement("input");
 
@@ -370,19 +369,27 @@ function get_commands_func(){
                     if (current_command_template["Inputs"][input_i]['Type'] === 'file_list'){
                         var file_list = $(".upload_file_list li div h4");
                         // file list dropdown
+                        new_selector = $("<select/>")
+                            .attr({"class": "form-control mySelect",
+                                   "style": "width:250px"})
+                            .attr("id", "argumentid_"+input_i)
+                            .css("display", "none");
+
                         $("#commandIdBuilder")
                             .append($("<div/>")
                                 .attr({"class": "form-group"})
                                 .append(new_selector.css("display", "")));
 
-                        $.each(Object.values(dom_filename_map), function(n) {
-                            current_command_template["Inputs"][input_i]['Value'] = dom_filename_map[n];
+
+                        for (var n=0; n<file_list.length; n++){
+                            current_command_template["Inputs"][input_i]['Value'] = file_list[n].innerText;
                             $(".mySelect")
+                                .change(update_argument)
                                 .append(
                                     $("<option/>")
-                                        .attr("value", n)
-                                        .text(Object.values(dom_filename_map)[n]));
-                        });
+                                        .attr("value", file_list[n].innerText)
+                                        .text(file_list[n].innerText));
+                        }
                     }
                     // if input.type == textbox
                     else {
