@@ -16,6 +16,10 @@ var ws_map = {};
 var active_sequence = "1";
 var exec_int = 0;
 var job_select_table;
+var w3_highlighted_row,
+    w3_highlighted_array,
+    w3_content_index;
+w3_highlighted_array = [];
 
 $(document).ready(function() {
     job_select_table = $('#job_table').DataTable({
@@ -30,10 +34,17 @@ $(document).ready(function() {
     $('#job_table tbody').on( 'click', 'tr', function () {
         if ($(this).hasClass('selected')) {
             $(this).removeClass('selected');
+            w3_content_index = w3_highlighted_array.indexOf($(this)[0].rowIndex);
+            if (w3_content_index > -1){
+                w3_highlighted_array.splice(w3_content_index, 1);
+            }
+
         }
         else {
             job_select_table.$("tr.selected").removeClass('selected');
             $(this).addClass('selected');
+            w3_highlighted_row = $(this)[0].rowIndex;
+            w3_highlighted_array.push(w3_highlighted_row);
         }
     });
 
@@ -103,7 +114,7 @@ $(document).ready(function() {
 	$("#execute_button").click(execute_sequence);         // execute sequence button in 23
     $("#w3_drop_to_all").attr({"ondrop": "drop_command_to_multiple(event)",
                                "ondragover": "allowDropCommand(event)"});
-    $("#dvader_nooo_id").click(easter_egg_one);           // dvader nooo audio
+    $("#nooo_id").click(easter_egg_one);           // nooo audio
     $("#searchNameHere_id").change(filter_w1);
     $("#searchNameHere_id").keyup(filter_w1);
     $("#w1_command_active_filter").css("display", "none");
@@ -560,112 +571,100 @@ function save_job_state(){
     });
 }
 
+function quick_action_function(source, source_widget_id, source_widget){
+    /*
+    Quick action button handler for commands & targets
+    Params:
+    source =
+    source_widget_id == commandid or pluginid
+    source_widget = target or command
+     */
+    var w3_column = w3_highlighted_array,
+        command_temp_str = JSON.stringify(current_command_template),
+        new_job_row_arry_checker = [];
+
+    // For Targets
+    if (source_widget !== "command"){
+        var row_js = JSON.parse(source);
+        if (inc === 0){  // check if job rows doesn't exist in W3, create row
+            add_new_job();
+            drop_target_into_job_row(inc, row_js, source);
+        } else {  // else if no job rows are highlighted, and job rows exist
+            for (var counter_two = 1; counter_two <= inc; counter_two++){
+                if ($("tr td#" + source_widget_id + counter_two)[0].textContent === ""){
+                    drop_target_into_job_row(""+counter_two, row_js, source);
+                    break;
+                } else {
+                    new_job_row_arry_checker.push(counter_two);
+                }
+            }
+        }
+        // if all job rows iterated and all filled, create  new job row
+        if (new_job_row_arry_checker.length === inc) {
+            add_new_job();
+            drop_target_into_job_row(inc, row_js, source);
+        }
+    // For Commands
+    } else {
+        // check if job rows doesn't exist in W3, create row
+        if (inc === 0) {
+            add_new_job();
+            // $("tr td#commandid"+inc);
+            drop_command_into_hole(current_command_template,
+                                   command_temp_str,
+                                   $("tr td#" + source_widget_id + inc),
+                                   "" + inc);
+        // If job row or rows are highlighted
+        } else if (inc !== 0 && w3_column.length > 0) {
+            for (var counter_one = 0; counter_one < w3_column.length; counter_one++) {
+                drop_command_into_hole(current_command_template,
+                                       command_temp_str,
+                                       $("tr td#" + source_widget_id + w3_column[counter_one]),
+                                       "" + (counter_one + 1));
+            }
+        // else if no job rows are highlighted, and job rows exist
+        } else {
+            for (var counter_three = 1; counter_three <= inc; counter_three++) {
+                // if a command box  or plugin box is not empty in the latest job row (Iterate through job rows)
+                if ($("tr td#" + source_widget_id + counter_three)[0].textContent === "") {
+                    drop_command_into_hole(current_command_template,
+                                           command_temp_str,
+                                           $("tr td#" + source_widget_id + counter_three),
+                                           ""+counter_three);
+                    break;
+                } else {
+                    new_job_row_arry_checker.push(counter_three);
+                }
+            }
+        }
+        // if all job rows iterated and all filled, create  new job row
+        if (new_job_row_arry_checker.length === inc) {
+            add_new_job();
+            drop_command_into_hole(current_command_template,
+                command_temp_str,
+                $("tr td#" + source_widget_id + inc),
+                "" + inc);
+        }
+    }
+}
+
 function add_target_to_job_sc_button(){
     // console.log("add_target_to_job_sc");  // debug
-    // json target data
-    var json_target_id,
-    json_target_data;
-    json_target_id = $(this)[0].parentElement.parentElement.parentElement.children[0].children[0].children[0].id;
-    json_target_data = $("#"+json_target_id)[0].innerText;
+    var w1_target_row_id = $(this)[0].parentElement.parentElement.parentElement.id.substring(10, $(this)[0].id.length),
+        row_js_str = $("#nameidjson" + w1_target_row_id)[0].innerText;
+        // json_target_id = $(this)[0].parentElement.parentElement.parentElement.children[0].children[0].children[0].id,
+        // json_target_data = $("#"+json_target_id)[0].innerText;
 
-    add_new_job();
-    var job_row_id = $("#addjob_button")[0].value;
-
-    var row_id = $(this)[0].parentElement.parentElement.parentElement.id.substring(10, $(this)[0].id.length);
-
-    var target_js_str = $("#name_tag_id"+row_id+" a span")[0].innerText;
-    var target_js = JSON.parse(target_js_str);
-    drop_target_into_job_row(job_row_id, target_js, target_js_str);
+    quick_action_function(row_js_str, "pluginid", "target");
     set_w3_job_status();
+
+
 }
 
 function add_command_to_job_sc_button(){
     // console.log("add_command_to_job_sc_button");
-
-    var job_command_row,
-        command_temp_str,
-        selected_row,
-        selected_row_num,
-        selected_job_command_row,
-        counter_int,
-        next_job_row,
-        next_highlighted_row_num,
-        next_highlighted_job_command_row,
-        loop_int,
-        append_new_row;
-
-    command_temp_str = JSON.stringify(current_command_template);  // command template as a string
-    append_new_row = 0;
-    // if no job rows are displayed, it would create one and input the command in the command column
-    if (inc === 0){
-        add_new_job();  // new row in W3
-        job_command_row = $("tr td#commandid"+inc);  // new job row object
-
-        // adding command template to W3 in command column
-        drop_command_into_hole(current_command_template, command_temp_str, job_command_row, ""+inc);
-    }
-    // if more than one job row is highlighted
-    else if (inc !== 0 && $(".gridSelect2 tbody tr").hasClass("selected") &&
-        $(".gridSelect2 tbody tr.selected").nextUntil().hasClass("selected")){
-        counter_int = 0;
-
-        // first highlighted row data
-        selected_row = $(".gridSelect2 tbody tr.selected");
-        selected_row_num = selected_row[0].children[0].innerText;
-        selected_job_command_row = $("tr td#commandid"+selected_row_num);
-
-        // adding first command template to W3 in command column
-        drop_command_into_hole(current_command_template,
-                               command_temp_str,
-                               selected_job_command_row,
-                               selected_row_num);
-
-        // Checking for next highlighted job row
-        while(selected_row.nextUntil().length > counter_int){
-            next_job_row = selected_row.nextUntil()[counter_int];
-
-            // If job row is highlighted then add command to job row
-            if (next_job_row.classList.contains("selected") && next_job_row.style.display !== 'none'){
-                next_highlighted_row_num = next_job_row.children[0].innerText;
-                next_highlighted_job_command_row = $("tr td#commandid"+next_highlighted_row_num);
-                drop_command_into_hole(current_command_template,
-                                       command_temp_str,
-                                       next_highlighted_job_command_row,
-                                       next_highlighted_row_num);
-            }
-            counter_int++;
-        }
-
-    }
-    // only if one job row is highlighted
-    else if (inc !== 0 && $(".gridSelect2 tbody tr").hasClass("selected")){
-        // highlighted row data
-        selected_row = $(".gridSelect2 tbody tr.selected");
-        selected_row_num = selected_row[0].children[0].innerText;
-        selected_job_command_row = $("tr td#commandid"+selected_row_num);
-        // adding command template to W3 in command column
-        drop_command_into_hole(current_command_template, command_temp_str, selected_job_command_row, selected_row_num);
-    }
-    // if job rows exist and none of the job rows are selected.
-    else if (inc!==0  && !$(".gridSelect2 tbody tr").hasClass("selected")) {
-        for (loop_int = 1; loop_int <= inc; loop_int++){
-            // if a command box is empty in the latest job row (Iterate through job rows)
-            if (!$("#commandid"+loop_int)[0].textContent){
-                drop_command_into_hole(current_command_template, command_temp_str, $("#commandid"+loop_int), loop_int);
-                break;
-            } else {
-                // if all job rows iterated and are filled append_new_row = 1
-                append_new_row = 1;
-            }
-        }
-        // if all job rows iterated and ar filled, create  new job row
-        if (append_new_row === 1){
-            add_new_job();  // new row in W3
-            job_command_row = $("tr td#commandid"+inc);  // new job row object
-            // adding command template to W3 in command column
-            drop_command_into_hole(current_command_template, command_temp_str, job_command_row, ""+inc);
-        }
-    }
+    var command_temp_str = JSON.stringify(current_command_template);  // command template as a string
+    quick_action_function(command_temp_str,"commandid", "command");
     set_w3_job_status();  // setting w3 job status
 }
 
