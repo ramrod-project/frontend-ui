@@ -7,32 +7,13 @@ function add_file_to_dropzone_list(filename){
     var next_id = file_list_dom.length;
     // dom_filename_map[next_id] = filename;
     file_list_dom
-        .append($("<li/>")
-            .append($("<hr/>"))
-            .append($("<div/>")
-                .attr({"class": "del_file_upload_c"})
-                .append($("<h4/>")
-                    .attr({"class": "control-sidebar-subheading file_upload_name brain_filename"})
-                    .text(filename))
-                .append($("<div/>")
-                    .append($("<span>")
-                        .attr({"class": "btn btn-social-icon btn-danger btn-xs pull-right"})
-                        .append($("<i/>")
-                            .attr({"class": "fa fa-close",
-                                   "onclick": "remove_file_from_dropzone_list("+next_id+")"})
-                        )
-                    )
-                    .append($("<span>")
-                        .attr({"class": "btn btn-social-icon  btn-info btn-xs pull-left"})
-                        .append($("<a/>")
-                            .attr({"class": "fa fa-download",
-                                   "href": "/file_download/"+filename+"/"})
-                        )
-                    )
-                )
-            )
-            .append($("<br/>"))
-        );
+        .append($("<div/>")
+            .attr({"class": "form-group pcp_div_custom"})
+            .append($("<label/>")
+                .attr({"class": "control-sidebar-subheading"})
+                .append($("<a/>").attr({"class": "pcp_custom_a", "href": "/file_download/"+filename+"/"}).text(filename))
+                .append($("<a/>").attr({"class": "text-red pull-right", "href": "#"})
+                    .append($("<i/>").attr({"class": "fa fa-trash-o", "onclick": "remove_file_from_dropzone_list("+next_id+")"})))));
 
 }
 
