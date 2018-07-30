@@ -18,8 +18,8 @@ var exec_int = 0;
 var job_select_table;
 var w3_highlighted_row,
     w3_highlighted_array,
-    w3_highlighted_array = [],
     w3_content_index;
+w3_highlighted_array = [];
 
 $(document).ready(function() {
     job_select_table = $('#job_table').DataTable({
@@ -34,7 +34,7 @@ $(document).ready(function() {
     $('#job_table tbody').on( 'click', 'tr', function () {
         if ($(this).hasClass('selected')) {
             $(this).removeClass('selected');
-            w3_content_index = w3_highlighted_array.indexOf($(this)[0].innerText);
+            w3_content_index = w3_highlighted_array.indexOf($(this)[0].rowIndex);
             if (w3_content_index > -1){
                 w3_highlighted_array.splice(w3_content_index, 1);
             }
@@ -43,7 +43,7 @@ $(document).ready(function() {
         else {
             job_select_table.$("tr.selected").removeClass('selected');
             $(this).addClass('selected');
-            w3_highlighted_row = $(this)[0].innerText;
+            w3_highlighted_row = $(this)[0].rowIndex;
             w3_highlighted_array.push(w3_highlighted_row);
         }
     });
@@ -571,40 +571,43 @@ function save_job_state(){
     });
 }
 
-// create a function to either for quick action button (for commands & targets) or check specific w3 columns are filled
-function quick_action_test_function(source, highlighted_row, source_widget, test_param=""){
-    console.log("quick_action_test_function");
-    var w3_column,
-        source_data,
-        hrct,  // highlighted_row_column_type
-        counter_one,
-        counter_two,
-        command_temp_str,
-        append_new_row;
-
-    w3_column = w3_highlighted_array;
-    source_data = source;
-    hrct = highlighted_row;
-    command_temp_str = JSON.stringify(current_command_template);
-    append_new_row = 0;
-    // TODO: drop_target_into_job_row(job_row_id, target_js, target_js_str="")
-    // TODO: drop_command_into_hole(command, command_json, command_td, row_id)
+function quick_action_function(source, source_widget_id, source_widget){
+    /*
+    Quick action button handler for commands & targets
+    Params:
+    source =
+    source_widget_id == commandid or pluginid
+    source_widget = target or command
+     */
+    var w3_column = w3_highlighted_array,
+        command_temp_str = JSON.stringify(current_command_template),
+        new_job_row_arry_checker = [];
 
     // For Targets
     if (source_widget !== "command"){
-        var row_js_str = $("#nameidjson" + test_param)[0].innerText;
-        var row_js = JSON.parse(row_js_str);
+        var row_js = JSON.parse(source);
 
         // check if job rows doesn't exist in W3, create row
         if (inc === 0){
             add_new_job();
-            drop_target_into_job_row(inc, row_js, row_js_str);
+            drop_target_into_job_row(inc, row_js, source);
         }
-         // If job row or rows are highlighted
         // else if no job rows are highlighted, and job rows exist
-            // for loop
-                // if a Plugin box is not empty in the latest job row (Iterate through job rows)
-            // if all job rows iterated and all filled, create  new job row
+        else {
+            for (var counter_two = 1; counter_two <= inc; counter_two++){
+                if ($("tr td#" + source_widget_id + counter_two)[0].textContent === ""){
+                    drop_target_into_job_row(""+counter_two, row_js, source);
+                    break;
+                } else {
+                    new_job_row_arry_checker.push(counter_two);
+                }
+            }
+        }
+        // if all job rows iterated and all filled, create  new job row
+        if (new_job_row_arry_checker.length === inc) {
+            add_new_job();
+            drop_target_into_job_row(inc, row_js, source);
+        }
     }
     // For Commands
     else {
@@ -614,86 +617,64 @@ function quick_action_test_function(source, highlighted_row, source_widget, test
             // $("tr td#commandid"+inc);
             drop_command_into_hole(current_command_template,
                                    command_temp_str,
-                                   $("tr td#" + highlighted_row + inc),
+                                   $("tr td#" + source_widget_id + inc),
                                    "" + inc);
         }
         // If job row or rows are highlighted
         else if (inc !== 0 && w3_column.length > 0) {
-            for (counter_one = 0; counter_one < w3_column.length; counter_one++) {
+            for (var counter_one = 0; counter_one < w3_column.length; counter_one++) {
                 drop_command_into_hole(current_command_template,
                     command_temp_str,
-                    $("tr td#" + highlighted_row + w3_column[counter_one]),
+                    $("tr td#" + source_widget_id + w3_column[counter_one]),
                     "" + (counter_one + 1));
             }
         }
         // else if no job rows are highlighted, and job rows exist
         else {
-            for (counter_two = 1; counter_two <= inc; counter_two++) {
+            for (var counter_three = 1; counter_three <= inc; counter_three++) {
                 // if a command box  or plugin box is not empty in the latest job row (Iterate through job rows)
-                if ($("tr td#" + highlighted_row + counter_two)[0].textContent === "") {
+                if ($("tr td#" + source_widget_id + counter_three)[0].textContent === "") {
                     drop_command_into_hole(current_command_template,
-                        command_temp_str,
-                        $("tr td#" + highlighted_row + w3_column[counter_two]));
-                    append_new_row = 0;
+                                           command_temp_str,
+                                           $("tr td#" + source_widget_id + counter_three),
+                                           ""+counter_three);
                     break;
                 } else {
-                    append_new_row = 1;
+                    new_job_row_arry_checker.push(counter_three);
                 }
             }
-            // if all job rows iterated and all filled, create  new job row
-            if (append_new_row !== 0) {
-                add_new_job();
-                drop_command_into_hole(current_command_template,
-                    command_temp_str,
-                    $("tr td#" + highlighted_row + inc),
-                    "" + inc);
-            }
+            console.log(new_job_row_arry_checker);
+        }
+        // if all job rows iterated and all filled, create  new job row
+        if (new_job_row_arry_checker.length === inc) {
+            add_new_job();
+            drop_command_into_hole(current_command_template,
+                command_temp_str,
+                $("tr td#" + source_widget_id + inc),
+                "" + inc);
         }
     }
 }
 
-// iterate job rows return array of highlighted job rows
-// function highlighted_job_rows
-
 function add_target_to_job_sc_button(){
     console.log("add_target_to_job_sc");  // debug
-    var json_target_id,  // json target data
-    json_target_data,
-    test_var1,
-    test_var2;
 
-    json_target_id = $(this)[0].parentElement.parentElement.parentElement.children[0].children[0].children[0].id;
-    json_target_data = $("#"+json_target_id)[0].innerText;
+    var w1_target_row_id = $(this)[0].parentElement.parentElement.parentElement.id.substring(10, $(this)[0].id.length),
+        row_js_str = $("#nameidjson" + w1_target_row_id)[0].innerText;
+        // json_target_id = $(this)[0].parentElement.parentElement.parentElement.children[0].children[0].children[0].id,
+        // json_target_data = $("#"+json_target_id)[0].innerText;
 
-    // add_new_job();
-    var w1_target_row_id = $(this)[0].parentElement.parentElement.parentElement.id.substring(10, $(this)[0].id.length);
-    var plugin_name_var = $("#name_tag_id"+w1_target_row_id+" a span")[1].innerText;
-    var location_num_var = $("#address_tag_id"+w1_target_row_id)[0].innerText;
-
-    test_var1 = [plugin_name_var, location_num_var];
-    quick_action_test_function(test_var1, "pluginid", "target", w1_target_row_id);
-
-    // $("#pluginid"+inc).empty();
-    // $("#pluginid"+inc)
-    //     .append(plugin_name_var)
-    //     .append($("<span/>")
-    //         .attr({"style": "display:none"})
-    //         .append(json_target_data));
-    // $("#addressid"+inc).append(location_num_var);
+    quick_action_function(row_js_str, "pluginid", "target");
     set_w3_job_status();
 
 
 }
 
 function add_command_to_job_sc_button(){
-    console.log("add_command_to_job_sc_button");
+    // console.log("add_command_to_job_sc_button");
 
-    var command_temp_str,
-        append_new_row,
-        test_var;
-
-    command_temp_str = JSON.stringify(current_command_template);  // command template as a string
-    quick_action_test_function(command_temp_str,"commandid", "command");
+    var command_temp_str = JSON.stringify(current_command_template);  // command template as a string
+    quick_action_function(command_temp_str,"commandid", "command");
     set_w3_job_status();  // setting w3 job status
 }
 
