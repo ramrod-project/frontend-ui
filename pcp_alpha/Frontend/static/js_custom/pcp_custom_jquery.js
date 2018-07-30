@@ -4,7 +4,7 @@ This file was created for project pcp to add jquery functionality and other java
 -----------------------------------------------------------------------------------------------------
 */
 var MAX_MANUAL_CHECK_COUNT = 30;
-var INITIAL_JOB_STATUS = "Ready";
+var INITIAL_JOB_STATUS = "Waiting";
 var inc = 0;
 var hover_int = 0;
 var sequences = {"1": new Set()};
@@ -15,13 +15,14 @@ var id_reverse_map = {};
 var ws_map = {};
 var active_sequence = "1";
 var exec_int = 0;
+var job_select_table;
 
 $(document).ready(function() {
-    var job_select_table = $('#job_table').DataTable({
+    job_select_table = $('#job_table').DataTable({
 	    searching: false,
 	    paging: false,
 	    bInfo: false,
-        rowReorder: true,
+        ordering: false,
         select: true
     });
     // $(".dataTables_empty").empty();
@@ -66,35 +67,26 @@ $(document).ready(function() {
     });
 
     // Date Time picker
-    var date_str,
-        time_str,
-        date_time_readable;
-    $("#job_sequence_timer").datetimepicker({dateFormat:"@",
+    $("#job_sequence_timer").datetimepicker({
                                              minDate: new Date(),
                                              onClose: function(dateText, inst) {
-                                                    date_str = String(inst.selectedMonth) + "-" + String(inst.selectedDay) + "-" + String(inst.selectedYear);
-                                                    time_str = inst.settings.timepicker.formattedTime;
-                                                    date_time_readable = date_str + ":" + time_str; // ui readable
-
-                                                    $("#job_sequence_timer")[0].value = date_time_readable;
-                                                    $("#job_sequence_timer")[0].title = dateText;
-                                                    sequence_starttime_map[active_sequence] = dateText;
+                                                 var date_split = dateText.split(" ");
+                                                 var mdy = date_split[0].split("/");
+                                                 var hm = date_split[1].split(":");
+                                                 var dt_obj = new Date(Number(mdy[2]),
+                                                                       Number(mdy[0])-1,
+                                                                       mdy[1],
+                                                                       hm[0],
+                                                                       hm[1], 0, 0);
+                                                 var py_dt = Math.floor(dt_obj.getTime()/1000).toString();
+                                                 $("#job_sequence_time_unix")[0].value = py_dt;
+                                                 sequence_starttime_map[active_sequence] = py_dt;
                                              },
                                              onSelect: function (selectedDateTime){
-                                                var date_component = Number(selectedDateTime
-                                                    .substring(0,selectedDateTime.length-6))/1000;
-                                                var time_component = selectedDateTime
-                                                    .substring(selectedDateTime.length-5, selectedDateTime.length)
-                                                    .split(':');
-                                                var time_in_sec = Number(time_component[0])*60*60 + Number(time_component[1])*60;
-                                                var final_time = Number(date_component) + Number(time_in_sec);
-                                                $("#job_sequence_timer")[0].value = final_time.toString();
                                              }});
-    $("#job_sequence_timer").tooltip({
-                                  classes: {"ui-tooltip": "ui-corner-all ui-widget-shadow ui-state-error"},
-                                  items: 'span',
-                                   content: "Warning: Not yet supported, brain will support user-selected StartTime in Sprint 5",
-                                });
+    var startup_date = new Date();
+    $("#job_sequence_time_unix")[0].value = Math.floor(startup_date.getTime()/1000).toString();
+    $("#job_sequence_timer").datepicker( "setDate", startup_date );
 
     $("#searchCommand_id").tooltip({
                               classes: {"ui-tooltip": "ui-corner-all ui-widget-shadow ui-state-error"},
@@ -128,9 +120,9 @@ $(document).ready(function() {
                     if (($("#jobrow"+i).css("display") != "none") && job_row_is_mutable(i)) {
                         var row_id = selected_var[0].id;
                         var row_id_str = row_id.substring(10,row_id.length);
-                        var row_js = JSON.parse($("#nameidjson" + row_id_str)[0].innerText);
-                        $("#addressid"+i)[0].innerText = row_js.Location;
-                        $("#pluginid"+i)[0].innerText = row_js.PluginName;
+                        var row_js_str = $("#nameidjson" + row_id_str)[0].innerText;
+                        var row_js = JSON.parse(row_js_str);
+                        drop_target_into_job_row(i.toString(), row_js, row_js_str);
                     }
                 }
                 set_w3_job_status();
@@ -233,6 +225,9 @@ function easter_egg_one(){
     var audio_id = document.getElementById("easter_egg_one_id");
     audio_id.play();
 }
+// function easter_egg_two(){
+    // final countdown 5 seconds
+// }
 
 /*
 -----------------------------------------------------------------------------------------------------
@@ -366,24 +361,35 @@ function get_commands_func(){
                         .append($("<i/>").attr({"id": "add_command_to_job_id2" ,"class": "fa fa-tasks"}));
                 $("#commandIdBuilder").append(quick_action_button);
 
-                new_selector = $("<select/>")
-                    .attr({"class": "form-control mySelect", "style": "width:250px"}).css("display", "none");
+
                 for (var input_i = 0; input_i < current_command_template['Inputs'].length; input_i++){
                     new_input = document.createElement("input");
 
                     // if input.type == file_list
                     if (current_command_template["Inputs"][input_i]['Type'] === 'file_list'){
-
+                        var file_list = $(".upload_file_list li div h4");
                         // file list dropdown
+                        new_selector = $("<select/>")
+                            .attr({"class": "form-control mySelect",
+                                   "style": "width:250px"})
+                            .attr("id", "argumentid_"+input_i)
+                            .css("display", "none");
+
                         $("#commandIdBuilder")
                             .append($("<div/>")
                                 .attr({"class": "form-group"})
                                 .append(new_selector.css("display", "")));
 
-                        $.each(Object.values(dom_filename_map), function(n) {
-                            current_command_template["Inputs"][input_i]['Value'] = dom_filename_map[n];
-                            $(".mySelect").append($("<option/>").attr("value", n).text(Object.values(dom_filename_map)[n]));
-                        });
+
+                        for (var n=0; n<file_list.length; n++){
+                            current_command_template["Inputs"][input_i]['Value'] = file_list[n].innerText;
+                            $(".mySelect")
+                                .change(update_argument)
+                                .append(
+                                    $("<option/>")
+                                        .attr("value", file_list[n].innerText)
+                                        .text(file_list[n].innerText));
+                        }
                     }
                     // if input.type == textbox
                     else {
@@ -427,7 +433,22 @@ function update_argument(event){
 Functions down below are for w3
 -----------------------------------------------------------------------------------------------------
 */
+function drop_target_into_job_row(job_row_id, target_js, target_js_str=""){
+    if (job_row_is_mutable(job_row_id)){
+        if (target_js_str.length == 0){
+            target_js_str = JSON.stringify(target_js)
+        }
+        $("#pluginid"+job_row_id).empty();
+        $("#addressid"+job_row_id).empty();
+        $("#addressid"+job_row_id)[0].innerText = target_js.Location;
+        $("#pluginid"+job_row_id)[0].innerText = target_js.PluginName+":"+target_js.Port;
+        $("#pluginid"+job_row_id)
+            .append($("<span/>")
+                .attr({"style": "display:none"})
+                .append(target_js_str));
 
+    }
+}
 
 function load_job_state(){
     $("#download_status").removeClass("fa-cloud-download");
@@ -442,8 +463,10 @@ function load_job_state(){
             for (var i = 0; i < data.jobs.length; i++){
                 var job_id = i + 1;
                 add_new_job();
-                $("#pluginid"+job_id).append(data.jobs[i].plugin);
-                $("#addressid"+job_id).append(data.jobs[i].address);
+                if (data.jobs[i].target_js != null && data.jobs[i].target_js.length > 5){
+                    var job_target_js = JSON.parse(data.jobs[i].target_js);
+                    drop_target_into_job_row(job_id, job_target_js, data.jobs[i].target_js);
+                }
                 if (data.jobs[i].job != null){
                     var command_td = $("#commandid"+job_id);
                     drop_command_into_hole(data.jobs[i].job,
@@ -503,6 +526,7 @@ function save_job_state(){
     var num_jobs = $("#addjob_button")[0].value;
     for (var i = 1; i <= Number(num_jobs); i++){
         var plugin_name = $("#pluginid"+i)[0].innerText;
+        var plugin_target = $("#pluginid"+i+" span")[0].innerText;
         var address = $("#addressid"+i)[0].innerText;
         var job_cell = $("#commandid"+i+" div");
         var job_str = undefined;
@@ -514,8 +538,7 @@ function save_job_state(){
                 job_js = JSON.parse(job_str);
             }
         }
-        data_package.jobs.push({"plugin": plugin_name,
-                                "address": address,
+        data_package.jobs.push({"target_js": plugin_target,
                                  "job": job_js,
                                  "status": null});
     }
@@ -546,18 +569,14 @@ function add_target_to_job_sc_button(){
     json_target_data = $("#"+json_target_id)[0].innerText;
 
     add_new_job();
+    var job_row_id = $("#addjob_button")[0].value;
+
     var row_id = $(this)[0].parentElement.parentElement.parentElement.id.substring(10, $(this)[0].id.length);
-    var plugin_name_var = $("#name_tag_id"+row_id+" a span")[1].innerText;
-    var location_num_var = $("#address_tag_id"+row_id)[0].innerText;
-    $("#pluginid"+inc)
-        .append(plugin_name_var)
-        .append($("<span/>")
-            .attr({"id": ""+json_target_id, "style": "display:none"})
-            .append(json_target_data));
-    $("#addressid"+inc).append(location_num_var);
+
+    var target_js_str = $("#name_tag_id"+row_id+" a span")[0].innerText;
+    var target_js = JSON.parse(target_js_str);
+    drop_target_into_job_row(job_row_id, target_js, target_js_str);
     set_w3_job_status();
-
-
 }
 
 function add_command_to_job_sc_button(){
@@ -571,11 +590,14 @@ function add_command_to_job_sc_button(){
         counter_int,
         next_job_row,
         next_highlighted_row_num,
-        next_highlighted_job_command_row;
+        next_highlighted_job_command_row,
+        loop_int,
+        append_new_row;
 
     command_temp_str = JSON.stringify(current_command_template);  // command template as a string
-
-    if (inc === 0 || !$(".gridSelect2 tbody tr").hasClass("selected")){
+    append_new_row = 0;
+    // if no job rows are displayed, it would create one and input the command in the command column
+    if (inc === 0){
         add_new_job();  // new row in W3
         job_command_row = $("tr td#commandid"+inc);  // new job row object
 
@@ -617,16 +639,33 @@ function add_command_to_job_sc_button(){
     }
     // only if one job row is highlighted
     else if (inc !== 0 && $(".gridSelect2 tbody tr").hasClass("selected")){
-
         // highlighted row data
         selected_row = $(".gridSelect2 tbody tr.selected");
         selected_row_num = selected_row[0].children[0].innerText;
         selected_job_command_row = $("tr td#commandid"+selected_row_num);
-
         // adding command template to W3 in command column
         drop_command_into_hole(current_command_template, command_temp_str, selected_job_command_row, selected_row_num);
     }
-
+    // if job rows exist and none of the job rows are selected.
+    else if (inc!==0  && !$(".gridSelect2 tbody tr").hasClass("selected")) {
+        for (loop_int = 1; loop_int <= inc; loop_int++){
+            // if a command box is empty in the latest job row (Iterate through job rows)
+            if (!$("#commandid"+loop_int)[0].textContent){
+                drop_command_into_hole(current_command_template, command_temp_str, $("#commandid"+loop_int), loop_int);
+                break;
+            } else {
+                // if all job rows iterated and are filled append_new_row = 1
+                append_new_row = 1;
+            }
+        }
+        // if all job rows iterated and ar filled, create  new job row
+        if (append_new_row === 1){
+            add_new_job();  // new row in W3
+            job_command_row = $("tr td#commandid"+inc);  // new job row object
+            // adding command template to W3 in command column
+            drop_command_into_hole(current_command_template, command_temp_str, job_command_row, ""+inc);
+        }
+    }
     set_w3_job_status();  // setting w3 job status
 }
 
@@ -915,11 +954,7 @@ function drop_target(hover_object){
                             // json target data
                             json_target_id = selected_var[int].children[0].children[0].children[0].id;
                             json_target_data = $("#"+json_target_id)[0].innerText;
-
-                            $("#pluginid"+selected_row.rowIndex)
-                                .append($("<span/>")
-                                    .attr({"id": ""+json_target_id, "style": "display:none"})
-                                    .append(json_target_data));
+                            drop_target_into_job_row(selected_row_id, row_js);
                         }
                     }
                 }
@@ -1114,7 +1149,7 @@ function prepare_jobs_list(){
             var uid = j+1;
             var terminal = $("#updateid"+uid).parent();
             var plugin_name_data = $("#pluginid"+(j+1))[0].textContent;  // correct json target data with plugin name
-            var json_target_data = JSON.parse($("#pluginid"+(j+1))[0].children[1].firstChild.data);
+            var json_target_data = JSON.parse($("#pluginid"+(j+1)+" span")[0].innerText);
             // var plugin_name = plugin_name_data.substring(0, plugin_name_data.indexOf("{"));  // former code
             // var location = $("#addressid"+(j+1))[0].textContent;                             // former code
             var command_json = $("#commandid"+(j+1)+" div")[0].innerText;
@@ -1135,14 +1170,43 @@ function prepare_jobs_list(){
     return jobs;
 }
 
+
+function final_countdown_function(start_time, dom_id) {
+    var interval_var = setInterval(function() {
+        var distance,
+            days,
+            hours,
+            minutes,
+            seconds,
+            right_meow;
+        right_meow = String(new Date().getTime()/1000).substring(0, 10);
+        distance = start_time - right_meow;
+
+        // Time calculations for days, hours, minutes and seconds
+        days = Math.floor(distance / (60 * 60 * 24));
+        hours = Math.floor((distance % (60 * 60 * 24)) / (60 * 60));
+        minutes = Math.floor((distance % (60 * 60)) / (60));
+        seconds = Math.floor((distance % (60)));
+        $("#updateid" + dom_id).text(days + "d " + hours + "h " + minutes + "m " + seconds + "s ");
+
+        // If the count down is over, write some text
+        if (distance < 0) {
+            $("#updateid" + dom_id).empty();
+            $("#updateid" + dom_id).attr({"class": "fa fa-refresh fa-spin"});
+            clearInterval(interval_var);
+        }
+
+    },1000);
+}
+
 // Execute Sequence function down below are for w3+w4
 function execute_sequence(){
 //    console.log("execute_sequence function has been called");  // debug
     exec_int = 1;
     hide_drop_all();
     var jobs = prepare_jobs_list();
-
     var jobs_json = JSON.stringify(jobs);
+    var sequence_start_time;
     $.ajax({
         type: "GET",
         url: "/action/get_w3_data/",
@@ -1151,14 +1215,19 @@ function execute_sequence(){
         success: function(data) {
             var job_ids = data.generated_keys;
             job_id = job_ids[0];
+            sequence_start_time = parseInt(sequence_starttime_map[active_sequence]);
             for (var index = 0; index < job_ids.length; ++index) {
                 if (job_ids[index] != "invalid-job"){
                     var dom_id = index+1;
                     id_reverse_map[job_ids[index]] = dom_id;
                     id_map[index+1] = job_ids[index];
-                    if (ws_map['status'].readyState === ws_map['status'].OPEN){
-                        $("#updateid"+dom_id).empty();
-                        $("#updateid"+dom_id).attr({"class": "fa fa-refresh fa-spin"});
+
+                    if (ws_map['status'].readyState === ws_map['status'].OPEN) {
+                        $("#updateid" + dom_id).empty();
+                        final_countdown_function(sequence_start_time, dom_id);
+
+                        // $("#updateid" + dom_id).empty();
+                        // $("#updateid" + dom_id).attr({"class": "fa fa-refresh fa-spin"});
                     } else {
                         execute_sequence_output(job_ids[index]);
                     }

@@ -3,12 +3,14 @@ import rethinkdb as rtdb
 from rethinkdb.errors import ReqlOpFailedError, ReqlDriverError
 import brain.jobs as BJ
 
+
 def switch_to_done(straight_to_done=True):
     connection_var = rtdb.connect()
     query_obj = rtdb.db("Brain").table("Jobs").changes(squash=False).run(connection_var)
     for query_item in query_obj:
         if query_item and query_item.get("new_val") and query_item['new_val'].get("id") and \
-                query_item['new_val'].get("Status") != "Done":
+                query_item['new_val'].get("Status") != "Done" and \
+                query_item['new_val'].get("Status") != "Waiting":
             print(query_item['new_val']['id'])
             print(query_item['new_val']['Status'])
             current_status = query_item['new_val'].get("Status")
@@ -29,6 +31,7 @@ def switch_to_done(straight_to_done=True):
             print(rtdb.db("Brain").table("Jobs").get(
                 query_item['new_val']['id']).update({"Status": new_status}).run(connection_var))
             sleep(3)
+
 
 if __name__ == "__main__":
     while True:
