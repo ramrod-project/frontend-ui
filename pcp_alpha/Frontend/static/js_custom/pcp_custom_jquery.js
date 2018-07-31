@@ -49,6 +49,11 @@ $(document).ready(function() {
     });
 
     ws_map["status"] = open_websocket("status", status_change_ws_callback);
+    ws_map["files"] = open_websocket("files", files_change_ws_callback);
+
+    $("#upload_files_need_refreshed").hide();
+
+
     clear_new_jobs();
     synchronize_job_sequence_tabs(active_sequence);
 	$("tr td.clickable-row-col1").click(get_commands_func);   // displays commands in w2
@@ -201,6 +206,10 @@ function status_change_ws_callback(message) {
             }
         }
     }
+}
+
+function files_change_ws_callback(message){
+    $("#upload_files_need_refreshed").show();
 }
 
 // ** TESTING ONLY **
