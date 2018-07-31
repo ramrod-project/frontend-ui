@@ -4,19 +4,25 @@ var dom_filename_map = {};
 
 function add_file_to_dropzone_list(filename){
     var file_list_dom = $(".upload_file_list");
-    var next_id = file_list_dom.length;
+    var next_id = $(".upload_file_list li").length;
     // dom_filename_map[next_id] = filename;
     file_list_dom
-        .append($("<div/>")
-            .attr({"class": "form-group pcp_div_custom"})
-            .append($("<label/>")
-                .attr({"class": "control-sidebar-subheading"})
-                .append($("<a/>").attr({"style": "color:white;",
-                                        "onmouseover": "this.style.color='aqua'" ,
-                                        "onmouseout":"this.style.color='white'",
-                                        "href": "/file_download/"+filename+"/"}).text(filename))
-                .append($("<a/>").attr({"class": "text-red pull-right", "href": "#"})
-                    .append($("<i/>").attr({"class": "fa fa-trash-o", "onclick": "remove_file_from_dropzone_list("+next_id+")"})))));
+        .append($("<li/>")
+            .append($("<div/>")
+                .attr({"class": "form-group pcp_div_custom"})
+                .append($("<label/>")
+                    .attr({"class": "control-sidebar-subheading"})
+                    .append($("<a/>").attr({"style": "color:white;",
+                                            "onmouseover": "this.style.color='aqua'" ,
+                                            "onmouseout":"this.style.color='white'",
+                                            "href": "/file_download/"+filename+"/"}).text(filename))
+                    .append($("<a/>").attr({"class": "text-red pull-right", "href": "#"})
+                        .append($("<i/>").attr({"class": "fa fa-trash-o", "onclick": "remove_file_from_dropzone_list("+next_id+")"})
+                        )
+                    )
+                )
+            )
+        );
 
 }
 
@@ -105,6 +111,7 @@ var myDropzone = new Dropzone("#dropzone_testid", {
             this.removeFile(file);
             if (this.getUploadingFiles().length === 0 && this.getQueuedFiles().length === 0) {
                 $(".progress")[0].style.visibility = "hidden";
+                $('.progress-bar').attr('style', "width: 0%");
             }
         });
 
