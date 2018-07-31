@@ -11,7 +11,10 @@ function add_file_to_dropzone_list(filename){
             .attr({"class": "form-group pcp_div_custom"})
             .append($("<label/>")
                 .attr({"class": "control-sidebar-subheading"})
-                .append($("<a/>").attr({"class": "pcp_custom_a", "href": "/file_download/"+filename+"/"}).text(filename))
+                .append($("<a/>").attr({"style": "color:white;",
+                                        "onmouseover": "this.style.color='aqua'" ,
+                                        "onmouseout":"this.style.color='white'",
+                                        "href": "/file_download/"+filename+"/"}).text(filename))
                 .append($("<a/>").attr({"class": "text-red pull-right", "href": "#"})
                     .append($("<i/>").attr({"class": "fa fa-trash-o", "onclick": "remove_file_from_dropzone_list("+next_id+")"})))));
 
