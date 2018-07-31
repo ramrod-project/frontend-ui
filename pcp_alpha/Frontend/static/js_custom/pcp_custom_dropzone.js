@@ -3,8 +3,8 @@
 var dom_filename_map = {};
 
 function add_file_to_dropzone_list(filename){
-    var file_list_dom = $(".upload_file_list");
-    var next_id = $(".upload_file_list li").length;
+    var file_list_dom = $(".upload_file_list"),
+        next_id = $(".upload_file_list li").length;
     // dom_filename_map[next_id] = filename;
     file_list_dom
         .append($("<li/>")
@@ -23,7 +23,6 @@ function add_file_to_dropzone_list(filename){
                 )
             )
         );
-
 }
 
 
@@ -112,6 +111,7 @@ var myDropzone = new Dropzone("#dropzone_testid", {
             if (this.getUploadingFiles().length === 0 && this.getQueuedFiles().length === 0) {
                 $(".progress")[0].style.visibility = "hidden";
                 $('.progress-bar').attr('style', "width: 0%");
+                populate_file_listing();
             }
         });
 
