@@ -41,6 +41,10 @@
     <!--for template inheritance-->
     <style>
         #draggable { width: 150px; height: 150px; padding: 0.5em; }
+        div.pcp_div_custom {
+            padding-left: 20px;
+            padding-right: 20px;
+        }
     </style>
     {% block styles %}{% endblock %}
 </head>
@@ -482,7 +486,7 @@ desired effect
     <!-- Create the tabs -->
     <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
       <li class="active"><a href="#control-sidebar-home-tab" data-toggle="tab"><i class="fa fa-dropbox"></i></a></li>
-      <li><a href="#control-sidebar-settings-tab" data-toggle="tab"><i class="fa fa-gears"></i></a></li>
+      <li><a href="#control-sidebar-settings-tab" data-toggle="tab"><i class="fa fa-plug"></i></a></li>
     </ul>
     <!-- Tab panes -->
     <div class="tab-content">
@@ -525,9 +529,7 @@ desired effect
 
         <!-- /.control-sidebar-menu -->
           <!--File Uploaded List-->
-        <h3 class="control-sidebar-heading">List of File(s) Uploaded</h3>
-
-          <span id="upload_file_refresh" class="fa fa-refresh" ></span>
+        <h3 class="control-sidebar-heading"><span id="upload_file_refresh" class="text-aqua fa fa-refresh" ></span>  List of File(s) Uploaded</h3>
         <ul class="control-sidebar-menu upload_file_list">
         </ul>
           <!--/File Uploaded List-->
