@@ -307,6 +307,7 @@ function get_commands_func(){
         data: {"plugin_name": plugin_name_var},
         datatype: 'json',
         success: function(data) {
+            console.log($(".theContent")[0]);
 
             // check if w2 should re-render or not
             if($(".theContent li a").length > 0){
@@ -326,6 +327,7 @@ function get_commands_func(){
 
         	$(".theContent").empty();
 
+            // HERE
             // display command(s) in w2
             if (data.length == 1){
                 $(".theContent").append($("<li/>").text(data));
@@ -333,13 +335,14 @@ function get_commands_func(){
                 for(var i = 0; i < data.length; i++) {
                     $(".theContent")
                         .append($("<li id='commandid' class='commandclass' onclick='#'/>")
-                            .append($("<a id='acommandid' class='acommandclass' href='#'/>")
+                            .append($("<a/>")
+                                .attr({"id": "acommandid"+(i+1), "class": "acommandclass", "href": "#"})
                                 .text(data[i].CommandName)));
                 }
             }
-            $(".theContent")
-                .append("<div/>")
-                .attr({"style": "width:250px"});
+            // $(".theContent")
+            //     .append("<div/>")
+            //     .attr({"style": "width:250px"});
             $(".theContentHeader")
                 .append("<h2 class='box-title'/>")
                 .text(plugin_name_var + "  command list");
