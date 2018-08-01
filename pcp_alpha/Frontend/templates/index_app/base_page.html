@@ -41,6 +41,10 @@
     <!--for template inheritance-->
     <style>
         #draggable { width: 150px; height: 150px; padding: 0.5em; }
+        div.pcp_div_custom {
+            padding-left: 20px;
+            padding-right: 20px;
+        }
     </style>
     {% block styles %}{% endblock %}
 </head>
@@ -474,7 +478,7 @@ desired effect
         <strong>Version 1.0.5</strong>
     </div>
     <!-- Default to the left -->
-    <strong>Demo Version for the <a id="dvader_nooo_id" href="#">PCP Project</a></strong> :)
+    <strong>Demo Version for the <a id="nooo_id" href="#">PCP Project</a></strong> :)
   </footer>
 
   <!-- Control Sidebar -->
@@ -482,7 +486,7 @@ desired effect
     <!-- Create the tabs -->
     <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
       <li class="active"><a href="#control-sidebar-home-tab" data-toggle="tab"><i class="fa fa-dropbox"></i></a></li>
-      <li><a href="#control-sidebar-settings-tab" data-toggle="tab"><i class="fa fa-gears"></i></a></li>
+      <li><a href="#control-sidebar-settings-tab" data-toggle="tab"><i class="fa fa-plug"></i></a></li>
     </ul>
     <!-- Tab panes -->
     <div class="tab-content">
@@ -525,9 +529,14 @@ desired effect
 
         <!-- /.control-sidebar-menu -->
           <!--File Uploaded List-->
-        <h3 class="control-sidebar-heading">List of File(s) Uploaded</h3>
+        <h3 class="control-sidebar-heading">
+            <span id="upload_file_refresh" class="text-aqua fa fa-refresh" ></span>
+            <span class="badge bg-green" id="upload_files_need_refreshed">
+                File list changed, refresh
+            </span>
+            List of File(s)
+        </h3>
 
-          <span id="upload_file_refresh" class="fa fa-refresh" ></span>
         <ul class="control-sidebar-menu upload_file_list">
         </ul>
           <!--/File Uploaded List-->
@@ -577,8 +586,6 @@ desired effect
 <script src="{% static 'AdminLTE/bower_components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
 <!-- AdminLTE App -->
 <script src="{% static 'AdminLTE/dist/js/adminlte.min.js' %}"></script>
-<!-- Project's custom js file -->
-<script src="{% static 'js_custom/pcp_custom_jquery.js' %}"></script>
 <!--Data Table jQuery-->
 <script src="{% static 'DataTables/js/jquery.dataTables.min.js' %}"></script>
 <script src="{% static 'DataTables/datatables.min.js' %}"></script>
@@ -594,6 +601,8 @@ desired effect
 <script src="{% static 'External_js_files/datetime-picker.js' %}"></script>
 <!--for template inheritance-->
 <script src="{% static 'js_custom/pcp_custom_targets.js' %}"></script>
+<!-- Project's custom js file -->
+<script src="{% static 'js_custom/pcp_custom_jquery.js' %}"></script>
 {% block extra_js %}{% endblock extra_js %}
 </body>
 </html>
