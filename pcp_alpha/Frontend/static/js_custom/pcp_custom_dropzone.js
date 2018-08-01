@@ -46,6 +46,7 @@ function populate_file_listing(){
                 add_file_to_dropzone_list(filename);
             }
             file_refresh.removeClass("fa-spin");
+            $("#upload_files_need_refreshed").hide();
         }
     });
 }
