@@ -326,8 +326,7 @@ function get_commands_func(){
             }
 
         	$(".theContent").empty();
-
-            // HERE
+            
             // display command(s) in w2
             if (data.length == 1){
                 $(".theContent").append($("<li/>").text(data));
