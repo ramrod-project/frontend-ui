@@ -106,6 +106,26 @@ _TEST_COMMANDS = [
     },
 ]
 
+plugin1_controller = {
+    "id": "1",
+    "Name": "Plugin1",
+    "State": "Available",
+    "DesiredState": "",
+    "Interface": "",
+    "ExternalPorts": ["9999"],
+    "InternalPorts": ["9999"]
+}
+
+plugin2_controller = {
+    "id": "2",
+    "Name": "Plugin2",
+    "State": "Available",
+    "DesiredState": "",
+    "Interface": "",
+    "ExternalPorts": ["4242"],
+    "InternalPorts": ["4242"]
+}
+
 
 def table_clear(database, table):
     """Clears data from a table
@@ -250,6 +270,10 @@ def confirm_plugin_db_info():
         rtdb.db("Plugins").table("Plugin1").insert(
             _TEST_COMMANDS
         ).run(db_con_var)
+        rtdb.db("Controller").table("Plugins").delete().run(db_con_var)
+        rtdb.db("Controller").table("Plugins")\
+            .insert([plugin1_controller,
+                     plugin2_controller]).run(db_con_var)
         print("log: db Dummy data was inserted to Plugins.Plugin1 locally\n")
 
 
