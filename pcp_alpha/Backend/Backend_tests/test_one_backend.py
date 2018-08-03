@@ -1,9 +1,5 @@
-# imports
 import pytest
 import ast
-import json
-# from pcp_alpha.Backend.db_dir.project_db import plugin1_controller,\
-#     plugin3_controller
 from pcp_alpha.Backend.pcp_app.views import get_plugin_list, update_plugin
 from pcp_alpha.Backend.Backend_tests.helper_test_functions import get_test, \
     SAMPLE_GOOD_PLUGIN_ID, SAMPLE_BAD_PLUGIN_ID
