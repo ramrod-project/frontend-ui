@@ -1,5 +1,8 @@
-import pytest
+""""
+Docstrings
+"""
 import ast
+import pytest
 from pcp_alpha.Backend.pcp_app.views import get_plugin_list, update_plugin
 from pcp_alpha.Backend.Backend_tests.helper_test_functions import get_test, \
     SAMPLE_GOOD_PLUGIN_ID, SAMPLE_BAD_PLUGIN_ID
@@ -7,6 +10,9 @@ from pcp_alpha.Backend.Backend_tests.helper_test_functions import get_test, \
 
 @pytest.mark.incremental
 class TestPluginData(object):
+    """
+    Docstrings
+    """
 
     @staticmethod
     def test_get_plugins(rf):
