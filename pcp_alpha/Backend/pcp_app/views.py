@@ -347,8 +347,13 @@ def update_plugin(request, plugin_id):
     :param request:
     :return:
     """
+    plugin_data_dict = dict()
     print("\nplugin_id == {}\n".format(plugin_id))
-    response = HttpResponse()
+    response = HttpResponse(json.dumps(plugin_id),
+                            content_type='application/json')
+    plugin_data_dict["plugin_id"] = plugin_id
+    response["Content-Disposition"] = plugin_data_dict["plugin_id"]
+    print(response["Content-Disposition"])
     response.status_code = 200
     return response
 
