@@ -111,7 +111,7 @@ plugin1_controller = {
     "Name": "Plugin1",
     "State": "Available",
     "DesiredState": "",
-    "Interface": "",
+    "Interface": location_generated_num("192.16.5."),
     "ExternalPorts": ["9999"],
     "InternalPorts": ["9999"]
 }
@@ -121,9 +121,19 @@ plugin2_controller = {
     "Name": "Plugin2",
     "State": "Available",
     "DesiredState": "",
-    "Interface": "",
+    "Interface": location_generated_num("192.16.5."),
     "ExternalPorts": ["4242"],
     "InternalPorts": ["4242"]
+}
+
+plugin3_controller = {
+    "id": "3",
+    "Name": "Plugin3",
+    "State": "Available",
+    "DesiredState": "",
+    "Interface": location_generated_num("192.16.5."),
+    "ExternalPorts": ["4243"],
+    "InternalPorts": ["4243"]
 }
 
 
@@ -273,7 +283,8 @@ def confirm_plugin_db_info():
         rtdb.db("Controller").table("Plugins").delete().run(db_con_var)
         rtdb.db("Controller").table("Plugins")\
             .insert([plugin1_controller,
-                     plugin2_controller]).run(db_con_var)
+                     plugin2_controller,
+                     plugin3_controller]).run(db_con_var)
         print("log: db Dummy data was inserted to Plugins.Plugin1 locally\n")
 
 
