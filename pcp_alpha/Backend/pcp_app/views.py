@@ -340,3 +340,17 @@ def get_plugin_list(request):
                             content_type='application/json')
 
 
+def update_plugin(request, plugin_id):
+    """
+    Update plugin controller, and return plugin data
+    back to Modal Form
+    :param request:
+    :return:
+    """
+    print("\nplugin_id == {}\n".format(plugin_id))
+    response = HttpResponse()
+    response.status_code = 200
+    return response
+
+
+

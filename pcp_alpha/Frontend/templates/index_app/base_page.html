@@ -45,6 +45,11 @@
             padding-left: 20px;
             padding-right: 20px;
         }
+        .btn-pcp_button_color1 {
+          color: #ffffff;
+          background-color: #00b33c;
+          border-color: rgba(0, 0, 0, 0.2);
+        }
     </style>
     {% block styles %}{% endblock %}
 </head>
@@ -536,9 +541,9 @@ desired effect
 {#        <span id="plugin_list_refresh" class="text-aqua fa fa-refresh"></span>#}
       <div class="tab-pane" id="control-sidebar-stats-tab">Stats Tab Content</div>
       <div class="tab-pane" id="control-sidebar-settings-tab">
-          <h3 class="control-sidebar-heading">Plugin List &nbsp;
-              <span id="plugin_list_refresh" class="text-aqua fa fa-refresh"></span>
-          </h3>
+          <button id="add_plugin_id" type="button" class="btn btn-block btn-info">Add Plugin</button>
+{#          Notification Here#}
+          <h3 class="control-sidebar-heading"><span id="plugin_list_refresh" class="text-aqua fa fa-refresh"></span>&nbsp; Plugin List</h3>
           <ul class="control-sidebar-menu plugin_list_display">
           </ul>
       </div>
