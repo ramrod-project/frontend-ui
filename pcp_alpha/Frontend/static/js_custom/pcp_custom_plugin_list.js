@@ -1,5 +1,8 @@
 // This file relates to plugin list on the right side panel
 
+var plugin_list_map = {};
+
+
 // Modify function for future activate plugin task
 function activate_plugin(plugin_id) {
     // console.log("activate_plugin function");
@@ -66,47 +69,51 @@ function display_plugin_list(plugin_data, plugin_index) {
                 .append($("<label/>")
                     .attr({"class": "control-sidebar-subheading"})
                     // Modal form when plugin name is clicked on, and passing plugin id
-                    .append($("<a/>").attr({"id": ""+plugin_data['id'],
-                                            "style": "color:white;",
-                                            "href": "/update_plugin/"+plugin_data['id']+"/"}).text(plugin_data['Name'])
-                        .append("&emsp;&emsp;&emsp;")
-                        // Activate button
-                        .append($("<a/>")
-                            .attr({"href": "#",
-                                "id": "activate_button"+plugin_index,
-                                "class":"btn btn-social-icon btn-pcp_button_color1 btn-xs",
-                                "onclick": "activate_plugin("+plugin_data['id']+")",
-                                "data-toggle": "tooltip",
-                                "title": "Activate  "+plugin_data['Name']})
-                            .append($("<i/>")
-                                .attr({"id": "activate_button_two"+plugin_index ,"class": "fa fa-thumbs-o-up"})
-                            )
+                    //<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@fat">Open modal for @fat</button>
+                    .append($("<button/>").attr({"id": ""+plugin_data['id'],
+                                            "class": "btn btn-primary",
+                                            "data-toggle":"modal",
+                                            "data-target":"#controller-modal",
+                                            "data-whatever": plugin_data['id'],
+                                            "whatever": "/update_plugin/"+plugin_data['id']+"/"})
+                        .text(plugin_data['Name']))
+                    .append("&emsp;&emsp;&emsp;")
+                    // Activate button
+                    .append($("<a/>")
+                        .attr({"href": "#",
+                            "id": "activate_button"+plugin_index,
+                            "class":"btn btn-social-icon btn-pcp_button_color1 btn-xs",
+                            "onclick": "activate_plugin('"+plugin_data['id']+"')",
+                            "data-toggle": "tooltip",
+                            "title": "Activate  "+plugin_data['Name']})
+                        .append($("<i/>")
+                            .attr({"id": "activate_button_two"+plugin_index ,"class": "fa fa-thumbs-o-up"})
                         )
-                        .append("&nbsp;")
-                        // Restart button
-                        .append($("<a/>")
-                            .attr({"href": "#",
-                                "id": "restart_button"+plugin_index,
-                                "class":"btn btn-social-icon btn-pcp_button_color2 btn-xs",
-                                "onclick": "restart_plugin("+plugin_data['id']+")",
-                                "data-toggle": "tooltip",
-                                "title": "Restart  "+plugin_data['Name']})
-                            .append($("<i/>")
-                                .attr({"id": "restart_button_two"+plugin_index ,"class": "fa fa-refresh"})
-                            )
+                    )
+                    .append("&nbsp;")
+                    // Restart button
+                    .append($("<a/>")
+                        .attr({"href": "#",
+                            "id": "restart_button"+plugin_index,
+                            "class":"btn btn-social-icon btn-pcp_button_color2 btn-xs",
+                            "onclick": "restart_plugin('"+plugin_data['id']+"')",
+                            "data-toggle": "tooltip",
+                            "title": "Restart  "+plugin_data['Name']})
+                        .append($("<i/>")
+                            .attr({"id": "restart_button_two"+plugin_index ,"class": "fa fa-refresh"})
                         )
-                        .append("&nbsp;")
-                        // Stop button
-                        .append($("<a/>")
-                            .attr({"href": "#",
-                                "id": "stop_button"+plugin_index,
-                                "class":"btn btn-social-icon btn-google btn-xs",
-                                "onclick": "stop_plugin("+plugin_data['id']+")",
-                                "data-toggle": "tooltip",
-                                "title": "Stop  "+plugin_data['Name']})
-                            .append($("<i/>")
-                                .attr({"id": "stop_button_two"+plugin_index ,"class": "fa fa-hand-stop-o"})
-                            )
+                    )
+                    .append("&nbsp;")
+                    // Stop button
+                    .append($("<a/>")
+                        .attr({"href": "#",
+                            "id": "stop_button"+plugin_index,
+                            "class":"btn btn-social-icon btn-google btn-xs",
+                            "onclick": "stop_plugin('"+plugin_data['id']+"')",
+                            "data-toggle": "tooltip",
+                            "title": "Stop  "+plugin_data['Name']})
+                        .append($("<i/>")
+                            .attr({"id": "stop_button_two"+plugin_index ,"class": "fa fa-hand-stop-o"})
                         )
                     )
                     // Plugin json data (hidden on ui)
@@ -130,7 +137,9 @@ function get_plugin_list() {
         datatype: 'json',
         success: function(data) {
             plugin_list_dom.empty();
+            plugin_list_map = {};
             for (var count=0; count<data.length; count++){
+                plugin_list_map[data[count]['id']] = data[count];
                 display_plugin_list(data[count], count);
                 $("#activate_button"+count).hide();
                 $("#restart_button"+count).hide();
@@ -148,6 +157,7 @@ function get_plugin_list() {
 $(document).ready(function() {
     // refresh button to refresh plugin list
     $("#plugin_list_refresh").click(get_plugin_list);
+    get_plugin_list();
     // Show and hide restart and stop buttons
     $(document).on('mouseenter', '.plugin_button', function () {
         $(this).find(".btn-google").show();
@@ -159,4 +169,23 @@ $(document).ready(function() {
         $(this).find(".btn-pcp_button_color1").hide();
         $(this).find(".btn-pcp_button_color2").hide();
     });
+});
+
+
+$('#controller-modal').on('show.bs.modal', function (event) {
+  var button = $(event.relatedTarget) // Button that triggered the modal
+  var plugin_id = button.data('whatever') // Extract info from data-* attributes
+  // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+  // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+  var modal = $(this);
+  modal.find('.modal-title').text('Plugin: ' + plugin_list_map[plugin_id]["Name"]);
+  modal.find('.plugin-state').val(plugin_list_map[plugin_id]["State"]);
+  modal.find('.plugin-ports').val(plugin_list_map[plugin_id]["ExternalPorts"].join());
+  modal.find('.plugin-interface')
+      .append($("<option/>")
+          .attr({"selected": true})
+          .val(plugin_list_map[plugin_id]["Interface"])
+          .text(plugin_list_map[plugin_id]["Interface"])
+      );
+  modal.find('.plugin-os').val(plugin_list_map[plugin_id]["OS"]);
 });
