@@ -368,6 +368,22 @@ def update_plugin(request, plugin_id):
     return response
 
 
+def activate_plugin(request):
+    """
+    User clicks on activate plugin button next to the
+    plugin name in the plugin list
+    :param request:
+    :return:
+    """
+    # Delete or modify lines below for future activate plugin task
+    if request.method == 'GET':
+        plugin_id = request.GET.get('plugin_id')
+        print("\nactivate_plugin plugin_id == {}\n".format(plugin_id))
+        return HttpResponse(json.dumps(plugin_id),
+                            content_type='application/json')
+    # pass
+
+
 def restart_plugin(request):
     """
     User clicks on restart plugin button next to the
