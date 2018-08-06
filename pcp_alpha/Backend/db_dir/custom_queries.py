@@ -206,3 +206,16 @@ def get_brain_file(file_id):
     except ValueError:
         response = None
     return response
+
+
+def get_plugin_list_query():
+    """
+
+    :return:
+    """
+    # This function will be modified in the future
+    return_plugin_list = list()
+    plugin_list = rtdb.db("Controller").table("Plugins").run(connect())
+    for plugin_item in plugin_list:
+        return_plugin_list.append(plugin_item)
+    return return_plugin_list

@@ -18,8 +18,10 @@ var exec_int = 0;
 var job_select_table;
 var w3_highlighted_row,
     w3_highlighted_array,
-    w3_content_index;
-w3_highlighted_array = [];
+    w3_content_index,
+    w3_highlighted_array = [],
+    start_timer_interval,
+    start_timer_map = {};
 
 $(document).ready(function() {
     job_select_table = $('#job_table').DataTable({
@@ -187,6 +189,7 @@ function status_change_update_dom(job_dom_id, status){
             .attr({"class": "label label-"+status})
             .text(status));
     if (status == "Done"){
+
         execute_sequence_output(id_map[job_dom_id]);
     }
 }
@@ -307,8 +310,6 @@ function get_commands_func(){
         data: {"plugin_name": plugin_name_var},
         datatype: 'json',
         success: function(data) {
-            console.log($(".theContent")[0]);
-
             // check if w2 should re-render or not
             if($(".theContent li a").length > 0){
                 for(var int = 0; int < $(".theContent li a").length; int++){
@@ -1180,29 +1181,50 @@ function prepare_jobs_list(){
     return jobs;
 }
 
+function start_timer(dom_id){
+    var seconds = 0,
+        minutes = 0,
+        hours = 0,
+        days = 0,
+        display_a = document.createElement("a");
+    display_a.className = "fa fa-refresh fa-spin";
+    display_a.id = "update_spin"+dom_id;
+
+    start_timer_map[dom_id] = setInterval( function(){
+        ++seconds%60;
+        if (seconds >= 60) {
+            seconds = 0;
+            ++minutes%60;
+            if (minutes >= 60) {
+                minutes = 0;
+                ++hours%24;
+                if (hours >= 24) {
+                    hours = 0;
+                    ++days%24;
+                }
+            }
+        }
+        $("#updateid" + dom_id).text(days + "d " + hours + "h " + minutes + "m " + seconds + "s ");
+        $("#updateid" + dom_id)[0].parentElement.append(display_a);
+    }, 1000);
+}
 
 function final_countdown_function(start_time, dom_id) {
     var interval_var = setInterval(function() {
-        var distance,
-            days,
-            hours,
-            minutes,
-            seconds,
-            right_meow;
-        right_meow = String(new Date().getTime()/1000).substring(0, 10);
-        distance = start_time - right_meow;
+        var right_meow = String(new Date().getTime()/1000).substring(0, 10),
+            distance = start_time - right_meow,
+            // Time calculations for days, hours, minutes and seconds
+            days = Math.floor(distance / (60 * 60 * 24)),
+            hours = Math.floor((distance % (60 * 60 * 24)) / (60 * 60)),
+            minutes = Math.floor((distance % (60 * 60)) / (60)),
+            seconds = Math.floor((distance % (60)));
 
-        // Time calculations for days, hours, minutes and seconds
-        days = Math.floor(distance / (60 * 60 * 24));
-        hours = Math.floor((distance % (60 * 60 * 24)) / (60 * 60));
-        minutes = Math.floor((distance % (60 * 60)) / (60));
-        seconds = Math.floor((distance % (60)));
         $("#updateid" + dom_id).text(days + "d " + hours + "h " + minutes + "m " + seconds + "s ");
 
         // If the count down is over, write some text
         if (distance < 0) {
             $("#updateid" + dom_id).empty();
-            $("#updateid" + dom_id).attr({"class": "fa fa-refresh fa-spin"});
+            start_timer(dom_id);
             clearInterval(interval_var);
         }
 
@@ -1211,7 +1233,7 @@ function final_countdown_function(start_time, dom_id) {
 
 // Execute Sequence function down below are for w3+w4
 function execute_sequence(){
-//    console.log("execute_sequence function has been called");  // debug
+   // console.log("execute_sequence function has been called");  // debug
     exec_int = 1;
     hide_drop_all();
     var jobs = prepare_jobs_list();
@@ -1235,9 +1257,6 @@ function execute_sequence(){
                     if (ws_map['status'].readyState === ws_map['status'].OPEN) {
                         $("#updateid" + dom_id).empty();
                         final_countdown_function(sequence_start_time, dom_id);
-
-                        // $("#updateid" + dom_id).empty();
-                        // $("#updateid" + dom_id).attr({"class": "fa fa-refresh fa-spin"});
                     } else {
                         execute_sequence_output(job_ids[index]);
                     }
@@ -1251,7 +1270,6 @@ function execute_sequence(){
         complete: function(data){
             exec_int = 0;
         }
-
     })
 }
 
@@ -1262,8 +1280,10 @@ Functions down below are for w4
 */
 function render_job_output_to_page(job_guid, data){
     var updateid = id_reverse_map[job_guid];
+    clearInterval(start_timer_map[updateid]);
     $("#updateid"+updateid).empty();
     $("#updateid"+updateid).attr({"class": ""});
+    $("#update_spin"+updateid).remove();
     $('<pre id="updatecontent'+updateid+'"></pre>').appendTo("#updateid"+updateid);
     $("#updatecontent"+updateid).append(JSON.stringify(data['Content']));
     var download_link = $('<a>[Download]</a>');
@@ -1288,6 +1308,7 @@ function render_job_output_timeout(job_guid){
     var updateid = id_reverse_map[job_guid];
     $("#updateid"+updateid).empty();
     $("#updateid"+updateid).attr({"class": ""});
+    $("#update_spin"+updateid).remove();
     $("#updateid"+updateid)
         .append("No data to return at the moment :(");
     $("#updateid"+updateid)
@@ -1317,7 +1338,6 @@ function execute_sequence_output_retry(job_guid){
 
 // Modify function add depth parameter, increment depth when it errors
 function execute_sequence_output(specific_id, counter=0, backoff=2000){
-//    console.log("execute_sequence_output function");  // debug
     var updateid = id_reverse_map[specific_id];
     $.ajax({
         type: "GET",

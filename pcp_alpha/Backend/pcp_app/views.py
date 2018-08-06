@@ -11,7 +11,7 @@ from ua_parser import user_agent_parser
 from Backend.db_dir.custom_queries import get_specific_commands, insert_brain_jobs_w3, \
     get_specific_brain_output, get_brain_output_content, insert_new_target, get_brain_targets, \
     persist_jobs_state, load_jobs_state, upload_file_to_brain, del_file_upload_from_brain, \
-    get_brain_files, get_brain_file
+    get_brain_files, get_brain_file, get_plugin_list_query
 from .forms import TargetForm
 
 
@@ -326,4 +326,36 @@ def get_file(request, file_id):
     else:
         response = HttpResponse()
     return response
+
+
+def get_plugin_list(request):
+    """
+
+    :param request:
+    :return:
+    """
+    if request.method == "GET":
+        json_plugin_list_return = get_plugin_list_query()
+        return HttpResponse(json.dumps(json_plugin_list_return),
+                            content_type='application/json')
+
+
+def update_plugin(request, plugin_id):
+    """
+    Update plugin controller, and return plugin data
+    back to Modal Form
+    :param request:
+    :return:
+    """
+    plugin_data_dict = dict()
+    print("\nplugin_id == {}\n".format(plugin_id))
+    response = HttpResponse(json.dumps(plugin_id),
+                            content_type='application/json')
+    plugin_data_dict["plugin_id"] = plugin_id
+    response["Content-Disposition"] = plugin_data_dict["plugin_id"]
+    print(response["Content-Disposition"])
+    response.status_code = 200
+    return response
+
+
 
