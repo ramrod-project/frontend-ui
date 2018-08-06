@@ -92,7 +92,6 @@ SAMPLE_MULTIPLE_JOBS = [{},
                         ]
 
 
-
 SAMPLE_OUTPUT = {
     "OutputJob": SAMPLE_JOB,
     "Content": "Sample output string"

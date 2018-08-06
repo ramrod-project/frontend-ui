@@ -45,6 +45,11 @@
             padding-left: 20px;
             padding-right: 20px;
         }
+        .btn-pcp_button_color1 {
+          color: #ffffff;
+          background-color: #00b33c;
+          border-color: rgba(0, 0, 0, 0.2);
+        }
     </style>
     {% block styles %}{% endblock %}
 </head>
@@ -493,18 +498,9 @@ desired effect
       <!-- Home tab content -->
       <div class="tab-pane active" id="control-sidebar-home-tab">
         <h3 class="control-sidebar-heading">File Upload</h3>
-
         <ul class="control-sidebar-menu">
           <li>
-              <!--drop zone here-->
             <a href="javascript:;">
-{#              <i class="menu-icon fa fa-bell bg-red"></i>#}
-
-{#              <div class="menu-info">#}
-{#                <h4 class="control-sidebar-subheading">DropZone HERE</h4>#}
-                <!--<p>Detail notification HERE</p>-->
-{#              </div>#}
-
               <div id="dropzone">
                   <div class="dropzone needsclick dz-clickable" id="dropzone_testid">{% csrf_token %}
                       <div class="dz-message dz-default needsclick">
@@ -513,16 +509,13 @@ desired effect
 {#                      <input type="file" name="file" />#}
                   </div>
               </div>
-
               <div class="progress progress-xxs" style="visibility: hidden;">
                   <div class="progress-bar progress-bar-danger" role="progressbar" data-dz-uploadprogress>
                       <span class="progress-text"></span>
                   </div>
               </div>
-
               <div class="file_upload_msg" style="visibility: hidden;">
               </div>
-
             </a>
           </li>
         </ul>
@@ -545,25 +538,14 @@ desired effect
       </div>
       <!-- /.tab-pane -->
       <!-- Stats tab content -->
+{#        <span id="plugin_list_refresh" class="text-aqua fa fa-refresh"></span>#}
       <div class="tab-pane" id="control-sidebar-stats-tab">Stats Tab Content</div>
-      <!-- /.tab-pane -->
-      <!-- Settings tab content -->
       <div class="tab-pane" id="control-sidebar-settings-tab">
-        <form method="post">
-          <h3 class="control-sidebar-heading">General Settings</h3>
-
-          <div class="form-group">
-            <label class="control-sidebar-subheading">
-              Report panel usage
-              <input type="checkbox" class="pull-right" checked>
-            </label>
-
-            <p>
-              Some information about this general settings option
-            </p>
-          </div>
-          <!-- /.form-group -->
-        </form>
+          <button id="add_plugin_id" type="button" class="btn btn-block btn-info">Add Plugin</button>
+{#          Notification Here#}
+          <h3 class="control-sidebar-heading"><span id="plugin_list_refresh" class="text-aqua fa fa-refresh"></span>&nbsp; Plugin List</h3>
+          <ul class="control-sidebar-menu plugin_list_display">
+          </ul>
       </div>
       <!-- /.tab-pane -->
     </div>
@@ -603,6 +585,7 @@ desired effect
 <script src="{% static 'js_custom/pcp_custom_targets.js' %}"></script>
 <!-- Project's custom js file -->
 <script src="{% static 'js_custom/pcp_custom_jquery.js' %}"></script>
+<script src="{% static 'js_custom/pcp_custom_plugin_list.js' %}"></script>
 {% block extra_js %}{% endblock extra_js %}
 </body>
 </html>
