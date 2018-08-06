@@ -376,12 +376,12 @@ def restart_plugin(request):
     :return:
     """
     # Delete or modify lines below for future restart plugin task
-    # if request.method == 'GET':
-    #     plugin_id = request.GET.get('plugin_id')
-    #     print("\nrestart_plugin plugin_id == {}\n".format(plugin_id))
-    #     return HttpResponse(json.dumps(plugin_id),
-    #                         content_type='application/json')
-    pass
+    if request.method == 'GET':
+        plugin_id = request.GET.get('plugin_id')
+        print("\nrestart_plugin plugin_id == {}\n".format(plugin_id))
+        return HttpResponse(json.dumps(plugin_id),
+                            content_type='application/json')
+    # pass
 
 
 def stop_plugin(request):
@@ -392,9 +392,9 @@ def stop_plugin(request):
     :return:
     """
     # Delete or modify lines below for future stop plugin task
-    # if request.method == 'GET':
-    #     plugin_id = request.GET.get('plugin_id')
-    #     print("\nstop_plugin plugin_id == {}\n".format(plugin_id))
-    #     return HttpResponse(json.dumps(plugin_id),
-    #                         content_type='application/json')
-    pass
+    if request.method == 'GET':
+        plugin_id = request.GET.get('plugin_id')
+        print("\nstop_plugin plugin_id == {}\n".format(plugin_id))
+        return HttpResponse(json.dumps(plugin_id),
+                            content_type='application/json')
+    # pass

@@ -22,7 +22,6 @@ function stop_plugin(plugin_id) {
 // Modify function for future restart plugin task
 function restart_plugin(plugin_id) {
     // console.log("restart_plugin function");
-    // ajax call to views.py restart_plugin controller
 
     $.ajax({
         type: "GET",
