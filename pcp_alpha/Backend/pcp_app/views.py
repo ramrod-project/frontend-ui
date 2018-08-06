@@ -328,6 +328,16 @@ def get_file(request, file_id):
     return response
 
 
+def add_plugin(request):
+    """
+    pcp-507 task
+    Add plugin form
+    :param request:
+    :return:
+    """
+    pass
+
+
 def get_plugin_list(request):
     """
 
@@ -348,14 +358,43 @@ def update_plugin(request, plugin_id):
     :return:
     """
     plugin_data_dict = dict()
-    print("\nplugin_id == {}\n".format(plugin_id))
+    # print("\nplugin_id == {}\n".format(plugin_id))
     response = HttpResponse(json.dumps(plugin_id),
                             content_type='application/json')
     plugin_data_dict["plugin_id"] = plugin_id
     response["Content-Disposition"] = plugin_data_dict["plugin_id"]
-    print(response["Content-Disposition"])
+    # print(response["Content-Disposition"])
     response.status_code = 200
     return response
 
 
+def restart_plugin(request):
+    """
+    User clicks on restart plugin button next to the
+    plugin name in the plugin list
+    :param request:
+    :return:
+    """
+    # Delete or modify lines below for future restart plugin task
+    # if request.method == 'GET':
+    #     plugin_id = request.GET.get('plugin_id')
+    #     print("\nrestart_plugin plugin_id == {}\n".format(plugin_id))
+    #     return HttpResponse(json.dumps(plugin_id),
+    #                         content_type='application/json')
+    pass
 
+
+def stop_plugin(request):
+    """
+    User clicks on stop plugin button next to the
+    plugin name in the plugin list
+    :param request:
+    :return:
+    """
+    # Delete or modify lines below for future stop plugin task
+    # if request.method == 'GET':
+    #     plugin_id = request.GET.get('plugin_id')
+    #     print("\nstop_plugin plugin_id == {}\n".format(plugin_id))
+    #     return HttpResponse(json.dumps(plugin_id),
+    #                         content_type='application/json')
+    pass

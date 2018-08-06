@@ -3,7 +3,7 @@ from django.urls import path
 from .views import get_commands_controller, new_target_form, val_target_form, execute_sequence_controller, \
     w4_output_controller, w4_output_controller_download, edit_target_form, val_edit_target_form, \
     persist_job_state, load_job_state, delete_specific_target, file_upload_list, del_file_from_list, \
-    get_file_listing, get_file, get_plugin_list, update_plugin
+    get_file_listing, get_file, get_plugin_list, update_plugin, restart_plugin, stop_plugin
 
 app_name = 'pcp_app'
 
@@ -25,4 +25,6 @@ urlpatterns = [
     path('file_download/<file_id>/', get_file),  # download file @ W4
     path('get_plugin_list/', get_plugin_list),
     path('update_plugin/<plugin_id>/', update_plugin),
+    path('restart_plugin/', restart_plugin),
+    path('stop_plugin/', stop_plugin),
     ]
