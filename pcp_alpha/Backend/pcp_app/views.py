@@ -4,7 +4,7 @@ Views python file for pcp_app 'django' app.
 import json
 import brain
 from django.http import HttpResponse
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.template import loader
 from django.views.decorators.csrf import csrf_exempt
 from ua_parser import user_agent_parser
@@ -171,8 +171,9 @@ def new_target_form(request):
     :param request: user request
     :return: New Target Form
     """
-    template = loader.get_template('pcp_app/target_form.html')
-    return HttpResponse(template.render(context=None, request=request))
+    return render(request,
+                  'pcp_app/target_form.html',
+                  context={'plugin_list': get_plugin_list_query(), })
 
 
 def val_target_form(request):
@@ -205,8 +206,9 @@ def val_target_form(request):
             return redirect('/')
     else:
         form = TargetForm()
-    template = loader.get_template('pcp_app/target_form.html')
-    return HttpResponse(template.render(context=None, request=request))
+    return render(request=request,
+                  template_name='pcp_app/target_form.html',
+                  context={'plugin_list': get_plugin_list_query(), })
 
 
 def edit_target_form(request, target_id):

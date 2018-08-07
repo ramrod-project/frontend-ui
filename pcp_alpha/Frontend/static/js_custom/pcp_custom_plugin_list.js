@@ -4,9 +4,6 @@ var plugin_list_map = {};
 
 // Modify function for future activate, restart, and stop plugin task
 function desired_plugin_state(plugin_id, desired_state) {
-    console.log("desired_plugin_state");
-    console.log(plugin_id);
-    console.log(desired_state);
 
     $.ajax({
         type: "GET",
@@ -136,8 +133,8 @@ $(document).ready(function() {
 
 
 $('#controller-modal').on('show.bs.modal', function (event) {
-  var button = $(event.relatedTarget) // Button that triggered the modal
-  var plugin_id = button.data('whatever') // Extract info from data-* attributes
+  var button = $(event.relatedTarget);  // Button that triggered the modal
+  var plugin_id = button.data('whatever');  // Extract info from data-* attributes
   // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
   // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
   var modal = $(this);
