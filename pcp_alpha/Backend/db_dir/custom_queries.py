@@ -2,6 +2,7 @@ import json
 import brain.queries
 from brain.binary import put_buffer, list_dir, get, delete
 import brain
+import brain.controller
 
 from .project_db import connect, rtdb
 
@@ -228,6 +229,11 @@ def desired_plugin_state_brain(plugin_id, desired_state):
     :param desired_state: 
     :return: 
     """
-    # function passes id and desired state
-    # brain.controller.plugins
-    pass
+    return_object = None
+    if desired_state == 'activate':
+        return_object = brain.controller.plugins.activate(plugin_id)
+    elif desired_state == 'restart':
+        return_object = brain.controller.plugins.restart(plugin_id)
+    elif desired_state == 'stop':
+        return_object = brain.controller.plugins.stop(plugin_id)
+    return return_object

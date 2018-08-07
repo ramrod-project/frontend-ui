@@ -172,7 +172,9 @@ def new_target_form(request):
     :return: New Target Form
     """
     template = loader.get_template('pcp_app/target_form.html')
-    return HttpResponse(template.render(context=None, request=request))
+    return HttpResponse(template.render(
+        context={'plugin_list': get_plugin_list_query(), },
+        request=request))
 
 
 def val_target_form(request):
@@ -206,7 +208,9 @@ def val_target_form(request):
     else:
         form = TargetForm()
     template = loader.get_template('pcp_app/target_form.html')
-    return HttpResponse(template.render(context=None, request=request))
+    return HttpResponse(template.render(
+        context={'plugin_list': get_plugin_list_query(), },
+        request=request))
 
 
 def edit_target_form(request, target_id):
@@ -222,7 +226,8 @@ def edit_target_form(request, target_id):
     get_brain_target = brain.r.db("Brain").table("Targets").filter(
         {"id": str(target_id)}).run(brain_connection)
     return HttpResponse(template.render(
-        context={"edit_target_dict": get_brain_target, },
+        context={"edit_target_dict": get_brain_target,
+                 'plugin_list': get_plugin_list_query(), },
         request=request))
 
 
@@ -377,8 +382,7 @@ def desired_plugin_state_controller(request):
     if request.method == 'GET':
         plugin_id = request.GET.get('plugin_id')
         desired_state = request.GET.get('desired_state')
-        print("\ndesired_state_plugin plugin_id == {}".format(plugin_id))
-        print("desired_state_plugin desired_state == {}\n".format(desired_state))
-        desired_plugin_state_brain(plugin_id, desired_state)
-        return HttpResponse(json.dumps(plugin_id),
-                            content_type='application/json')
+        response = HttpResponse(json.dumps(desired_plugin_state_brain(
+            plugin_id, desired_state)),
+            content_type='application/json')
+        return response
