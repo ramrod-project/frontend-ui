@@ -112,7 +112,7 @@ plugin1_controller = {
     "State": "Available",
     "DesiredState": "",
     "OS": "posix",
-    "Interface": location_generated_num("192.16.5."),
+    "Interface": "192.16.5.240",
     "ExternalPorts": ["9999"],
     "InternalPorts": ["9999"]
 }
@@ -123,7 +123,7 @@ plugin2_controller = {
     "State": "Available",
     "DesiredState": "",
     "OS": "nt",
-    "Interface": location_generated_num("192.16.5."),
+    "Interface": "10.10.10.10",
     "ExternalPorts": ["4242"],
     "InternalPorts": ["4242"]
 }
@@ -134,11 +134,23 @@ plugin3_controller = {
     "State": "Available",
     "DesiredState": "",
     "OS": "all",
-    "Interface": location_generated_num("192.16.5."),
+    "Interface": "192.16.5.240",
     "ExternalPorts": ["4243"],
     "InternalPorts": ["4243"]
 }
+TEST_PORT_DATA = {
+    "InterfaceName": "eth0",
+    "Address": "192.16.5.240",
+    "TCPPorts": ["9999", "4243"],
+    "UDPPorts": []
+}
 
+TEST_PORT_DATA2 = {
+    "InterfaceName": "eth0",
+    "Address": "10.10.10.10",
+    "TCPPorts": ["4242"],
+    "UDPPorts": []
+}
 
 def table_clear(database, table):
     """Clears data from a table
@@ -288,6 +300,11 @@ def confirm_plugin_db_info():
             .insert([plugin1_controller,
                      plugin2_controller,
                      plugin3_controller]).run(db_con_var)
+        rtdb.db("Controller").table("Ports").delete().run(db_con_var)
+        rtdb.db("Controller").table("Ports") \
+            .insert([TEST_PORT_DATA,
+                     TEST_PORT_DATA2]).run(db_con_var)
+
         print("log: db Dummy data was inserted to Plugins.Plugin1 locally\n")
 
 

@@ -1,6 +1,7 @@
 import json
 import brain.queries
 from brain.binary import put_buffer, list_dir, get, delete
+import brain.controller
 import brain
 import brain.controller
 
@@ -222,6 +223,32 @@ def get_plugin_list_query():
     return return_plugin_list
 
 
+def get_interface_list():
+    """
+
+    :return:
+    """
+    return brain.controller.plugins.get_interfaces()
+
+
+def update_plugin_to_brain(plugin):
+    """
+
+    :param plugin:
+    :return:
+    """
+    response = None
+    if plugin["id"] == "NEW":
+        all_ports = "-".join(plugin['ExternalPorts'])
+        del(plugin['id'])  # allow database to generate a new id
+        plugin["ServiceName"] = "{}-{}".format(plugin["Name"],
+                                               all_ports)
+        plugin["InternalPorts"] = []
+        plugin["ServiceID"] = ""
+    response = brain.controller.plugins.update_plugin(plugin)
+    return response
+  
+  
 def desired_plugin_state_brain(plugin_id, desired_state):
     """
     

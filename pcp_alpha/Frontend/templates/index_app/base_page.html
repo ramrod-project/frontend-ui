@@ -574,13 +574,19 @@ desired effect
       </div>
       <div class="modal-body">
         <form>
+          <div class="form-group plugin-name">
+            <label for="plugin-name" class="control-label">Name:</label>
+            <select class="form-control plugin-name" id="plugin-name">
+            </select>
+          <input type="text" class="form-control plugin-id" disabled id="plugin-id">
+          </div>
           <div class="form-group">
             <label for="plugin-state" class="control-label">State:</label>
             <input type="text" class="form-control plugin-state" disabled id="plugin-state">
           </div>
           <div class="form-group">
             <label for="plugin-desired-state" class="control-label">Desired State:</label>
-            <select class="form-control plugin-desired" id="plugin-interface">
+            <select class="form-control plugin-desired" id="plugin-desired">
                 <option value="" selected></option>
                 <option value="Activate">Activate</option>
                 <option value="Restart">Restart</option>
@@ -595,6 +601,7 @@ desired effect
           <div class="form-group">
             <label for="plugin-external-ports" class="control-label">Ports (comma separated):</label>
             <input class="form-control plugin-ports" id="plugin-external-ports" />
+            <input class="form-control plugin-iports" disabled id="plugin-internal-ports" />
           </div>
           <div class="form-group">
             <label for="plugin-os" class="control-label">OS (posix/nt/all):</label>
@@ -607,6 +614,7 @@ desired effect
         </form>
       </div>
       <div class="modal-footer">
+        <div class="ui-widget-shadow" id="plugin-response"></div>
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
         <button type="button" class="btn btn-primary" id="plugin-save">Save</button>
       </div>
