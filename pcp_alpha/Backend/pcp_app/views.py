@@ -372,18 +372,18 @@ def update_plugin(request, plugin_id):
     return response
 
 
-def desired_plugin_state_controller(request):
-    """
-    User clicks on activate, restart, or stop button
-    next to the plugin name in the plugin list
-    :param request:
-    :return:
-    """
-    if request.method == 'GET':
-        plugin_id = request.GET.get('plugin_id')
-        desired_state = request.GET.get('desired_state')
-        print("\ndesired_state_plugin plugin_id == {}".format(plugin_id))
-        print("desired_state_plugin desired_state == {}\n".format(desired_state))
-        desired_plugin_state_brain(plugin_id, desired_state)
-        return HttpResponse(json.dumps(plugin_id),
-                            content_type='application/json')
+# def desired_plugin_state_controller(request):
+#     """
+#     User clicks on activate, restart, or stop button
+#     next to the plugin name in the plugin list
+#     :param request:
+#     :return:
+#     """
+#     if request.method == 'GET':
+#         plugin_id = request.GET.get('plugin_id')
+#         desired_state = request.GET.get('desired_state')
+#         print("\ndesired_state_plugin plugin_id == {}".format(plugin_id))
+#         print("desired_state_plugin desired_state == {}\n".format(desired_state))
+#         desired_plugin_state_brain(plugin_id, desired_state)
+#         return HttpResponse(json.dumps(plugin_id),
+#                             content_type='application/json')
