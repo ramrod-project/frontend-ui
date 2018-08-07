@@ -107,30 +107,33 @@ _TEST_COMMANDS = [
 ]
 
 plugin1_controller = {
-    "id": "1",
+    "id": "1-1-A",
     "Name": "Plugin1",
     "State": "Available",
     "DesiredState": "",
+    "OS": "posix",
     "Interface": location_generated_num("192.16.5."),
     "ExternalPorts": ["9999"],
     "InternalPorts": ["9999"]
 }
 
 plugin2_controller = {
-    "id": "2",
+    "id": "2-2-B",
     "Name": "Plugin2",
     "State": "Available",
     "DesiredState": "",
+    "OS": "nt",
     "Interface": location_generated_num("192.16.5."),
     "ExternalPorts": ["4242"],
     "InternalPorts": ["4242"]
 }
 
 plugin3_controller = {
-    "id": "3",
+    "id": "3-3-C",
     "Name": "Plugin3",
     "State": "Available",
     "DesiredState": "",
+    "OS": "all",
     "Interface": location_generated_num("192.16.5."),
     "ExternalPorts": ["4243"],
     "InternalPorts": ["4243"]
