@@ -6,6 +6,7 @@ from .views import get_commands_controller, new_target_form, val_target_form, ex
     get_file_listing, get_file, get_plugin_list, update_plugin, restart_plugin, stop_plugin, activate_plugin, \
     get_interfaces
 
+
 app_name = 'pcp_app'
 
 urlpatterns = [
@@ -30,4 +31,5 @@ urlpatterns = [
     path('restart_plugin/', restart_plugin),
     path('stop_plugin/', stop_plugin),
     path('get_interfaces/', get_interfaces),
+    path('desired_plugin_state/', desired_plugin_state_controller),  # url for desired state action controller
     ]

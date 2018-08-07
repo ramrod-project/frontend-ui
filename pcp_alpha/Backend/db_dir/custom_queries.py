@@ -3,6 +3,7 @@ import brain.queries
 from brain.binary import put_buffer, list_dir, get, delete
 import brain.controller
 import brain
+import brain.controller
 
 from .project_db import connect, rtdb
 
@@ -246,3 +247,20 @@ def update_plugin_to_brain(plugin):
         plugin["ServiceID"] = ""
     response = brain.controller.plugins.update_plugin(plugin)
     return response
+  
+  
+def desired_plugin_state_brain(plugin_id, desired_state):
+    """
+    
+    :param plugin_id: 
+    :param desired_state: 
+    :return: 
+    """
+    return_object = None
+    if desired_state == 'activate':
+        return_object = brain.controller.plugins.activate(plugin_id)
+    elif desired_state == 'restart':
+        return_object = brain.controller.plugins.restart(plugin_id)
+    elif desired_state == 'stop':
+        return_object = brain.controller.plugins.stop(plugin_id)
+    return return_object

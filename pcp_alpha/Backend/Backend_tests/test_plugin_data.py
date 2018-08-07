@@ -3,7 +3,8 @@ Docstrings
 """
 import ast
 import pytest
-from pcp_alpha.Backend.pcp_app.views import get_plugin_list, update_plugin
+from pcp_alpha.Backend.pcp_app.views import get_plugin_list, update_plugin, \
+    desired_plugin_state_controller
 from pcp_alpha.Backend.Backend_tests.helper_test_functions import get_test, \
     SAMPLE_GOOD_PLUGIN_ID, SAMPLE_BAD_PLUGIN_ID
 
@@ -67,3 +68,9 @@ class TestPluginData(object):
         response = get_test(url_var, update_plugin, rf, target_id=SAMPLE_GOOD_PLUGIN_ID)
         assert response.status_code == 200
         assert response['Content-Disposition'] == str(SAMPLE_GOOD_PLUGIN_ID)
+
+    @staticmethod
+    def test_plugin_state(rf):
+        url_var = 'desired_plugin_state/'
+        response = get_test(url_var, desired_plugin_state_controller, rf)
+        assert response.status_code == 200
