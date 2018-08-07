@@ -4,7 +4,7 @@ Views python file for pcp_app 'django' app.
 import json
 import brain
 from django.http import HttpResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect
 from django.template import loader
 from django.views.decorators.csrf import csrf_exempt
 from ua_parser import user_agent_parser
@@ -171,9 +171,10 @@ def new_target_form(request):
     :param request: user request
     :return: New Target Form
     """
-    return render(request,
-                  'pcp_app/target_form.html',
-                  context={'plugin_list': get_plugin_list_query(), })
+    template = loader.get_template('pcp_app/target_form.html')
+    return HttpResponse(template.render(
+        context={'plugin_list': get_plugin_list_query(), },
+        request=request))
 
 
 def val_target_form(request):
@@ -206,9 +207,10 @@ def val_target_form(request):
             return redirect('/')
     else:
         form = TargetForm()
-    return render(request=request,
-                  template_name='pcp_app/target_form.html',
-                  context={'plugin_list': get_plugin_list_query(), })
+    template = loader.get_template('pcp_app/target_form.html')
+    return HttpResponse(template.render(
+        context={'plugin_list': get_plugin_list_query(), },
+        request=request))
 
 
 def edit_target_form(request, target_id):
@@ -224,7 +226,8 @@ def edit_target_form(request, target_id):
     get_brain_target = brain.r.db("Brain").table("Targets").filter(
         {"id": str(target_id)}).run(brain_connection)
     return HttpResponse(template.render(
-        context={"edit_target_dict": get_brain_target, },
+        context={"edit_target_dict": get_brain_target,
+                 'plugin_list': get_plugin_list_query(), },
         request=request))
 
 
