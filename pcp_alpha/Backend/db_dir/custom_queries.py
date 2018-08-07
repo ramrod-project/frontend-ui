@@ -224,9 +224,9 @@ def get_plugin_list_query():
 def desired_plugin_state_brain(plugin_id, desired_state):
     """
     
-    :param plugin_id:
-    :param desired_state:
-    :return:
+    :param plugin_id: 
+    :param desired_state: 
+    :return: 
     """
     # function passes id and desired state
     # brain.controller.plugins
