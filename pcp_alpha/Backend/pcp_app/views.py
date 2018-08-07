@@ -387,9 +387,12 @@ def desired_plugin_state_controller(request):
     """
     if request.method == 'GET':
         plugin_id = request.GET.get('plugin_id')
-        print("\nstop_plugin plugin_id == {}\n".format(plugin_id))
-        return HttpResponse(json.dumps(plugin_id),
-                            content_type='application/json')
+        desired_state = request.GET.get('desired_state')
+        response = HttpResponse(json.dumps(desired_plugin_state_brain(
+            plugin_id, desired_state)),
+            content_type='application/json')
+        response.status_code = 200
+        return response
 
 
 def get_interfaces(request):
