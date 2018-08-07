@@ -219,3 +219,15 @@ def get_plugin_list_query():
     for plugin_item in plugin_list:
         return_plugin_list.append(plugin_item)
     return return_plugin_list
+
+
+def desired_plugin_state_brain(plugin_id, desired_state):
+    """
+    
+    :param plugin_id:
+    :param desired_state:
+    :return:
+    """
+    # function passes id and desired state
+    # brain.controller.plugins
+    pass

@@ -2,15 +2,16 @@
 
 var plugin_list_map = {};
 
-
-// Modify function for future activate plugin task
-function activate_plugin(plugin_id) {
-    // console.log("activate_plugin function");
+// Modify function for future activate, restart, and stop plugin task
+function desired_plugin_state(plugin_id, desired_state) {
+    console.log("desired_plugin_state");
+    console.log(plugin_id);
+    console.log(desired_state);
 
     $.ajax({
         type: "GET",
-        url: "/activate_plugin/",
-        data: {"plugin_id": plugin_id},
+        url: "/desired_plugin_state/",
+        data: {"plugin_id": plugin_id, "desired_state": desired_state},
         datatype: 'json',
         success: function(data) {
             console.log("SUCCESS @ activate_plugin ajax function");
@@ -18,44 +19,6 @@ function activate_plugin(plugin_id) {
         },
         error: function (data) {
             console.log("ERROR @ activate_plugin ajax function");
-        }
-    });
-}
-
-// Modify function for future stop plugin task
-function stop_plugin(plugin_id) {
-    // console.log("stop_plugin function");
-
-    $.ajax({
-        type: "GET",
-        url: "/stop_plugin/",
-        data: {"plugin_id": plugin_id},
-        datatype: 'json',
-        success: function(data) {
-            console.log("SUCCESS @ restart_plugin ajax function");
-            console.log(data);
-        },
-        error: function (data) {
-            console.log("ERROR @ restart_plugin ajax function");
-        }
-    });
-}
-
-// Modify function for future restart plugin task
-function restart_plugin(plugin_id) {
-    // console.log("restart_plugin function");
-
-    $.ajax({
-        type: "GET",
-        url: "/restart_plugin/",
-        data: {"plugin_id": plugin_id},
-        datatype: 'json',
-        success: function(data) {
-            console.log("SUCCESS @ restart_plugin ajax function");
-            console.log(data);
-        },
-        error: function (data) {
-            console.log("ERROR @ restart_plugin ajax function");
         }
     });
 }
@@ -83,7 +46,7 @@ function display_plugin_list(plugin_data, plugin_index) {
                         .attr({"href": "#",
                             "id": "activate_button"+plugin_index,
                             "class":"btn btn-social-icon btn-pcp_button_color1 btn-xs",
-                            "onclick": "activate_plugin('"+plugin_data['id']+"')",
+                            "onclick": "desired_plugin_state('"+plugin_data['id']+"', 'activate')",
                             "data-toggle": "tooltip",
                             "title": "Activate  "+plugin_data['Name']})
                         .append($("<i/>")
@@ -96,7 +59,7 @@ function display_plugin_list(plugin_data, plugin_index) {
                         .attr({"href": "#",
                             "id": "restart_button"+plugin_index,
                             "class":"btn btn-social-icon btn-pcp_button_color2 btn-xs",
-                            "onclick": "restart_plugin('"+plugin_data['id']+"')",
+                            "onclick": "desired_plugin_state('"+plugin_data['id']+"', 'restart')",
                             "data-toggle": "tooltip",
                             "title": "Restart  "+plugin_data['Name']})
                         .append($("<i/>")
@@ -109,7 +72,7 @@ function display_plugin_list(plugin_data, plugin_index) {
                         .attr({"href": "#",
                             "id": "stop_button"+plugin_index,
                             "class":"btn btn-social-icon btn-google btn-xs",
-                            "onclick": "stop_plugin('"+plugin_data['id']+"')",
+                            "onclick": "desired_plugin_state('"+plugin_data['id']+"', 'stop')",
                             "data-toggle": "tooltip",
                             "title": "Stop  "+plugin_data['Name']})
                         .append($("<i/>")

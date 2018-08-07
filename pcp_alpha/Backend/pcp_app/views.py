@@ -11,7 +11,7 @@ from ua_parser import user_agent_parser
 from Backend.db_dir.custom_queries import get_specific_commands, insert_brain_jobs_w3, \
     get_specific_brain_output, get_brain_output_content, insert_new_target, get_brain_targets, \
     persist_jobs_state, load_jobs_state, upload_file_to_brain, del_file_upload_from_brain, \
-    get_brain_files, get_brain_file, get_plugin_list_query
+    get_brain_files, get_brain_file, get_plugin_list_query, desired_plugin_state_brain
 from .forms import TargetForm
 
 
@@ -355,62 +355,30 @@ def update_plugin(request, plugin_id):
     Update plugin controller, and return plugin data
     back to Modal Form
     :param request:
+    :param plugin_id:
     :return:
     """
     plugin_data_dict = dict()
-    # print("\nplugin_id == {}\n".format(plugin_id))
     response = HttpResponse(json.dumps(plugin_id),
                             content_type='application/json')
     plugin_data_dict["plugin_id"] = plugin_id
     response["Content-Disposition"] = plugin_data_dict["plugin_id"]
-    # print(response["Content-Disposition"])
     response.status_code = 200
     return response
 
 
-def activate_plugin(request):
+def desired_plugin_state_controller(request):
     """
-    User clicks on activate plugin button next to the
-    plugin name in the plugin list
+    User clicks on activate, restart, or stop button
+    next to the plugin name in the plugin list
     :param request:
     :return:
     """
-    # Delete or modify lines below for future activate plugin task
     if request.method == 'GET':
         plugin_id = request.GET.get('plugin_id')
-        print("\nactivate_plugin plugin_id == {}\n".format(plugin_id))
+        desired_state = request.GET.get('desired_state')
+        print("\ndesired_state_plugin plugin_id == {}".format(plugin_id))
+        print("desired_state_plugin desired_state == {}\n".format(desired_state))
+        desired_plugin_state_brain(plugin_id, desired_state)
         return HttpResponse(json.dumps(plugin_id),
                             content_type='application/json')
-    # pass
-
-
-def restart_plugin(request):
-    """
-    User clicks on restart plugin button next to the
-    plugin name in the plugin list
-    :param request:
-    :return:
-    """
-    # Delete or modify lines below for future restart plugin task
-    if request.method == 'GET':
-        plugin_id = request.GET.get('plugin_id')
-        print("\nrestart_plugin plugin_id == {}\n".format(plugin_id))
-        return HttpResponse(json.dumps(plugin_id),
-                            content_type='application/json')
-    # pass
-
-
-def stop_plugin(request):
-    """
-    User clicks on stop plugin button next to the
-    plugin name in the plugin list
-    :param request:
-    :return:
-    """
-    # Delete or modify lines below for future stop plugin task
-    if request.method == 'GET':
-        plugin_id = request.GET.get('plugin_id')
-        print("\nstop_plugin plugin_id == {}\n".format(plugin_id))
-        return HttpResponse(json.dumps(plugin_id),
-                            content_type='application/json')
-    # pass
