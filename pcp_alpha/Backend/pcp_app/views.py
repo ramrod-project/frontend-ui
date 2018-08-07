@@ -385,4 +385,5 @@ def desired_plugin_state_controller(request):
         response = HttpResponse(json.dumps(desired_plugin_state_brain(
             plugin_id, desired_state)),
             content_type='application/json')
+        response.status_code = 200
         return response
