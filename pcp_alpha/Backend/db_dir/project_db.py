@@ -316,4 +316,4 @@ def confirm_db_info():
     print("\nlog: ###### DB Logs ######")
     connect()
     confirm_brain_db_info()
-
+    confirm_plugin_db_info()
