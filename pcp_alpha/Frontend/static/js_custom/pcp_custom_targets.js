@@ -63,16 +63,25 @@ function verify_port(){
 }
 
 function verify_name(){
-    var plugin_name = $("#plugin_name");
-    var content = plugin_name[0].value;
-    if(!name_rgx.test(content)){
-        $("#fg_name").addClass("has-error");
-        $("#fg_name_help").show();
-        $("#add_target_submit")[0].disabled = true;
-    } else {
+    var plugin_name = $("#plugin_name"),
+        content = plugin_name[0].value,
+        helper_checker = 0;
+    for(var counter = 1; counter < plugin_name[0].length; counter++){
+        var plugin_name_option = $("#plugin_name option#"+counter);
+        if(plugin_name_option[0].selected === true) {
+            $("#add_target_submit")[0].disabled = false;
+            helper_checker = 1;
+            break;
+        } else {
+            $("#add_target_submit")[0].disabled = true;
+        }
+    }
+    if(helper_checker === 1) {
         $("#fg_name").removeClass("has-error");
         $("#fg_name_help").hide();
-        $("#add_target_submit")[0].disabled = false;
+    } else {
+        $("#fg_name").addClass("has-error");
+        $("#fg_name_help").show();
     }
     return ! $("#add_target_submit")[0].disabled;
 }

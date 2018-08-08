@@ -29,10 +29,20 @@
                         <!--Plugin Name-->
                         <div class="form-group">
                             <label for="plugin_name" class="col-sm-12 content-header">Plugin Name</label>
-
+                            {% if plugin_list %}
                             <div class="col-sm-10">
-                                <input class="form-control" type="text" id="plugin_name" name="plugin_name" maxlength="200" placeholder="{{ items.PluginName }}">
+                                <select class="form-control plugin_name" id="plugin_name" name="plugin_name">
+                                    {% for plugin_item in plugin_list %}
+                                        {% if plugin_item.Name == items.PluginName %}
+                                            <option id="{{ forloop.counter }}" value="{{ plugin_item.Name }}" selected>{{ plugin_item.Name }}</option>
+                                        {% else %}
+                                            <option id="{{ forloop.counter }}" value="{{ plugin_item.Name }}">{{ plugin_item.Name }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+{#                                <input class="form-control" type="text" id="plugin_name" name="plugin_name" maxlength="200" placeholder="{{ items.PluginName }}">#}
                             </div>
+                            {% endif %}
                         </div>
 
                         <!--Location Number-->

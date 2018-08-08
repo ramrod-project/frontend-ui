@@ -1,8 +1,30 @@
 # Helpful functions to used in tests
-from random import randint
+import os
+from random import SystemRandom
+from pcp_alpha.Backend.db_dir.project_db import rtdb, connect
 
-SAMPLE_GOOD_PLUGIN_ID = randint(1, 3)
-SAMPLE_BAD_PLUGIN_ID = 4
+
+BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def read_test_file(filename, directory):
+    file_object = open(directory+filename)
+    try:
+        data = file_object.read()
+    except IOError:
+        data = None
+    finally:
+        file_object.close()
+    return data
+
+
+def return_random_plugin_id():
+    return_plugin_list = list()
+    plugin_list = rtdb.db("Controller").table("Plugins").run(connect())
+    for plugin_item in plugin_list:
+        return_plugin_list.append(plugin_item['id'])
+    srandom = SystemRandom()
+    return srandom.choice(return_plugin_list)
 
 
 def get_test(url_str, function_obj, rf, target_id=None):
@@ -19,3 +41,7 @@ def get_test(url_str, function_obj, rf, target_id=None):
     else:
         response = function_obj(request)
     return response
+
+
+SAMPLE_GOOD_PLUGIN_ID = return_random_plugin_id()
+SAMPLE_BAD_PLUGIN_ID = "bad_plugin_id"

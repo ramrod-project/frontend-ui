@@ -1,12 +1,15 @@
 from multiprocessing import Process
 from time import sleep, time
 from uuid import uuid4
+import os
 import json
+import ast
 import pytest
-from brain import connect, r
+from brain import connect, r, binary
 
 from test.test_w4_switch_to_done import switch_to_done
 # from rethinkdb.errors import ReqlOpFailedError
+from pcp_alpha.Backend.Backend_tests.helper_test_functions import read_test_file, BACKEND_DIR
 from pcp_alpha.Backend.db_dir.custom_data import location_generated_num
 from pcp_alpha.Backend.db_dir.project_db import rtdb
 from pcp_alpha.Backend.db_dir.custom_queries import get_specific_brain_targets, \
@@ -15,7 +18,7 @@ from pcp_alpha.Backend.pcp_app.views import get_commands_controller, \
     execute_sequence_controller, w4_output_controller, w4_output_controller_download, \
     new_target_form, val_target_form, val_edit_target_form, edit_target_form, \
     delete_specific_target, file_upload_list, persist_job_state, load_job_state, \
-    del_file_from_list, get_file_listing, get_file
+    del_file_from_list, get_file_listing, get_file, get_interfaces
 
 ECHO_JOB_ID = str(uuid4())
 NOW = time()
@@ -96,6 +99,7 @@ SAMPLE_OUTPUT = {
     "OutputJob": SAMPLE_JOB,
     "Content": "Sample output string"
 }
+
 SAMPLE_FILE_ID = "test.txt"
 
 
@@ -630,9 +634,14 @@ class TestDataHandling(object):
         :param rf:
         :return:
         """
+        binary.put_buffer(SAMPLE_FILE_ID,
+                          read_test_file(SAMPLE_FILE_ID,
+                                         BACKEND_DIR + "/Backend_tests/"))
         url_var = "file_listing/"
         response = TestDataHandling.get_test(url_var, get_file_listing, rf)
+        db_file_list = ast.literal_eval(response.content.decode())
         assert response.status_code == 200
+        assert SAMPLE_FILE_ID in db_file_list
 
     @staticmethod
     def test_get_file(rf):
@@ -644,4 +653,16 @@ class TestDataHandling(object):
         """
         url_var = "file_download/{}/".format(SAMPLE_FILE_ID)
         response = TestDataHandling.get_test(url_var, get_file, rf, target_id=SAMPLE_FILE_ID)
+        assert response.status_code == 200
+        assert SAMPLE_FILE_ID in response['Content-Disposition']
+
+    @staticmethod
+    def test_get_interfaces(rf):
+        """
+
+        :param rf:
+        :return:
+        """
+        url_var = "get_interfaces/"
+        response = TestDataHandling.get_test(url_var, get_interfaces, rf)
         assert response.status_code == 200
