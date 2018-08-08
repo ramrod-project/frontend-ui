@@ -1,6 +1,7 @@
 from multiprocessing import Process
 from time import sleep, time
 from uuid import uuid4
+import os
 import json
 import ast
 import pytest
@@ -8,7 +9,6 @@ from brain import connect, r, binary
 
 from test.test_w4_switch_to_done import switch_to_done
 # from rethinkdb.errors import ReqlOpFailedError
-from pcp_alpha.Backend.Backend_tests.helper_test_functions import read_test_file, BACKEND_DIR
 from pcp_alpha.Backend.db_dir.custom_data import location_generated_num
 from pcp_alpha.Backend.db_dir.project_db import rtdb
 from pcp_alpha.Backend.db_dir.custom_queries import get_specific_brain_targets, \
@@ -101,6 +101,11 @@ SAMPLE_OUTPUT = {
 
 SAMPLE_FILE_ID = "test.txt"
 
+BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Create sample data to input file (Brain.Files dictionary)
+# Create sample data to for job state (Audit.Jobs?)
+
 
 @pytest.fixture(scope="function")
 def dummy_output_data():
@@ -166,6 +171,17 @@ class TestDataHandling(object):
         else:
             response = function_obj(request)
         return response
+
+    @staticmethod
+    def read_test_file(filename, directory):
+        file_object = open(directory + filename)
+        try:
+            data = file_object.read()
+        except IOError:
+            data = None
+        finally:
+            file_object.close()
+        return data
 
     @staticmethod
     def test_display_capability_list():
