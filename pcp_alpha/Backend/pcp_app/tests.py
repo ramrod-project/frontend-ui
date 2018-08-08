@@ -9,6 +9,7 @@ from brain import connect, r, binary
 
 from test.test_w4_switch_to_done import switch_to_done
 # from rethinkdb.errors import ReqlOpFailedError
+from pcp_alpha.Backend.Backend_tests.helper_test_functions import read_test_file, BACKEND_DIR
 from pcp_alpha.Backend.db_dir.custom_data import location_generated_num
 from pcp_alpha.Backend.db_dir.project_db import rtdb
 from pcp_alpha.Backend.db_dir.custom_queries import get_specific_brain_targets, \
@@ -101,11 +102,6 @@ SAMPLE_OUTPUT = {
 
 SAMPLE_FILE_ID = "test.txt"
 
-BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-# Create sample data to input file (Brain.Files dictionary)
-# Create sample data to for job state (Audit.Jobs?)
-
 
 @pytest.fixture(scope="function")
 def dummy_output_data():
@@ -171,17 +167,6 @@ class TestDataHandling(object):
         else:
             response = function_obj(request)
         return response
-
-    @staticmethod
-    def read_test_file(filename, directory):
-        file_object = open(directory + filename)
-        try:
-            data = file_object.read()
-        except IOError:
-            data = None
-        finally:
-            file_object.close()
-        return data
 
     @staticmethod
     def test_display_capability_list():
@@ -650,8 +635,8 @@ class TestDataHandling(object):
         :return:
         """
         binary.put_buffer(SAMPLE_FILE_ID,
-                          TestDataHandling.read_test_file(SAMPLE_FILE_ID,
-                                                          BACKEND_DIR + "/Backend_tests/"))
+                          read_test_file(SAMPLE_FILE_ID,
+                                         BACKEND_DIR + "/Backend_tests/"))
         url_var = "file_listing/"
         response = TestDataHandling.get_test(url_var, get_file_listing, rf)
         db_file_list = ast.literal_eval(response.content.decode())
