@@ -650,8 +650,8 @@ class TestDataHandling(object):
         :return:
         """
         binary.put_buffer(SAMPLE_FILE_ID,
-                          read_test_file(SAMPLE_FILE_ID,
-                                         BACKEND_DIR + "/Backend_tests/"))
+                          TestDataHandling.read_test_file(SAMPLE_FILE_ID,
+                                                          BACKEND_DIR + "/Backend_tests/"))
         url_var = "file_listing/"
         response = TestDataHandling.get_test(url_var, get_file_listing, rf)
         db_file_list = ast.literal_eval(response.content.decode())
