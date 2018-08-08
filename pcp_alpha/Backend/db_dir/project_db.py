@@ -152,6 +152,7 @@ TEST_PORT_DATA2 = {
     "UDPPorts": []
 }
 
+
 def table_clear(database, table):
     """Clears data from a table
 
@@ -239,7 +240,7 @@ def confirm_brain_db_info():
     be created only locally.
     :return: nothing at the moment
     """
-    if not check_dev_env(): # Check for Development Environment
+    if not check_dev_env():  # Check for Development Environment
         return
     db_con_var = connect()
     if rtdb.db_list().contains("Brain").run(db_con_var) is not True:
@@ -315,4 +316,4 @@ def confirm_db_info():
     print("\nlog: ###### DB Logs ######")
     connect()
     confirm_brain_db_info()
-    confirm_plugin_db_info()
+

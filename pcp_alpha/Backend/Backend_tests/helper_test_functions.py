@@ -1,6 +1,21 @@
 # Helpful functions to used in tests
+import os
 from random import SystemRandom
 from pcp_alpha.Backend.db_dir.project_db import rtdb, connect
+
+
+BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def read_test_file(filename, directory):
+    file_object = open(directory+filename)
+    try:
+        data = file_object.read()
+    except IOError:
+        data = None
+    finally:
+        file_object.close()
+    return data
 
 
 def return_random_plugin_id():
