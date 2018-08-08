@@ -18,7 +18,7 @@ from pcp_alpha.Backend.pcp_app.views import get_commands_controller, \
     execute_sequence_controller, w4_output_controller, w4_output_controller_download, \
     new_target_form, val_target_form, val_edit_target_form, edit_target_form, \
     delete_specific_target, file_upload_list, persist_job_state, load_job_state, \
-    del_file_from_list, get_file_listing, get_file
+    del_file_from_list, get_file_listing, get_file, get_interfaces
 
 ECHO_JOB_ID = str(uuid4())
 NOW = time()
@@ -655,3 +655,14 @@ class TestDataHandling(object):
         response = TestDataHandling.get_test(url_var, get_file, rf, target_id=SAMPLE_FILE_ID)
         assert response.status_code == 200
         assert SAMPLE_FILE_ID in response['Content-Disposition']
+
+    @staticmethod
+    def test_get_interfaces(rf):
+        """
+
+        :param rf:
+        :return:
+        """
+        url_var = "get_interfaces/"
+        response = TestDataHandling.get_test(url_var, get_interfaces, rf)
+        assert response.status_code == 200
