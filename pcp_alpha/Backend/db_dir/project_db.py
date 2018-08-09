@@ -106,7 +106,7 @@ _TEST_COMMANDS = [
     },
 ]
 
-plugin1_controller = {
+plugins = [{
     "id": "1-1-A",
     "Name": "Plugin1",
     "State": "Available",
@@ -116,9 +116,7 @@ plugin1_controller = {
     "Environment": ["STAGE=DEV", "NORMAL=1"],
     "ExternalPorts": ["9999/tcp"],
     "InternalPorts": ["9999/tcp"]
-}
-
-plugin2_controller = {
+}, {
     "id": "2-2-B",
     "Name": "Plugin2",
     "State": "Restarting",
@@ -128,9 +126,7 @@ plugin2_controller = {
     "Environment": ["STAGE=DEV", "NORMAL=2"],
     "ExternalPorts": ["4242/tcp"],
     "InternalPorts": ["4242/tcp"]
-}
-
-plugin3_controller = {
+}, {
     "id": "3-3-C",
     "Name": "Plugin3",
     "State": "Stopped",
@@ -140,7 +136,9 @@ plugin3_controller = {
     "Environment": ["STAGE=DEV", "NORMAL=3"],
     "ExternalPorts": ["4243/udp"],
     "InternalPorts": ["4243/udp"]
-}
+}]
+
+
 TEST_PORT_DATA = {
     "InterfaceName": "eth0",
     "Address": "192.16.5.240",
@@ -301,9 +299,7 @@ def confirm_plugin_db_info():
         ).run(db_con_var)
         rtdb.db("Controller").table("Plugins").delete().run(db_con_var)
         rtdb.db("Controller").table("Plugins")\
-            .insert([plugin1_controller,
-                     plugin2_controller,
-                     plugin3_controller]).run(db_con_var)
+            .insert(plugins).run(db_con_var)
         rtdb.db("Controller").table("Ports").delete().run(db_con_var)
         rtdb.db("Controller").table("Ports") \
             .insert([TEST_PORT_DATA,
