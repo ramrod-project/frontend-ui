@@ -12,13 +12,13 @@ var PLUGIN_INTERNAL_PORTS = "InternalPorts";
 
 var BLANK_PLUGIN = {
     "id": "NEW",
-    PLUGIN_NAME: "Name",
-    PLUGIN_STATE: "",
-    PLUGIN_DESIRED_STATE: "Activate",
-    PLUGIN_OS: "all",
-    PLUGIN_INTERFACE: "",
-    PLUGIN_EXTERNAL_PORTS: [],
-    PLUGIN_INTERNAL_PORTS: []
+    "Name": "Name",
+    "State": "",
+    "DesiredState": "Activate",
+    "OS": "all",
+    "Interface": "",
+    "ExternalPorts": [],
+    "InternalPorts": []
 };
 
 var plugin_list_map = {};
