@@ -78,7 +78,8 @@ class TestPluginData(object):
         """
         url_var = "update_plugin/{}/".format(SAMPLE_GOOD_PLUGIN_ID)
         update_data = {'id': '2-2-B', 'DesiredState': '', 'Name': 'Plugin2', 'Interface': '10.10.10.10', 'OS': 'posix', 'ExternalPorts': ['4242/tcp'], 'Environment': ['STAGE=DEV,NORMAL=2']}
-        response = rf.post(url_var, update_data)
+        response = update_plugin(rf.post(url_var, update_data))
+        assert response.status_code == 200
 
 
     @staticmethod
