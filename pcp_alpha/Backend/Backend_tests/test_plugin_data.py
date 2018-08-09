@@ -69,6 +69,20 @@ class TestPluginData(object):
         assert response.status_code == 405
 
     @staticmethod
+    def test_update_plugin_data(rf):
+        """
+        Test when a user clicks on a plugin name,
+        plugin data will return for update plugin form
+        :param rf:
+        :return:
+        """
+        url_var = "update_plugin/{}/".format(SAMPLE_GOOD_PLUGIN_ID)
+        update_data = {'id': '2-2-B', 'DesiredState': '', 'Name': 'Plugin2', 'Interface': '10.10.10.10', 'OS': 'posix', 'ExternalPorts': ['4242/tcp'], 'Environment': ['STAGE=DEV,NORMAL=2']}
+        response = rf.post(url_var, update_data)
+        assert response.status_code == 200
+
+
+    @staticmethod
     def test_plugin_state(rf):
         url_var = 'desired_plugin_state/'
         response = get_test(url_var, desired_plugin_state_controller, rf)
