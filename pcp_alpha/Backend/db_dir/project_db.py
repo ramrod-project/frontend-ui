@@ -113,8 +113,9 @@ plugin1_controller = {
     "DesiredState": "",
     "OS": "posix",
     "Interface": "192.16.5.240",
-    "ExternalPorts": ["9999"],
-    "InternalPorts": ["9999"]
+    "Environment": ["STAGE=DEV", "NORMAL=1"],
+    "ExternalPorts": ["9999/tcp"],
+    "InternalPorts": ["9999/tcp"]
 }
 
 plugin2_controller = {
@@ -124,8 +125,9 @@ plugin2_controller = {
     "DesiredState": "",
     "OS": "nt",
     "Interface": "10.10.10.10",
-    "ExternalPorts": ["4242"],
-    "InternalPorts": ["4242"]
+    "Environment": ["STAGE=DEV", "NORMAL=2"],
+    "ExternalPorts": ["4242/tcp"],
+    "InternalPorts": ["4242/tcp"]
 }
 
 plugin3_controller = {
@@ -135,8 +137,9 @@ plugin3_controller = {
     "DesiredState": "",
     "OS": "all",
     "Interface": "192.16.5.240",
-    "ExternalPorts": ["4243"],
-    "InternalPorts": ["4243"]
+    "Environment": ["STAGE=DEV", "NORMAL=3"],
+    "ExternalPorts": ["4243/udp"],
+    "InternalPorts": ["4243/udp"]
 }
 TEST_PORT_DATA = {
     "InterfaceName": "eth0",
@@ -148,8 +151,8 @@ TEST_PORT_DATA = {
 TEST_PORT_DATA2 = {
     "InterfaceName": "eth0",
     "Address": "10.10.10.10",
-    "TCPPorts": ["4242"],
-    "UDPPorts": []
+    "TCPPorts": [],
+    "UDPPorts": ["4242"]
 }
 
 

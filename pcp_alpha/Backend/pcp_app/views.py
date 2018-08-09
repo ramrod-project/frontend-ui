@@ -14,7 +14,7 @@ from Backend.db_dir.custom_queries import get_specific_commands, insert_brain_jo
     get_brain_files, get_brain_file, get_plugin_list_query, desired_plugin_state_brain, \
     get_interface_list, update_plugin_to_brain
 
-from .forms import TargetForm
+from .forms import TargetForm, verify_plugin_data
 
 
 @csrf_exempt
@@ -368,17 +368,26 @@ def update_plugin(request, plugin_id):
     """
 
     output = {}
+    response = HttpResponse(content_type='application/json')
     if request.method == 'POST':
         plugin_data = request.POST.dict()
         plugin_data['ExternalPorts[]'] = plugin_data['ExternalPorts[]']\
             .replace(" ", "")
-        plugin_data['ExternalPorts'] = request.POST.getlist("ExternalPorts[]")
-        del plugin_data["ExternalPorts[]"]
+        plugin_data['Environment[]'] = plugin_data['Environment[]'] \
+            .replace(" ", "")
 
+        plugin_data['ExternalPorts'] = request.POST.getlist("ExternalPorts[]")
+        plugin_data['Environment'] = request.POST.getlist("Environment[]")
+
+        del plugin_data["ExternalPorts[]"]
+        del plugin_data["Environment[]"]
         output = update_plugin_to_brain(plugin_data)
-    response = HttpResponse(json.dumps(output),
-                            content_type='application/json')
-    response.status_code = 200
+        if output['errors'] > 0:
+            response.status_code = 400
+        response.status_code = 200
+    else:
+        response.status_code = 405
+    response.write(json.dumps(output))
     return response
 
 
