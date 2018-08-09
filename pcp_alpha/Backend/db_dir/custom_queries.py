@@ -1,9 +1,7 @@
 import json
 import brain.queries
 from brain.binary import put_buffer, list_dir, get, delete
-import brain.controller
 import brain
-import brain.controller
 
 from .project_db import connect, rtdb
 
@@ -240,7 +238,7 @@ def update_plugin_to_brain(plugin):
     response = None
     if plugin["id"] == "NEW":
         all_ports = "-".join(plugin['ExternalPorts'])
-        del(plugin['id'])  # allow database to generate a new id
+        del (plugin['id'])  # allow database to generate a new id
         plugin["ServiceName"] = "{}-{}".format(plugin["Name"],
                                                all_ports)
         plugin["InternalPorts"] = []
@@ -249,11 +247,11 @@ def update_plugin_to_brain(plugin):
     else:
         response = brain.controller.plugins.update_plugin(plugin)
     return response
-  
-  
+
+
 def desired_plugin_state_brain(plugin_id, desired_state):
     """
-    
+
     :param plugin_id: 
     :param desired_state: 
     :return: 
