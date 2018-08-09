@@ -79,7 +79,8 @@ function desired_plugin_state(plugin_id, desired_state) {
 }
 
 function display_plugin_list(plugin_data, plugin_index) {
-    var plugin_list_dom = $(".plugin_list_display");
+    var plugin_list_dom = $(".plugin_list_display"),
+        bp = "<br/>";
     plugin_list_dom
         .append($("<li/>").attr({"class": "plugin_button"})
             .append($("<div/>")
@@ -94,7 +95,20 @@ function display_plugin_list(plugin_data, plugin_index) {
                                             "data-target":"#controller-modal",
                                             "data-whatever": plugin_data['id'],
                                             "whatever": "/update_plugin/"+plugin_data['id']+"/"})
-                        .text(plugin_data['Name']))
+                        .text(plugin_data['Name'])
+                        .tooltip({
+                            classes: {"ui-tooltip": "ui-corner-all ui-widget-shadow ui-state-highlight"},
+                            items: 'button',
+                            content: "DesiredState: "+plugin_data['DesiredState']+bp+
+                            "ExternalPorts: "+plugin_data['ExternalPorts']+bp+
+                            "Interface: "+plugin_data['Interface']+bp+
+                            "InternalPorts: "+plugin_data['InternalPorts']+bp+
+                            "Name: "+plugin_data['Name']+bp+
+                            "OS: "+plugin_data['OS']+bp+
+                            "State: "+plugin_data['State']+bp+
+                            "id: "+plugin_data['id'],
+                        })
+                    )
                     .append("&emsp;&emsp;&emsp;")
                     // Activate button
                     .append($("<a/>")
@@ -216,12 +230,12 @@ $(document).ready(function() {
     $("#plugin_list_refresh").click(get_plugin_list);
 
     get_plugin_list();
-    // Show and hide restart and stop buttons
+    // Show restart and stop buttons
     $(document).on('mouseenter', '.plugin_button', function () {
         $(this).find(".btn-google").show();
         $(this).find(".btn-pcp_button_color1").show();
         $(this).find(".btn-pcp_button_color2").show();
-
+    // Hide restart and stop buttons
     }).on('mouseleave', '.plugin_button', function () {
         $(this).find(".btn-google").hide();
         $(this).find(".btn-pcp_button_color1").hide();
