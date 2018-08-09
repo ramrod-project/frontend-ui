@@ -9,4 +9,5 @@ omit =
     *Frontend*
     *pcp_alpha_settings*
     *test*
+    *project_db*
     *manage.py
