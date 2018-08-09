@@ -66,7 +66,7 @@ class TestPluginData(object):
         """
         url_var = "update_plugin/{}/".format(SAMPLE_GOOD_PLUGIN_ID)
         response = get_test(url_var, update_plugin, rf, target_id=SAMPLE_GOOD_PLUGIN_ID)
-        assert response.status_code == 200
+        assert response.status_code == 405
 
     @staticmethod
     def test_plugin_state(rf):
