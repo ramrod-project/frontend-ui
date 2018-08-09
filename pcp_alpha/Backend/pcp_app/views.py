@@ -370,7 +370,11 @@ def update_plugin(request, plugin_id):
     output = {}
     if request.method == 'POST':
         plugin_data = request.POST.dict()
+        plugin_data['ExternalPorts[]'] = plugin_data['ExternalPorts[]']\
+            .replace(" ", "")
         plugin_data['ExternalPorts'] = request.POST.getlist("ExternalPorts[]")
+        del plugin_data["ExternalPorts[]"]
+
         output = update_plugin_to_brain(plugin_data)
     response = HttpResponse(json.dumps(output),
                             content_type='application/json')
