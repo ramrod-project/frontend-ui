@@ -243,7 +243,9 @@ def update_plugin_to_brain(plugin):
                                                all_ports)
         plugin["InternalPorts"] = []
         plugin["ServiceID"] = ""
-    response = brain.controller.plugins.update_plugin(plugin)
+        response = brain.controller.plugins.create_plugin(plugin)
+    else:
+        response = brain.controller.plugins.update_plugin(plugin)
     return response
 
 

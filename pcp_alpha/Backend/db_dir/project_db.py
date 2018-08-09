@@ -120,7 +120,7 @@ plugin1_controller = {
 plugin2_controller = {
     "id": "2-2-B",
     "Name": "Plugin2",
-    "State": "Available",
+    "State": "Restarting",
     "DesiredState": "",
     "OS": "nt",
     "Interface": "10.10.10.10",
@@ -131,7 +131,7 @@ plugin2_controller = {
 plugin3_controller = {
     "id": "3-3-C",
     "Name": "Plugin3",
-    "State": "Available",
+    "State": "Stopped",
     "DesiredState": "",
     "OS": "all",
     "Interface": "192.16.5.240",

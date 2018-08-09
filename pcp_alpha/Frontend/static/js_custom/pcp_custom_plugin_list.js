@@ -267,5 +267,6 @@ $('#controller-modal').on('show.bs.modal', function (event) {
   modal.find('.plugin-ports').val(plugin_list_map[plugin_id]["ExternalPorts"].join());
   modal.find('.plugin-iports').val(plugin_list_map[plugin_id]["InternalPorts"].join());
   modal.find('.plugin-interface').val(plugin_list_map[plugin_id]["Interface"]);
+  modal.find('.plugin-desired').val(plugin_list_map[plugin_id]["DesiredState"]);
   modal.find('.plugin-os').val(plugin_list_map[plugin_id]["OS"]);
 });
