@@ -109,6 +109,7 @@ _TEST_COMMANDS = [
 plugins = [{
     "id": "1-1-A",
     "Name": "Plugin1",
+    "ServiceName": "Plugin1-a",
     "State": "Available",
     "DesiredState": "",
     "OS": "posix",
@@ -119,6 +120,7 @@ plugins = [{
 }, {
     "id": "2-2-B",
     "Name": "Plugin2",
+    "ServiceName": "Plugin2-a",
     "State": "Restarting",
     "DesiredState": "",
     "OS": "nt",
@@ -129,6 +131,7 @@ plugins = [{
 }, {
     "id": "3-3-C",
     "Name": "Plugin3",
+    "ServiceName": "Plugin3-a",
     "State": "Stopped",
     "DesiredState": "",
     "OS": "all",
