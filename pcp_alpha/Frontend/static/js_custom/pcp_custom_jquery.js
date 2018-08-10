@@ -106,12 +106,6 @@ $(document).ready(function() {
     $("#job_sequence_time_unix")[0].value = Math.floor(startup_date.getTime()/1000).toString();
     $("#job_sequence_timer").datepicker( "setDate", startup_date );
 
-    // $("#searchCommand_id").tooltip({
-    //                           classes: {"ui-tooltip": "ui-corner-all ui-widget-shadow ui-state-error"},
-    //                           items: 'span',
-    //                            content: "Warning: Not yet supported, will be supported in Sprint 5",
-    //                         });
-
 
 
 
@@ -273,7 +267,7 @@ function filter_w1(){
         filter_display = $("#w1_command_active_filter"),
         to_filter = $("#target_box_contentid tr");
 
-    if (filter_content.length == 0){
+    if (filter_content.length === 0){
         filter_display.css("display", "none");
     } else {
         filter_display.css("display", "");
