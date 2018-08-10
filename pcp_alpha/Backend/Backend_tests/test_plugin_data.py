@@ -81,7 +81,7 @@ class TestPluginData(object):
                        'DesiredState': '',
                        'Interface': '10.10.10.10',
                        'OS': 'posix',
-                       'ExternalPorts[]': ['4242/tcp'],
+                       'ExternalPorts[]': ['1111/tcp'],
                        'Environment[]': ['STAGE=DEV', 'NORMAL=2']}
         response = update_plugin(rf.post(url_var, update_data), "2-2-B")
         assert response.status_code == 200
