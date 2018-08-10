@@ -83,9 +83,8 @@ class TestPluginData(object):
                        'OS': 'posix',
                        'ExternalPorts[]': ['1111/tcp'],
                        'Environment[]': ['STAGE=DEV', 'NORMAL=2']}
-        response = update_plugin(rf.post(url_var, update_data), "2-2-B")
+        response = post_test(url_var, update_data, update_plugin, rf, target_id="2-2-B")
         assert response.status_code == 200
-
 
     @staticmethod
     def test_create_plugin_data(rf):
@@ -104,9 +103,7 @@ class TestPluginData(object):
                        'ExternalPorts[]': ['4242/tcp'],
                        'Environment[]': ['STAGE=DEV', 'NORMAL=2']}
         response = post_test(url_var, update_data, update_plugin, rf, target_id="NEW")
-        # response = update_plugin(rf.post(url_var, update_data), "NEW")
         assert response.status_code == 200
-
 
     @staticmethod
     def test_plugin_state(rf):

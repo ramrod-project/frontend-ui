@@ -106,12 +106,6 @@ $(document).ready(function() {
     $("#job_sequence_time_unix")[0].value = Math.floor(startup_date.getTime()/1000).toString();
     $("#job_sequence_timer").datepicker( "setDate", startup_date );
 
-    $("#searchCommand_id").tooltip({
-                              classes: {"ui-tooltip": "ui-corner-all ui-widget-shadow ui-state-error"},
-                              items: 'span',
-                               content: "Warning: Not yet supported, will be supported in Sprint 5",
-                            });
-
 
 
 
@@ -125,6 +119,12 @@ $(document).ready(function() {
     $("#searchNameHere_id").change(filter_w1);
     $("#searchNameHere_id").keyup(filter_w1);
     $("#w1_command_active_filter").css("display", "none");
+
+    $("#searchCommand_id")[0].value = "";
+    $("#searchCommand_id").change(filter_w2);
+    $("#searchCommand_id").keyup(filter_w2);
+    $("#w2_command_active_filter").css("display", "none");
+
     $("#new_jobq_button").click(add_sequence_tab);
     $("#clear_seq_buttonid").click(hide_current_sequence);
     $("#persist_button").click(save_job_state);
@@ -261,30 +261,23 @@ Functions down below are for w2
 // List of commands based off of plugin name
 var current_command_template = {};
 
+// TODO: Perhaps make one filter function in the future
 function filter_w1(){
-    var filter_content,
-        filter_display,
-        num_targets,
-        to_filter,
-        row_i,
-        row_id,
-        target_json,
-        target;
+    var filter_content = $("#searchNameHere_id")[0].value.toLowerCase(),
+        filter_display = $("#w1_command_active_filter"),
+        to_filter = $("#target_box_contentid tr");
 
-    filter_content = $("#searchNameHere_id")[0].value.toLowerCase();
-    filter_display = $("#w1_command_active_filter");
-    num_targets = 2;
-    if (filter_content.length == 0){
+    if (filter_content.length === 0){
         filter_display.css("display", "none");
     } else {
         filter_display.css("display", "");
         filter_display[0].innerText = "Currently filtering on: "+filter_content;
     }
-    to_filter = $("#target_box_contentid tr");
-    for (row_i = 0; row_i < to_filter.length; row_i++){
-        row_id = to_filter[row_i].id.substring(10, to_filter[row_i].id.length);
-        target_json = $("#name_tag_id"+row_id+" a span")[0].innerHTML;
-        target = JSON.parse(target_json);
+
+    for (var row_i = 0; row_i < to_filter.length; row_i++){
+        var row_id = to_filter[row_i].id.substring(10, to_filter[row_i].id.length),
+            target_json = $("#name_tag_id"+row_id+" a span")[0].innerHTML,
+            target = JSON.parse(target_json);
         if (target.PluginName.toLowerCase().includes(filter_content)  || target.Location.toLowerCase().includes(filter_content) ){
             $(to_filter[row_i]).css("display", "");
         } else {
@@ -292,6 +285,36 @@ function filter_w1(){
         }
     }
 }
+
+function filter_w2() {
+    var filter_content = $("#searchCommand_id")[0].value.toLowerCase(),
+        filter_display = $("#w2_command_active_filter"),
+        to_filter = $(".theContent");
+
+    if (filter_content.length === 0){
+        filter_display.css("display", "none");
+    } else {
+        filter_display.css("display", "");
+        filter_display[0].innerText = "Currently filtering on: "+filter_content;
+    }
+
+    for (var row_i = 0; row_i < to_filter[0].children.length; row_i++){
+        var row_id = to_filter[0].children[row_i].children[0].id.substring(10, to_filter[0].children[row_i].length),
+            specific_command = $("#acommandid"+row_id)[0].innerHTML;
+        if (specific_command.toLowerCase().includes(filter_content)){
+            $(to_filter[0].children[row_i]).css("display", "");
+
+            // if tooltip & box footer was opened before the user was
+            // searching the tooltip content & box footer will disappear
+            $(".tooltipHeader").empty();
+            $(".tooltipContent").empty();
+            $(".theContentArgument").empty();
+        } else {
+            $(to_filter[0].children[row_i]).css("display", "none");
+        }
+    }
+}
+
 function get_commands_func(){
 //    console.log("get_commands_func");  // debug
 //    console.log($(this)[0].parentElement.id);
