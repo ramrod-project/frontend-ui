@@ -381,6 +381,7 @@ def update_plugin(request, plugin_id):
 
         del plugin_data["ExternalPorts[]"]
         del plugin_data["Environment[]"]
+
         output = update_plugin_to_brain(plugin_data)
         if output['errors'] > 0:
             response.status_code = 400

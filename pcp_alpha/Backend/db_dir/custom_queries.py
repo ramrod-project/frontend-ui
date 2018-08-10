@@ -236,18 +236,19 @@ def update_plugin_to_brain(plugin):
     :return:
     """
     response = None
+    from sys import stderr
     if plugin["id"] == "NEW":
         all_ports = "-".join(plugin['ExternalPorts'])
         del (plugin['id'])  # allow database to generate a new id
         plugin["ServiceName"] = "{}-{}".format(plugin["Name"],
                                                all_ports)
-        plugin["InternalPorts"] = []
+        plugin["InternalPorts"] = plugin['ExternalPorts']
+        plugin["State"] = ""
         plugin["ServiceID"] = ""
         response = brain.controller.plugins.create_plugin(plugin,
-                                                          True)
-    else:
-        response = brain.controller.plugins.update_plugin(plugin,
                                                           verify_plugin=True)
+    else:
+        response = brain.controller.plugins.update_plugin(plugin)
     return response
 
 

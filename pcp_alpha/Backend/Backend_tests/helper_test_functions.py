@@ -43,5 +43,18 @@ def get_test(url_str, function_obj, rf, target_id=None):
     return response
 
 
+def post_test(url_str, post_data, function_obj, rf, target_id=None):
+    """
+    This function is used for forms to imitate user's inputting
+    data and doing a request.POST
+    """
+    request = rf.post(url_str, post_data)
+    if target_id is not None:
+        response = function_obj(request, target_id)
+    else:
+        response = function_obj(request)
+    return response
+
+
 SAMPLE_GOOD_PLUGIN_ID = return_random_plugin_id()
 SAMPLE_BAD_PLUGIN_ID = "bad_plugin_id"

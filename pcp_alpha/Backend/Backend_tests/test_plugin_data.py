@@ -5,8 +5,8 @@ import ast
 import pytest
 from pcp_alpha.Backend.pcp_app.views import get_plugin_list, update_plugin, \
     desired_plugin_state_controller
-from pcp_alpha.Backend.Backend_tests.helper_test_functions import get_test, \
-    SAMPLE_GOOD_PLUGIN_ID, SAMPLE_BAD_PLUGIN_ID
+from .helper_test_functions import get_test, \
+    SAMPLE_GOOD_PLUGIN_ID, SAMPLE_BAD_PLUGIN_ID, post_test
 
 
 @pytest.mark.incremental
@@ -78,17 +78,11 @@ class TestPluginData(object):
         """
         url_var = "update_plugin/2-2-B/"
         update_data = {'id': '2-2-B',
-                       "State": "",
                        'DesiredState': '',
-                       'Name': 'Plugin2',
-                       "ServiceName":"hi",
                        'Interface': '10.10.10.10',
                        'OS': 'posix',
                        'ExternalPorts[]': ['4242/tcp'],
-                       'ExternalPorts': ['4242/tcp'],
-                       'InternalPorts': ['4242/tcp'],
-                       'Environment[]': ['STAGE=DEV,NORMAL=2'],
-                       'Environment': ['STAGE=DEV,NORMAL=2']}
+                       'Environment[]': ['STAGE=DEV', 'NORMAL=2']}
         response = update_plugin(rf.post(url_var, update_data), "2-2-B")
         assert response.status_code == 200
 
@@ -103,18 +97,14 @@ class TestPluginData(object):
         """
         url_var = "update_plugin/2-2-B/"
         update_data = {'id': 'NEW',
-                       "State": "",
                        'DesiredState': '',
                        'Name': 'Plugin2',
-                       "ServiceName":"hi-2",
                        'Interface': '10.10.10.10',
                        'OS': 'posix',
                        'ExternalPorts[]': ['4242/tcp'],
-                       'ExternalPorts': ['4242/tcp'],
-                       'InternalPorts': ['4242/tcp'],
-                       'Environment[]': ['STAGE=DEV,NORMAL=2'],
-                       'Environment': ['STAGE=DEV,NORMAL=2']}
-        response = update_plugin(rf.post(url_var, update_data), "NEW")
+                       'Environment[]': ['STAGE=DEV', 'NORMAL=2']}
+        response = post_test(url_var, update_data, update_plugin, rf, target_id="NEW")
+        # response = update_plugin(rf.post(url_var, update_data), "NEW")
         assert response.status_code == 200
 
 
