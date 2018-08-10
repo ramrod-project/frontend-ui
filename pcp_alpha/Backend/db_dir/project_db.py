@@ -106,38 +106,39 @@ _TEST_COMMANDS = [
     },
 ]
 
-plugin1_controller = {
+plugins = [{
     "id": "1-1-A",
     "Name": "Plugin1",
     "State": "Available",
     "DesiredState": "",
     "OS": "posix",
     "Interface": "192.16.5.240",
-    "ExternalPorts": ["9999"],
-    "InternalPorts": ["9999"]
-}
-
-plugin2_controller = {
+    "Environment": ["STAGE=DEV", "NORMAL=1"],
+    "ExternalPorts": ["9999/tcp"],
+    "InternalPorts": ["9999/tcp"]
+}, {
     "id": "2-2-B",
     "Name": "Plugin2",
     "State": "Restarting",
     "DesiredState": "",
     "OS": "nt",
     "Interface": "10.10.10.10",
-    "ExternalPorts": ["4242"],
-    "InternalPorts": ["4242"]
-}
-
-plugin3_controller = {
+    "Environment": ["STAGE=DEV", "NORMAL=2"],
+    "ExternalPorts": ["4242/tcp"],
+    "InternalPorts": ["4242/tcp"]
+}, {
     "id": "3-3-C",
     "Name": "Plugin3",
     "State": "Stopped",
     "DesiredState": "",
     "OS": "all",
     "Interface": "192.16.5.240",
-    "ExternalPorts": ["4243"],
-    "InternalPorts": ["4243"]
-}
+    "Environment": ["STAGE=DEV", "NORMAL=3"],
+    "ExternalPorts": ["4243/udp"],
+    "InternalPorts": ["4243/udp"]
+}]
+
+
 TEST_PORT_DATA = {
     "InterfaceName": "eth0",
     "Address": "192.16.5.240",
@@ -148,8 +149,8 @@ TEST_PORT_DATA = {
 TEST_PORT_DATA2 = {
     "InterfaceName": "eth0",
     "Address": "10.10.10.10",
-    "TCPPorts": ["4242"],
-    "UDPPorts": []
+    "TCPPorts": [],
+    "UDPPorts": ["4242"]
 }
 
 
@@ -298,9 +299,7 @@ def confirm_plugin_db_info():
         ).run(db_con_var)
         rtdb.db("Controller").table("Plugins").delete().run(db_con_var)
         rtdb.db("Controller").table("Plugins")\
-            .insert([plugin1_controller,
-                     plugin2_controller,
-                     plugin3_controller]).run(db_con_var)
+            .insert(plugins).run(db_con_var)
         rtdb.db("Controller").table("Ports").delete().run(db_con_var)
         rtdb.db("Controller").table("Ports") \
             .insert([TEST_PORT_DATA,

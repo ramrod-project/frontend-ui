@@ -66,7 +66,57 @@ class TestPluginData(object):
         """
         url_var = "update_plugin/{}/".format(SAMPLE_GOOD_PLUGIN_ID)
         response = get_test(url_var, update_plugin, rf, target_id=SAMPLE_GOOD_PLUGIN_ID)
+        assert response.status_code == 405
+
+    @staticmethod
+    def test_update_plugin_data(rf):
+        """
+        Test when a user clicks on a plugin name,
+        plugin data will return for update plugin form
+        :param rf:
+        :return:
+        """
+        url_var = "update_plugin/2-2-B/"
+        update_data = {'id': '2-2-B',
+                       "State": "",
+                       'DesiredState': '',
+                       'Name': 'Plugin2',
+                       "ServiceName":"hi",
+                       'Interface': '10.10.10.10',
+                       'OS': 'posix',
+                       'ExternalPorts[]': ['4242/tcp'],
+                       'ExternalPorts': ['4242/tcp'],
+                       'InternalPorts': ['4242/tcp'],
+                       'Environment[]': ['STAGE=DEV,NORMAL=2'],
+                       'Environment': ['STAGE=DEV,NORMAL=2']}
+        response = update_plugin(rf.post(url_var, update_data), "2-2-B")
         assert response.status_code == 200
+
+
+    @staticmethod
+    def test_create_plugin_data(rf):
+        """
+        Test when a user clicks on a plugin name,
+        plugin data will return for update plugin form
+        :param rf:
+        :return:
+        """
+        url_var = "update_plugin/2-2-B/"
+        update_data = {'id': 'NEW',
+                       "State": "",
+                       'DesiredState': '',
+                       'Name': 'Plugin2',
+                       "ServiceName":"hi-2",
+                       'Interface': '10.10.10.10',
+                       'OS': 'posix',
+                       'ExternalPorts[]': ['4242/tcp'],
+                       'ExternalPorts': ['4242/tcp'],
+                       'InternalPorts': ['4242/tcp'],
+                       'Environment[]': ['STAGE=DEV,NORMAL=2'],
+                       'Environment': ['STAGE=DEV,NORMAL=2']}
+        response = update_plugin(rf.post(url_var, update_data), "NEW")
+        assert response.status_code == 200
+
 
     @staticmethod
     def test_plugin_state(rf):

@@ -7,6 +7,7 @@ var PLUGIN_DESIRED_STATE = "DesiredState";
 var PLUGIN_OS = "OS";
 var PLUGIN_NAME = "Name";
 var PLUGIN_INTERFACE = "Interface";
+var PLUGIN_ENVIRONMENT = "Environment";
 var PLUGIN_EXTERNAL_PORTS = "ExternalPorts";
 var PLUGIN_INTERNAL_PORTS = "InternalPorts";
 
@@ -17,6 +18,7 @@ var BLANK_PLUGIN = {
     "DesiredState": "Activate",
     "OS": "all",
     "Interface": "",
+    "Environment":[],
     "ExternalPorts": [],
     "InternalPorts": []
 };
@@ -204,6 +206,7 @@ function onclick_plugin_save(event){
     plugin[PLUGIN_NAME] = $("#plugin-name").val();
     plugin[PLUGIN_INTERFACE] = $("#plugin-interface").val();
     plugin[PLUGIN_OS] = $("#plugin-os").val();
+    plugin[PLUGIN_ENVIRONMENT] = $("#plugin-environment").val().split();
     $.ajax({
         type: "POST",
         url: "/update_plugin/"+plugin['id']+"/",
@@ -268,5 +271,6 @@ $('#controller-modal').on('show.bs.modal', function (event) {
   modal.find('.plugin-iports').val(plugin_list_map[plugin_id]["InternalPorts"].join());
   modal.find('.plugin-interface').val(plugin_list_map[plugin_id]["Interface"]);
   modal.find('.plugin-desired').val(plugin_list_map[plugin_id]["DesiredState"]);
+  modal.find('.plugin-env').val(plugin_list_map[plugin_id]["Environment"].join());
   modal.find('.plugin-os').val(plugin_list_map[plugin_id]["OS"]);
 });
