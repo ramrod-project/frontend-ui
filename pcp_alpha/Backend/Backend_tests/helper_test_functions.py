@@ -1,47 +1,126 @@
-# Helpful functions to used in tests
-import os
-from random import SystemRandom
-from pcp_alpha.Backend.db_dir.project_db import rtdb, connect
+""""
+Docstrings
+"""
+import ast
+import pytest
+from pcp_alpha.Backend.pcp_app.views import get_plugin_list, update_plugin, \
+    desired_plugin_state_controller
+from pcp_alpha.Backend.Backend_tests.helper_test_functions import get_test, \
+    SAMPLE_GOOD_PLUGIN_ID, SAMPLE_BAD_PLUGIN_ID, post_test
 
 
-BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-
-def read_test_file(filename, directory):
-    file_object = open(directory+filename)
-    try:
-        data = file_object.read()
-    except IOError:
-        data = None
-    finally:
-        file_object.close()
-    return data
-
-
-def return_random_plugin_id():
-    return_plugin_list = list()
-    plugin_list = rtdb.db("Controller").table("Plugins").run(connect())
-    for plugin_item in plugin_list:
-        return_plugin_list.append(plugin_item['id'])
-    srandom = SystemRandom()
-    return srandom.choice(return_plugin_list)
-
-
-def get_test(url_str, function_obj, rf, target_id=None):
+@pytest.mark.incremental
+class TestPluginData(object):
     """
-    This function is used with functions from
-    pcp_app/views.py
+    Docstrings
     """
-    request = rf.get(url_str, HTTP_USER_AGENT="Mozilla/5.0 "
-                                              "(Windows NT 6.1; WOW64; rv:40.0) "
-                                              "Gecko/20100101 Firefox/40.1")
-    # response = function_obj(request)
-    if target_id is not None:
-        response = function_obj(request, target_id)
-    else:
-        response = function_obj(request)
-    return response
+
+    @staticmethod
+    def test_get_plugins(rf):
+        """
+        Test get plugins to display plugin names
+        in plugins list on the right side panel
+        :param rf:
+        :return:
+        """
+        url_var = "get_plugin_list/"
+        response = get_test(url_var, get_plugin_list, rf)
+        assert response.status_code == 200
+
+    @staticmethod
+    def test_get_plugins_two(rf):
+        """
+        Test get plugins to display plugin names
+        in plugins list on the right side panel
+        :param rf:
+        :return:
+        """
+        url_var = "get_plugin_list/"
+        response = get_test(url_var, get_plugin_list, rf)
+        db_plugins = ast.literal_eval(response.content.decode())
+        for key, value in db_plugins[0].items():
+            if value == SAMPLE_GOOD_PLUGIN_ID:
+                assert value == SAMPLE_GOOD_PLUGIN_ID
+        assert response.status_code == 200
+
+    @staticmethod
+    def test_bad_get_plugins(rf):
+        """
+        :param rf:
+        :return:
+        """
+        url_var = "get_plugin_list/"
+        response = get_test(url_var, get_plugin_list, rf)
+        db_plugins = ast.literal_eval(response.content.decode())
+        for key, value in db_plugins[0].items():
+            if value != SAMPLE_BAD_PLUGIN_ID:
+                assert value != SAMPLE_BAD_PLUGIN_ID
+
+    @staticmethod
+    def test_get_plugin_data(rf):
+        """
+        Test when a user clicks on a plugin name,
+        plugin data will return for update plugin form
+        :param rf:
+        :return:
+        """
+        url_var = "update_plugin/{}/".format(SAMPLE_GOOD_PLUGIN_ID)
+        response = get_test(url_var, update_plugin, rf, target_id=SAMPLE_GOOD_PLUGIN_ID)
+        assert response.status_code == 405
+
+    @staticmethod
+    def test_update_plugin_data(rf):
+        """
+        Test when a user clicks on a plugin name,
+        plugin data will return for update plugin form
+        :param rf:
+        :return:
+        """
+        url_var = "update_plugin/2-2-B/"
+        update_data = {'id': '2-2-B',
+                       # "State": "",
+                       'DesiredState': '',
+                       'Name': 'Plugin2',
+                       "ServiceName": "hi",
+                       'Interface': '10.10.10.10',
+                       'OS': 'posix',
+                       'ExternalPorts[]': ['4242/tcp'],
+                       'ExternalPorts': ['4242/tcp'],
+                       'InternalPorts[]': ['4242/tcp'],
+                       # 'Environment[]': ['STAGE=DEV&NORMAL=2'],
+                       'Environment[]': ['STAGE=DEV', 'NORMAL=2']}
+        response = update_plugin(rf.post(url_var, update_data), "2-2-B")
+        assert response.status_code == 200
 
 
-SAMPLE_GOOD_PLUGIN_ID = return_random_plugin_id()
-SAMPLE_BAD_PLUGIN_ID = "bad_plugin_id"
+    @staticmethod
+    def test_create_plugin_data(rf):
+        """
+        Test when a user clicks on a plugin name,
+        plugin data will return for update plugin form
+        :param rf:
+        :return:
+        """
+        url_var = "update_plugin/2-2-B/"
+        update_data = {'id': 'NEW',
+                       # "State": "",
+                       'DesiredState': '',
+                       'Name': 'Plugin2',
+                       "ServiceName": "hi-2",
+                       'Interface': '10.10.10.10',
+                       'OS': 'posix',
+                       'ExternalPorts[]': ['4242/tcp'],
+                       'ExternalPorts': ['4242/tcp'],
+                       'InternalPorts[]': ['4242/tcp'],
+                       # 'Environment[]': ['STAGE=DEV&NORMAL=2'],
+                       'Environment[]': ['STAGE=DEV', 'NORMAL=2']}
+        response = post_test(url_var, update_data, update_plugin, rf, target_id="NEW")
+        # response = update_plugin(rf.post(url_var, update_data), "NEW")
+        assert response.status_code == 200
+
+
+    @staticmethod
+    def test_plugin_state(rf):
+        url_var = 'desired_plugin_state/'
+        response = get_test(url_var, desired_plugin_state_controller, rf)
+        assert response.status_code == 200

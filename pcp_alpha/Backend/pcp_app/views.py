@@ -377,10 +377,13 @@ def update_plugin(request, plugin_id):
             .replace(" ", "")
 
         plugin_data['ExternalPorts'] = request.POST.getlist("ExternalPorts[]")
+        plugin_data['InternalPorts'] = request.POST.getlist("InternalPorts[]")
         plugin_data['Environment'] = request.POST.getlist("Environment[]")
 
+        del plugin_data["InternalPorts[]"]
         del plugin_data["ExternalPorts[]"]
         del plugin_data["Environment[]"]
+
         output = update_plugin_to_brain(plugin_data)
         if output['errors'] > 0:
             response.status_code = 400
