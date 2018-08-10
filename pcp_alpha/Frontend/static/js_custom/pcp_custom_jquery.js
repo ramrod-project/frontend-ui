@@ -126,6 +126,7 @@ $(document).ready(function() {
     $("#searchNameHere_id").keyup(filter_w1);
     $("#w1_command_active_filter").css("display", "none");
 
+    $("#searchCommand_id")[0].value = "";
     $("#searchCommand_id").change(filter_w2);
     $("#searchCommand_id").keyup(filter_w2);
     $("#w2_command_active_filter").css("display", "none");
@@ -338,7 +339,6 @@ function get_commands_func(){
         data: {"plugin_name": plugin_name_var},
         datatype: 'json',
         success: function(data) {
-            console.log(data);
             // check if w2 should re-render or not
             if($(".theContent li a").length > 0){
                 for(var int = 0; int < $(".theContent li a").length; int++){
