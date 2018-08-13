@@ -132,6 +132,10 @@ def w4_output_controller_download_filename(job_id, job_number):
     filename = job_id
     job = get_specific_brain_output(job_id)
     if job:
+        try:
+            str(int(job_number))
+        except ValueError:
+            job_number = "error"
         filename = "{}_{}_{}_{}".format(job_number,
                                         job['JobTarget']['PluginName'],
                                         job['JobTarget']['Location'],
