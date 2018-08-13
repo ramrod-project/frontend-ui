@@ -549,7 +549,13 @@ desired effect
       <div class="tab-pane" id="control-sidebar-settings-tab">
           <button id="add_plugin_id" type="button" class="btn btn-block btn-info">Add Plugin</button>
 {#          Notification Here#}
-          <h3 class="control-sidebar-heading"><span id="plugin_list_refresh" class="text-aqua fa fa-refresh"></span>&nbsp; Plugin List</h3>
+          <h3 class="control-sidebar-heading">
+              <span id="plugin_list_refresh" class="text-aqua fa fa-refresh"></span>&nbsp;
+              <span class="badge bg-green" id="plugins_need_refreshed">
+                Plugin list changed, refresh
+            </span>
+              Plugin List
+          </h3>
           <ul class="control-sidebar-menu plugin_list_display">
           </ul>
       </div>

@@ -52,6 +52,7 @@ $(document).ready(function() {
 
     ws_map["status"] = open_websocket("status", status_change_ws_callback);
     ws_map["files"] = open_websocket("files", files_change_ws_callback);
+    ws_map['plugins'] = open_websocket("plugins", plugins_change_ws_callback);
 
     $("#upload_files_need_refreshed").hide();
 
@@ -212,7 +213,16 @@ function status_change_ws_callback(message) {
 }
 
 function files_change_ws_callback(message){
-    $("#upload_files_need_refreshed").show();
+    if (message.data.length > 0 && message.data[0] == "{"){
+        $("#upload_files_need_refreshed").show();
+    }
+
+}
+
+function plugins_change_ws_callback(message){
+    if (message.data.length > 0 && message.data[0] == "{"){
+        $("#plugins_need_refreshed").show();
+    }
 }
 
 // ** TESTING ONLY **
