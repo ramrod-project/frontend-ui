@@ -28,6 +28,9 @@ var plugin_list_map = {};
 var interfaces = [];
 var plugin_names = [];
 
+var env_rgx = /^([0-9a-zA-Z_]{2,100}=[0-9a-zA-Z_]{2,100},{0,1}){0,10}$|^$/;
+var port_rgx2 = /^(\d{2,4}\/(tcp|udp),{0,1}){1,10}$/;
+
 
 
 function add_plugin_name(name){
@@ -226,6 +229,125 @@ function onclick_plugin_save(event){
     });
 }
 
+function verify_plugin_name(){
+    var plugin_name = $("#plugin-name"),
+        content = plugin_name[0].value,
+        helper_checker = 0;
+    for(var counter = 1; counter < plugin_name[0].length; counter++){
+        var plugin_name_option = $("#plugin-name option#"+counter);
+        if(plugin_name_option[0].selected === true) {
+            $("#plugin-save")[0].disabled = false;
+            helper_checker = 1;
+            break;
+        } else {
+            $("#plugin-save")[0].disabled = true;
+        }
+    }
+    if(helper_checker === 1) {
+        $("#pf_name").removeClass("has-error");
+        $("#pf_name_help").hide();
+    } else {
+        $("#pf_name").addClass("has-error");
+        $("#pf_name_help").show();
+    }
+    return !$("#plugin-save")[0].disabled;
+}
+
+function verify_desired_state(){
+    console.log("verify_desired_state");
+    var desired_state = $("#plugin-desired"),
+        content = desired_state[0].value,
+        helper_checker = 0;
+    for(var counter = 1; counter < desired_state[0].length; counter++){
+        var plugin_desired_option = $("#plugin-desired option#"+counter);
+        if(plugin_desired_option[0].selected === true) {
+            $("#plugin-save")[0].disabled = false;
+            helper_checker = 1;
+            break;
+        } else {
+            $("#plugin-save")[0].disabled = true;
+        }
+    }
+}
+
+function verify_plugin_interface(){
+    console.log("verify_plugin_interface");
+    var plugin_interface = $("#plugin-interface"),
+        helper_checker = 0;
+    for(var counter = 1; counter < plugin_interface[0].length; counter++){
+        var plugin_interface_option = $("#plugin-interface option#"+counter);
+        if(plugin_interface_option[0].selected === true) {
+            $("#plugin-save")[0].disabled = false;
+            helper_checker = 1;
+            break;
+        } else {
+            $("#plugin-save")[0].disabled = true;
+        }
+    }
+    if(helper_checker === 1) {
+        $("#pf_interface").removeClass("has-error");
+        $("#pf_interface_help").hide();
+    } else {
+        $("#pf_interface").addClass("has-error");
+        $("#pf_interface_help").show();
+    }
+    return !$("#plugin-save")[0].disabled;
+}
+
+function verify_plugin_external_ports(){
+    var plugin_port = $("#plugin-external-ports"),
+        content = plugin_port[0].value;
+    if(!port_rgx2.test(content)){
+        $("#pf_port").addClass("has-error");
+        $("#pf_ep_help").show();
+        $("#plugin-save")[0].disabled = true;
+    } else {
+        $("#pf_port").removeClass("has-error");
+        $("#pf_ep_help").hide();
+        $("#plugin-save")[0].disabled = false;
+    }
+    return !$("#plugin-save")[0].disabled;
+}
+
+function verify_plugin_environment(){
+    console.log("verify_plugin_environment");
+    var plugin_environment = $("#plugin-environment"),
+        content = plugin_environment[0].value;
+    if(!env_rgx.test(content)){
+        $("#pf_environment").addClass("has-error");
+        $("#pf_environment_help").show();
+        $("#plugin-save")[0].disabled = true;
+    } else {
+        $("#pf_environment").removeClass("has-error");
+        $("#pf_environment_help").hide();
+        $("#plugin-save")[0].disabled = false;
+    }
+    return !$("#plugin-save")[0].disabled;
+}
+
+function verify_plugin_os(){
+    var plugin_os = $("#plugin-os"),
+        helper_checker = 0;
+    for(var counter = 1; counter < plugin_os[0].length; counter++){
+        var plugin_os_option = $("#plugin-os option#"+counter);
+        if(plugin_os_option[0].selected === true) {
+            $("#plugin-save")[0].disabled = false;
+            helper_checker = 1;
+            break;
+        } else {
+            $("#plugin-save")[0].disabled = true;
+        }
+    }
+    if(helper_checker === 1) {
+        $("#pf_os").removeClass("has-error");
+        $("#pf_os_help").hide();
+    } else {
+        $("#pf_os").addClass("has-error");
+        $("#pf_os_help").show();
+    }
+    return !$("#plugin-save")[0].disabled;
+}
+
 
 $(document).ready(function() {
     // refresh button to refresh plugin list
@@ -244,6 +366,23 @@ $(document).ready(function() {
         $(this).find(".btn-pcp_button_color1").hide();
         $(this).find(".btn-pcp_button_color2").hide();
     });
+    $("#plugin-name").change(verify_plugin_name);
+    $("#plugin-name").keyup(verify_plugin_name);
+
+    $("#plugin-desired").change(verify_desired_state);
+    $("#plugin-desired").keyup(verify_desired_state);
+
+    $("#plugin-interface").change(verify_plugin_interface);
+    $("#plugin-interface").keyup(verify_plugin_interface);
+
+    $("#plugin-external-ports").change(verify_plugin_external_ports);
+    $("#plugin-external-ports").keyup(verify_plugin_external_ports);
+
+    $("#plugin-environment").change(verify_plugin_environment);
+    $("#plugin-environment").keyup(verify_plugin_environment);
+
+    $("#plugin-os").change(verify_plugin_os);
+    $("#plugin-os").keyup(verify_plugin_os);
 });
 
 
