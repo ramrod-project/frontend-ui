@@ -28,8 +28,8 @@ var plugin_list_map = {};
 var interfaces = [];
 var plugin_names = [];
 
-var env_rgx = /[0-9a-zA-Z_]{3,100}=[0-9a-zA-Z_]{3,100}(,)*/;
-var port_rgx2 = /(\d{2,4})\/(tcp|udp)((,)(\d{2,4})\/(tcp|udp))*/;
+var env_rgx = /^([0-9a-zA-Z_]{2,100}=[0-9a-zA-Z_]{2,100},{0,1}){0,10}$|^$/;
+var port_rgx2 = /^(\d{2,4}\/(tcp|udp),{0,1}){1,10}$/;
 
 
 
