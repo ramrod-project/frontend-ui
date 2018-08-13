@@ -1118,6 +1118,7 @@ function drop_command_to_multiple(ev) {
 function drop_command_into_hole(command, command_json, command_td, row_id){
    // console.log("drop_command_into_hole");
     var current_status = $("#jobstatusid"+row_id+" span");
+    var MAX_DISPLAY_ARGUMENT = 36;
     if ((current_status.length == 0) ||
         (current_status.length >=1 && command_td.length == 1 && ( current_status[0].innerText == "Invalid" ||
                                                                   current_status[0].innerText == "Valid" ||
@@ -1130,15 +1131,28 @@ function drop_command_into_hole(command, command_json, command_td, row_id){
         var new_div = document.createElement("div");
         new_div.innerText = command_json;
         new_div.style.display = 'none';
-        var display_string = command['CommandName'] + " ("
-
+        var display_string = command['CommandName'] + " (";
+        var args_str = "";
+        var args_str_truncated = "";
         for (var j = 0; j < command["Inputs"].length; j++){
-            display_string += " "+command["Inputs"][j]["Value"]
+            args_str += " "+command["Inputs"][j]["Value"];
+            var arg_truncated = command["Inputs"][j]["Value"].substring(0, MAX_DISPLAY_ARGUMENT);
+            if (arg_truncated.length >= MAX_DISPLAY_ARGUMENT){
+                arg_truncated += "...";
+            }
+            args_str_truncated += arg_truncated;
         }
-        display_string += " )";
+        display_string += args_str_truncated + " )";
         command_td[0].appendChild(new_div);
         var display_div = document.createElement("div");
         display_div.innerText = display_string;
+        display_div.title = command['CommandName'] + " (" + args_str + " )";
+        $(display_div)
+            .tooltip({open: function (event, ui) {
+                                ui.tooltip.css("max-width", "50%");
+                            },
+                      classes: {"ui-tooltip": "ui-corner-all ui-widget-shadow bg-light-blue-active color-palette"}
+            });
         command_td[0].appendChild(display_div);
     } else {
         console.error("Can't drop command into job "+row_id+" (job already in Brain)");
