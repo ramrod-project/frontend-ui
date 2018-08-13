@@ -1147,9 +1147,12 @@ function drop_command_into_hole(command, command_json, command_td, row_id){
         var display_div = document.createElement("div");
         display_div.innerText = display_string;
         display_div.title = command['CommandName'] + " (" + args_str + " )";
-        $(display_div).tooltip({open: function (event, ui) {
-            ui.tooltip.css("max-width", "50%");
-        }});
+        $(display_div)
+            .tooltip({open: function (event, ui) {
+                                ui.tooltip.css("max-width", "50%");
+                            },
+                      classes: {"ui-tooltip": "ui-corner-all ui-widget-shadow bg-light-blue-active color-palette"}
+            });
         command_td[0].appendChild(display_div);
     } else {
         console.error("Can't drop command into job "+row_id+" (job already in Brain)");
