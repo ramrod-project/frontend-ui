@@ -575,17 +575,18 @@ desired effect
       </div>
       <div class="modal-body">
         <form>
-          <div class="form-group plugin-name">
+          <div id="pf_name" class="form-group plugin-name">
             <label for="plugin-name" class="control-label">Name:</label>
             <select class="form-control plugin-name" id="plugin-name">
             </select>
+            <span id="pf_name_help" class="help-block">Select a Plugin Name</span>
           <input type="text" class="form-control plugin-id" disabled id="plugin-id">
           </div>
           <div class="form-group">
             <label for="plugin-state" class="control-label">State:</label>
             <input type="text" class="form-control plugin-state" disabled id="plugin-state">
           </div>
-          <div class="form-group">
+          <div id="pf_desired_state" class="form-group">
             <label for="plugin-desired-state" class="control-label">Desired State:</label>
             <select class="form-control plugin-desired" id="plugin-desired">
                 <option value="" selected></option>
@@ -593,28 +594,33 @@ desired effect
                 <option value="Restart">Restart</option>
                 <option value="Stop">Stop</option>
             </select>
+            <span id="pf_ds_help" class="help-block">Select a Desired State</span>
           </div>
-          <div class="form-group">
+          <div id="pf_interface" class="form-group">
             <label for="plugin-interface" class="control-label">Interface:</label>
               <select class="form-control plugin-interface" id="plugin-interface">
               </select>
+              <span id="pf_interface_help" class="help-block">Select a Interface</span>
           </div>
-          <div class="form-group">
+          <div id="pf_port" class="form-group">
             <label for="plugin-external-ports" class="control-label">Ports (comma separated):</label>
             <input class="form-control plugin-ports" id="plugin-external-ports" />
             <input class="form-control plugin-iports" disabled id="plugin-internal-ports" />
+            <span id="pf_ep_help" class="help-block">Port Input Help</span>
           </div>
-          <div class="form-group">
+          <div id="pf_environment" class="form-group">
             <label for="plugin-external-env" class="control-label">Environment (comma separated "k1=v1,k2=v2,..."):</label>
             <input class="form-control plugin-env" id="plugin-environment" />
+            <span id="pf_environment_help" class="help-block">Environment Help</span>
           </div>
-          <div class="form-group">
+          <div id="pf_os" class="form-group">
             <label for="plugin-os" class="control-label">OS (posix/nt/all):</label>
             <select class="form-control plugin-os" id="plugin-os">
                 <option value="posix">posix</option>
                 <option value="nt">nt</option>
                 <option value="all">all</option>
             </select>
+            <span id="pf_os_help" class="help-block">Select a Operating System</span>
           </div>
         </form>
       </div>
