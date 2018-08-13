@@ -11,8 +11,10 @@ from ua_parser import user_agent_parser
 from Backend.db_dir.custom_queries import get_specific_commands, insert_brain_jobs_w3, \
     get_specific_brain_output, get_brain_output_content, insert_new_target, get_brain_targets, \
     persist_jobs_state, load_jobs_state, upload_file_to_brain, del_file_upload_from_brain, \
-    get_brain_files, get_brain_file, get_plugin_list_query
-from .forms import TargetForm
+    get_brain_files, get_brain_file, get_plugin_list_query, desired_plugin_state_brain, \
+    get_interface_list, update_plugin_to_brain
+
+from .forms import TargetForm, verify_plugin_data
 
 
 @csrf_exempt
@@ -130,6 +132,10 @@ def w4_output_controller_download_filename(job_id, job_number):
     filename = job_id
     job = get_specific_brain_output(job_id)
     if job:
+        try:
+            str(int(job_number))
+        except ValueError:
+            job_number = "error"
         filename = "{}_{}_{}_{}".format(job_number,
                                         job['JobTarget']['PluginName'],
                                         job['JobTarget']['Location'],
@@ -172,7 +178,9 @@ def new_target_form(request):
     :return: New Target Form
     """
     template = loader.get_template('pcp_app/target_form.html')
-    return HttpResponse(template.render(context=None, request=request))
+    return HttpResponse(template.render(
+        context={'plugin_list': get_plugin_list_query(), },
+        request=request))
 
 
 def val_target_form(request):
@@ -206,7 +214,9 @@ def val_target_form(request):
     else:
         form = TargetForm()
     template = loader.get_template('pcp_app/target_form.html')
-    return HttpResponse(template.render(context=None, request=request))
+    return HttpResponse(template.render(
+        context={'plugin_list': get_plugin_list_query(), },
+        request=request))
 
 
 def edit_target_form(request, target_id):
@@ -222,7 +232,8 @@ def edit_target_form(request, target_id):
     get_brain_target = brain.r.db("Brain").table("Targets").filter(
         {"id": str(target_id)}).run(brain_connection)
     return HttpResponse(template.render(
-        context={"edit_target_dict": get_brain_target, },
+        context={"edit_target_dict": get_brain_target,
+                 'plugin_list': get_plugin_list_query(), },
         request=request))
 
 
@@ -328,6 +339,16 @@ def get_file(request, file_id):
     return response
 
 
+def add_plugin(request):
+    """
+    pcp-507 task
+    Add plugin form
+    :param request:
+    :return:
+    """
+    pass
+
+
 def get_plugin_list(request):
     """
 
@@ -340,22 +361,69 @@ def get_plugin_list(request):
                             content_type='application/json')
 
 
+@csrf_exempt
 def update_plugin(request, plugin_id):
     """
     Update plugin controller, and return plugin data
     back to Modal Form
     :param request:
+    :param plugin_id:
     :return:
     """
-    plugin_data_dict = dict()
-    print("\nplugin_id == {}\n".format(plugin_id))
-    response = HttpResponse(json.dumps(plugin_id),
-                            content_type='application/json')
-    plugin_data_dict["plugin_id"] = plugin_id
-    response["Content-Disposition"] = plugin_data_dict["plugin_id"]
-    print(response["Content-Disposition"])
-    response.status_code = 200
+
+    output = {}
+    response = HttpResponse(content_type='application/json')
+    if request.method == 'POST':
+        plugin_data = request.POST.dict()
+        plugin_data['ExternalPorts[]'] = plugin_data['ExternalPorts[]']\
+            .replace(" ", "")
+        plugin_data['Environment[]'] = plugin_data['Environment[]'] \
+            .replace(" ", "")
+
+        plugin_data['ExternalPorts'] = request.POST.getlist("ExternalPorts[]")
+        plugin_data['Environment'] = request.POST.getlist("Environment[]")
+
+        del plugin_data["ExternalPorts[]"]
+        del plugin_data["Environment[]"]
+
+        output = update_plugin_to_brain(plugin_data)
+        if output['errors'] > 0:
+            response.status_code = 400
+        response.status_code = 200
+    else:
+        response.status_code = 405
+    response.write(json.dumps(output))
     return response
 
 
+def desired_plugin_state_controller(request):
+    """
+    User clicks on activate, restart, or stop button
+    next to the plugin name in the plugin list
+    :param request:
+    :return:
+    """
+    if request.method == 'GET':
+        plugin_id = request.GET.get('plugin_id')
+        desired_state = request.GET.get('desired_state')
+        response = HttpResponse(json.dumps(desired_plugin_state_brain(
+            plugin_id, desired_state)),
+            content_type='application/json')
+        response.status_code = 200
+        return response
+
+
+def get_interfaces(request):
+    """
+    User clicks on stop plugin button next to the
+    plugin name in the plugin list
+    :param request:
+    :return:
+    """
+    # Delete or modify lines below for future stop plugin task
+    interfaces = []
+    if request.method == 'GET':
+        interfaces = get_interface_list()
+    return HttpResponse(json.dumps(interfaces),
+                        content_type='application/json')
 

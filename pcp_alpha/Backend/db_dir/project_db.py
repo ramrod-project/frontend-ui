@@ -106,34 +106,54 @@ _TEST_COMMANDS = [
     },
 ]
 
-plugin1_controller = {
-    "id": "1",
+plugins = [{
+    "id": "1-1-A",
     "Name": "Plugin1",
+    "ServiceName": "Plugin1-a",
     "State": "Available",
     "DesiredState": "",
-    "Interface": location_generated_num("192.16.5."),
-    "ExternalPorts": ["9999"],
-    "InternalPorts": ["9999"]
-}
-
-plugin2_controller = {
-    "id": "2",
+    "OS": "posix",
+    "Interface": "192.16.5.240",
+    "Environment": ["STAGE=DEV", "NORMAL=1"],
+    "ExternalPorts": ["9999/tcp"],
+    "InternalPorts": ["9999/tcp"]
+}, {
+    "id": "2-2-B",
     "Name": "Plugin2",
-    "State": "Available",
+    "ServiceName": "Plugin2-a",
+    "State": "Restarting",
     "DesiredState": "",
-    "Interface": location_generated_num("192.16.5."),
-    "ExternalPorts": ["4242"],
-    "InternalPorts": ["4242"]
+    "OS": "nt",
+    "Interface": "10.10.10.10",
+    "Environment": ["STAGE=DEV", "NORMAL=2"],
+    "ExternalPorts": ["4242/tcp"],
+    "InternalPorts": ["4242/tcp"]
+}, {
+    "id": "3-3-C",
+    "Name": "Plugin3",
+    "ServiceName": "Plugin3-a",
+    "State": "Stopped",
+    "DesiredState": "",
+    "OS": "all",
+    "Interface": "192.16.5.240",
+    "Environment": ["STAGE=DEV", "NORMAL=3"],
+    "ExternalPorts": ["4243/udp"],
+    "InternalPorts": ["4243/udp"]
+}]
+
+
+TEST_PORT_DATA = {
+    "InterfaceName": "eth0",
+    "Address": "192.16.5.240",
+    "TCPPorts": ["9999", "4243"],
+    "UDPPorts": []
 }
 
-plugin3_controller = {
-    "id": "3",
-    "Name": "Plugin3",
-    "State": "Available",
-    "DesiredState": "",
-    "Interface": location_generated_num("192.16.5."),
-    "ExternalPorts": ["4243"],
-    "InternalPorts": ["4243"]
+TEST_PORT_DATA2 = {
+    "InterfaceName": "eth0",
+    "Address": "10.10.10.10",
+    "TCPPorts": [],
+    "UDPPorts": ["4242"]
 }
 
 
@@ -224,7 +244,7 @@ def confirm_brain_db_info():
     be created only locally.
     :return: nothing at the moment
     """
-    if not check_dev_env(): # Check for Development Environment
+    if not check_dev_env():  # Check for Development Environment
         return
     db_con_var = connect()
     if rtdb.db_list().contains("Brain").run(db_con_var) is not True:
@@ -282,9 +302,12 @@ def confirm_plugin_db_info():
         ).run(db_con_var)
         rtdb.db("Controller").table("Plugins").delete().run(db_con_var)
         rtdb.db("Controller").table("Plugins")\
-            .insert([plugin1_controller,
-                     plugin2_controller,
-                     plugin3_controller]).run(db_con_var)
+            .insert(plugins).run(db_con_var)
+        rtdb.db("Controller").table("Ports").delete().run(db_con_var)
+        rtdb.db("Controller").table("Ports") \
+            .insert([TEST_PORT_DATA,
+                     TEST_PORT_DATA2]).run(db_con_var)
+
         print("log: db Dummy data was inserted to Plugins.Plugin1 locally\n")
 
 
