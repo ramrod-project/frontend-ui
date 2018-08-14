@@ -777,7 +777,8 @@ function add_new_job(){
     // content for w3
     $(".thirdBoxContent")
         .append($("<tr/>")
-            .attr({"role": "row","onclick": "#","id":"jobrow"+value,"class": "draggable_tr divw3row"})
+            .attr({"role": "row","onclick": "#","id":"jobrow"+value,"class": "draggable_tr divw3row",
+                "style": "z-index: 200"})
             .append($("<td/>")
                     .append($("<div/>")
                         .append($("<a/>")
@@ -852,7 +853,7 @@ function clear_new_jobs(){
 function drag_target(){
    // console.log("drag_target");
 	$(".gridSelect tbody tr").draggable({
-        appendTo: 'body',
+        appendTo: $("#third_box_content"),
 	    helper: function(){
 	        var selected_var = $(".gridSelect tbody tr.selected");
             var container_to_drag;
@@ -870,8 +871,9 @@ function drag_target(){
             } else if (container_to_drag.length == 1) {
                 display_drop_all();
             }
-            var container = $('<table/>').attr({'id':'draggingContainer'});
+            var container = $('<table/>').attr({'id':'draggingContainer', 'style': 'position: absolute;z-index: 1'});
             container.append(container_to_drag.clone().removeClass("selected"));
+            $("#third_box_content tr").attr({'style': 'position: relative;z-index: 1000'});
             hover_w3_for_target();
             return container;
 	    },
