@@ -55,6 +55,17 @@
           background-color: #e68a00;
           border-color: rgba(0, 0, 0, 0.2);
         }
+
+        #targetTableWrapper {
+            position: relative;
+        }
+        #targtTableScroll {
+            max-height: 250px;
+            max-width: 699px;
+            overflow: auto;
+            {#margin-top: 44px;#}
+        }
+
     </style>
     {% block styles %}{% endblock %}
 </head>
@@ -201,7 +212,7 @@ desired effect
                 <div class="tab-content">
                   <div class="box box-primary">
                     <!--box body-->
-                    <div class="box-body">
+                    <div id="targetTableWrapper" class="box-body">
                       <div id="example2_wrapper" class="dataTables_wrapper form-inline dt-bootstrap">
                           <div class="row">
                               <div class="col-sm-6">
@@ -212,65 +223,67 @@ desired effect
                               </div>
                           </div>
                           <div class="row">
-                              <div class="col-sm-12">
-                                  <table id="target_table" class="table table-bordered table-hover dataTable display gridSelect" role="grid" aria-describedby="target_table_info">
-                                      <thead>
-                                      <tr role="row">
-                                          <!--<th class="sorting_asc" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Rendering engine: activate to sort column descending">-->
-                                              <!--Row #-->
-                                          <!--</th>-->
-                                          <th class="sorting" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Plugin Name: activate to sort column ascending">
-                                              Plugin Name
-                                          </th>
-                                          <th class="sorting" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Location: activate to sort column ascending">
-                                              Location
-                                          </th>
-                                          <th class="sorting" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">
+                              <div id="targtTableScroll">
+                                  <div class="col-sm-12">
+                                      <table id="target_table" class="table table-bordered table-hover dataTable display gridSelect" role="grid" aria-describedby="target_table_info">
+                                          <thead>
+                                          <tr role="row">
+                                              <!--<th class="sorting_asc" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Rendering engine: activate to sort column descending">-->
+                                                  <!--Row #-->
+                                              <!--</th>-->
+                                              <th class="sorting text" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Plugin Name: activate to sort column ascending">
+                                                  Plugin Name
+                                              </th>
+                                              <th class="sorting text" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Location: activate to sort column ascending">
+                                                  Location
+                                              </th>
+                                              <th class="sorting text" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">
 
-                                          </th>
-                                      </tr>
-                                      </thead>
-                                      <tbody id="target_box_contentid" class="target_box_content">
-                                      {% if host_dict %}
-                                        {% for items in host_dict %}
-                                            <!--<a name="name_tag_name">-->
-                                            <tr role="row" class="odd" id="target_row{{ forloop.counter0 }}">
-                                                <!--<td>-->
-                                                    <!--<input class="target_checkbox" type="checkbox">&nbsp;{{ forloop.counter }}<br>-->
-                                                <!--</td>-->
-                                                <td id="name_tag_id{{ forloop.counter0 }}" class="clickable-row-col1" onclick="#">
-                                                    <a href="#">
-                                                    <span style="display:none" id="nameidjson{{ forloop.counter0 }}">{{ items.json }}</span>
-                                                    <span>{{ items.PluginName }}</span>
-                                                    </a>
-                                                </td>
-                                                <td id="address_tag_id{{ forloop.counter0 }}" class="clickable-row-col2" onclick="#">
-                                                    <a href="#">
-                                                    <span>{{ items.Location }}</span>
-                                                    </a>
-                                                </td>
-                                                <td id="action_tad_id{{ forloop.counter0 }}" style="text-align: center; width: 80px;" class="clickable-row-col3" onclick="#">
-                                                    <span id="edit_target_id">
-                                                        <a href="/edit_target_form/{{ items.id }}/" target="_blank" class="btn btn-social-icon btn-bitbucket btn-xs" data-toggle="tooltip" title="Edit Target"><i class="fa fa-edit"></i></a>
-                                                    </span>
-                                                    <span id="add_job_sc_id_attr">
-                                                        <a href="#" id="add_job_sc_id{{ forloop.counter0 }}" class="btn btn-social-icon btn-linkedin btn-xs" data-toggle="tooltip" title="Add Target to W3"><i class="fa fa-tasks"></i></a>
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                            <!--</a>-->
-                                        {% endfor %}
-                                      {% endif %}
-                                      </tbody>
-                                      <tfoot>
-                                      <tr>
-                                          <!--<th rowspan="1" colspan="1">Row #</th>-->
-                                          <th rowspan="1" colspan="1">Plugin Name</th>
-                                          <th rowspan="1" colspan="1">Location</th>
-                                          <th rowspan="1" colspan="1"></th>
-                                      </tr>
-                                      </tfoot>
-                                  </table>
+                                              </th>
+                                          </tr>
+                                          </thead>
+                                          <tbody id="target_box_contentid" class="target_box_content">
+                                          {% if host_dict %}
+                                            {% for items in host_dict %}
+                                                <!--<a name="name_tag_name">-->
+                                                <tr role="row" class="odd" id="target_row{{ forloop.counter0 }}">
+                                                    <!--<td>-->
+                                                        <!--<input class="target_checkbox" type="checkbox">&nbsp;{{ forloop.counter }}<br>-->
+                                                    <!--</td>-->
+                                                    <td id="name_tag_id{{ forloop.counter0 }}" class="clickable-row-col1" onclick="#">
+                                                        <a href="#">
+                                                        <span style="display:none" id="nameidjson{{ forloop.counter0 }}">{{ items.json }}</span>
+                                                        <span>{{ items.PluginName }}</span>
+                                                        </a>
+                                                    </td>
+                                                    <td id="address_tag_id{{ forloop.counter0 }}" class="clickable-row-col2" onclick="#">
+                                                        <a href="#">
+                                                        <span>{{ items.Location }}</span>
+                                                        </a>
+                                                    </td>
+                                                    <td id="action_tad_id{{ forloop.counter0 }}" style="text-align: center; width: 80px;" class="clickable-row-col3" onclick="#">
+                                                        <span id="edit_target_id">
+                                                            <a href="/edit_target_form/{{ items.id }}/" target="_blank" class="btn btn-social-icon btn-bitbucket btn-xs" data-toggle="tooltip" title="Edit Target"><i class="fa fa-edit"></i></a>
+                                                        </span>
+                                                        <span id="add_job_sc_id_attr">
+                                                            <a href="#" id="add_job_sc_id{{ forloop.counter0 }}" class="btn btn-social-icon btn-linkedin btn-xs" data-toggle="tooltip" title="Add Target to W3"><i class="fa fa-tasks"></i></a>
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                                <!--</a>-->
+                                            {% endfor %}
+                                          {% endif %}
+                                          </tbody>
+                                          <tfoot>
+    {#                                      <tr>#}
+    {#                                          <!--<th rowspan="1" colspan="1">Row #</th>-->#}
+    {#                                          <th rowspan="1" colspan="1">Plugin Name</th>#}
+    {#                                          <th rowspan="1" colspan="1">Location</th>#}
+    {#                                          <th rowspan="1" colspan="1"></th>#}
+    {#                                      </tr>#}
+                                          </tfoot>
+                                      </table>
+                                  </div>
                               </div>
                           </div>
                           <div class="row">
