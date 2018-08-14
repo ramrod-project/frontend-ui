@@ -174,6 +174,7 @@ function get_plugin_list() {
                "data-target":"#controller-modal",
                "data-whatever": "NEW"});
 
+    $("#plugins_need_refreshed").hide();
     $.ajax({
         type: "GET",
         url: "/get_plugin_list/",
