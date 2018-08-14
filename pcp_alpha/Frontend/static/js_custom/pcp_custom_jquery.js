@@ -852,6 +852,7 @@ function clear_new_jobs(){
 function drag_target(){
    // console.log("drag_target");
 	$(".gridSelect tbody tr").draggable({
+        appendTo: 'body',
 	    helper: function(){
 	        var selected_var = $(".gridSelect tbody tr.selected");
             var container_to_drag;

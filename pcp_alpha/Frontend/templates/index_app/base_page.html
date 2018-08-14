@@ -65,7 +65,7 @@
             position: relative;
         }
         #targtTableScroll {
-            height: 275px;
+            max-height: 250px;
             overflow: auto;
         }
         #targetTableWrapper table thead th .sorting {
@@ -228,7 +228,7 @@ desired effect
                 <div class="tab-content">
                   <div class="box box-primary">
                     <!--box body-->
-                    <div class="box-body">
+                    <div id="targetTableWrapper" class="box-body">
                       <div id="example2_wrapper" class="dataTables_wrapper form-inline dt-bootstrap">
                           <div class="row">
                               <div class="col-sm-6">
@@ -238,7 +238,7 @@ desired effect
 
                               </div>
                           </div>
-                          <div id="targetTableWrapper" class="row targetScrollingTable">
+                          <div class="row">
                               <div id="targtTableScroll" class="col-sm-12">
                                   <table id="target_table" class="table table-bordered table-hover dataTable display gridSelect" role="grid" aria-describedby="target_table_info">
                                       <thead>
