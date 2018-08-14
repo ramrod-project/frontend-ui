@@ -29,6 +29,24 @@ _TEST_TARGETS = [
         "Optional": "Document Here"
     },
     {
+        "PluginName": "Plugin2",
+        "Location": location_generated_num("172.16.5."),
+        "Port": "8002",
+        "Optional": "Document Here"
+    },
+    {
+        "PluginName": "Plugin3",
+        "Location": location_generated_num("172.16.5."),
+        "Port": "8002",
+        "Optional": "Document Here"
+    },
+    {
+        "PluginName": "Plugin4",
+        "Location": location_generated_num("172.16.5."),
+        "Port": "8002",
+        "Optional": "Document Here"
+    },
+    {
         "PluginName": "Plugin1",
         "Location": location_generated_num("172.16.5."),
         "Port": "8002",

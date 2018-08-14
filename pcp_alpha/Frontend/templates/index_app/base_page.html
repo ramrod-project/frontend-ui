@@ -55,6 +55,33 @@
           background-color: #e68a00;
           border-color: rgba(0, 0, 0, 0.2);
         }
+        {#677x211#}
+        {#targetScrollingTable#}
+        {#ids#}
+        {#targetTableWrapper#}
+        {#targtTableScroll#}
+
+        #targetTableWrapper {
+            position: relative;
+        }
+        #targtTableScroll {
+            height: 275px;
+            overflow: auto;
+        }
+        #targetTableWrapper table thead th .sorting {
+            position: absolute;
+            top:-20px;
+            z-index: 2;
+            height: 20px;
+            width: 35%;
+        }
+
+        {#OLD#}
+        {##target_table {#}
+        {#    height: 250px;#}
+        {#    width: 680px;#}
+        {#    overflow: scroll;#}
+
     </style>
     {% block styles %}{% endblock %}
 </head>
@@ -211,8 +238,8 @@ desired effect
 
                               </div>
                           </div>
-                          <div class="row">
-                              <div class="col-sm-12">
+                          <div id="targetTableWrapper" class="row targetScrollingTable">
+                              <div id="targtTableScroll" class="col-sm-12">
                                   <table id="target_table" class="table table-bordered table-hover dataTable display gridSelect" role="grid" aria-describedby="target_table_info">
                                       <thead>
                                       <tr role="row">
@@ -263,12 +290,12 @@ desired effect
                                       {% endif %}
                                       </tbody>
                                       <tfoot>
-                                      <tr>
-                                          <!--<th rowspan="1" colspan="1">Row #</th>-->
-                                          <th rowspan="1" colspan="1">Plugin Name</th>
-                                          <th rowspan="1" colspan="1">Location</th>
-                                          <th rowspan="1" colspan="1"></th>
-                                      </tr>
+{#                                      <tr>#}
+{#                                          <!--<th rowspan="1" colspan="1">Row #</th>-->#}
+{#                                          <th rowspan="1" colspan="1">Plugin Name</th>#}
+{#                                          <th rowspan="1" colspan="1">Location</th>#}
+{#                                          <th rowspan="1" colspan="1"></th>#}
+{#                                      </tr>#}
                                       </tfoot>
                                   </table>
                               </div>
