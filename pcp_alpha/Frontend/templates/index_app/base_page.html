@@ -7,6 +7,8 @@
     {% load static %}
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+
+    <link rel="stylesheet" href="{% static 'css_custom/pcp_custom_css.css' %}">
     <link rel="stylesheet" href="{% static 'AdminLTE/bower_components/bootstrap/dist/css/bootstrap.css' %}">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="{% static 'AdminLTE/bower_components/font-awesome/css/font-awesome.min.css' %}">
@@ -20,7 +22,6 @@
     <link rel="stylesheet" href="{% static 'AdminLTE/dist/css/skins/skin-blue.min.css' %}">
     <link rel="stylesheet" href="{% static 'Select/css/select.dataTables.css' %}">
     <link rel="stylesheet" href="{% static 'DataTables/datatables.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css_custom/pcp_custom_css.css' %}">
     <link rel="stylesheet" href="{% static 'external_jquery/jquery-ui.css' %}">
     <link rel="stylesheet" href="{% static 'css_custom/datetime-picker.css' %}">
 
@@ -503,6 +504,7 @@ desired effect
     </div>
     <!-- Default to the left -->
     <strong>Demo Version for the <a id="nooo_id" href="#">PCP Project</a></strong> :)
+    <button data-toggle="modal" data-target="#terminal-modal" data-terminaldata='{"target":{"Location": "172.16.5.10", "Optional": "Document Here", "PluginName": "Plugin1", "Port": "8002"}, "sequence":"_C_2_2"}'>TEST TERMINAL</button>
   </footer>
 
   <!-- Control Sidebar -->
@@ -585,6 +587,45 @@ desired effect
     <source src="{% static 'media_test/nooo.mp3' %}" type="audio/mpeg">
   Your browser does not support the audio element.
 </audio>
+
+
+<div class="modal modal-info fade" id="terminal-modal" tabindex="-1" role="dialog" aria-labelledby="terminal-modal-label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="terminal-modal-label">Terminal</h4>
+      </div>
+      <div class="modal-body">
+          <input type="text" style="display: none"  disabled id="terminal-active-target-str">
+          <div class="terminal-window">
+            <ol id="terminal-active-history" class="terminal-contents">
+                <li>
+                    <ul>
+                        <li>
+                            Input
+                        </li>
+                        <li id="terminal-output-1">
+                            --output--
+                        </li>
+                    </ul>
+                </li>
+            </ol>
+            <div id="terminal_cmdname" class="form-group plugin-name">
+                <input size="64" type="text" class="form-control terminal-window" id="terminal-cmd" placeholder=">"/>
+            </div>
+          </div>
+      </div>
+      <div class="modal-footer">
+        <div class="ui-widget-shadow" id="terminal-response"></div>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="terminal-save">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <div class="modal fade" id="controller-modal" tabindex="-1" role="dialog" aria-labelledby="controller-modal-label">
   <div class="modal-dialog" role="document">
     <div class="modal-content">

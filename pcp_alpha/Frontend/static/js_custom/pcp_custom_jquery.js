@@ -24,6 +24,14 @@ var w3_highlighted_row,
     start_timer_map = {};
 
 $(document).ready(function() {
+
+    $("#terminal-save").click(onclick_terminal_submit);
+    $("#terminal-cmd").keyup(function(e){
+        if(e.keyCode == 13) {
+            onclick_terminal_submit();
+        }
+    });
+    $('#terminal-modal').on('show.bs.modal', terminal_opener);
     job_select_table = $('#job_table').DataTable({
 	    searching: false,
 	    paging: false,
@@ -1426,3 +1434,54 @@ function execute_sequence_output(specific_id, counter=0, backoff=2000){
     })
 }
 
+
+function onclick_terminal_submit(event){
+    var dan="hi";
+    var terminal_cmd = $("#terminal-cmd");
+    var output_list = $("#terminal-active-history");
+    var cmd_string = terminal_cmd.val();
+    var target_js = $("#terminal-active-target-str").val();
+    var current_id = 1;
+    var job = {
+        "JobTarget":null,
+        "Status": INITIAL_JOB_STATUS,
+        "StartTime": 0,
+        "JobCommand": {
+            "CommandName":"terminal_input",
+            "Tooltip": "",
+            "Output": true,
+            "Inputs": [{
+                "Name": "command",
+                "Type": "textbox",
+                "Tooltip": "",
+                "Value": cmd_string
+            }]
+        }
+    };
+    current_command_template = job.JobCommand;
+    quick_action_function(target_js, "pluginid", "target");
+    add_command_to_job_sc_button();
+    output_list
+        .append($("<li/>")
+            .append($("<ul/>")
+                .attr({"class":"terminal-contents"})
+                .append($("<li/>")
+                    .text(cmd_string)
+                )
+                .append($("<li/>")
+                    .attr({"id": "specialupdateid"+current_id})
+                    .text(" ----- OUTPUT WILL GO HERE -----")
+                )
+            )
+        );
+    terminal_cmd.val("");
+    execute_sequence();
+}
+function terminal_opener(event) {
+    var button = $(event.relatedTarget); // Button that triggered the modal
+    var terminal_data = button.data('terminaldata'); // Extract info from data-* attributes
+    var history = $("#terminal-active-history");
+    history.empty();
+    var modal = $(this);
+    $("#terminal-active-target-str").val(JSON.stringify(terminal_data.target));
+}
