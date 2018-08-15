@@ -52,6 +52,7 @@ $(document).ready(function() {
 
     ws_map["status"] = open_websocket("status", status_change_ws_callback);
     ws_map["files"] = open_websocket("files", files_change_ws_callback);
+    ws_map['plugins'] = open_websocket("plugins", plugins_change_ws_callback);
 
     $("#upload_files_need_refreshed").hide();
 
@@ -212,7 +213,16 @@ function status_change_ws_callback(message) {
 }
 
 function files_change_ws_callback(message){
-    $("#upload_files_need_refreshed").show();
+    if (message.data.length > 0 && message.data[0] == "{"){
+        $("#upload_files_need_refreshed").show();
+    }
+
+}
+
+function plugins_change_ws_callback(message){
+    if (message.data.length > 0 && message.data[0] == "{"){
+        $("#plugins_need_refreshed").show();
+    }
 }
 
 // ** TESTING ONLY **
@@ -777,7 +787,8 @@ function add_new_job(){
     // content for w3
     $(".thirdBoxContent")
         .append($("<tr/>")
-            .attr({"role": "row","onclick": "#","id":"jobrow"+value,"class": "draggable_tr divw3row"})
+            .attr({"role": "row","onclick": "#","id":"jobrow"+value,"class": "draggable_tr divw3row",
+                "style": "z-index: 200"})
             .append($("<td/>")
                     .append($("<div/>")
                         .append($("<a/>")
@@ -852,6 +863,7 @@ function clear_new_jobs(){
 function drag_target(){
    // console.log("drag_target");
 	$(".gridSelect tbody tr").draggable({
+        appendTo: $("#third_box_content"),
 	    helper: function(){
 	        var selected_var = $(".gridSelect tbody tr.selected");
             var container_to_drag;
@@ -869,8 +881,9 @@ function drag_target(){
             } else if (container_to_drag.length == 1) {
                 display_drop_all();
             }
-            var container = $('<table/>').attr({'id':'draggingContainer'});
+            var container = $('<table/>').attr({'id':'draggingContainer', 'style': 'position: absolute;z-index: 1'});
             container.append(container_to_drag.clone().removeClass("selected"));
+            $("#third_box_content tr").attr({'style': 'position: relative;z-index: 1000'});
             hover_w3_for_target();
             return container;
 	    },
@@ -1118,6 +1131,7 @@ function drop_command_to_multiple(ev) {
 function drop_command_into_hole(command, command_json, command_td, row_id){
    // console.log("drop_command_into_hole");
     var current_status = $("#jobstatusid"+row_id+" span");
+    var MAX_DISPLAY_ARGUMENT = 36;
     if ((current_status.length == 0) ||
         (current_status.length >=1 && command_td.length == 1 && ( current_status[0].innerText == "Invalid" ||
                                                                   current_status[0].innerText == "Valid" ||
@@ -1130,15 +1144,28 @@ function drop_command_into_hole(command, command_json, command_td, row_id){
         var new_div = document.createElement("div");
         new_div.innerText = command_json;
         new_div.style.display = 'none';
-        var display_string = command['CommandName'] + " ("
-
+        var display_string = command['CommandName'] + " (";
+        var args_str = "";
+        var args_str_truncated = "";
         for (var j = 0; j < command["Inputs"].length; j++){
-            display_string += " "+command["Inputs"][j]["Value"]
+            args_str += " "+command["Inputs"][j]["Value"];
+            var arg_truncated = command["Inputs"][j]["Value"].substring(0, MAX_DISPLAY_ARGUMENT);
+            if (arg_truncated.length >= MAX_DISPLAY_ARGUMENT){
+                arg_truncated += "...";
+            }
+            args_str_truncated += arg_truncated;
         }
-        display_string += " )";
+        display_string += args_str_truncated + " )";
         command_td[0].appendChild(new_div);
         var display_div = document.createElement("div");
         display_div.innerText = display_string;
+        display_div.title = command['CommandName'] + " (" + args_str + " )";
+        $(display_div)
+            .tooltip({open: function (event, ui) {
+                                ui.tooltip.css("max-width", "50%");
+                            },
+                      classes: {"ui-tooltip": "ui-corner-all ui-widget-shadow bg-light-blue-active color-palette"}
+            });
         command_td[0].appendChild(display_div);
     } else {
         console.error("Can't drop command into job "+row_id+" (job already in Brain)");

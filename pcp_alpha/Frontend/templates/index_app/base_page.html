@@ -55,6 +55,17 @@
           background-color: #e68a00;
           border-color: rgba(0, 0, 0, 0.2);
         }
+
+        #targetTableWrapper {
+            position: relative;
+        }
+        #targtTableScroll {
+            max-height: 250px;
+            max-width: 699px;
+            overflow: auto;
+            {#margin-top: 44px;#}
+        }
+
     </style>
     {% block styles %}{% endblock %}
 </head>
@@ -201,7 +212,7 @@ desired effect
                 <div class="tab-content">
                   <div class="box box-primary">
                     <!--box body-->
-                    <div class="box-body">
+                    <div id="targetTableWrapper" class="box-body">
                       <div id="example2_wrapper" class="dataTables_wrapper form-inline dt-bootstrap">
                           <div class="row">
                               <div class="col-sm-6">
@@ -212,65 +223,67 @@ desired effect
                               </div>
                           </div>
                           <div class="row">
-                              <div class="col-sm-12">
-                                  <table id="target_table" class="table table-bordered table-hover dataTable display gridSelect" role="grid" aria-describedby="target_table_info">
-                                      <thead>
-                                      <tr role="row">
-                                          <!--<th class="sorting_asc" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Rendering engine: activate to sort column descending">-->
-                                              <!--Row #-->
-                                          <!--</th>-->
-                                          <th class="sorting" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Plugin Name: activate to sort column ascending">
-                                              Plugin Name
-                                          </th>
-                                          <th class="sorting" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Location: activate to sort column ascending">
-                                              Location
-                                          </th>
-                                          <th class="sorting" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">
+                              <div id="targtTableScroll">
+                                  <div class="col-sm-12">
+                                      <table id="target_table" class="table table-bordered table-hover dataTable display gridSelect" role="grid" aria-describedby="target_table_info">
+                                          <thead>
+                                          <tr role="row">
+                                              <!--<th class="sorting_asc" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Rendering engine: activate to sort column descending">-->
+                                                  <!--Row #-->
+                                              <!--</th>-->
+                                              <th class="sorting text" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Plugin Name: activate to sort column ascending">
+                                                  Plugin Name
+                                              </th>
+                                              <th class="sorting text" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Location: activate to sort column ascending">
+                                                  Location
+                                              </th>
+                                              <th class="sorting text" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">
 
-                                          </th>
-                                      </tr>
-                                      </thead>
-                                      <tbody id="target_box_contentid" class="target_box_content">
-                                      {% if host_dict %}
-                                        {% for items in host_dict %}
-                                            <!--<a name="name_tag_name">-->
-                                            <tr role="row" class="odd" id="target_row{{ forloop.counter0 }}">
-                                                <!--<td>-->
-                                                    <!--<input class="target_checkbox" type="checkbox">&nbsp;{{ forloop.counter }}<br>-->
-                                                <!--</td>-->
-                                                <td id="name_tag_id{{ forloop.counter0 }}" class="clickable-row-col1" onclick="#">
-                                                    <a href="#">
-                                                    <span style="display:none" id="nameidjson{{ forloop.counter0 }}">{{ items.json }}</span>
-                                                    <span>{{ items.PluginName }}</span>
-                                                    </a>
-                                                </td>
-                                                <td id="address_tag_id{{ forloop.counter0 }}" class="clickable-row-col2" onclick="#">
-                                                    <a href="#">
-                                                    <span>{{ items.Location }}</span>
-                                                    </a>
-                                                </td>
-                                                <td id="action_tad_id{{ forloop.counter0 }}" style="text-align: center; width: 80px;" class="clickable-row-col3" onclick="#">
-                                                    <span id="edit_target_id">
-                                                        <a href="/edit_target_form/{{ items.id }}/" target="_blank" class="btn btn-social-icon btn-bitbucket btn-xs" data-toggle="tooltip" title="Edit Target"><i class="fa fa-edit"></i></a>
-                                                    </span>
-                                                    <span id="add_job_sc_id_attr">
-                                                        <a href="#" id="add_job_sc_id{{ forloop.counter0 }}" class="btn btn-social-icon btn-linkedin btn-xs" data-toggle="tooltip" title="Add Target to W3"><i class="fa fa-tasks"></i></a>
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                            <!--</a>-->
-                                        {% endfor %}
-                                      {% endif %}
-                                      </tbody>
-                                      <tfoot>
-                                      <tr>
-                                          <!--<th rowspan="1" colspan="1">Row #</th>-->
-                                          <th rowspan="1" colspan="1">Plugin Name</th>
-                                          <th rowspan="1" colspan="1">Location</th>
-                                          <th rowspan="1" colspan="1"></th>
-                                      </tr>
-                                      </tfoot>
-                                  </table>
+                                              </th>
+                                          </tr>
+                                          </thead>
+                                          <tbody id="target_box_contentid" class="target_box_content">
+                                          {% if host_dict %}
+                                            {% for items in host_dict %}
+                                                <!--<a name="name_tag_name">-->
+                                                <tr role="row" class="odd" id="target_row{{ forloop.counter0 }}">
+                                                    <!--<td>-->
+                                                        <!--<input class="target_checkbox" type="checkbox">&nbsp;{{ forloop.counter }}<br>-->
+                                                    <!--</td>-->
+                                                    <td id="name_tag_id{{ forloop.counter0 }}" class="clickable-row-col1" onclick="#">
+                                                        <a href="#">
+                                                        <span style="display:none" id="nameidjson{{ forloop.counter0 }}">{{ items.json }}</span>
+                                                        <span>{{ items.PluginName }}</span>
+                                                        </a>
+                                                    </td>
+                                                    <td id="address_tag_id{{ forloop.counter0 }}" class="clickable-row-col2" onclick="#">
+                                                        <a href="#">
+                                                        <span>{{ items.Location }}</span>
+                                                        </a>
+                                                    </td>
+                                                    <td id="action_tad_id{{ forloop.counter0 }}" style="text-align: center; width: 80px;" class="clickable-row-col3" onclick="#">
+                                                        <span id="edit_target_id">
+                                                            <a href="/edit_target_form/{{ items.id }}/" target="_blank" class="btn btn-social-icon btn-bitbucket btn-xs" data-toggle="tooltip" title="Edit Target"><i class="fa fa-edit"></i></a>
+                                                        </span>
+                                                        <span id="add_job_sc_id_attr">
+                                                            <a href="#" id="add_job_sc_id{{ forloop.counter0 }}" class="btn btn-social-icon btn-linkedin btn-xs" data-toggle="tooltip" title="Add Target to W3"><i class="fa fa-tasks"></i></a>
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                                <!--</a>-->
+                                            {% endfor %}
+                                          {% endif %}
+                                          </tbody>
+                                          <tfoot>
+    {#                                      <tr>#}
+    {#                                          <!--<th rowspan="1" colspan="1">Row #</th>-->#}
+    {#                                          <th rowspan="1" colspan="1">Plugin Name</th>#}
+    {#                                          <th rowspan="1" colspan="1">Location</th>#}
+    {#                                          <th rowspan="1" colspan="1"></th>#}
+    {#                                      </tr>#}
+                                          </tfoot>
+                                      </table>
+                                  </div>
                               </div>
                           </div>
                           <div class="row">
@@ -549,7 +562,13 @@ desired effect
       <div class="tab-pane" id="control-sidebar-settings-tab">
           <button id="add_plugin_id" type="button" class="btn btn-block btn-info">Add Plugin</button>
 {#          Notification Here#}
-          <h3 class="control-sidebar-heading"><span id="plugin_list_refresh" class="text-aqua fa fa-refresh"></span>&nbsp; Plugin List</h3>
+          <h3 class="control-sidebar-heading">
+              <span id="plugin_list_refresh" class="text-aqua fa fa-refresh"></span>&nbsp;
+              <span class="badge bg-green" id="plugins_need_refreshed">
+                Plugin list changed, refresh
+            </span>
+              Plugin List
+          </h3>
           <ul class="control-sidebar-menu plugin_list_display">
           </ul>
       </div>
@@ -575,17 +594,18 @@ desired effect
       </div>
       <div class="modal-body">
         <form>
-          <div class="form-group plugin-name">
+          <div id="pf_name" class="form-group plugin-name">
             <label for="plugin-name" class="control-label">Name:</label>
             <select class="form-control plugin-name" id="plugin-name">
             </select>
+            <span id="pf_name_help" class="help-block">Select a Plugin Name</span>
           <input type="text" class="form-control plugin-id" disabled id="plugin-id">
           </div>
           <div class="form-group">
             <label for="plugin-state" class="control-label">State:</label>
             <input type="text" class="form-control plugin-state" disabled id="plugin-state">
           </div>
-          <div class="form-group">
+          <div id="pf_desired_state" class="form-group">
             <label for="plugin-desired-state" class="control-label">Desired State:</label>
             <select class="form-control plugin-desired" id="plugin-desired">
                 <option value="" selected></option>
@@ -593,28 +613,33 @@ desired effect
                 <option value="Restart">Restart</option>
                 <option value="Stop">Stop</option>
             </select>
+            <span id="pf_ds_help" class="help-block">Select a Desired State</span>
           </div>
-          <div class="form-group">
+          <div id="pf_interface" class="form-group">
             <label for="plugin-interface" class="control-label">Interface:</label>
               <select class="form-control plugin-interface" id="plugin-interface">
               </select>
+              <span id="pf_interface_help" class="help-block">Select a Interface</span>
           </div>
-          <div class="form-group">
+          <div id="pf_port" class="form-group">
             <label for="plugin-external-ports" class="control-label">Ports (comma separated):</label>
             <input class="form-control plugin-ports" id="plugin-external-ports" />
             <input class="form-control plugin-iports" disabled id="plugin-internal-ports" />
+            <span id="pf_ep_help" class="help-block">Port Input Help</span>
           </div>
-          <div class="form-group">
+          <div id="pf_environment" class="form-group">
             <label for="plugin-external-env" class="control-label">Environment (comma separated "k1=v1,k2=v2,..."):</label>
             <input class="form-control plugin-env" id="plugin-environment" />
+            <span id="pf_environment_help" class="help-block">Environment Help</span>
           </div>
-          <div class="form-group">
+          <div id="pf_os" class="form-group">
             <label for="plugin-os" class="control-label">OS (posix/nt/all):</label>
             <select class="form-control plugin-os" id="plugin-os">
                 <option value="posix">posix</option>
                 <option value="nt">nt</option>
                 <option value="all">all</option>
             </select>
+            <span id="pf_os_help" class="help-block">Select a Operating System</span>
           </div>
         </form>
       </div>
