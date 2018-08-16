@@ -12,6 +12,7 @@ var sequence_starttime_map = {"1":  Math.floor((new Date().valueOf())/1000).toSt
 var id_map = {};
 var id_status_map = {};
 var id_reverse_map = {};
+var id_replication_map = {};
 var ws_map = {};
 var active_sequence = "1";
 var exec_int = 0;
@@ -1360,7 +1361,24 @@ function render_job_output_to_page(job_guid, data){
         .append($("<span/>")
             .attr({"class": "label label-Done"})
             .text("Done"));
+    if (id_replication_map.hasOwnProperty(updateid)){
+        render_job_output_to_secondary(id_replication_map[updateid], data);
+    }
 }
+
+function render_job_output_to_secondary(secondary_id, data)
+{
+    console.log(data);
+    var replica = $("#"+secondary_id);
+    replica.empty();
+    replica
+        .append(
+            $("<pre>")
+                .attr({"class": "terminal-window"})
+                .text(data['Content'])
+        )
+}
+
 
 function render_job_output_timeout(job_guid){
     var updateid = id_reverse_map[job_guid];
@@ -1438,15 +1456,10 @@ function execute_sequence_output(specific_id, counter=0, backoff=2000){
 function onclick_terminal_submit(event){
     var dan="hi";
     var terminal_cmd = $("#terminal-cmd");
-    var output_list = $("#terminal-active-history");
     var cmd_string = terminal_cmd.val();
     var target_js = $("#terminal-active-target-str").val();
-    var current_id = 1;
-    var job = {
-        "JobTarget":null,
-        "Status": INITIAL_JOB_STATUS,
-        "StartTime": 0,
-        "JobCommand": {
+
+    var ti_command = {
             "CommandName":"terminal_input",
             "Tooltip": "",
             "Output": true,
@@ -1456,27 +1469,38 @@ function onclick_terminal_submit(event){
                 "Tooltip": "",
                 "Value": cmd_string
             }]
-        }
-    };
-    current_command_template = job.JobCommand;
+        };
+    current_command_template = ti_command;
+
+    //put the target+command in w3 to make a job
     quick_action_function(target_js, "pluginid", "target");
     add_command_to_job_sc_button();
-    output_list
-        .append($("<li/>")
+    var current_id = $("#addjob_button")[0].value;
+    var secondary_output_domid = "specialupdateid"+current_id;
+    id_replication_map[current_id] = secondary_output_domid;
+    var console_io = make_one_terminal_command(secondary_output_domid, cmd_string);
+    var output_list = $("#terminal-active-history");
+    output_list.append(console_io);
+    terminal_cmd.val("");
+    execute_sequence();
+}
+function make_one_terminal_command(secondary_output_domid, cmd_string, out_string="..."){
+    return $("<li/>")
             .append($("<ul/>")
                 .attr({"class":"terminal-contents"})
                 .append($("<li/>")
                     .text(cmd_string)
                 )
                 .append($("<li/>")
-                    .attr({"id": "specialupdateid"+current_id})
-                    .text(" ----- OUTPUT WILL GO HERE -----")
+                    .attr({"id": secondary_output_domid})
+                    .append($("<pre/>")
+                        .attr({"class":"terminal-window"})
+                        .text(out_string)
+                    )
                 )
             )
-        );
-    terminal_cmd.val("");
-    execute_sequence();
 }
+
 function terminal_opener(event) {
     var button = $(event.relatedTarget); // Button that triggered the modal
     var terminal_data = button.data('terminaldata'); // Extract info from data-* attributes
@@ -1484,4 +1508,23 @@ function terminal_opener(event) {
     history.empty();
     var modal = $(this);
     $("#terminal-active-target-str").val(JSON.stringify(terminal_data.target));
+    var visible_commands = $("#third_box_content tr:visible");
+    var visible_ouput = $("#W4Rows tr:visible");
+    for (var i=0; i<visible_commands.length; i++){
+        var command_td = $(visible_commands[i]).find("td")[3];
+        var command_js = JSON.parse(command_td.children[0].innerText);
+        if (command_js.CommandName == "terminal_input"){
+            var out_str = " ... ";
+            var shortid = command_td.id.substring(9,command_td.id.length);
+            var update_content = $("#updateid"+shortid+" pre");
+            if (update_content.length > 0){
+                out_str = update_content[0].innerText;
+            }
+            var console_io = make_one_terminal_command("specialupdateid"+shortid, command_js.Inputs[0].Value, out_str);
+            var output_list = $("#terminal-active-history");
+            output_list.append(console_io);
+        }
+
+
+    }
 }

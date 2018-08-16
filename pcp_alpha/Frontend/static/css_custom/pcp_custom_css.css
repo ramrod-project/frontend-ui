@@ -40,6 +40,12 @@ div.terminal-window {
     background-color: #333333 !important; /* AdminLTE nonsense */
     color: #BBBBBB !important; /* AdminLTE nonsense */
 }
+pre.terminal-window {
+    background-color: #333333 !important; /* AdminLTE nonsense */
+    color: #BBBBBB !important; /* AdminLTE nonsense */
+    padding-left: 0.3em;
+    padding-right: 0.3em;
+}
 input.terminal-window {
     background-color: #333333 !important; /* AdminLTE nonsense */
     color: #BBBBBB !important; /* AdminLTE nonsense */
@@ -48,5 +54,6 @@ input.terminal-window {
 }
 .terminal-contents {
     padding-left: 0.3em;
+    padding-right: 0.3em;
     list-style-type:none
 }

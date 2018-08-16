@@ -30,7 +30,7 @@ def switch_to_done(straight_to_done=True):
                       run(connection_var))
             print(rtdb.db("Brain").table("Jobs").get(
                 query_item['new_val']['id']).update({"Status": new_status}).run(connection_var))
-            sleep(3)
+            sleep(1)
 
 
 if __name__ == "__main__":
