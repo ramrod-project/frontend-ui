@@ -381,8 +381,12 @@ def update_plugin(request, plugin_id):
             .replace(" ", "")
 
         plugin_data['ExternalPorts'] = request.POST.getlist("ExternalPorts[]")
-        plugin_data['Environment'] = request.POST.getlist("Environment[]")
-
+        env_list = request.POST.getlist("Environment[]")
+        plugin_data["State"] = "Available"
+        plugin_data['Environment'] = []
+        for env_kv in env_list:
+            if env_kv:
+                plugin_data['Environment'].append(env_kv)
         del plugin_data["ExternalPorts[]"]
         del plugin_data["Environment[]"]
 
