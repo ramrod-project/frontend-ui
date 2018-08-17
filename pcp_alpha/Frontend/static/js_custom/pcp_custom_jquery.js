@@ -1454,12 +1454,11 @@ function execute_sequence_output(specific_id, counter=0, backoff=2000){
 
 
 function onclick_terminal_submit(event){
-    var dan="hi";
     var terminal_cmd = $("#terminal-cmd");
     var cmd_string = terminal_cmd.val();
-    var target_js = $("#terminal-active-target-str").val();
-
-    var ti_command = {
+    if (cmd_string.length > 0){
+        var target_js = $("#terminal-active-target-str").val();
+        var ti_command = {
             "CommandName":"terminal_input",
             "Tooltip": "",
             "Output": true,
@@ -1470,19 +1469,22 @@ function onclick_terminal_submit(event){
                 "Value": cmd_string
             }]
         };
-    current_command_template = ti_command;
-
-    //put the target+command in w3 to make a job
-    quick_action_function(target_js, "pluginid", "target");
-    add_command_to_job_sc_button();
-    var current_id = $("#addjob_button")[0].value;
-    var secondary_output_domid = "specialupdateid"+current_id;
-    id_replication_map[current_id] = secondary_output_domid;
-    var console_io = make_one_terminal_command(secondary_output_domid, cmd_string);
-    var output_list = $("#terminal-active-history");
-    output_list.append(console_io);
-    terminal_cmd.val("");
-    execute_sequence();
+        current_command_template = ti_command;
+        //put the target+command in w3 to make a job
+        quick_action_function(target_js, "pluginid", "target");
+        add_command_to_job_sc_button();
+        var current_id = $("#addjob_button")[0].value;
+        var secondary_output_domid = "specialupdateid"+current_id;
+        id_replication_map[current_id] = secondary_output_domid;
+        var console_io = make_one_terminal_command(secondary_output_domid, cmd_string);
+        var output_list = $("#terminal-active-history");
+        output_list.append(console_io);
+        terminal_cmd.val("");
+        var container = document.getElementById('terminal-cmd-list');
+        var scrollTo = document.getElementById('terminal-cmd-bottom');
+        container.scrollTop = scrollTo.offsetTop;
+        execute_sequence();
+    }
 }
 function make_one_terminal_command(secondary_output_domid, cmd_string, out_string="..."){
     return $("<li/>")

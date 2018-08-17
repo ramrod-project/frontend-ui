@@ -39,6 +39,9 @@
 div.terminal-window {
     background-color: #333333 !important; /* AdminLTE nonsense */
     color: #BBBBBB !important; /* AdminLTE nonsense */
+    overflow-y: scroll;
+    -ms-overflow-y: scroll;
+    height: 45em;
 }
 pre.terminal-window {
     background-color: #333333 !important; /* AdminLTE nonsense */
@@ -49,8 +52,8 @@ pre.terminal-window {
 input.terminal-window {
     background-color: #333333 !important; /* AdminLTE nonsense */
     color: #BBBBBB !important; /* AdminLTE nonsense */
-    border: #0b58a2;
-    padding: 30px;
+    border: 1px solid #0b58a2;
+    padding: 15px;
 }
 .terminal-contents {
     padding-left: 0.3em;

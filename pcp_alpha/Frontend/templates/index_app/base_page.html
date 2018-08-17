@@ -598,7 +598,7 @@ desired effect
       </div>
       <div class="modal-body">
           <input type="text" style="display: none"  disabled id="terminal-active-target-str">
-          <div class="terminal-window">
+          <div id="terminal-cmd-list" class="terminal-window">
             <ol id="terminal-active-history" class="terminal-contents">
                 <li>
                     <ul>
@@ -611,9 +611,11 @@ desired effect
                     </ul>
                 </li>
             </ol>
-            <div id="terminal_cmdname" class="form-group plugin-name">
-                <input size="64" type="text" class="form-control terminal-window" id="terminal-cmd" placeholder=">"/>
-            </div>
+              <a id="terminal-cmd-bottom" />
+          </div>
+          <div id="terminal_cmdname" class="form-group plugin-name">
+              <label for="terminal-cmd" class="control-label">Console Command:</label>
+                <input size="64" type="text" class="form-control terminal-window" id="terminal-cmd" placeholder="$" />
           </div>
       </div>
       <div class="modal-footer">
