@@ -237,7 +237,7 @@ def update_plugin_to_brain(plugin):
     """
     response = None
     if plugin["id"] == "NEW":
-        all_ports = "-".join(plugin['ExternalPorts'])
+        all_ports = "-".join(plugin['ExternalPorts']).replace("/", "")
         del (plugin['id'])  # allow database to generate a new id
         plugin["ServiceName"] = "{}-{}".format(plugin["Name"],
                                                all_ports)
