@@ -812,12 +812,12 @@ function add_new_job(){
     // W4 Rows
     $(".W4BodyContent")
         .append($("<tr/>")
-            .append($("<th/>")
-                    .text(value),$("<th/>")
+            .append($("<td/>")
+                    .text(value),$("<td/>")
                     .append($("<a/>")
                         .attr({'id': 'updateid'+value})
                         .text("terminal" + value)),
-    $("<th/>").attr({"id": "updatestatusid" + value})));
+    $("<td/>").attr({"id": "updatestatusid" + value})));
     $("#trashjob"+value).click(delete_job_from_w3);
 
 }
