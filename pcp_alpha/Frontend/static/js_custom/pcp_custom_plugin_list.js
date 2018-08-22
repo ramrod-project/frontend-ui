@@ -184,10 +184,12 @@ function get_plugin_list() {
             for (var count=0; count<data.length; count++){
                 plugin_list_map[data[count]['id']] = data[count];
                 add_plugin_name(data[count]["Name"]);
-                display_plugin_list(data[count], count);
-                $("#activate_button"+count).hide();
-                $("#restart_button"+count).hide();
-                $("#stop_button"+count).hide();
+                if (data[count].hasOwnProperty("ServiceID")){
+                    display_plugin_list(data[count], count);
+                    $("#activate_button"+count).hide();
+                    $("#restart_button"+count).hide();
+                    $("#stop_button"+count).hide();
+                }
             }
             plugin_list_map[BLANK_PLUGIN["id"]] = BLANK_PLUGIN;
             plugin_list_refresh.removeClass("fa-spin");
@@ -234,15 +236,12 @@ function verify_plugin_name(){
     var plugin_name = $("#plugin-name"),
         content = plugin_name[0].value,
         helper_checker = 0;
-    for(var counter = 1; counter < plugin_name[0].length; counter++){
-        var plugin_name_option = $("#plugin-name option#"+counter);
-        if(plugin_name_option[0].selected === true) {
-            $("#plugin-save")[0].disabled = false;
-            helper_checker = 1;
-            break;
-        } else {
-            $("#plugin-save")[0].disabled = true;
-        }
+    var plugin_name_option = $("#plugin-name option:selected");
+    if(plugin_name_option.length > 0) {
+        $("#plugin-save")[0].disabled = false;
+        helper_checker = 1;
+    } else {
+        $("#plugin-save")[0].disabled = true;
     }
     if(helper_checker === 1) {
         $("#pf_name").removeClass("has-error");
@@ -256,18 +255,15 @@ function verify_plugin_name(){
 
 function verify_desired_state(){
     console.log("verify_desired_state");
-    var desired_state = $("#plugin-desired"),
-        content = desired_state[0].value,
-        helper_checker = 0;
-    for(var counter = 1; counter < desired_state[0].length; counter++){
-        var plugin_desired_option = $("#plugin-desired option#"+counter);
-        if(plugin_desired_option[0].selected === true) {
-            $("#plugin-save")[0].disabled = false;
-            helper_checker = 1;
-            break;
-        } else {
-            $("#plugin-save")[0].disabled = true;
-        }
+    var plugin_desired_option = $("#plugin-desired option");
+    if(plugin_desired_option[0].selected === true) {
+        $("#plugin-save")[0].disabled = true;
+        $("#pf_desired_state").addClass("has-error");
+        $("#pf_ds_help").show();
+    } else {
+        $("#plugin-save")[0].disabled = false;
+        $("#pf_desired_state").removeClass("has-error");
+        $("#pf_ds_help").hide();
     }
 }
 
@@ -275,15 +271,12 @@ function verify_plugin_interface(){
     console.log("verify_plugin_interface");
     var plugin_interface = $("#plugin-interface"),
         helper_checker = 0;
-    for(var counter = 1; counter < plugin_interface[0].length; counter++){
-        var plugin_interface_option = $("#plugin-interface option#"+counter);
-        if(plugin_interface_option[0].selected === true) {
-            $("#plugin-save")[0].disabled = false;
-            helper_checker = 1;
-            break;
-        } else {
-            $("#plugin-save")[0].disabled = true;
-        }
+    var plugin_interface_option = $("#plugin-interface option:selected");
+    if(plugin_interface_option.length > 0) {
+        $("#plugin-save")[0].disabled = false;
+        helper_checker = 1;
+    } else {
+        $("#plugin-save")[0].disabled = true;
     }
     if(helper_checker === 1) {
         $("#pf_interface").removeClass("has-error");
@@ -329,15 +322,12 @@ function verify_plugin_environment(){
 function verify_plugin_os(){
     var plugin_os = $("#plugin-os"),
         helper_checker = 0;
-    for(var counter = 1; counter < plugin_os[0].length; counter++){
-        var plugin_os_option = $("#plugin-os option#"+counter);
-        if(plugin_os_option[0].selected === true) {
-            $("#plugin-save")[0].disabled = false;
-            helper_checker = 1;
-            break;
-        } else {
-            $("#plugin-save")[0].disabled = true;
-        }
+    var plugin_os_option = $("#plugin-os option:selected");
+    if(plugin_os_option.length > 0) {
+        $("#plugin-save")[0].disabled = false;
+        helper_checker = 1;
+    } else {
+        $("#plugin-save")[0].disabled = true;
     }
     if(helper_checker === 1) {
         $("#pf_os").removeClass("has-error");
