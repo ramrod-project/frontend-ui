@@ -741,7 +741,6 @@ function synchronize_job_sequence_tabs(tab_id){
     active_sequence = tab_id;
     var other_tab = $('#output_tabs a[href="#outq_'+tab_id+'"]');
     other_tab.tab('show');
-    $("#job_sequence_timer")[0].value = sequence_starttime_map[tab_id];
     synchronize_sequence_tab_rows(tab_id);
 }
 function synchronize_output_sequence_tabs(tab_id){
@@ -751,6 +750,13 @@ function synchronize_output_sequence_tabs(tab_id){
     synchronize_sequence_tab_rows(tab_id);
 }
 function synchronize_sequence_tab_rows(sequence_id){
+    var _dt = new Date(Number(sequence_starttime_map[sequence_id]) * 1000);
+    var display_date = $.datepicker.formatDate('mm/dd/yy ', _dt);
+        display_date += ("0" + _dt.getHours()).slice(-2);
+        display_date += ":";
+        display_date += ("0" + _dt.getMinutes()).slice(-2);
+    $("#job_sequence_time_unix")[0].value = sequence_starttime_map[sequence_id];
+    $("#job_sequence_timer")[0].value = display_date;
     var job_row_ids = $("#third_box_content tr" );
     var ouput_row_objs = $("#W4Rows tr");
     for (var i = 1; i <= job_row_ids.length; i++){
