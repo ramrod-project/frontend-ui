@@ -12,6 +12,7 @@ var sequence_starttime_map = {"1":  Math.floor((new Date().valueOf())/1000).toSt
 var id_map = {};
 var id_status_map = {};
 var id_reverse_map = {};
+var current_plugin_commands = [];
 var ws_map = {};
 var active_sequence = "1";
 var exec_int = 0;
@@ -309,11 +310,9 @@ function filter_w2() {
     }
 
     for (var row_i = 0; row_i < to_filter[0].children.length; row_i++){
-        var row_id = to_filter[0].children[row_i].children[0].id.substring(10, to_filter[0].children[row_i].length),
-            specific_command = $("#acommandid"+row_id)[0].innerHTML;
-        if (specific_command.toLowerCase().includes(filter_content)){
+        if (current_plugin_commands[row_i].CommandName.toLowerCase().includes(filter_content) ||
+            current_plugin_commands[row_i].Tooltip.toLowerCase().includes(filter_content)){
             $(to_filter[0].children[row_i]).css("display", "");
-
             // if tooltip & box footer was opened before the user was
             // searching the tooltip content & box footer will disappear
             $(".tooltipHeader").empty();
@@ -344,6 +343,7 @@ function get_commands_func(){
         datatype: 'json',
         success: function(data) {
             // check if w2 should re-render or not
+            current_plugin_commands = data;
             if($(".theContent li a").length > 0){
                 for(var int = 0; int < $(".theContent li a").length; int++){
                     if(data[0].CommandName == $(".theContent li a")[int].text){
