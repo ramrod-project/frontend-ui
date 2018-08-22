@@ -99,18 +99,19 @@ function display_plugin_list(plugin_data, plugin_index) {
                                             "data-target":"#controller-modal",
                                             "data-whatever": plugin_data['id'],
                                             "whatever": "/update_plugin/"+plugin_data['id']+"/"})
-                        .text(plugin_data['Name'])
+                        .text(plugin_data.ServiceName)
                         .tooltip({
                             classes: {"ui-tooltip": "ui-corner-all ui-widget-shadow ui-state-highlight"},
                             items: 'button',
-                            content: "DesiredState: "+plugin_data['DesiredState']+bp+
-                            "ExternalPorts: "+plugin_data['ExternalPorts']+bp+
-                            "Interface: "+plugin_data['Interface']+bp+
-                            "InternalPorts: "+plugin_data['InternalPorts']+bp+
-                            "Name: "+plugin_data['Name']+bp+
-                            "OS: "+plugin_data['OS']+bp+
-                            "State: "+plugin_data['State']+bp+
-                            "id: "+plugin_data['id'],
+                            content: "ServiceName:  "+plugin_data.ServiceName+bp+
+                                "State: "+plugin_data.State+bp+
+                                "DesiredState: "+plugin_data.DesiredState+bp+
+                                "Interface: "+plugin_data.Interface+bp+
+                                "ExternalPorts: "+plugin_data.ExternalPorts+bp+
+                                "Name: "+plugin_data.Name+bp+
+                                "OS: "+plugin_data.OS+bp+
+                                "ServiceID:  "+plugin_data.ServiceID+bp+
+                                "id: "+plugin_data.id,
                         })
                     )
                     .append("&emsp;&emsp;&emsp;")
