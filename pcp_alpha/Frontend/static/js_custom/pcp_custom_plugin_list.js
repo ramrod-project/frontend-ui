@@ -183,12 +183,17 @@ function get_plugin_list() {
             plugin_list_map = {};
             for (var count=0; count<data.length; count++){
                 plugin_list_map[data[count]['id']] = data[count];
-                add_plugin_name(data[count]["Name"]);
-                if (data[count].hasOwnProperty("ServiceID")){
-                    display_plugin_list(data[count], count);
-                    $("#activate_button"+count).hide();
-                    $("#restart_button"+count).hide();
-                    $("#stop_button"+count).hide();
+                if (data[count].ServiceName != "aux-services"){
+                    if (data[count].hasOwnProperty("ServiceID")){
+                        // This is a running plugin
+                        display_plugin_list(data[count], count);
+                        $("#activate_button"+count).hide();
+                        $("#restart_button"+count).hide();
+                        $("#stop_button"+count).hide();
+                    } else {
+                        // This is a TEMPLATE object
+                        add_plugin_name(data[count].Name);
+                    }
                 }
             }
             plugin_list_map[BLANK_PLUGIN["id"]] = BLANK_PLUGIN;
