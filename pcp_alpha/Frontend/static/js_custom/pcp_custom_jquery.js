@@ -12,6 +12,7 @@ var sequence_starttime_map = {"1":  Math.floor((new Date().valueOf())/1000).toSt
 var id_map = {};
 var id_status_map = {};
 var id_reverse_map = {};
+var current_plugin_commands = [];
 var ws_map = {};
 var active_sequence = "1";
 var exec_int = 0;
@@ -309,11 +310,9 @@ function filter_w2() {
     }
 
     for (var row_i = 0; row_i < to_filter[0].children.length; row_i++){
-        var row_id = to_filter[0].children[row_i].children[0].id.substring(10, to_filter[0].children[row_i].length),
-            specific_command = $("#acommandid"+row_id)[0].innerHTML;
-        if (specific_command.toLowerCase().includes(filter_content)){
+        if (current_plugin_commands[row_i].CommandName.toLowerCase().includes(filter_content) ||
+            current_plugin_commands[row_i].Tooltip.toLowerCase().includes(filter_content)){
             $(to_filter[0].children[row_i]).css("display", "");
-
             // if tooltip & box footer was opened before the user was
             // searching the tooltip content & box footer will disappear
             $(".tooltipHeader").empty();
@@ -344,6 +343,7 @@ function get_commands_func(){
         datatype: 'json',
         success: function(data) {
             // check if w2 should re-render or not
+            current_plugin_commands = data;
             if($(".theContent li a").length > 0){
                 for(var int = 0; int < $(".theContent li a").length; int++){
                     if(data[0].CommandName == $(".theContent li a")[int].text){
@@ -741,7 +741,6 @@ function synchronize_job_sequence_tabs(tab_id){
     active_sequence = tab_id;
     var other_tab = $('#output_tabs a[href="#outq_'+tab_id+'"]');
     other_tab.tab('show');
-    $("#job_sequence_timer")[0].value = sequence_starttime_map[tab_id];
     synchronize_sequence_tab_rows(tab_id);
 }
 function synchronize_output_sequence_tabs(tab_id){
@@ -751,6 +750,13 @@ function synchronize_output_sequence_tabs(tab_id){
     synchronize_sequence_tab_rows(tab_id);
 }
 function synchronize_sequence_tab_rows(sequence_id){
+    var _dt = new Date(Number(sequence_starttime_map[sequence_id]) * 1000);
+    var display_date = $.datepicker.formatDate('mm/dd/yy ', _dt);
+        display_date += ("0" + _dt.getHours()).slice(-2);
+        display_date += ":";
+        display_date += ("0" + _dt.getMinutes()).slice(-2);
+    $("#job_sequence_time_unix")[0].value = sequence_starttime_map[sequence_id];
+    $("#job_sequence_timer")[0].value = display_date;
     var job_row_ids = $("#third_box_content tr" );
     var ouput_row_objs = $("#W4Rows tr");
     for (var i = 1; i <= job_row_ids.length; i++){
@@ -812,12 +818,12 @@ function add_new_job(){
     // W4 Rows
     $(".W4BodyContent")
         .append($("<tr/>")
-            .append($("<th/>")
-                    .text(value),$("<th/>")
+            .append($("<td/>")
+                    .text(value),$("<td/>")
                     .append($("<a/>")
                         .attr({'id': 'updateid'+value})
                         .text("terminal" + value)),
-    $("<th/>").attr({"id": "updatestatusid" + value})));
+    $("<td/>").attr({"id": "updatestatusid" + value})));
     $("#trashjob"+value).click(delete_job_from_w3);
 
 }

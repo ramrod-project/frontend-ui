@@ -144,14 +144,14 @@ plugins = [{
 
 TEST_PORT_DATA = {
     "InterfaceName": "eth0",
-    "Address": "192.16.5.240",
+    "Interface": "192.16.5.240",
     "TCPPorts": ["9999", "4243"],
     "UDPPorts": []
 }
 
 TEST_PORT_DATA2 = {
     "InterfaceName": "eth0",
-    "Address": "10.10.10.10",
+    "Interface": "10.10.10.10",
     "TCPPorts": [],
     "UDPPorts": ["4242"]
 }
