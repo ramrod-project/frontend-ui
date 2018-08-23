@@ -272,8 +272,8 @@ class TestDataHandling(object):
         sleep(5)
         second_url = "/action/get_output_data/?job_id={}".format(json.loads(
             response.getvalue().decode())['generated_keys'][0])
-        assert w4_output_controller(rf.get(second_url)).status_code == 200
-        assert "sdfsdfsd" in str(w4_output_controller(rf.get(second_url)).content)
+        assert w4_output_controller(rf.get(second_url, HTTP_USER_AGENT='Mozilla/5.0')).status_code == 200
+        assert "sdfsdfsd" in str(w4_output_controller(rf.get(second_url, HTTP_USER_AGENT='Mozilla/5.0')).content)
         process_obj.terminate()
         process_obj.join(timeout=2)
 
@@ -322,7 +322,7 @@ class TestDataHandling(object):
         on 'Execute Sequence' button at the bottom right of w3. With wrong data.
         """
         url_var = "/action/get_output_data/?job_id=60d5405c-81b0-4248-aead-9e4f8d38cd14"
-        request = rf.get(url_var)
+        request = rf.get(url_var, HTTP_USER_AGENT='Mozilla/5.0')
         response = w4_output_controller(request)
         assert response.status_code == 418
 
