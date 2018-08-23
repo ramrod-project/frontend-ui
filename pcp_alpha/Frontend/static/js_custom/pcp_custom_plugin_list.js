@@ -184,7 +184,7 @@ function get_plugin_list() {
             plugin_list_map = {};
             for (var count=0; count<data.length; count++){
                 plugin_list_map[data[count]['id']] = data[count];
-                if (data[count].ServiceName != "aux-services"){
+                if (data[count].ServiceName != "AuxiliaryServices"){
                     if (data[count].hasOwnProperty("ServiceID")){
                         // This is a running plugin
                         display_plugin_list(data[count], count);
