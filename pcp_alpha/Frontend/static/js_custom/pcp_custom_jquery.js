@@ -109,7 +109,7 @@ $(document).ready(function() {
     $("#job_sequence_timer").datepicker( "setDate", startup_date );
 
 
-
+    $("#truncate_output_to").change(change_truncate_value);
 
 	$("#addjob_button").click(add_new_job);               // add new job in w3
     $("#addjob_top_button").click(add_new_job);               // add new job in w3
@@ -1334,6 +1334,16 @@ function execute_sequence(){
 Functions down below are for w4
 -----------------------------------------------------------------------------------------------------
 */
+function change_truncate_value(){
+    var tot = $("#truncate_output_to");
+    if(tot.is(":checked")) {
+        tot.val("1024");
+    } else {
+        tot.val("0");
+    }
+}
+
+
 function render_job_output_to_page(job_guid, data){
     var updateid = id_reverse_map[job_guid];
     clearInterval(start_timer_map[updateid]);
@@ -1395,10 +1405,12 @@ function execute_sequence_output_retry(job_guid){
 // Modify function add depth parameter, increment depth when it errors
 function execute_sequence_output(specific_id, counter=0, backoff=2000){
     var updateid = id_reverse_map[specific_id];
+    var trunc_output_size = $("#truncate_output_to").val();
     $.ajax({
         type: "GET",
         url: "/action/get_output_data/",
-        data: {"job_id": specific_id},
+        data: {"job_id": specific_id,
+               "truncate": trunc_output_size},
         datatype: 'json',
         success: function(data) {
             console.log("SUCCESS @ execute_sequence_output  function");
