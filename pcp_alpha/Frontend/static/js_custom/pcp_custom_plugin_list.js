@@ -184,8 +184,8 @@ function get_plugin_list() {
             plugin_list_map = {};
             for (var count=0; count<data.length; count++){
                 plugin_list_map[data[count]['id']] = data[count];
-                if (data[count].hasOwnProperty("ServiceID") && data[count].ServiceID !== ""){
-                    if (data[count].hasOwnProperty("ServiceID")){
+                if (data[count].ServiceName != "AuxiliaryServices"){
+                    if (data[count].hasOwnProperty("ServiceID") && data[count].ServiceID !== ""){
                         // This is a running plugin
                         display_plugin_list(data[count], count);
                         $("#activate_button"+count).hide();
