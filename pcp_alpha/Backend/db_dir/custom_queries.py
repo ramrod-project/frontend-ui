@@ -243,7 +243,7 @@ def update_plugin_to_brain(plugin):
                                                all_ports)
         plugin["InternalPorts"] = plugin['ExternalPorts']
         plugin["State"] = ""
-        plugin["ServiceID"] = ""
+        plugin["ServiceID"] = "NEW"
         response = brain.controller.plugins.create_plugin(plugin,
                                                           verify_plugin=True)
     else:
