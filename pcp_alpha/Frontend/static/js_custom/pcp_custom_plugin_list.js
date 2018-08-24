@@ -114,50 +114,10 @@ function display_plugin_list(plugin_data, plugin_index) {
                                 "id: "+plugin_data.id,
                         })
                     )
-                    .append("&emsp;&emsp;&emsp;")
-                    // Activate button
-                    .append($("<a/>")
-                        .attr({"href": "#",
-                            "id": "activate_button"+plugin_index,
-                            "class":"btn btn-social-icon btn-pcp_button_color1 btn-xs",
-                            "onclick": "desired_plugin_state('"+plugin_data['id']+"', 'activate')",
-                            "data-toggle": "tooltip",
-                            "title": "Activate  "+plugin_data['Name']})
-                        .append($("<i/>")
-                            .attr({"id": "activate_button_two"+plugin_index ,"class": "fa fa-thumbs-o-up"})
+                    .append("&emsp;&emsp;")
+                        // Check Box Button
+                        .append($("<input/>").attr({"type": "checkbox"})
                         )
-                    )
-                    .append("&nbsp;")
-                    // Restart button
-                    .append($("<a/>")
-                        .attr({"href": "#",
-                            "id": "restart_button"+plugin_index,
-                            "class":"btn btn-social-icon btn-pcp_button_color2 btn-xs",
-                            "onclick": "desired_plugin_state('"+plugin_data['id']+"', 'restart')",
-                            "data-toggle": "tooltip",
-                            "title": "Restart  "+plugin_data['Name']})
-                        .append($("<i/>")
-                            .attr({"id": "restart_button_two"+plugin_index ,"class": "fa fa-refresh"})
-                        )
-                    )
-                    .append("&nbsp;")
-                    // Stop button
-                    .append($("<a/>")
-                        .attr({"href": "#",
-                            "id": "stop_button"+plugin_index,
-                            "class":"btn btn-social-icon btn-google btn-xs",
-                            "onclick": "desired_plugin_state('"+plugin_data['id']+"', 'stop')",
-                            "data-toggle": "tooltip",
-                            "title": "Stop  "+plugin_data['Name']})
-                        .append($("<i/>")
-                            .attr({"id": "stop_button_two"+plugin_index ,"class": "fa fa-hand-stop-o"})
-                        )
-                    )
-                    // Plugin json data (hidden on ui)
-                    .append($("<span/>")
-                        .attr({"id": "pluginidjson"+plugin_data['id'], "style": "display:none"})
-                        .text(JSON.stringify(plugin_data))
-                    )
                 )
             )
         );
@@ -184,8 +144,8 @@ function get_plugin_list() {
             plugin_list_map = {};
             for (var count=0; count<data.length; count++){
                 plugin_list_map[data[count]['id']] = data[count];
-                if (data[count].ServiceName != "AuxiliaryServices"){
-                    if (data[count].hasOwnProperty("ServiceID")){
+                if (data[count].ServiceName !== "AuxiliaryServices"){
+                    if (data[count].hasOwnProperty("ServiceID") && data[count].ServiceID !== ""){
                         // This is a running plugin
                         display_plugin_list(data[count], count);
                         $("#activate_button"+count).hide();
