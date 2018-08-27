@@ -107,11 +107,11 @@ class TestPluginData(object):
         response = post_test(url_var, update_data, update_plugin, rf, target_id="NEW")
         assert response.status_code == 200
 
-    @staticmethod
-    def test_plugin_state(rf):
-        url_var = 'desired_plugin_state/'
-        response = get_test(url_var, desired_plugin_state_controller, rf)
-        assert response.status_code == 200
+    # @staticmethod
+    # def test_plugin_state(rf):
+    #     url_var = 'desired_plugin_state/'
+    #     response = get_test(url_var, desired_plugin_state_controller, rf)
+    #     assert response.status_code == 200
 
     # @staticmethod
     # def test_plugin_state_two():
