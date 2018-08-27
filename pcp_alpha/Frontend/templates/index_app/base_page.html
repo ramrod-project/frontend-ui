@@ -571,7 +571,11 @@ desired effect
             </span>
               Plugin List<br>
               <br>&nbsp;
-              <!--"onclick": "desired_plugin_state('"+plugin_data['id']+"', 'activate')"-->
+                  <span>
+                      <a id="activate_plugin_button" class="btn btn-social-icon btn-pcp_button_color1 btn-xs" onclick="desired_plugin_state('activate')" data-toggle="tooltip" title="Activate Plugin">
+                          <i class="fa fa-thumbs-o-up"></i>
+                      </a>
+                  </span>&nbsp;
                   <span>
                       <a id="restart_plugin_button" class="btn btn-social-icon btn-pcp_button_color2 btn-xs" onclick="desired_plugin_state('restart')" data-toggle="tooltip" title="Restart Plugin">
                           <i class="fa fa-refresh"></i>
