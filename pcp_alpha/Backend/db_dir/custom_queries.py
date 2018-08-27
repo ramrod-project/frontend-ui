@@ -252,18 +252,19 @@ def update_plugin_to_brain(plugin):
     return response
 
 
-def desired_plugin_state_brain(plugin_id, desired_state):
+def desired_plugin_state_brain(plugin_id_list, desired_state):
     """
 
-    :param plugin_id: 
+    :param plugin_id_list:
     :param desired_state: 
     :return: 
     """
     return_object = None
-    if desired_state == 'activate':
-        return_object = brain.controller.plugins.activate(plugin_id)
-    elif desired_state == 'restart':
-        return_object = brain.controller.plugins.restart(plugin_id)
-    elif desired_state == 'stop':
-        return_object = brain.controller.plugins.stop(plugin_id)
-    return return_object
+    for plugin_id_item in plugin_id_list:
+        if desired_state == 'activate':
+            return_object = brain.controller.plugins.activate(plugin_id_item.strip('\"'))
+        elif desired_state == 'restart':
+            return_object = brain.controller.plugins.restart(plugin_id_item.strip('\"'))
+        elif desired_state == 'stop':
+            return_object = brain.controller.plugins.stop(plugin_id_item.strip('\"'))
+        return return_object

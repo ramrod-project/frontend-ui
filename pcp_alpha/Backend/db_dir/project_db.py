@@ -322,10 +322,3 @@ def confirm_db_info():
     connect()
     confirm_brain_db_info()
     confirm_plugin_db_info()
-
-
-    db_con_var = connect()
-    plugs = rtdb.db("Controller").table("Plugins").run(db_con_var)
-    for item_plugs in plugs:
-        print("\n")
-        print(item_plugs)

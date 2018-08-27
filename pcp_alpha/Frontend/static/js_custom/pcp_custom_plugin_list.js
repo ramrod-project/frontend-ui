@@ -27,6 +27,9 @@ var BLANK_PLUGIN = {
 var plugin_list_map = {};
 var interfaces = [];
 var plugin_names = [];
+var num_plugins = [];
+var checked_plugin_list_map = {};
+var checked_plugin_list_array = [];
 
 var env_rgx = /^([0-9a-zA-Z_]{2,100}=[0-9a-zA-Z_]{2,100},{0,1}){0,10}$|^$/;
 var port_rgx2 = /^(\d{2,4}\/(tcp|udp),{0,1}){1,10}$/;
@@ -64,13 +67,30 @@ function get_interfaces(){
     });
 }
 
+function checked_plugin_list(plugin_id, plugin_checkbox_num) {
+    if ($("#"+plugin_checkbox_num).is(":checked")) {
+        // adds plugin to the array (checked_plugin_list_array)
+        checked_plugin_list_array.push(plugin_id);
+    } else {
+        // removes the unchecked plugin from the array (checked_plugin_list_array)
+        for(var i = checked_plugin_list_array.length - 1; i >= 0; i--) {
+            if(checked_plugin_list_array[i] === plugin_id) {
+               checked_plugin_list_array.splice(i, 1);
+            }
+        }
+    }
+    console.log(checked_plugin_list_array);
+}
 
 // Modify function for future activate, restart, and stop plugin task
-function desired_plugin_state(plugin_id, desired_state) {
+// function desired_plugin_state(plugin_id, desired_state) {
+function desired_plugin_state(desired_state) {
+    var plugin_list_array = JSON.stringify(checked_plugin_list_array);
+
     $.ajax({
         type: "GET",
         url: "/desired_plugin_state/",
-        data: {"plugin_id": plugin_id, "desired_state": desired_state},
+        data: {"plugin_id_list": plugin_list_array.replace(/^\[(.+)\]$/,'$1'), "desired_state": desired_state},
         datatype: 'json',
         success: function(data) {
             console.log("SUCCESS @ activate_plugin ajax function");
@@ -116,7 +136,9 @@ function display_plugin_list(plugin_data, plugin_index) {
                     )
                     .append("&emsp;&emsp;")
                         // Check Box Button
-                        .append($("<input/>").attr({"type": "checkbox"})
+                        .append($("<input/>").attr({"type": "checkbox",
+                                                    "id": "plugin_checkbox"+plugin_index,
+                                                    "onclick": "checked_plugin_list('"+plugin_data['id']+"', 'plugin_checkbox"+plugin_index+"')"})
                         )
                 )
             )
@@ -147,6 +169,7 @@ function get_plugin_list() {
                 if (data[count].ServiceName !== "AuxiliaryServices"){
                     if (data[count].hasOwnProperty("ServiceID") && data[count].ServiceID !== ""){
                         // This is a running plugin
+                        num_plugins.push(count);
                         display_plugin_list(data[count], count);
                         $("#activate_button"+count).hide();
                         $("#restart_button"+count).hide();

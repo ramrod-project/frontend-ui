@@ -415,10 +415,10 @@ def desired_plugin_state_controller(request):
     :return:
     """
     if request.method == 'GET':
-        plugin_id = request.GET.get('plugin_id')
         desired_state = request.GET.get('desired_state')
+        plugin_id_list = request.GET.get('plugin_id_list')
         response = HttpResponse(json.dumps(desired_plugin_state_brain(
-            plugin_id, desired_state)),
+            plugin_id_list.split(','), desired_state)),
             content_type='application/json')
         response.status_code = 200
         return response
