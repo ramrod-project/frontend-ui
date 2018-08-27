@@ -58,3 +58,4 @@ def post_test(url_str, post_data, function_obj, rf, target_id=None):
 
 SAMPLE_GOOD_PLUGIN_ID = return_random_plugin_id()
 SAMPLE_BAD_PLUGIN_ID = "bad_plugin_id"
+SAMPLE_DESIRED_STATE = ['restart', 'stop']

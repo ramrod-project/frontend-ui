@@ -3,10 +3,12 @@ Docstrings
 """
 import ast
 import pytest
+import random
 from pcp_alpha.Backend.pcp_app.views import get_plugin_list, update_plugin, \
     desired_plugin_state_controller
+from pcp_alpha.Backend.db_dir.custom_queries import desired_plugin_state_brain
 from .helper_test_functions import get_test, \
-    SAMPLE_GOOD_PLUGIN_ID, SAMPLE_BAD_PLUGIN_ID, post_test
+    SAMPLE_GOOD_PLUGIN_ID, SAMPLE_BAD_PLUGIN_ID, SAMPLE_DESIRED_STATE, post_test
 
 
 @pytest.mark.incremental
@@ -110,3 +112,8 @@ class TestPluginData(object):
         url_var = 'desired_plugin_state/'
         response = get_test(url_var, desired_plugin_state_controller, rf)
         assert response.status_code == 200
+
+    # @staticmethod
+    # def test_plugin_state_two():
+    #     random_id = "{}".format(SAMPLE_GOOD_PLUGIN_ID)
+    #     desired_plugin_state_brain(random_id, random.choice(SAMPLE_DESIRED_STATE))
