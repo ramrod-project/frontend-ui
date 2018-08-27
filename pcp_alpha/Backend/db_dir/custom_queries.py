@@ -215,7 +215,7 @@ def get_plugin_list_query():
     """
     # This function will be modified in the future
     return_plugin_list = list()
-    plugin_list = rtdb.db("Controller").table("Plugins").run(connect())
+    plugin_list = brain.controller.plugins.get_plugins()
     for plugin_item in plugin_list:
         return_plugin_list.append(plugin_item)
     return return_plugin_list
@@ -237,13 +237,13 @@ def update_plugin_to_brain(plugin):
     """
     response = None
     if plugin["id"] == "NEW":
-        all_ports = "-".join(plugin['ExternalPorts'])
+        all_ports = "-".join(plugin['ExternalPorts']).replace("/", "")
         del (plugin['id'])  # allow database to generate a new id
         plugin["ServiceName"] = "{}-{}".format(plugin["Name"],
                                                all_ports)
         plugin["InternalPorts"] = plugin['ExternalPorts']
-        plugin["State"] = ""
-        plugin["ServiceID"] = ""
+        plugin["State"] = "Available"
+        plugin["ServiceID"] = "NEW"
         response = brain.controller.plugins.create_plugin(plugin,
                                                           verify_plugin=True)
     else:

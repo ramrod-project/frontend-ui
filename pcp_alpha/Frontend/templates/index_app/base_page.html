@@ -62,7 +62,6 @@
         }
         #targtTableScroll {
             max-height: 250px;
-            max-width: 699px;
             overflow: auto;
             {#margin-top: 44px;#}
         }
@@ -456,7 +455,10 @@ desired effect
                 <!-- /W4 Tabs -->
                 <!--Content-->
                 <div class="box box-primary">
+
                     <div class="box-body">
+                        <input type="checkbox" name="truncate_ouput" value="1024" id="truncate_output_to" checked>
+                        <label for="truncate_output_to">Truncate output</label>
                         <div id="outq_content" class="tab-content">
                             <div id="outq_1" class="tab-pane active"> </div>
 
@@ -649,31 +651,31 @@ desired effect
             <input type="text" class="form-control plugin-state" disabled id="plugin-state">
           </div>
           <div id="pf_desired_state" class="form-group">
-            <label for="plugin-desired-state" class="control-label">Desired State:</label>
+            <label for="plugin-desired" class="control-label">Desired State:</label>
             <select class="form-control plugin-desired" id="plugin-desired">
                 <option value="" selected></option>
                 <option value="Activate">Activate</option>
                 <option value="Restart">Restart</option>
                 <option value="Stop">Stop</option>
             </select>
-            <span id="pf_ds_help" class="help-block">Select a Desired State</span>
+            <span id="pf_ds_help" class="help-block">Desired state must be selected from "Activate", "Restart", or "Stop"</span>
           </div>
           <div id="pf_interface" class="form-group">
             <label for="plugin-interface" class="control-label">Interface:</label>
               <select class="form-control plugin-interface" id="plugin-interface">
               </select>
-              <span id="pf_interface_help" class="help-block">Select a Interface</span>
+              <span id="pf_interface_help" class="help-block">Interface must be selected from available interfaces  (Refresh the plugin list from the right pullout if desired interface not listed)</span>
           </div>
           <div id="pf_port" class="form-group">
             <label for="plugin-external-ports" class="control-label">Ports (comma separated):</label>
             <input class="form-control plugin-ports" id="plugin-external-ports" />
             <input class="form-control plugin-iports" disabled id="plugin-internal-ports" />
-            <span id="pf_ep_help" class="help-block">Port Input Help</span>
+            <span id="pf_ep_help" class="help-block">Ports must be in the form of number/protocol 1111/tcp or comma separated 1111/tcp,2222/udp</span>
           </div>
           <div id="pf_environment" class="form-group">
-            <label for="plugin-external-env" class="control-label">Environment (comma separated "k1=v1,k2=v2,..."):</label>
+            <label for="plugin-environment" class="control-label">Environment (comma separated):</label>
             <input class="form-control plugin-env" id="plugin-environment" />
-            <span id="pf_environment_help" class="help-block">Environment Help</span>
+            <span id="pf_environment_help" class="help-block">must be in the format of key=value or comma separated key1=val1,key2=val2,...</span>
           </div>
           <div id="pf_os" class="form-group">
             <label for="plugin-os" class="control-label">OS (posix/nt/all):</label>
@@ -682,7 +684,7 @@ desired effect
                 <option value="nt">nt</option>
                 <option value="all">all</option>
             </select>
-            <span id="pf_os_help" class="help-block">Select a Operating System</span>
+            <span id="pf_os_help" class="help-block">select posix to run on an linux-based host, nt to run on a windows based host, or all to run on either</span>
           </div>
         </form>
       </div>
