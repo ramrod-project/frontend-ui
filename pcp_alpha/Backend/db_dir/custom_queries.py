@@ -261,9 +261,9 @@ def desired_plugin_state_brain(plugin_id_list, desired_state):
     """
     return_object = None
     for plugin_id_item in plugin_id_list:
-        if desired_state == 'activate':
-            return_object = brain.controller.plugins.activate(plugin_id_item.strip('\"'))
-        elif desired_state == 'restart':
+        # if desired_state == 'activate':
+        #     return_object = brain.controller.plugins.activate(plugin_id_item.strip('\"'))
+        if desired_state == 'restart':
             return_object = brain.controller.plugins.restart(plugin_id_item.strip('\"'))
         elif desired_state == 'stop':
             return_object = brain.controller.plugins.stop(plugin_id_item.strip('\"'))
