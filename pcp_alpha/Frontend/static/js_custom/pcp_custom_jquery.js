@@ -33,7 +33,13 @@ $(document).ready(function() {
             onclick_terminal_submit();
         }
     });
+    $(".terminal_opener_sc").click(function(event){
+        var row_id = get_number_from_id(this.id, "open_terminal_id");
+        var target_js = $("#nameidjson"+row_id);
+        console.warn(target_js.text());
+    });
     $('#terminal-modal').on('show.bs.modal', terminal_opener);
+    $("#terminal-modal").on("shown.bs.modal", terminal_opened);
     job_select_table = $('#job_table').DataTable({
 	    searching: false,
 	    paging: false,
@@ -1528,12 +1534,24 @@ function terminal_opener(event) {
     history.empty();
     var modal = $(this);
     $("#terminal-active-target-str").val(JSON.stringify(terminal_data.target));
+    $("#terminal-modal-target").text(terminal_data.target.Location);
+    $("#terminal-modal-plugin").text(terminal_data.target.PluginName);
+    $("#terminal-modal-port").text(terminal_data.target.Port);
     var visible_commands = $("#third_box_content tr:visible");
     var visible_ouput = $("#W4Rows tr:visible");
     for (var i=0; i<visible_commands.length; i++){
         var command_td = $(visible_commands[i]).find("td")[3];
+        var target_cells = $(visible_commands[i]).find("td span");
+        var target = null;
+        if (target_cells.length > 2){
+            target = JSON.parse(target_cells[1].innerText);
+        }
         var command_js = JSON.parse(command_td.children[0].innerText);
-        if (command_js.CommandName == "terminal_input"){
+        if (target !== null
+            && target.PluginName == terminal_data.target.PluginName
+            && target.Port == terminal_data.target.Port
+            && target.Location == terminal_data.target.Location
+            && command_js.CommandName == "terminal_input"){
             var out_str = " ... ";
             var shortid = command_td.id.substring(9,command_td.id.length);
             var update_content = $("#updateid"+shortid+" pre");
@@ -1544,7 +1562,13 @@ function terminal_opener(event) {
             var output_list = $("#terminal-active-history");
             output_list.append(console_io);
         }
-
-
     }
+}
+
+function terminal_opened(event){
+    $("#terminal-cmd").focus();
+}
+
+function get_number_from_id(id_str, pretext){
+    return id_str.substring(pretext.length, id_str.length);
 }

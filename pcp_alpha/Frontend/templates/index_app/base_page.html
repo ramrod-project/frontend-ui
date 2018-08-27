@@ -208,7 +208,7 @@ desired effect
                 </ul>
                 <!-- /Left box TABS HERE -->
                 <div id="w1_command_active_filter" class="alert alert-info" ></div>
-                <form action="/action/get_command_list/" method="get">
+                <form action="/action/get_command_list/" method="get" onsubmit="return false;">
                 <div class="tab-content">
                   <div class="box box-primary">
                     <!--box body-->
@@ -263,10 +263,23 @@ desired effect
                                                     </td>
                                                     <td id="action_tad_id{{ forloop.counter0 }}" style="text-align: center; width: 80px;" class="clickable-row-col3" onclick="#">
                                                         <span id="edit_target_id">
-                                                            <a href="/edit_target_form/{{ items.id }}/" target="_blank" class="btn btn-social-icon btn-bitbucket btn-xs" data-toggle="tooltip" title="Edit Target"><i class="fa fa-edit"></i></a>
+                                                            <a href="/edit_target_form/{{ items.id }}/" target="_blank" class="btn btn-social-icon btn-bitbucket btn-xs" data-toggle="tooltip" title="Edit Target">
+                                                                <i class="fa fa-edit"></i>
+                                                            </a>
                                                         </span>
                                                         <span id="add_job_sc_id_attr">
-                                                            <a href="#" id="add_job_sc_id{{ forloop.counter0 }}" class="btn btn-social-icon btn-linkedin btn-xs" data-toggle="tooltip" title="Add Target to W3"><i class="fa fa-tasks"></i></a>
+                                                            <a href="#" id="add_job_sc_id{{ forloop.counter0 }}" class="btn btn-social-icon btn-linkedin btn-xs" data-toggle="tooltip" title="Add Target to W3">
+                                                                <i class="fa fa-tasks"></i>
+                                                            </a>
+                                                        </span>
+                                                        <span>
+                                                            <button id="open_terminal_id{{ forloop.counter0 }}"
+                                                                    class="btn btn-social-icon btn-twitter btn-xs terminal_opener_sc"
+                                                                    title="Open Terminal to this Target (May require prior initialization)"
+                                                                    data-toggle="modal"
+                                                                    data-target="#terminal-modal"
+                                                                    data-terminaldata='{"target":{{ items.json }}, "sequence":"_C_2_2"}'>
+                                                            </button>
                                                         </span>
                                                     </td>
                                                 </tr>
@@ -596,7 +609,10 @@ desired effect
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="terminal-modal-label">Terminal</h4>
+        <h4 class="modal-title" id="terminal-modal-label">Terminal for
+            <span id="terminal-modal-target"></span> using
+            <span id="terminal-modal-plugin"></span>:<span id="terminal-modal-port"></span>
+        </h4>
       </div>
       <div class="modal-body">
           <input type="text" style="display: none"  disabled id="terminal-active-target-str">
