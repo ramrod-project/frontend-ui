@@ -559,17 +559,33 @@ desired effect
       </div>
       <!-- /.tab-pane -->
       <!-- Stats tab content -->
-{#        <span id="plugin_list_refresh" class="text-aqua fa fa-refresh"></span>#}
+        <!--<span id="plugin_list_refresh" class="text-aqua fa fa-refresh"></span>-->
       <div class="tab-pane" id="control-sidebar-stats-tab">Stats Tab Content</div>
       <div class="tab-pane" id="control-sidebar-settings-tab">
           <button id="add_plugin_id" type="button" class="btn btn-block btn-info">Add Plugin</button>
-{#          Notification Here#}
+          <!--Notification Here-->
           <h3 class="control-sidebar-heading">
               <span id="plugin_list_refresh" class="text-aqua fa fa-refresh"></span>&nbsp;
               <span class="badge bg-green" id="plugins_need_refreshed">
                 Plugin list changed, refresh
             </span>
-              Plugin List
+              Plugin List<br>
+              <br>&nbsp;
+                  <span>
+                      <a id="activate_plugin_button" class="btn btn-social-icon btn-pcp_button_color1 btn-xs" onclick="desired_plugin_state('activate')" data-toggle="tooltip" title="Activate Plugin">
+                          <i class="fa fa-thumbs-o-up"></i>
+                      </a>
+                  </span>&nbsp;
+                  <span>
+                      <a id="restart_plugin_button" class="btn btn-social-icon btn-pcp_button_color2 btn-xs" onclick="desired_plugin_state('restart')" data-toggle="tooltip" title="Restart Plugin">
+                          <i class="fa fa-refresh"></i>
+                      </a>
+                  </span>&nbsp;
+                  <span>
+                      <a id="stop_plugin_button" class="btn btn-social-icon btn-google btn-xs" onclick="desired_plugin_state('stop')" data-toggle="tooltip" title="Stop Plugin">
+                          <i class="fa fa-hand-stop-o"></i>
+                      </a>
+                  </span>
           </h3>
           <ul class="control-sidebar-menu plugin_list_display">
           </ul>
