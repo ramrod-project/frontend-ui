@@ -1403,7 +1403,7 @@ function render_job_output_to_page(job_guid, data){
     $("#updateid"+updateid).attr({"class": ""});
     $("#update_spin"+updateid).remove();
     $('<pre id="updatecontent'+updateid+'"></pre>').appendTo("#updateid"+updateid);
-    $("#updatecontent"+updateid).append(JSON.stringify(data['Content']));
+    $("#updatecontent"+updateid).text(data['Content']);
     var download_link = $('<a>[Download]</a>');
     download_link.attr({"href": "/action/get_full_output_data/?job_id="+job_guid+"&job_number="+updateid});
     $("#updateid"+updateid)
