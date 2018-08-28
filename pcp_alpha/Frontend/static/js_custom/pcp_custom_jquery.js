@@ -26,7 +26,6 @@ var w3_highlighted_row,
 
 var timer_on = 1,
     time_var,
-    time_counter = 0,
     test_server = 'ws://' + window.location.hostname + ':3000/monitor',
     test_ws = new WebSocket(test_server);
 
