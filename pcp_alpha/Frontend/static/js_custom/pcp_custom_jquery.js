@@ -24,6 +24,13 @@ var w3_highlighted_row,
     start_timer_interval,
     start_timer_map = {};
 
+var timer_on = 1,
+    time_var,
+    time_counter = 0,
+    test_server = 'ws://' + window.location.hostname + ':3000/monitor',
+    test_ws = new WebSocket(test_server);
+
+
 $(document).ready(function() {
     job_select_table = $('#job_table').DataTable({
 	    searching: false,
@@ -54,6 +61,7 @@ $(document).ready(function() {
     ws_map["status"] = open_websocket("status", status_change_ws_callback);
     ws_map["files"] = open_websocket("files", files_change_ws_callback);
     ws_map['plugins'] = open_websocket("plugins", plugins_change_ws_callback);
+    start_ping_pong();
 
     $("#upload_files_need_refreshed").hide();
 
@@ -158,6 +166,36 @@ $(document).ready(function() {
 Websockets functions
 -----------------------------------------------------------------------------------------------------
 */
+function ws_ping() {
+    test_ws.send('__ping__');
+    time_var = setTimeout(function () {
+        // connection closed, restart web socket
+        // console.log("websocket closed");
+        ws_map["status"] = open_websocket("status", status_change_ws_callback);
+        ws_map["files"] = open_websocket("files", files_change_ws_callback);
+        ws_map['plugins'] = open_websocket("plugins", plugins_change_ws_callback);
+        start_ping_pong();
+    }, 5000);
+}
+
+function ws_pong() {
+    clearTimeout(time_var);
+}
+
+function start_ping_pong(){
+    test_ws.onopen = function () {
+        setInterval(ws_ping, 10000);
+    };
+
+    test_ws.onmessage = function (evt) {
+        var msg = evt.data;
+        if (msg === '__pong__') {
+            // console.log("message is pong");
+            ws_pong();
+            // return;
+        }
+    }
+}
 
 function open_websocket(selection, callback) {
     // Create a new websocket
@@ -170,7 +208,7 @@ function open_websocket(selection, callback) {
     ws.onopen = function () {
         ws.send(selection);
         console.log("Websocket connected to feed " + selection);
-    }
+    };
 
     // receive message
     ws.onmessage = function (message) {
