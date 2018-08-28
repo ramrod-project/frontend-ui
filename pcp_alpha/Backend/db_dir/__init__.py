@@ -1,9 +1,10 @@
+# Dummy data for development
 
 
 plugins = [{
     "id": "1-1-A",
     "Name": "Plugin1",
-    "ServiceName": "Plugin1-a",
+    "ServiceName": "Plugin1-9999tcp",
     "ServiceID": "cheeto1",
     "State": "Available",
     "DesiredState": "",
@@ -15,7 +16,7 @@ plugins = [{
 }, {
     "id": "2-2-B",
     "Name": "Plugin2",
-    "ServiceName": "Plugin2-a",
+    "ServiceName": "Plugin2-4242tcp",
     "ServiceID": "cheeto2",
     "State": "Restarting",
     "DesiredState": "",
@@ -27,7 +28,7 @@ plugins = [{
 }, {
     "id": "3-3-C",
     "Name": "Plugin3",
-    "ServiceName": "Plugin3-a",
+    "ServiceName": "Plugin3-4243tcp",
     "ServiceID": "cheeto3",
     "State": "Stopped",
     "DesiredState": "",

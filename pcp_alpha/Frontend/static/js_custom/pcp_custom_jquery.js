@@ -1269,8 +1269,6 @@ function prepare_jobs_list(){
             var terminal = $("#updateid"+uid).parent();
             var plugin_name_data = $("#pluginid"+(j+1))[0].textContent;  // correct json target data with plugin name
             var json_target_data = JSON.parse($("#pluginid"+(j+1)+" span")[0].innerText);
-            // var plugin_name = plugin_name_data.substring(0, plugin_name_data.indexOf("{"));  // former code
-            // var location = $("#addressid"+(j+1))[0].textContent;                             // former code
             var command_json = $("#commandid"+(j+1)+" div")[0].innerText;
             var command = JSON.parse(command_json);
 
