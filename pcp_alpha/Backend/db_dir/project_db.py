@@ -105,6 +105,20 @@ _TEST_COMMANDS = [
         ],
         "OptionalInputs": []
     },
+    {
+        "CommandName": "terminal_input",
+        "Tooltip": "Special!",
+        "Output": True,
+        "Inputs": [
+            {
+                "Name": "Command",
+                "Type": "textbox",
+                "Tooltip": "This string will be echoed back",
+                "Value": ""
+            },
+        ],
+        "OptionalInputs": []
+    },
 ]
 
 

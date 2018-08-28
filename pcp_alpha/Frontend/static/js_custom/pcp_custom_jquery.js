@@ -12,6 +12,7 @@ var sequence_starttime_map = {"1":  Math.floor((new Date().valueOf())/1000).toSt
 var id_map = {};
 var id_status_map = {};
 var id_reverse_map = {};
+var id_replication_map = {};
 var current_plugin_commands = [];
 var ws_map = {};
 var active_sequence = "1";
@@ -25,6 +26,20 @@ var w3_highlighted_row,
     start_timer_map = {};
 
 $(document).ready(function() {
+
+    $("#terminal-save").click(onclick_terminal_submit);
+    $("#terminal-cmd").keyup(function(e){
+        if(e.keyCode == 13) {
+            onclick_terminal_submit();
+        }
+    });
+    $(".terminal_opener_sc").click(function(event){
+        var row_id = get_number_from_id(this.id, "open_terminal_id");
+        var target_js = $("#nameidjson"+row_id);
+        console.warn(target_js.text());
+    });
+    $('#terminal-modal').on('show.bs.modal', terminal_opener);
+    $("#terminal-modal").on("shown.bs.modal", terminal_opened);
     job_select_table = $('#job_table').DataTable({
 	    searching: false,
 	    paging: false,
@@ -1368,7 +1383,24 @@ function render_job_output_to_page(job_guid, data){
         .append($("<span/>")
             .attr({"class": "label label-Done"})
             .text("Done"));
+    if (id_replication_map.hasOwnProperty(updateid)){
+        render_job_output_to_secondary(id_replication_map[updateid], data);
+    }
 }
+
+function render_job_output_to_secondary(secondary_id, data)
+{
+    console.log(data);
+    var replica = $("#"+secondary_id);
+    replica.empty();
+    replica
+        .append(
+            $("<pre>")
+                .attr({"class": "terminal-window"})
+                .text(data['Content'])
+        )
+}
+
 
 function render_job_output_timeout(job_guid){
     var updateid = id_reverse_map[job_guid];
@@ -1444,3 +1476,99 @@ function execute_sequence_output(specific_id, counter=0, backoff=2000){
     })
 }
 
+
+function onclick_terminal_submit(event){
+    var terminal_cmd = $("#terminal-cmd");
+    var cmd_string = terminal_cmd.val();
+    if (cmd_string.length > 0){
+        var target_js = $("#terminal-active-target-str").val();
+        var ti_command = {
+            "CommandName":"terminal_input",
+            "Tooltip": "",
+            "Output": true,
+            "Inputs": [{
+                "Name": "command",
+                "Type": "textbox",
+                "Tooltip": "",
+                "Value": cmd_string
+            }]
+        };
+        current_command_template = ti_command;
+        //put the target+command in w3 to make a job
+        quick_action_function(target_js, "pluginid", "target");
+        add_command_to_job_sc_button();
+        var current_id = $("#addjob_button")[0].value;
+        var secondary_output_domid = "specialupdateid"+current_id;
+        id_replication_map[current_id] = secondary_output_domid;
+        var console_io = make_one_terminal_command(secondary_output_domid, cmd_string);
+        var output_list = $("#terminal-active-history");
+        output_list.append(console_io);
+        terminal_cmd.val("");
+        var container = document.getElementById('terminal-cmd-list');
+        var scrollTo = document.getElementById('terminal-cmd-bottom');
+        container.scrollTop = scrollTo.offsetTop;
+        execute_sequence();
+    }
+}
+function make_one_terminal_command(secondary_output_domid, cmd_string, out_string="..."){
+    return $("<li/>")
+            .append($("<ul/>")
+                .attr({"class":"terminal-contents"})
+                .append($("<li/>")
+                    .text(cmd_string)
+                )
+                .append($("<li/>")
+                    .attr({"id": secondary_output_domid})
+                    .append($("<pre/>")
+                        .attr({"class":"terminal-window"})
+                        .text(out_string)
+                    )
+                )
+            )
+}
+
+function terminal_opener(event) {
+    var button = $(event.relatedTarget); // Button that triggered the modal
+    var terminal_data = button.data('terminaldata'); // Extract info from data-* attributes
+    var history = $("#terminal-active-history");
+    history.empty();
+    var modal = $(this);
+    $("#terminal-active-target-str").val(JSON.stringify(terminal_data.target));
+    $("#terminal-modal-target").text(terminal_data.target.Location);
+    $("#terminal-modal-plugin").text(terminal_data.target.PluginName);
+    $("#terminal-modal-port").text(terminal_data.target.Port);
+    var visible_commands = $("#third_box_content tr:visible");
+    var visible_ouput = $("#W4Rows tr:visible");
+    for (var i=0; i<visible_commands.length; i++){
+        var command_td = $(visible_commands[i]).find("td")[3];
+        var target_cells = $(visible_commands[i]).find("td span");
+        var target = null;
+        if (target_cells.length > 2){
+            target = JSON.parse(target_cells[1].innerText);
+        }
+        var command_js = JSON.parse(command_td.children[0].innerText);
+        if (target !== null
+            && target.PluginName == terminal_data.target.PluginName
+            && target.Port == terminal_data.target.Port
+            && target.Location == terminal_data.target.Location
+            && command_js.CommandName == "terminal_input"){
+            var out_str = " ... ";
+            var shortid = command_td.id.substring(9,command_td.id.length);
+            var update_content = $("#updateid"+shortid+" pre");
+            if (update_content.length > 0){
+                out_str = update_content[0].innerText;
+            }
+            var console_io = make_one_terminal_command("specialupdateid"+shortid, command_js.Inputs[0].Value, out_str);
+            var output_list = $("#terminal-active-history");
+            output_list.append(console_io);
+        }
+    }
+}
+
+function terminal_opened(event){
+    $("#terminal-cmd").focus();
+}
+
+function get_number_from_id(id_str, pretext){
+    return id_str.substring(pretext.length, id_str.length);
+}
