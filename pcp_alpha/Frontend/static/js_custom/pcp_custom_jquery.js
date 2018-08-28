@@ -184,7 +184,7 @@ function ws_pong() {
 
 function start_ping_pong(){
     test_ws.onopen = function () {
-        setInterval(ws_ping, 10000);
+        setInterval(ws_ping, 20000);
     };
 
     test_ws.onmessage = function (evt) {
