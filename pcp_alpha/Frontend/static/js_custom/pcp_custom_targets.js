@@ -6,9 +6,9 @@ $(document).ready(function() {
 
     // populate_file_listing();
 
-    $("#fg_name_help").hide();
-    $("#plugin_name").change(verify_name);
-    $("#plugin_name").keyup(verify_name);
+    $("#fg_service_name_help").hide();
+    $("#service_name").change(verify_name);
+    $("#service_name").keyup(verify_name);
 
     $("#fg_location_help").hide();
     $("#location_num").change(verify_location);
@@ -63,11 +63,11 @@ function verify_port(){
 }
 
 function verify_name(){
-    var plugin_name = $("#plugin_name"),
-        content = plugin_name[0].value,
+    var service_name = $("#service_name"),
+        content = service_name[0].value,
         helper_checker = 0;
-    for(var counter = 1; counter < plugin_name[0].length; counter++){
-        var plugin_name_option = $("#plugin_name option#"+counter);
+    for(var counter = 1; counter < service_name[0].length; counter++){
+        var plugin_name_option = $("#service_name option#"+counter);
         if(plugin_name_option[0].selected === true) {
             $("#add_target_submit")[0].disabled = false;
             helper_checker = 1;
@@ -77,11 +77,11 @@ function verify_name(){
         }
     }
     if(helper_checker === 1) {
-        $("#fg_name").removeClass("has-error");
-        $("#fg_name_help").hide();
+        $("#fg_service_name").removeClass("has-error");
+        $("#fg_service_name_help").hide();
     } else {
-        $("#fg_name").addClass("has-error");
-        $("#fg_name_help").show();
+        $("#fg_service_name").addClass("has-error");
+        $("#fg_service_name_help").show();
     }
     return ! $("#add_target_submit")[0].disabled;
 }
@@ -102,10 +102,27 @@ function verify_location(){
 }
 
 function verify_all(){
-    if (!verify_name() || !verify_location() || !verify_name() || !verify_optional()){
+    if (!verify_name() || !verify_location() || !verify_port() || !verify_optional()){
         $("#add_target_submit")[0].disabled = true;
     } else {
         $("#add_target_submit")[0].disabled = false;
     }
     return ! $("#add_target_submit")[0].disabled
+}
+
+function update_target_form(){
+    var str_target = $("#service_name")[0].value;
+    var double_quotes_str = str_target.replace(/'/g, '"');
+    JSON.stringify(double_quotes_str);
+    var json_object = JSON.parse(double_quotes_str);
+    $("#plugin_name")[0].innerHTML = json_object['Name'];
+    $("#plugin_name")[0].innerText = json_object['Name'];
+    $("#plugin_name")[0].value = json_object['Name'];
+
+    var target_json_port = json_object['ExternalPorts'][0];
+    var target_port = target_json_port.split("/")[0];
+
+    $("#port_num")[0].innerHTML = target_port;
+    $("#port_num")[0].innerText = target_port;
+    $("#port_num")[0].value = target_port;
 }

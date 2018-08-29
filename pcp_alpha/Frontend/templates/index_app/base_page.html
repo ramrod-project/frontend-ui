@@ -7,6 +7,8 @@
     {% load static %}
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+
+    <link rel="stylesheet" href="{% static 'css_custom/pcp_custom_css.css' %}">
     <link rel="stylesheet" href="{% static 'AdminLTE/bower_components/bootstrap/dist/css/bootstrap.css' %}">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="{% static 'AdminLTE/bower_components/font-awesome/css/font-awesome.min.css' %}">
@@ -20,7 +22,6 @@
     <link rel="stylesheet" href="{% static 'AdminLTE/dist/css/skins/skin-blue.min.css' %}">
     <link rel="stylesheet" href="{% static 'Select/css/select.dataTables.css' %}">
     <link rel="stylesheet" href="{% static 'DataTables/datatables.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css_custom/pcp_custom_css.css' %}">
     <link rel="stylesheet" href="{% static 'external_jquery/jquery-ui.css' %}">
     <link rel="stylesheet" href="{% static 'css_custom/datetime-picker.css' %}">
 
@@ -207,7 +208,7 @@ desired effect
                 </ul>
                 <!-- /Left box TABS HERE -->
                 <div id="w1_command_active_filter" class="alert alert-info" ></div>
-                <form action="/action/get_command_list/" method="get">
+                <form action="/action/get_command_list/" method="get" onsubmit="return false;">
                 <div class="tab-content">
                   <div class="box box-primary">
                     <!--box body-->
@@ -262,10 +263,23 @@ desired effect
                                                     </td>
                                                     <td id="action_tad_id{{ forloop.counter0 }}" style="text-align: center; width: 80px;" class="clickable-row-col3" onclick="#">
                                                         <span id="edit_target_id">
-                                                            <a href="/edit_target_form/{{ items.id }}/" target="_blank" class="btn btn-social-icon btn-bitbucket btn-xs" data-toggle="tooltip" title="Edit Target"><i class="fa fa-edit"></i></a>
+                                                            <a href="/edit_target_form/{{ items.id }}/" target="_blank" class="btn btn-social-icon btn-bitbucket btn-xs" data-toggle="tooltip" title="Edit Target">
+                                                                <i class="fa fa-edit"></i>
+                                                            </a>
                                                         </span>
                                                         <span id="add_job_sc_id_attr">
-                                                            <a href="#" id="add_job_sc_id{{ forloop.counter0 }}" class="btn btn-social-icon btn-linkedin btn-xs" data-toggle="tooltip" title="Add Target to W3"><i class="fa fa-tasks"></i></a>
+                                                            <a href="#" id="add_job_sc_id{{ forloop.counter0 }}" class="btn btn-social-icon btn-linkedin btn-xs" data-toggle="tooltip" title="Add Target to W3">
+                                                                <i class="fa fa-tasks"></i>
+                                                            </a>
+                                                        </span>
+                                                        <span>
+                                                            <button id="open_terminal_id{{ forloop.counter0 }}"
+                                                                    class="btn btn-social-icon btn-twitter btn-xs terminal_opener_sc fa fa-laptop"
+                                                                    title="Open Terminal to this Target (May require prior initialization)"
+                                                                    data-toggle="modal"
+                                                                    data-target="#terminal-modal"
+                                                                    data-terminaldata='{"target":{{ items.json }}, "sequence":"_C_2_2"}'>
+                                                            </button>
                                                         </span>
                                                     </td>
                                                 </tr>
@@ -454,7 +468,10 @@ desired effect
                 <!-- /W4 Tabs -->
                 <!--Content-->
                 <div class="box box-primary">
+
                     <div class="box-body">
+                        <input type="checkbox" name="truncate_ouput" value="1024" id="truncate_output_to" checked>
+                        <label for="truncate_output_to">Truncate output</label>
                         <div id="outq_content" class="tab-content">
                             <div id="outq_1" class="tab-pane active"> </div>
 
@@ -498,7 +515,7 @@ desired effect
   <footer class="main-footer">
     <!-- To the right -->
     <div class="pull-right hidden-xs">
-        <strong>Version 1.0.5</strong>
+        <strong>Version 1.0.7</strong>
     </div>
     <!-- Default to the left -->
     <strong>Demo Version for the <a id="nooo_id" href="#">PCP Project</a></strong> :)
@@ -556,17 +573,33 @@ desired effect
       </div>
       <!-- /.tab-pane -->
       <!-- Stats tab content -->
-{#        <span id="plugin_list_refresh" class="text-aqua fa fa-refresh"></span>#}
+        <!--<span id="plugin_list_refresh" class="text-aqua fa fa-refresh"></span>-->
       <div class="tab-pane" id="control-sidebar-stats-tab">Stats Tab Content</div>
       <div class="tab-pane" id="control-sidebar-settings-tab">
           <button id="add_plugin_id" type="button" class="btn btn-block btn-info">Add Plugin</button>
-{#          Notification Here#}
+          <!--Notification Here-->
           <h3 class="control-sidebar-heading">
               <span id="plugin_list_refresh" class="text-aqua fa fa-refresh"></span>&nbsp;
               <span class="badge bg-green" id="plugins_need_refreshed">
                 Plugin list changed, refresh
             </span>
-              Plugin List
+              Plugin List<br>
+              <br>&nbsp;
+                  <span>
+                      <a id="activate_plugin_button" class="btn btn-social-icon btn-pcp_button_color1 btn-xs" onclick="desired_plugin_state('activate')" data-toggle="tooltip" title="Activate Plugin">
+                          <i class="fa fa-thumbs-o-up"></i>
+                      </a>
+                  </span>&nbsp;
+                  <span>
+                      <a id="restart_plugin_button" class="btn btn-social-icon btn-pcp_button_color2 btn-xs" onclick="desired_plugin_state('restart')" data-toggle="tooltip" title="Restart Plugin">
+                          <i class="fa fa-refresh"></i>
+                      </a>
+                  </span>&nbsp;
+                  <span>
+                      <a id="stop_plugin_button" class="btn btn-social-icon btn-google btn-xs" onclick="desired_plugin_state('stop')" data-toggle="tooltip" title="Stop Plugin">
+                          <i class="fa fa-hand-stop-o"></i>
+                      </a>
+                  </span>
           </h3>
           <ul class="control-sidebar-menu plugin_list_display">
           </ul>
@@ -584,6 +617,50 @@ desired effect
     <source src="{% static 'media_test/nooo.mp3' %}" type="audio/mpeg">
   Your browser does not support the audio element.
 </audio>
+
+
+<div class="modal modal-info bs-example-modal-lg fade" id="terminal-modal" tabindex="-1" role="dialog" aria-labelledby="terminal-modal-label">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="terminal-modal-label">Terminal for
+            <span id="terminal-modal-target"></span> using
+            <span id="terminal-modal-plugin"></span>:<span id="terminal-modal-port"></span>
+        </h4>
+      </div>
+      <div class="modal-body">
+          <input type="text" style="display: none"  disabled id="terminal-active-target-str">
+          <div id="terminal-cmd-list" class="terminal-window">
+            <ol id="terminal-active-history" class="terminal-contents">
+                <li>
+                    <ul>
+                        <li>
+                            Input
+                        </li>
+                        <li id="terminal-output-1">
+                            --output--
+                        </li>
+                    </ul>
+                </li>
+            </ol>
+              <a id="terminal-cmd-bottom" />
+          </div>
+          <div id="terminal_cmdname" class="form-group plugin-name">
+              <label for="terminal-cmd" class="control-label">Console Command:</label>
+                <input size="64" type="text" class="form-control terminal-window" id="terminal-cmd" placeholder="$" />
+          </div>
+      </div>
+      <div class="modal-footer">
+        <div class="ui-widget-shadow" id="terminal-response"></div>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="terminal-save">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <div class="modal fade" id="controller-modal" tabindex="-1" role="dialog" aria-labelledby="controller-modal-label">
   <div class="modal-dialog" role="document">
     <div class="modal-content">

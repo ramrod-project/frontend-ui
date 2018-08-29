@@ -2,6 +2,7 @@ from django import forms
 from brain.checks import verify as brain_verify
 from brain.brain_pb2 import Plugin
 
+
 class TargetForm(forms.Form):
     """
     TargetForm class is the template to add a new target as a form.

@@ -85,7 +85,7 @@ def execute_sequence_controller(request):
                         content_type="application/json")
 
 
-def _w4_get_content(job_id):
+def _w4_get_content(job_id, max_size, convert=False):
     """
     Checking on specific data
     :param job_id: user request
@@ -101,8 +101,10 @@ def _w4_get_content(job_id):
     else:
         result = {
             'status': '200',
-            "Content": get_brain_output_content(job_id)
+            "Content": get_brain_output_content(job_id, max_size)
         }
+    if convert and result['Content']:
+        result['Content'].replace("\n", "\r\n")
     return result
 
 
@@ -113,9 +115,14 @@ def w4_output_controller(request):
     :return: job content
     """
     response = None
+    user_agent = user_agent_parser.ParseOS(request.META.get("HTTP_USER_AGENT"))
+    convert = False
+    if "windows" in user_agent.get("family").lower():
+        convert = True
     if request.method == 'GET':
         controller_job_id = request.GET.get('job_id')
-        result = _w4_get_content(controller_job_id)
+        truncate_to = int(request.GET.get("truncate", 0))
+        result = _w4_get_content(controller_job_id, truncate_to, convert)
         response = HttpResponse(json.dumps(result),
                                 content_type='application/json')
         response.status_code = int(result['status'])
@@ -408,10 +415,10 @@ def desired_plugin_state_controller(request):
     :return:
     """
     if request.method == 'GET':
-        plugin_id = request.GET.get('plugin_id')
         desired_state = request.GET.get('desired_state')
+        plugin_id_list = request.GET.get('plugin_id_list')
         response = HttpResponse(json.dumps(desired_plugin_state_brain(
-            plugin_id, desired_state)),
+            plugin_id_list.split(','), desired_state)),
             content_type='application/json')
         response.status_code = 200
         return response

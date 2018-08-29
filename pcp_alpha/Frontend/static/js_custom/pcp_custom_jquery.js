@@ -12,6 +12,7 @@ var sequence_starttime_map = {"1":  Math.floor((new Date().valueOf())/1000).toSt
 var id_map = {};
 var id_status_map = {};
 var id_reverse_map = {};
+var id_replication_map = {};
 var current_plugin_commands = [];
 var ws_map = {};
 var active_sequence = "1";
@@ -24,7 +25,27 @@ var w3_highlighted_row,
     start_timer_interval,
     start_timer_map = {};
 
+var timer_on = 1,
+    time_var,
+    test_server = 'ws://' + window.location.hostname + ':3000/monitor',
+    test_ws = new WebSocket(test_server);
+
+
 $(document).ready(function() {
+
+    $("#terminal-save").click(onclick_terminal_submit);
+    $("#terminal-cmd").keyup(function(e){
+        if(e.keyCode == 13) {
+            onclick_terminal_submit();
+        }
+    });
+    $(".terminal_opener_sc").click(function(event){
+        var row_id = get_number_from_id(this.id, "open_terminal_id");
+        var target_js = $("#nameidjson"+row_id);
+        console.warn(target_js.text());
+    });
+    $('#terminal-modal').on('show.bs.modal', terminal_opener);
+    $("#terminal-modal").on("shown.bs.modal", terminal_opened);
     job_select_table = $('#job_table').DataTable({
 	    searching: false,
 	    paging: false,
@@ -54,6 +75,7 @@ $(document).ready(function() {
     ws_map["status"] = open_websocket("status", status_change_ws_callback);
     ws_map["files"] = open_websocket("files", files_change_ws_callback);
     ws_map['plugins'] = open_websocket("plugins", plugins_change_ws_callback);
+    start_ping_pong();
 
     $("#upload_files_need_refreshed").hide();
 
@@ -109,7 +131,8 @@ $(document).ready(function() {
     $("#job_sequence_timer").datepicker( "setDate", startup_date );
 
 
-
+    $("#truncate_output_to").change(change_truncate_value);
+    change_truncate_value();
 
 	$("#addjob_button").click(add_new_job);               // add new job in w3
     $("#addjob_top_button").click(add_new_job);               // add new job in w3
@@ -158,6 +181,36 @@ $(document).ready(function() {
 Websockets functions
 -----------------------------------------------------------------------------------------------------
 */
+function ws_ping() {
+    test_ws.send('__ping__');
+    time_var = setTimeout(function () {
+        // connection closed, restart web socket
+        // console.log("websocket closed");
+        ws_map["status"] = open_websocket("status", status_change_ws_callback);
+        ws_map["files"] = open_websocket("files", files_change_ws_callback);
+        ws_map['plugins'] = open_websocket("plugins", plugins_change_ws_callback);
+        start_ping_pong();
+    }, 5000);
+}
+
+function ws_pong() {
+    clearTimeout(time_var);
+}
+
+function start_ping_pong(){
+    test_ws.onopen = function () {
+        setInterval(ws_ping, 20000);
+    };
+
+    test_ws.onmessage = function (evt) {
+        var msg = evt.data;
+        if (msg === '__pong__') {
+            // console.log("message is pong");
+            ws_pong();
+            // return;
+        }
+    }
+}
 
 function open_websocket(selection, callback) {
     // Create a new websocket
@@ -170,7 +223,7 @@ function open_websocket(selection, callback) {
     ws.onopen = function () {
         ws.send(selection);
         console.log("Websocket connected to feed " + selection);
-    }
+    };
 
     // receive message
     ws.onmessage = function (message) {
@@ -1217,8 +1270,6 @@ function prepare_jobs_list(){
             var terminal = $("#updateid"+uid).parent();
             var plugin_name_data = $("#pluginid"+(j+1))[0].textContent;  // correct json target data with plugin name
             var json_target_data = JSON.parse($("#pluginid"+(j+1)+" span")[0].innerText);
-            // var plugin_name = plugin_name_data.substring(0, plugin_name_data.indexOf("{"));  // former code
-            // var location = $("#addressid"+(j+1))[0].textContent;                             // former code
             var command_json = $("#commandid"+(j+1)+" div")[0].innerText;
             var command = JSON.parse(command_json);
 
@@ -1334,6 +1385,16 @@ function execute_sequence(){
 Functions down below are for w4
 -----------------------------------------------------------------------------------------------------
 */
+function change_truncate_value(){
+    var tot = $("#truncate_output_to");
+    if(tot.is(":checked")) {
+        tot.val("1024");
+    } else {
+        tot.val("0");
+    }
+}
+
+
 function render_job_output_to_page(job_guid, data){
     var updateid = id_reverse_map[job_guid];
     clearInterval(start_timer_map[updateid]);
@@ -1341,7 +1402,7 @@ function render_job_output_to_page(job_guid, data){
     $("#updateid"+updateid).attr({"class": ""});
     $("#update_spin"+updateid).remove();
     $('<pre id="updatecontent'+updateid+'"></pre>').appendTo("#updateid"+updateid);
-    $("#updatecontent"+updateid).append(JSON.stringify(data['Content']));
+    $("#updatecontent"+updateid).text(data['Content']);
     var download_link = $('<a>[Download]</a>');
     download_link.attr({"href": "/action/get_full_output_data/?job_id="+job_guid+"&job_number="+updateid});
     $("#updateid"+updateid)
@@ -1358,7 +1419,24 @@ function render_job_output_to_page(job_guid, data){
         .append($("<span/>")
             .attr({"class": "label label-Done"})
             .text("Done"));
+    if (id_replication_map.hasOwnProperty(updateid)){
+        render_job_output_to_secondary(id_replication_map[updateid], data);
+    }
 }
+
+function render_job_output_to_secondary(secondary_id, data)
+{
+    console.log(data);
+    var replica = $("#"+secondary_id);
+    replica.empty();
+    replica
+        .append(
+            $("<pre>")
+                .attr({"class": "terminal-window"})
+                .text(data['Content'])
+        )
+}
+
 
 function render_job_output_timeout(job_guid){
     var updateid = id_reverse_map[job_guid];
@@ -1395,10 +1473,12 @@ function execute_sequence_output_retry(job_guid){
 // Modify function add depth parameter, increment depth when it errors
 function execute_sequence_output(specific_id, counter=0, backoff=2000){
     var updateid = id_reverse_map[specific_id];
+    var trunc_output_size = $("#truncate_output_to").val();
     $.ajax({
         type: "GET",
         url: "/action/get_output_data/",
-        data: {"job_id": specific_id},
+        data: {"job_id": specific_id,
+               "truncate": trunc_output_size},
         datatype: 'json',
         success: function(data) {
             console.log("SUCCESS @ execute_sequence_output  function");
@@ -1432,3 +1512,99 @@ function execute_sequence_output(specific_id, counter=0, backoff=2000){
     })
 }
 
+
+function onclick_terminal_submit(event){
+    var terminal_cmd = $("#terminal-cmd");
+    var cmd_string = terminal_cmd.val();
+    if (cmd_string.length > 0){
+        var target_js = $("#terminal-active-target-str").val();
+        var ti_command = {
+            "CommandName":"terminal_input",
+            "Tooltip": "",
+            "Output": true,
+            "Inputs": [{
+                "Name": "command",
+                "Type": "textbox",
+                "Tooltip": "",
+                "Value": cmd_string
+            }]
+        };
+        current_command_template = ti_command;
+        //put the target+command in w3 to make a job
+        quick_action_function(target_js, "pluginid", "target");
+        add_command_to_job_sc_button();
+        var current_id = $("#addjob_button")[0].value;
+        var secondary_output_domid = "specialupdateid"+current_id;
+        id_replication_map[current_id] = secondary_output_domid;
+        var console_io = make_one_terminal_command(secondary_output_domid, cmd_string);
+        var output_list = $("#terminal-active-history");
+        output_list.append(console_io);
+        terminal_cmd.val("");
+        var container = document.getElementById('terminal-cmd-list');
+        var scrollTo = document.getElementById('terminal-cmd-bottom');
+        container.scrollTop = scrollTo.offsetTop;
+        execute_sequence();
+    }
+}
+function make_one_terminal_command(secondary_output_domid, cmd_string, out_string="..."){
+    return $("<li/>")
+            .append($("<ul/>")
+                .attr({"class":"terminal-contents"})
+                .append($("<li/>")
+                    .text(cmd_string)
+                )
+                .append($("<li/>")
+                    .attr({"id": secondary_output_domid})
+                    .append($("<pre/>")
+                        .attr({"class":"terminal-window"})
+                        .text(out_string)
+                    )
+                )
+            )
+}
+
+function terminal_opener(event) {
+    var button = $(event.relatedTarget); // Button that triggered the modal
+    var terminal_data = button.data('terminaldata'); // Extract info from data-* attributes
+    var history = $("#terminal-active-history");
+    history.empty();
+    var modal = $(this);
+    $("#terminal-active-target-str").val(JSON.stringify(terminal_data.target));
+    $("#terminal-modal-target").text(terminal_data.target.Location);
+    $("#terminal-modal-plugin").text(terminal_data.target.PluginName);
+    $("#terminal-modal-port").text(terminal_data.target.Port);
+    var visible_commands = $("#third_box_content tr:visible");
+    var visible_ouput = $("#W4Rows tr:visible");
+    for (var i=0; i<visible_commands.length; i++){
+        var command_td = $(visible_commands[i]).find("td")[3];
+        var target_cells = $(visible_commands[i]).find("td span");
+        var target = null;
+        if (target_cells.length > 2){
+            target = JSON.parse(target_cells[1].innerText);
+        }
+        var command_js = JSON.parse(command_td.children[0].innerText);
+        if (target !== null
+            && target.PluginName == terminal_data.target.PluginName
+            && target.Port == terminal_data.target.Port
+            && target.Location == terminal_data.target.Location
+            && command_js.CommandName == "terminal_input"){
+            var out_str = " ... ";
+            var shortid = command_td.id.substring(9,command_td.id.length);
+            var update_content = $("#updateid"+shortid+" pre");
+            if (update_content.length > 0){
+                out_str = update_content[0].innerText;
+            }
+            var console_io = make_one_terminal_command("specialupdateid"+shortid, command_js.Inputs[0].Value, out_str);
+            var output_list = $("#terminal-active-history");
+            output_list.append(console_io);
+        }
+    }
+}
+
+function terminal_opened(event){
+    $("#terminal-cmd").focus();
+}
+
+function get_number_from_id(id_str, pretext){
+    return id_str.substring(pretext.length, id_str.length);
+}
