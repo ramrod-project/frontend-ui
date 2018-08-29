@@ -132,6 +132,7 @@ $(document).ready(function() {
 
 
     $("#truncate_output_to").change(change_truncate_value);
+    change_truncate_value();
 
 	$("#addjob_button").click(add_new_job);               // add new job in w3
     $("#addjob_top_button").click(add_new_job);               // add new job in w3
