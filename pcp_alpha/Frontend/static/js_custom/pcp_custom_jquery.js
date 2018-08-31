@@ -549,8 +549,8 @@ function update_argument(event){
     var cmditem = get_number_from_id(source.id, "argumentid_");
     var assumed_input = "Inputs";
     if (Number(cmditem) >= current_command_template[assumed_input].length){
-        assumed_input = "OptionalInputs";
         cmditem = cmditem - current_command_template[assumed_input].length;
+        assumed_input = "OptionalInputs";
     }
     console.warn("updating commdn item "+ cmditem);
     current_command_template[assumed_input][cmditem]["Value"] = source.value;
