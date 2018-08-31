@@ -6,6 +6,7 @@ and validating information in the Brain.
 import sys
 from brain import connect, r as rtdb
 from brain import check_dev_env, check_prod_env
+from . import plugins
 
 from .custom_data import (
     location_generated_num,
@@ -104,7 +105,36 @@ _TEST_COMMANDS = [
         ],
         "OptionalInputs": []
     },
+    {
+        "CommandName": "terminal_input",
+        "Tooltip": "Special!",
+        "Output": True,
+        "Inputs": [
+            {
+                "Name": "Command",
+                "Type": "textbox",
+                "Tooltip": "This string will be echoed back",
+                "Value": ""
+            },
+        ],
+        "OptionalInputs": []
+    },
 ]
+
+
+TEST_PORT_DATA = {
+    "InterfaceName": "eth0",
+    "Interface": "192.16.5.240",
+    "TCPPorts": ["9999", "4243"],
+    "UDPPorts": []
+}
+
+TEST_PORT_DATA2 = {
+    "InterfaceName": "eth0",
+    "Interface": "10.10.10.10",
+    "TCPPorts": [],
+    "UDPPorts": ["4242"]
+}
 
 
 def table_clear(database, table):
@@ -129,6 +159,7 @@ def table_clear(database, table):
     except rtdb.ReqlError as err:
         err = sys.exc_info()[0]
         print("EXCEPT == {}".format(err))
+
 
 def tables_create(database, tables):
     """Create a list of tables in the database
@@ -173,8 +204,7 @@ def tables_check(database, tables):
     for i, table_name in enumerate(tables):
         # {database}.{table_name} does exist
         if rtdb.db(database).table_list().contains(
-                table_name
-            ).run(db_con_var):
+                table_name).run(db_con_var):
             print("\nlog: db {}.{} table exist locally"
                   .format(database, table_name))
             table_clear(database, table_name)
@@ -194,7 +224,7 @@ def confirm_brain_db_info():
     be created only locally.
     :return: nothing at the moment
     """
-    if not check_dev_env(): # Check for Development Environment
+    if not check_dev_env():  # Check for Development Environment
         return
     db_con_var = connect()
     if rtdb.db_list().contains("Brain").run(db_con_var) is not True:
@@ -250,13 +280,21 @@ def confirm_plugin_db_info():
         rtdb.db("Plugins").table("Plugin1").insert(
             _TEST_COMMANDS
         ).run(db_con_var)
+        rtdb.db("Controller").table("Plugins").delete().run(db_con_var)
+        rtdb.db("Controller").table("Plugins")\
+            .insert(plugins).run(db_con_var)
+        rtdb.db("Controller").table("Ports").delete().run(db_con_var)
+        rtdb.db("Controller").table("Ports") \
+            .insert([TEST_PORT_DATA,
+                     TEST_PORT_DATA2]).run(db_con_var)
+
         print("log: db Dummy data was inserted to Plugins.Plugin1 locally\n")
 
 
 def confirm_db_info():
-    """Runs all the db confirm functions
     """
-
+    Runs all the db confirm functions
+    """
     print("\nlog: ###### DB Logs ######")
     connect()
     confirm_brain_db_info()

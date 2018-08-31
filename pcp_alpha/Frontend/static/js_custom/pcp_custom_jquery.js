@@ -4,7 +4,7 @@ This file was created for project pcp to add jquery functionality and other java
 -----------------------------------------------------------------------------------------------------
 */
 var MAX_MANUAL_CHECK_COUNT = 30;
-var INITIAL_JOB_STATUS = "Ready";
+var INITIAL_JOB_STATUS = "Waiting";
 var inc = 0;
 var hover_int = 0;
 var sequences = {"1": new Set()};
@@ -12,16 +12,45 @@ var sequence_starttime_map = {"1":  Math.floor((new Date().valueOf())/1000).toSt
 var id_map = {};
 var id_status_map = {};
 var id_reverse_map = {};
+var id_replication_map = {};
+var current_plugin_commands = [];
 var ws_map = {};
 var active_sequence = "1";
 var exec_int = 0;
+var job_select_table;
+var w3_highlighted_row,
+    w3_highlighted_array,
+    w3_content_index,
+    w3_highlighted_array = [],
+    start_timer_interval,
+    start_timer_map = {};
+
+var timer_on = 1,
+    time_var,
+    test_server = 'ws://' + window.location.hostname + ':3000/monitor',
+    test_ws = new WebSocket(test_server);
+
 
 $(document).ready(function() {
-    var job_select_table = $('#job_table').DataTable({
+
+    $("#terminal-save").click(onclick_terminal_submit);
+    $("#terminal-cmd").keyup(function(e){
+        if(e.keyCode == 13) {
+            onclick_terminal_submit();
+        }
+    });
+    $(".terminal_opener_sc").click(function(event){
+        var row_id = get_number_from_id(this.id, "open_terminal_id");
+        var target_js = $("#nameidjson"+row_id);
+        console.warn(target_js.text());
+    });
+    $('#terminal-modal').on('show.bs.modal', terminal_opener);
+    $("#terminal-modal").on("shown.bs.modal", terminal_opened);
+    job_select_table = $('#job_table').DataTable({
 	    searching: false,
 	    paging: false,
 	    bInfo: false,
-        rowReorder: true,
+        ordering: false,
         select: true
     });
     // $(".dataTables_empty").empty();
@@ -29,14 +58,28 @@ $(document).ready(function() {
     $('#job_table tbody').on( 'click', 'tr', function () {
         if ($(this).hasClass('selected')) {
             $(this).removeClass('selected');
+            w3_content_index = w3_highlighted_array.indexOf($(this)[0].rowIndex);
+            if (w3_content_index > -1){
+                w3_highlighted_array.splice(w3_content_index, 1);
+            }
+
         }
         else {
             job_select_table.$("tr.selected").removeClass('selected');
             $(this).addClass('selected');
+            w3_highlighted_row = $(this)[0].rowIndex;
+            w3_highlighted_array.push(w3_highlighted_row);
         }
     });
 
     ws_map["status"] = open_websocket("status", status_change_ws_callback);
+    ws_map["files"] = open_websocket("files", files_change_ws_callback);
+    ws_map['plugins'] = open_websocket("plugins", plugins_change_ws_callback);
+    start_ping_pong();
+
+    $("#upload_files_need_refreshed").hide();
+
+
     clear_new_jobs();
     synchronize_job_sequence_tabs(active_sequence);
 	$("tr td.clickable-row-col1").click(get_commands_func);   // displays commands in w2
@@ -66,44 +109,30 @@ $(document).ready(function() {
     });
 
     // Date Time picker
-    var date_str,
-        time_str,
-        date_time_readable;
-    $("#job_sequence_timer").datetimepicker({dateFormat:"@",
+    $("#job_sequence_timer").datetimepicker({
                                              minDate: new Date(),
                                              onClose: function(dateText, inst) {
-                                                    date_str = String(inst.selectedMonth) + "-" + String(inst.selectedDay) + "-" + String(inst.selectedYear);
-                                                    time_str = inst.settings.timepicker.formattedTime;
-                                                    date_time_readable = date_str + ":" + time_str; // ui readable
-
-                                                    $("#job_sequence_timer")[0].value = date_time_readable;
-                                                    $("#job_sequence_timer")[0].title = dateText;
-                                                    sequence_starttime_map[active_sequence] = dateText;
+                                                 var date_split = dateText.split(" ");
+                                                 var mdy = date_split[0].split("/");
+                                                 var hm = date_split[1].split(":");
+                                                 var dt_obj = new Date(Number(mdy[2]),
+                                                                       Number(mdy[0])-1,
+                                                                       mdy[1],
+                                                                       hm[0],
+                                                                       hm[1], 0, 0);
+                                                 var py_dt = Math.floor(dt_obj.getTime()/1000).toString();
+                                                 $("#job_sequence_time_unix")[0].value = py_dt;
+                                                 sequence_starttime_map[active_sequence] = py_dt;
                                              },
                                              onSelect: function (selectedDateTime){
-                                                var date_component = Number(selectedDateTime
-                                                    .substring(0,selectedDateTime.length-6))/1000;
-                                                var time_component = selectedDateTime
-                                                    .substring(selectedDateTime.length-5, selectedDateTime.length)
-                                                    .split(':');
-                                                var time_in_sec = Number(time_component[0])*60*60 + Number(time_component[1])*60;
-                                                var final_time = Number(date_component) + Number(time_in_sec);
-                                                $("#job_sequence_timer")[0].value = final_time.toString();
                                              }});
-    $("#job_sequence_timer").tooltip({
-                                  classes: {"ui-tooltip": "ui-corner-all ui-widget-shadow ui-state-error"},
-                                  items: 'span',
-                                   content: "Warning: Not yet supported, brain will support user-selected StartTime in Sprint 5",
-                                });
-
-    $("#searchCommand_id").tooltip({
-                              classes: {"ui-tooltip": "ui-corner-all ui-widget-shadow ui-state-error"},
-                              items: 'span',
-                               content: "Warning: Not yet supported, will be supported in Sprint 5",
-                            });
+    var startup_date = new Date();
+    $("#job_sequence_time_unix")[0].value = Math.floor(startup_date.getTime()/1000).toString();
+    $("#job_sequence_timer").datepicker( "setDate", startup_date );
 
 
-
+    $("#truncate_output_to").change(change_truncate_value);
+    change_truncate_value();
 
 	$("#addjob_button").click(add_new_job);               // add new job in w3
     $("#addjob_top_button").click(add_new_job);               // add new job in w3
@@ -111,10 +140,16 @@ $(document).ready(function() {
 	$("#execute_button").click(execute_sequence);         // execute sequence button in 23
     $("#w3_drop_to_all").attr({"ondrop": "drop_command_to_multiple(event)",
                                "ondragover": "allowDropCommand(event)"});
-    $("#dvader_nooo_id").click(easter_egg_one);           // dvader nooo audio
+    $("#nooo_id").click(easter_egg_one);           // nooo audio
     $("#searchNameHere_id").change(filter_w1);
     $("#searchNameHere_id").keyup(filter_w1);
     $("#w1_command_active_filter").css("display", "none");
+
+    $("#searchCommand_id")[0].value = "";
+    $("#searchCommand_id").change(filter_w2);
+    $("#searchCommand_id").keyup(filter_w2);
+    $("#w2_command_active_filter").css("display", "none");
+
     $("#new_jobq_button").click(add_sequence_tab);
     $("#clear_seq_buttonid").click(hide_current_sequence);
     $("#persist_button").click(save_job_state);
@@ -128,9 +163,9 @@ $(document).ready(function() {
                     if (($("#jobrow"+i).css("display") != "none") && job_row_is_mutable(i)) {
                         var row_id = selected_var[0].id;
                         var row_id_str = row_id.substring(10,row_id.length);
-                        var row_js = JSON.parse($("#nameidjson" + row_id_str)[0].innerText);
-                        $("#addressid"+i)[0].innerText = row_js.Location;
-                        $("#pluginid"+i)[0].innerText = row_js.PluginName;
+                        var row_js_str = $("#nameidjson" + row_id_str)[0].innerText;
+                        var row_js = JSON.parse(row_js_str);
+                        drop_target_into_job_row(i.toString(), row_js, row_js_str);
                     }
                 }
                 set_w3_job_status();
@@ -146,6 +181,36 @@ $(document).ready(function() {
 Websockets functions
 -----------------------------------------------------------------------------------------------------
 */
+function ws_ping() {
+    test_ws.send('__ping__');
+    time_var = setTimeout(function () {
+        // connection closed, restart web socket
+        // console.log("websocket closed");
+        ws_map["status"] = open_websocket("status", status_change_ws_callback);
+        ws_map["files"] = open_websocket("files", files_change_ws_callback);
+        ws_map['plugins'] = open_websocket("plugins", plugins_change_ws_callback);
+        start_ping_pong();
+    }, 5000);
+}
+
+function ws_pong() {
+    clearTimeout(time_var);
+}
+
+function start_ping_pong(){
+    test_ws.onopen = function () {
+        setInterval(ws_ping, 20000);
+    };
+
+    test_ws.onmessage = function (evt) {
+        var msg = evt.data;
+        if (msg === '__pong__') {
+            // console.log("message is pong");
+            ws_pong();
+            // return;
+        }
+    }
+}
 
 function open_websocket(selection, callback) {
     // Create a new websocket
@@ -158,7 +223,7 @@ function open_websocket(selection, callback) {
     ws.onopen = function () {
         ws.send(selection);
         console.log("Websocket connected to feed " + selection);
-    }
+    };
 
     // receive message
     ws.onmessage = function (message) {
@@ -179,6 +244,7 @@ function status_change_update_dom(job_dom_id, status){
             .attr({"class": "label label-"+status})
             .text(status));
     if (status == "Done"){
+
         execute_sequence_output(id_map[job_dom_id]);
     }
 }
@@ -197,6 +263,19 @@ function status_change_ws_callback(message) {
                 status_change_update_dom(job_dom_id, data.status);
             }
         }
+    }
+}
+
+function files_change_ws_callback(message){
+    if (message.data.length > 0 && message.data[0] == "{"){
+        $("#upload_files_need_refreshed").show();
+    }
+
+}
+
+function plugins_change_ws_callback(message){
+    if (message.data.length > 0 && message.data[0] == "{"){
+        $("#plugins_need_refreshed").show();
     }
 }
 
@@ -233,6 +312,9 @@ function easter_egg_one(){
     var audio_id = document.getElementById("easter_egg_one_id");
     audio_id.play();
 }
+// function easter_egg_two(){
+    // final countdown 5 seconds
+// }
 
 /*
 -----------------------------------------------------------------------------------------------------
@@ -243,30 +325,23 @@ Functions down below are for w2
 // List of commands based off of plugin name
 var current_command_template = {};
 
+// TODO: Perhaps make one filter function in the future
 function filter_w1(){
-    var filter_content,
-        filter_display,
-        num_targets,
-        to_filter,
-        row_i,
-        row_id,
-        target_json,
-        target;
+    var filter_content = $("#searchNameHere_id")[0].value.toLowerCase(),
+        filter_display = $("#w1_command_active_filter"),
+        to_filter = $("#target_box_contentid tr");
 
-    filter_content = $("#searchNameHere_id")[0].value.toLowerCase();
-    filter_display = $("#w1_command_active_filter");
-    num_targets = 2;
-    if (filter_content.length == 0){
+    if (filter_content.length === 0){
         filter_display.css("display", "none");
     } else {
         filter_display.css("display", "");
         filter_display[0].innerText = "Currently filtering on: "+filter_content;
     }
-    to_filter = $("#target_box_contentid tr");
-    for (row_i = 0; row_i < to_filter.length; row_i++){
-        row_id = to_filter[row_i].id.substring(10, to_filter[row_i].id.length);
-        target_json = $("#name_tag_id"+row_id+" a span")[0].innerHTML;
-        target = JSON.parse(target_json);
+
+    for (var row_i = 0; row_i < to_filter.length; row_i++){
+        var row_id = to_filter[row_i].id.substring(10, to_filter[row_i].id.length),
+            target_json = $("#name_tag_id"+row_id+" a span")[0].innerHTML,
+            target = JSON.parse(target_json);
         if (target.PluginName.toLowerCase().includes(filter_content)  || target.Location.toLowerCase().includes(filter_content) ){
             $(to_filter[row_i]).css("display", "");
         } else {
@@ -274,6 +349,34 @@ function filter_w1(){
         }
     }
 }
+
+function filter_w2() {
+    var filter_content = $("#searchCommand_id")[0].value.toLowerCase(),
+        filter_display = $("#w2_command_active_filter"),
+        to_filter = $(".theContent");
+
+    if (filter_content.length === 0){
+        filter_display.css("display", "none");
+    } else {
+        filter_display.css("display", "");
+        filter_display[0].innerText = "Currently filtering on: "+filter_content;
+    }
+
+    for (var row_i = 0; row_i < to_filter[0].children.length; row_i++){
+        if (current_plugin_commands[row_i].CommandName.toLowerCase().includes(filter_content) ||
+            current_plugin_commands[row_i].Tooltip.toLowerCase().includes(filter_content)){
+            $(to_filter[0].children[row_i]).css("display", "");
+            // if tooltip & box footer was opened before the user was
+            // searching the tooltip content & box footer will disappear
+            $(".tooltipHeader").empty();
+            $(".tooltipContent").empty();
+            $(".theContentArgument").empty();
+        } else {
+            $(to_filter[0].children[row_i]).css("display", "none");
+        }
+    }
+}
+
 function get_commands_func(){
 //    console.log("get_commands_func");  // debug
 //    console.log($(this)[0].parentElement.id);
@@ -292,8 +395,8 @@ function get_commands_func(){
         data: {"plugin_name": plugin_name_var},
         datatype: 'json',
         success: function(data) {
-
             // check if w2 should re-render or not
+            current_plugin_commands = data;
             if($(".theContent li a").length > 0){
                 for(var int = 0; int < $(".theContent li a").length; int++){
                     if(data[0].CommandName == $(".theContent li a")[int].text){
@@ -310,7 +413,7 @@ function get_commands_func(){
             }
 
         	$(".theContent").empty();
-
+            
             // display command(s) in w2
             if (data.length == 1){
                 $(".theContent").append($("<li/>").text(data));
@@ -318,13 +421,14 @@ function get_commands_func(){
                 for(var i = 0; i < data.length; i++) {
                     $(".theContent")
                         .append($("<li id='commandid' class='commandclass' onclick='#'/>")
-                            .append($("<a id='acommandid' class='acommandclass' href='#'/>")
+                            .append($("<a/>")
+                                .attr({"id": "acommandid"+(i+1), "class": "acommandclass", "href": "#"})
                                 .text(data[i].CommandName)));
                 }
             }
-            $(".theContent")
-                .append("<div/>")
-                .attr({"style": "width:250px"});
+            // $(".theContent")
+            //     .append("<div/>")
+            //     .attr({"style": "width:250px"});
             $(".theContentHeader")
                 .append("<h2 class='box-title'/>")
                 .text(plugin_name_var + "  command list");
@@ -366,24 +470,35 @@ function get_commands_func(){
                         .append($("<i/>").attr({"id": "add_command_to_job_id2" ,"class": "fa fa-tasks"}));
                 $("#commandIdBuilder").append(quick_action_button);
 
-                new_selector = $("<select/>")
-                    .attr({"class": "form-control mySelect", "style": "width:250px"}).css("display", "none");
+
                 for (var input_i = 0; input_i < current_command_template['Inputs'].length; input_i++){
                     new_input = document.createElement("input");
 
                     // if input.type == file_list
                     if (current_command_template["Inputs"][input_i]['Type'] === 'file_list'){
-
+                        var file_list = $(".upload_file_list li div h4");
                         // file list dropdown
+                        new_selector = $("<select/>")
+                            .attr({"class": "form-control mySelect",
+                                   "style": "width:250px"})
+                            .attr("id", "argumentid_"+input_i)
+                            .css("display", "none");
+
                         $("#commandIdBuilder")
                             .append($("<div/>")
                                 .attr({"class": "form-group"})
                                 .append(new_selector.css("display", "")));
 
-                        $.each(Object.values(dom_filename_map), function(n) {
-                            current_command_template["Inputs"][input_i]['Value'] = dom_filename_map[n];
-                            $(".mySelect").append($("<option/>").attr("value", n).text(Object.values(dom_filename_map)[n]));
-                        });
+
+                        for (var n=0; n<file_list.length; n++){
+                            current_command_template["Inputs"][input_i]['Value'] = file_list[n].innerText;
+                            $(".mySelect")
+                                .change(update_argument)
+                                .append(
+                                    $("<option/>")
+                                        .attr("value", file_list[n].innerText)
+                                        .text(file_list[n].innerText));
+                        }
                     }
                     // if input.type == textbox
                     else {
@@ -427,7 +542,22 @@ function update_argument(event){
 Functions down below are for w3
 -----------------------------------------------------------------------------------------------------
 */
+function drop_target_into_job_row(job_row_id, target_js, target_js_str=""){
+    if (job_row_is_mutable(job_row_id)){
+        if (target_js_str.length == 0){
+            target_js_str = JSON.stringify(target_js)
+        }
+        $("#pluginid"+job_row_id).empty();
+        $("#addressid"+job_row_id).empty();
+        $("#addressid"+job_row_id)[0].innerText = target_js.Location;
+        $("#pluginid"+job_row_id)[0].innerText = target_js.PluginName+":"+target_js.Port;
+        $("#pluginid"+job_row_id)
+            .append($("<span/>")
+                .attr({"style": "display:none"})
+                .append(target_js_str));
 
+    }
+}
 
 function load_job_state(){
     $("#download_status").removeClass("fa-cloud-download");
@@ -442,8 +572,10 @@ function load_job_state(){
             for (var i = 0; i < data.jobs.length; i++){
                 var job_id = i + 1;
                 add_new_job();
-                $("#pluginid"+job_id).append(data.jobs[i].plugin);
-                $("#addressid"+job_id).append(data.jobs[i].address);
+                if (data.jobs[i].target_js != null && data.jobs[i].target_js.length > 5){
+                    var job_target_js = JSON.parse(data.jobs[i].target_js);
+                    drop_target_into_job_row(job_id, job_target_js, data.jobs[i].target_js);
+                }
                 if (data.jobs[i].job != null){
                     var command_td = $("#commandid"+job_id);
                     drop_command_into_hole(data.jobs[i].job,
@@ -503,6 +635,7 @@ function save_job_state(){
     var num_jobs = $("#addjob_button")[0].value;
     for (var i = 1; i <= Number(num_jobs); i++){
         var plugin_name = $("#pluginid"+i)[0].innerText;
+        var plugin_target = $("#pluginid"+i+" span")[0].innerText;
         var address = $("#addressid"+i)[0].innerText;
         var job_cell = $("#commandid"+i+" div");
         var job_str = undefined;
@@ -514,8 +647,7 @@ function save_job_state(){
                 job_js = JSON.parse(job_str);
             }
         }
-        data_package.jobs.push({"plugin": plugin_name,
-                                "address": address,
+        data_package.jobs.push({"target_js": plugin_target,
                                  "job": job_js,
                                  "status": null});
     }
@@ -537,24 +669,91 @@ function save_job_state(){
     });
 }
 
+function quick_action_function(source, source_widget_id, source_widget){
+    /*
+    Quick action button handler for commands & targets
+    Params:
+    source =
+    source_widget_id == commandid or pluginid
+    source_widget = target or command
+     */
+    var w3_column = w3_highlighted_array,
+        command_temp_str = JSON.stringify(current_command_template),
+        new_job_row_arry_checker = [];
+
+    // For Targets
+    if (source_widget !== "command"){
+        var row_js = JSON.parse(source);
+        if (inc === 0){  // check if job rows doesn't exist in W3, create row
+            add_new_job();
+            drop_target_into_job_row(inc, row_js, source);
+        } else {  // else if no job rows are highlighted, and job rows exist
+            for (var counter_two = 1; counter_two <= inc; counter_two++){
+                if ($("tr td#" + source_widget_id + counter_two)[0].textContent === ""){
+                    drop_target_into_job_row(""+counter_two, row_js, source);
+                    break;
+                } else {
+                    new_job_row_arry_checker.push(counter_two);
+                }
+            }
+        }
+        // if all job rows iterated and all filled, create  new job row
+        if (new_job_row_arry_checker.length === inc) {
+            add_new_job();
+            drop_target_into_job_row(inc, row_js, source);
+        }
+    // For Commands
+    } else {
+        // check if job rows doesn't exist in W3, create row
+        if (inc === 0) {
+            add_new_job();
+            // $("tr td#commandid"+inc);
+            drop_command_into_hole(current_command_template,
+                                   command_temp_str,
+                                   $("tr td#" + source_widget_id + inc),
+                                   "" + inc);
+        // If job row or rows are highlighted
+        } else if (inc !== 0 && w3_column.length > 0) {
+            for (var counter_one = 0; counter_one < w3_column.length; counter_one++) {
+                drop_command_into_hole(current_command_template,
+                                       command_temp_str,
+                                       $("tr td#" + source_widget_id + w3_column[counter_one]),
+                                       "" + (counter_one + 1));
+            }
+        // else if no job rows are highlighted, and job rows exist
+        } else {
+            for (var counter_three = 1; counter_three <= inc; counter_three++) {
+                // if a command box  or plugin box is not empty in the latest job row (Iterate through job rows)
+                if ($("tr td#" + source_widget_id + counter_three)[0].textContent === "") {
+                    drop_command_into_hole(current_command_template,
+                                           command_temp_str,
+                                           $("tr td#" + source_widget_id + counter_three),
+                                           ""+counter_three);
+                    break;
+                } else {
+                    new_job_row_arry_checker.push(counter_three);
+                }
+            }
+        }
+        // if all job rows iterated and all filled, create  new job row
+        if (new_job_row_arry_checker.length === inc) {
+            add_new_job();
+            drop_command_into_hole(current_command_template,
+                command_temp_str,
+                $("tr td#" + source_widget_id + inc),
+                "" + inc);
+        }
+    }
+}
+
 function add_target_to_job_sc_button(){
     // console.log("add_target_to_job_sc");  // debug
-    // json target data
-    var json_target_id,
-    json_target_data;
-    json_target_id = $(this)[0].parentElement.parentElement.parentElement.children[0].children[0].children[0].id;
-    json_target_data = $("#"+json_target_id)[0].innerText;
+    var w1_target_row_id = $(this)[0].parentElement.parentElement.parentElement.id.substring(10, $(this)[0].id.length),
+        row_js_str = $("#nameidjson" + w1_target_row_id)[0].innerText;
+        // json_target_id = $(this)[0].parentElement.parentElement.parentElement.children[0].children[0].children[0].id,
+        // json_target_data = $("#"+json_target_id)[0].innerText;
 
-    add_new_job();
-    var row_id = $(this)[0].parentElement.parentElement.parentElement.id.substring(10, $(this)[0].id.length);
-    var plugin_name_var = $("#name_tag_id"+row_id+" a span")[1].innerText;
-    var location_num_var = $("#address_tag_id"+row_id)[0].innerText;
-    $("#pluginid"+inc)
-        .append(plugin_name_var)
-        .append($("<span/>")
-            .attr({"id": ""+json_target_id, "style": "display:none"})
-            .append(json_target_data));
-    $("#addressid"+inc).append(location_num_var);
+    quick_action_function(row_js_str, "pluginid", "target");
     set_w3_job_status();
 
 
@@ -562,71 +761,8 @@ function add_target_to_job_sc_button(){
 
 function add_command_to_job_sc_button(){
     // console.log("add_command_to_job_sc_button");
-
-    var job_command_row,
-        command_temp_str,
-        selected_row,
-        selected_row_num,
-        selected_job_command_row,
-        counter_int,
-        next_job_row,
-        next_highlighted_row_num,
-        next_highlighted_job_command_row;
-
-    command_temp_str = JSON.stringify(current_command_template);  // command template as a string
-
-    if (inc === 0 || !$(".gridSelect2 tbody tr").hasClass("selected")){
-        add_new_job();  // new row in W3
-        job_command_row = $("tr td#commandid"+inc);  // new job row object
-
-        // adding command template to W3 in command column
-        drop_command_into_hole(current_command_template, command_temp_str, job_command_row, ""+inc);
-    }
-    // if more than one job row is highlighted
-    else if (inc !== 0 && $(".gridSelect2 tbody tr").hasClass("selected") &&
-        $(".gridSelect2 tbody tr.selected").nextUntil().hasClass("selected")){
-        counter_int = 0;
-
-        // first highlighted row data
-        selected_row = $(".gridSelect2 tbody tr.selected");
-        selected_row_num = selected_row[0].children[0].innerText;
-        selected_job_command_row = $("tr td#commandid"+selected_row_num);
-
-        // adding first command template to W3 in command column
-        drop_command_into_hole(current_command_template,
-                               command_temp_str,
-                               selected_job_command_row,
-                               selected_row_num);
-
-        // Checking for next highlighted job row
-        while(selected_row.nextUntil().length > counter_int){
-            next_job_row = selected_row.nextUntil()[counter_int];
-
-            // If job row is highlighted then add command to job row
-            if (next_job_row.classList.contains("selected") && next_job_row.style.display !== 'none'){
-                next_highlighted_row_num = next_job_row.children[0].innerText;
-                next_highlighted_job_command_row = $("tr td#commandid"+next_highlighted_row_num);
-                drop_command_into_hole(current_command_template,
-                                       command_temp_str,
-                                       next_highlighted_job_command_row,
-                                       next_highlighted_row_num);
-            }
-            counter_int++;
-        }
-
-    }
-    // only if one job row is highlighted
-    else if (inc !== 0 && $(".gridSelect2 tbody tr").hasClass("selected")){
-
-        // highlighted row data
-        selected_row = $(".gridSelect2 tbody tr.selected");
-        selected_row_num = selected_row[0].children[0].innerText;
-        selected_job_command_row = $("tr td#commandid"+selected_row_num);
-
-        // adding command template to W3 in command column
-        drop_command_into_hole(current_command_template, command_temp_str, selected_job_command_row, selected_row_num);
-    }
-
+    var command_temp_str = JSON.stringify(current_command_template);  // command template as a string
+    quick_action_function(command_temp_str,"commandid", "command");
     set_w3_job_status();  // setting w3 job status
 }
 
@@ -658,7 +794,6 @@ function synchronize_job_sequence_tabs(tab_id){
     active_sequence = tab_id;
     var other_tab = $('#output_tabs a[href="#outq_'+tab_id+'"]');
     other_tab.tab('show');
-    $("#job_sequence_timer")[0].value = sequence_starttime_map[tab_id];
     synchronize_sequence_tab_rows(tab_id);
 }
 function synchronize_output_sequence_tabs(tab_id){
@@ -668,6 +803,13 @@ function synchronize_output_sequence_tabs(tab_id){
     synchronize_sequence_tab_rows(tab_id);
 }
 function synchronize_sequence_tab_rows(sequence_id){
+    var _dt = new Date(Number(sequence_starttime_map[sequence_id]) * 1000);
+    var display_date = $.datepicker.formatDate('mm/dd/yy ', _dt);
+        display_date += ("0" + _dt.getHours()).slice(-2);
+        display_date += ":";
+        display_date += ("0" + _dt.getMinutes()).slice(-2);
+    $("#job_sequence_time_unix")[0].value = sequence_starttime_map[sequence_id];
+    $("#job_sequence_timer")[0].value = display_date;
     var job_row_ids = $("#third_box_content tr" );
     var ouput_row_objs = $("#W4Rows tr");
     for (var i = 1; i <= job_row_ids.length; i++){
@@ -704,7 +846,8 @@ function add_new_job(){
     // content for w3
     $(".thirdBoxContent")
         .append($("<tr/>")
-            .attr({"role": "row","onclick": "#","id":"jobrow"+value,"class": "draggable_tr divw3row"})
+            .attr({"role": "row","onclick": "#","id":"jobrow"+value,"class": "draggable_tr divw3row",
+                "style": "z-index: 200"})
             .append($("<td/>")
                     .append($("<div/>")
                         .append($("<a/>")
@@ -728,12 +871,12 @@ function add_new_job(){
     // W4 Rows
     $(".W4BodyContent")
         .append($("<tr/>")
-            .append($("<th/>")
-                    .text(value),$("<th/>")
+            .append($("<td/>")
+                    .text(value),$("<td/>")
                     .append($("<a/>")
                         .attr({'id': 'updateid'+value})
                         .text("terminal" + value)),
-    $("<th/>").attr({"id": "updatestatusid" + value})));
+    $("<td/>").attr({"id": "updatestatusid" + value})));
     $("#trashjob"+value).click(delete_job_from_w3);
 
 }
@@ -779,6 +922,7 @@ function clear_new_jobs(){
 function drag_target(){
    // console.log("drag_target");
 	$(".gridSelect tbody tr").draggable({
+        appendTo: $("#third_box_content"),
 	    helper: function(){
 	        var selected_var = $(".gridSelect tbody tr.selected");
             var container_to_drag;
@@ -796,8 +940,9 @@ function drag_target(){
             } else if (container_to_drag.length == 1) {
                 display_drop_all();
             }
-            var container = $('<table/>').attr({'id':'draggingContainer'});
+            var container = $('<table/>').attr({'id':'draggingContainer', 'style': 'position: absolute;z-index: 1'});
             container.append(container_to_drag.clone().removeClass("selected"));
+            $("#third_box_content tr").attr({'style': 'position: relative;z-index: 1000'});
             hover_w3_for_target();
             return container;
 	    },
@@ -915,11 +1060,7 @@ function drop_target(hover_object){
                             // json target data
                             json_target_id = selected_var[int].children[0].children[0].children[0].id;
                             json_target_data = $("#"+json_target_id)[0].innerText;
-
-                            $("#pluginid"+selected_row.rowIndex)
-                                .append($("<span/>")
-                                    .attr({"id": ""+json_target_id, "style": "display:none"})
-                                    .append(json_target_data));
+                            drop_target_into_job_row(selected_row_id, row_js);
                         }
                     }
                 }
@@ -1049,6 +1190,7 @@ function drop_command_to_multiple(ev) {
 function drop_command_into_hole(command, command_json, command_td, row_id){
    // console.log("drop_command_into_hole");
     var current_status = $("#jobstatusid"+row_id+" span");
+    var MAX_DISPLAY_ARGUMENT = 36;
     if ((current_status.length == 0) ||
         (current_status.length >=1 && command_td.length == 1 && ( current_status[0].innerText == "Invalid" ||
                                                                   current_status[0].innerText == "Valid" ||
@@ -1061,15 +1203,28 @@ function drop_command_into_hole(command, command_json, command_td, row_id){
         var new_div = document.createElement("div");
         new_div.innerText = command_json;
         new_div.style.display = 'none';
-        var display_string = command['CommandName'] + " ("
-
+        var display_string = command['CommandName'] + " (";
+        var args_str = "";
+        var args_str_truncated = "";
         for (var j = 0; j < command["Inputs"].length; j++){
-            display_string += " "+command["Inputs"][j]["Value"]
+            args_str += " "+command["Inputs"][j]["Value"];
+            var arg_truncated = command["Inputs"][j]["Value"].substring(0, MAX_DISPLAY_ARGUMENT);
+            if (arg_truncated.length >= MAX_DISPLAY_ARGUMENT){
+                arg_truncated += "...";
+            }
+            args_str_truncated += arg_truncated;
         }
-        display_string += " )";
+        display_string += args_str_truncated + " )";
         command_td[0].appendChild(new_div);
         var display_div = document.createElement("div");
         display_div.innerText = display_string;
+        display_div.title = command['CommandName'] + " (" + args_str + " )";
+        $(display_div)
+            .tooltip({open: function (event, ui) {
+                                ui.tooltip.css("max-width", "50%");
+                            },
+                      classes: {"ui-tooltip": "ui-corner-all ui-widget-shadow bg-light-blue-active color-palette"}
+            });
         command_td[0].appendChild(display_div);
     } else {
         console.error("Can't drop command into job "+row_id+" (job already in Brain)");
@@ -1114,9 +1269,7 @@ function prepare_jobs_list(){
             var uid = j+1;
             var terminal = $("#updateid"+uid).parent();
             var plugin_name_data = $("#pluginid"+(j+1))[0].textContent;  // correct json target data with plugin name
-            var json_target_data = JSON.parse($("#pluginid"+(j+1))[0].children[1].firstChild.data);
-            // var plugin_name = plugin_name_data.substring(0, plugin_name_data.indexOf("{"));  // former code
-            // var location = $("#addressid"+(j+1))[0].textContent;                             // former code
+            var json_target_data = JSON.parse($("#pluginid"+(j+1)+" span")[0].innerText);
             var command_json = $("#commandid"+(j+1)+" div")[0].innerText;
             var command = JSON.parse(command_json);
 
@@ -1135,14 +1288,64 @@ function prepare_jobs_list(){
     return jobs;
 }
 
+function start_timer(dom_id){
+    var seconds = 0,
+        minutes = 0,
+        hours = 0,
+        days = 0,
+        display_a = document.createElement("a");
+    display_a.className = "fa fa-refresh fa-spin";
+    display_a.id = "update_spin"+dom_id;
+
+    start_timer_map[dom_id] = setInterval( function(){
+        ++seconds%60;
+        if (seconds >= 60) {
+            seconds = 0;
+            ++minutes%60;
+            if (minutes >= 60) {
+                minutes = 0;
+                ++hours%24;
+                if (hours >= 24) {
+                    hours = 0;
+                    ++days%24;
+                }
+            }
+        }
+        $("#updateid" + dom_id).text(days + "d " + hours + "h " + minutes + "m " + seconds + "s ");
+        $("#updateid" + dom_id)[0].parentElement.append(display_a);
+    }, 1000);
+}
+
+function final_countdown_function(start_time, dom_id) {
+    var interval_var = setInterval(function() {
+        var right_meow = String(new Date().getTime()/1000).substring(0, 10),
+            distance = start_time - right_meow,
+            // Time calculations for days, hours, minutes and seconds
+            days = Math.floor(distance / (60 * 60 * 24)),
+            hours = Math.floor((distance % (60 * 60 * 24)) / (60 * 60)),
+            minutes = Math.floor((distance % (60 * 60)) / (60)),
+            seconds = Math.floor((distance % (60)));
+
+        $("#updateid" + dom_id).text(days + "d " + hours + "h " + minutes + "m " + seconds + "s ");
+
+        // If the count down is over, write some text
+        if (distance < 0) {
+            $("#updateid" + dom_id).empty();
+            start_timer(dom_id);
+            clearInterval(interval_var);
+        }
+
+    },1000);
+}
+
 // Execute Sequence function down below are for w3+w4
 function execute_sequence(){
-//    console.log("execute_sequence function has been called");  // debug
+   // console.log("execute_sequence function has been called");  // debug
     exec_int = 1;
     hide_drop_all();
     var jobs = prepare_jobs_list();
-
     var jobs_json = JSON.stringify(jobs);
+    var sequence_start_time;
     $.ajax({
         type: "GET",
         url: "/action/get_w3_data/",
@@ -1151,14 +1354,16 @@ function execute_sequence(){
         success: function(data) {
             var job_ids = data.generated_keys;
             job_id = job_ids[0];
+            sequence_start_time = parseInt(sequence_starttime_map[active_sequence]);
             for (var index = 0; index < job_ids.length; ++index) {
                 if (job_ids[index] != "invalid-job"){
                     var dom_id = index+1;
                     id_reverse_map[job_ids[index]] = dom_id;
                     id_map[index+1] = job_ids[index];
-                    if (ws_map['status'].readyState === ws_map['status'].OPEN){
-                        $("#updateid"+dom_id).empty();
-                        $("#updateid"+dom_id).attr({"class": "fa fa-refresh fa-spin"});
+
+                    if (ws_map['status'].readyState === ws_map['status'].OPEN) {
+                        $("#updateid" + dom_id).empty();
+                        final_countdown_function(sequence_start_time, dom_id);
                     } else {
                         execute_sequence_output(job_ids[index]);
                     }
@@ -1172,7 +1377,6 @@ function execute_sequence(){
         complete: function(data){
             exec_int = 0;
         }
-
     })
 }
 
@@ -1181,12 +1385,24 @@ function execute_sequence(){
 Functions down below are for w4
 -----------------------------------------------------------------------------------------------------
 */
+function change_truncate_value(){
+    var tot = $("#truncate_output_to");
+    if(tot.is(":checked")) {
+        tot.val("1024");
+    } else {
+        tot.val("0");
+    }
+}
+
+
 function render_job_output_to_page(job_guid, data){
     var updateid = id_reverse_map[job_guid];
+    clearInterval(start_timer_map[updateid]);
     $("#updateid"+updateid).empty();
     $("#updateid"+updateid).attr({"class": ""});
+    $("#update_spin"+updateid).remove();
     $('<pre id="updatecontent'+updateid+'"></pre>').appendTo("#updateid"+updateid);
-    $("#updatecontent"+updateid).append(JSON.stringify(data['Content']));
+    $("#updatecontent"+updateid).text(data['Content']);
     var download_link = $('<a>[Download]</a>');
     download_link.attr({"href": "/action/get_full_output_data/?job_id="+job_guid+"&job_number="+updateid});
     $("#updateid"+updateid)
@@ -1203,12 +1419,30 @@ function render_job_output_to_page(job_guid, data){
         .append($("<span/>")
             .attr({"class": "label label-Done"})
             .text("Done"));
+    if (id_replication_map.hasOwnProperty(updateid)){
+        render_job_output_to_secondary(id_replication_map[updateid], data);
+    }
 }
+
+function render_job_output_to_secondary(secondary_id, data)
+{
+    console.log(data);
+    var replica = $("#"+secondary_id);
+    replica.empty();
+    replica
+        .append(
+            $("<pre>")
+                .attr({"class": "terminal-window"})
+                .text(data['Content'])
+        )
+}
+
 
 function render_job_output_timeout(job_guid){
     var updateid = id_reverse_map[job_guid];
     $("#updateid"+updateid).empty();
     $("#updateid"+updateid).attr({"class": ""});
+    $("#update_spin"+updateid).remove();
     $("#updateid"+updateid)
         .append("No data to return at the moment :(");
     $("#updateid"+updateid)
@@ -1238,12 +1472,13 @@ function execute_sequence_output_retry(job_guid){
 
 // Modify function add depth parameter, increment depth when it errors
 function execute_sequence_output(specific_id, counter=0, backoff=2000){
-//    console.log("execute_sequence_output function");  // debug
     var updateid = id_reverse_map[specific_id];
+    var trunc_output_size = $("#truncate_output_to").val();
     $.ajax({
         type: "GET",
         url: "/action/get_output_data/",
-        data: {"job_id": specific_id},
+        data: {"job_id": specific_id,
+               "truncate": trunc_output_size},
         datatype: 'json',
         success: function(data) {
             console.log("SUCCESS @ execute_sequence_output  function");
@@ -1275,4 +1510,101 @@ function execute_sequence_output(specific_id, counter=0, backoff=2000){
             setTimeout( function() { execute_sequence_output(specific_id, counter); }, backoff*2 );
         }
     })
+}
+
+
+function onclick_terminal_submit(event){
+    var terminal_cmd = $("#terminal-cmd");
+    var cmd_string = terminal_cmd.val();
+    if (cmd_string.length > 0){
+        var target_js = $("#terminal-active-target-str").val();
+        var ti_command = {
+            "CommandName":"terminal_input",
+            "Tooltip": "",
+            "Output": true,
+            "Inputs": [{
+                "Name": "command",
+                "Type": "textbox",
+                "Tooltip": "",
+                "Value": cmd_string
+            }]
+        };
+        current_command_template = ti_command;
+        //put the target+command in w3 to make a job
+        quick_action_function(target_js, "pluginid", "target");
+        add_command_to_job_sc_button();
+        var current_id = $("#addjob_button")[0].value;
+        var secondary_output_domid = "specialupdateid"+current_id;
+        id_replication_map[current_id] = secondary_output_domid;
+        var console_io = make_one_terminal_command(secondary_output_domid, cmd_string);
+        var output_list = $("#terminal-active-history");
+        output_list.append(console_io);
+        terminal_cmd.val("");
+        var container = document.getElementById('terminal-cmd-list');
+        var scrollTo = document.getElementById('terminal-cmd-bottom');
+        container.scrollTop = scrollTo.offsetTop;
+        execute_sequence();
+    }
+}
+function make_one_terminal_command(secondary_output_domid, cmd_string, out_string="..."){
+    return $("<li/>")
+            .append($("<ul/>")
+                .attr({"class":"terminal-contents"})
+                .append($("<li/>")
+                    .text(cmd_string)
+                )
+                .append($("<li/>")
+                    .attr({"id": secondary_output_domid})
+                    .append($("<pre/>")
+                        .attr({"class":"terminal-window"})
+                        .text(out_string)
+                    )
+                )
+            )
+}
+
+function terminal_opener(event) {
+    var button = $(event.relatedTarget); // Button that triggered the modal
+    var terminal_data = button.data('terminaldata'); // Extract info from data-* attributes
+    var history = $("#terminal-active-history");
+    history.empty();
+    var modal = $(this);
+    $("#terminal-active-target-str").val(JSON.stringify(terminal_data.target));
+    $("#terminal-modal-target").text(terminal_data.target.Location);
+    $("#terminal-modal-plugin").text(terminal_data.target.PluginName);
+    $("#terminal-modal-port").text(terminal_data.target.Port);
+    var visible_commands = $("#third_box_content tr:visible");
+    var visible_ouput = $("#W4Rows tr:visible");
+    for (var i=0; i<visible_commands.length; i++){
+        var command_td = $(visible_commands[i]).find("td")[3];
+        var target_cells = $(visible_commands[i]).find("td span");
+        var target = null;
+        if (target_cells.length > 2){
+            target = JSON.parse(target_cells[1].innerText);
+        }
+        var command_js = JSON.parse(command_td.children[0].innerText);
+        if (target !== null
+            && target.PluginName == terminal_data.target.PluginName
+            && target.Port == terminal_data.target.Port
+            && target.Location == terminal_data.target.Location
+            && command_js.CommandName == "terminal_input"){
+            var out_str = " ... ";
+            var shortid = command_td.id.substring(9,command_td.id.length);
+            var update_content = $("#updateid"+shortid+" pre");
+            if (update_content.length > 0){
+                out_str = update_content[0].innerText;
+            }
+            var console_io = make_one_terminal_command("specialupdateid"+shortid, command_js.Inputs[0].Value, out_str);
+            var output_list = $("#terminal-active-history");
+            output_list.append(console_io);
+        }
+    }
+}
+
+function terminal_opened(event){
+    $("#terminal-cmd").focus();
+}
+
+function get_number_from_id(id_str, pretext){
+    return id_str.substring(pretext.length, id_str.length);
 }

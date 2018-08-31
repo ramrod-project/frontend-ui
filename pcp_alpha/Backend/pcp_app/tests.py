@@ -1,12 +1,16 @@
 from multiprocessing import Process
 from time import sleep, time
 from uuid import uuid4
+import os
 import json
+import ast
 import pytest
-from brain import connect, r
+from brain import connect, r, binary
 
 from test.test_w4_switch_to_done import switch_to_done
 # from rethinkdb.errors import ReqlOpFailedError
+from pcp_alpha.Backend.Backend_tests.helper_test_functions import \
+    read_test_file, BACKEND_DIR, get_test, post_test
 from pcp_alpha.Backend.db_dir.custom_data import location_generated_num
 from pcp_alpha.Backend.db_dir.project_db import rtdb
 from pcp_alpha.Backend.db_dir.custom_queries import get_specific_brain_targets, \
@@ -15,7 +19,7 @@ from pcp_alpha.Backend.pcp_app.views import get_commands_controller, \
     execute_sequence_controller, w4_output_controller, w4_output_controller_download, \
     new_target_form, val_target_form, val_edit_target_form, edit_target_form, \
     delete_specific_target, file_upload_list, persist_job_state, load_job_state, \
-    del_file_from_list, get_file_listing, get_file
+    del_file_from_list, get_file_listing, get_file, get_interfaces
 
 ECHO_JOB_ID = str(uuid4())
 NOW = time()
@@ -92,11 +96,11 @@ SAMPLE_MULTIPLE_JOBS = [{},
                         ]
 
 
-
 SAMPLE_OUTPUT = {
     "OutputJob": SAMPLE_JOB,
     "Content": "Sample output string"
 }
+
 SAMPLE_FILE_ID = "test.txt"
 
 
@@ -130,35 +134,6 @@ class TestDataHandling(object):
         status codes
         """
         request = rf.get(url_str)
-        if target_id is not None:
-            response = function_obj(request, target_id)
-        else:
-            response = function_obj(request)
-        return response
-
-    @staticmethod
-    def get_test(url_str, function_obj, rf, target_id=None):
-        """
-        This function is used with functions from
-        pcp_app/views.py
-        """
-        request = rf.get(url_str, HTTP_USER_AGENT="Mozilla/5.0 "
-                                                  "(Windows NT 6.1; WOW64; rv:40.0) "
-                                                  "Gecko/20100101 Firefox/40.1")
-        # response = function_obj(request)
-        if target_id is not None:
-            response = function_obj(request, target_id)
-        else:
-            response = function_obj(request)
-        return response
-
-    @staticmethod
-    def post_test(url_str, post_data, function_obj, rf, target_id=None):
-        """
-        This function is used for forms to imitate user's inputting
-        data and doing a request.POST
-        """
-        request = rf.post(url_str, post_data)
         if target_id is not None:
             response = function_obj(request, target_id)
         else:
@@ -297,8 +272,8 @@ class TestDataHandling(object):
         sleep(5)
         second_url = "/action/get_output_data/?job_id={}".format(json.loads(
             response.getvalue().decode())['generated_keys'][0])
-        assert w4_output_controller(rf.get(second_url)).status_code == 200
-        assert "sdfsdfsd" in str(w4_output_controller(rf.get(second_url)).content)
+        assert w4_output_controller(rf.get(second_url, HTTP_USER_AGENT='Mozilla/5.0')).status_code == 200
+        assert "sdfsdfsd" in str(w4_output_controller(rf.get(second_url, HTTP_USER_AGENT='Mozilla/5.0')).content)
         process_obj.terminate()
         process_obj.join(timeout=2)
 
@@ -320,10 +295,10 @@ class TestDataHandling(object):
             "optional_char": ""
         }
         url_var = "/action/val_target_form"
-        response = TestDataHandling.post_test(url_var, post_data, val_target_form, rf)
+        response = post_test(url_var, post_data, val_target_form, rf)
         assert response.status_code == 302
         assert response.url == "/"
-        response = TestDataHandling.post_test(url_var, {}, val_target_form, rf)
+        response = post_test(url_var, {}, val_target_form, rf)
         assert response.status_code == 200
 
     @staticmethod
@@ -332,7 +307,7 @@ class TestDataHandling(object):
         test download output data from W4
         """
         url_var = "/action/get_full_output_data?job_id=138thg-eg98198-sf98gy3-feh8h8"
-        response = TestDataHandling.get_test(
+        response = get_test(
             url_var,
             w4_output_controller_download,
             rf
@@ -347,7 +322,7 @@ class TestDataHandling(object):
         on 'Execute Sequence' button at the bottom right of w3. With wrong data.
         """
         url_var = "/action/get_output_data/?job_id=60d5405c-81b0-4248-aead-9e4f8d38cd14"
-        request = rf.get(url_var)
+        request = rf.get(url_var, HTTP_USER_AGENT='Mozilla/5.0')
         response = w4_output_controller(request)
         assert response.status_code == 418
 
@@ -505,13 +480,13 @@ class TestDataHandling(object):
             "optional_char": ""
         }
         url_var = "action/val_edit_target_form/{}/".format(target_key)
-        response = TestDataHandling.post_test(url_var,
+        response = post_test(url_var,
                                               post_data,
                                               val_edit_target_form,
                                               rf, target_id=target_key)
         assert response.status_code == 302
         assert response.url == "/"
-        response = TestDataHandling.post_test(url_var, {},
+        response = post_test(url_var, {},
                                               val_edit_target_form,
                                               rf, target_id=target_key)
         assert response.status_code == 302
@@ -526,7 +501,7 @@ class TestDataHandling(object):
         for target_item in get_brain_targets():
             target_key = target_item["id"]
         url_var = "delete_target_row/{}/".format(target_key)
-        response = TestDataHandling.get_test(url_var, delete_specific_target, rf, target_id=target_key)
+        response = get_test(url_var, delete_specific_target, rf, target_id=target_key)
         assert response.status_code == 302
         assert response.url == "/"
 
@@ -538,13 +513,13 @@ class TestDataHandling(object):
         :return: status code
         """
         url_var = "file_upload/"
-        response = TestDataHandling.get_test(url_var, file_upload_list, rf)
+        response = get_test(url_var, file_upload_list, rf)
         assert response.status_code == 200
         with pytest.raises(json.JSONDecodeError):
             post_data = json.loads(str(SAMPLE_FILE_ID))
-            response = TestDataHandling.post_test(url_var, post_data, file_upload_list, rf)
+            response = post_test(url_var, post_data, file_upload_list, rf)
             assert response.status_code == 200
-            response = TestDataHandling.post_test(url_var, {}, file_upload_list, rf)
+            response = post_test(url_var, {}, file_upload_list, rf)
             assert response.status_code == 200
 
     @staticmethod
@@ -559,9 +534,9 @@ class TestDataHandling(object):
 
         with pytest.raises(json.JSONDecodeError):
             current_state = json.loads(str(post_data))
-            response = TestDataHandling.post_test(url_var, current_state, persist_job_state, rf)
+            response = post_test(url_var, current_state, persist_job_state, rf)
             assert response.status_code == 200
-            response = TestDataHandling.post_test(url_var, {}, persist_job_state, rf)
+            response = post_test(url_var, {}, persist_job_state, rf)
             assert response.status_code == 200
 
     @staticmethod
@@ -596,9 +571,9 @@ class TestDataHandling(object):
 
         with pytest.raises(json.JSONDecodeError):
             current_state = json.loads(str(post_data))
-            response = TestDataHandling.post_test(url_var, current_state, persist_job_state, rf)
+            response = post_test(url_var, current_state, persist_job_state, rf)
             assert response.status_code == 200
-            response = TestDataHandling.post_test(url_var, {}, persist_job_state, rf)
+            response = post_test(url_var, {}, persist_job_state, rf)
             assert response.status_code == 200
 
     @staticmethod
@@ -609,7 +584,7 @@ class TestDataHandling(object):
         :return: status code
         """
         url_var = "action/load_state/"
-        response = TestDataHandling.get_test(url_var, load_job_state, rf)
+        response = get_test(url_var, load_job_state, rf)
         assert response.status_code == 200
 
     @staticmethod
@@ -620,7 +595,7 @@ class TestDataHandling(object):
         :return:
         """
         url_var = "del_file_upload/{}/".format(SAMPLE_FILE_ID)
-        response = TestDataHandling.get_test(url_var, del_file_from_list, rf, target_id=SAMPLE_FILE_ID)
+        response = get_test(url_var, del_file_from_list, rf, target_id=SAMPLE_FILE_ID)
         assert response.status_code == 200
 
     @staticmethod
@@ -631,9 +606,14 @@ class TestDataHandling(object):
         :param rf:
         :return:
         """
+        binary.put_buffer(SAMPLE_FILE_ID,
+                          read_test_file(SAMPLE_FILE_ID,
+                                         BACKEND_DIR + "/Backend_tests/"))
         url_var = "file_listing/"
-        response = TestDataHandling.get_test(url_var, get_file_listing, rf)
+        response = get_test(url_var, get_file_listing, rf)
+        db_file_list = ast.literal_eval(response.content.decode())
         assert response.status_code == 200
+        assert SAMPLE_FILE_ID in db_file_list
 
     @staticmethod
     def test_get_file(rf):
@@ -644,5 +624,17 @@ class TestDataHandling(object):
         :return:
         """
         url_var = "file_download/{}/".format(SAMPLE_FILE_ID)
-        response = TestDataHandling.get_test(url_var, get_file, rf, target_id=SAMPLE_FILE_ID)
+        response = get_test(url_var, get_file, rf, target_id=SAMPLE_FILE_ID)
+        assert response.status_code == 200
+        assert SAMPLE_FILE_ID in response['Content-Disposition']
+
+    @staticmethod
+    def test_get_interfaces(rf):
+        """
+
+        :param rf:
+        :return:
+        """
+        url_var = "get_interfaces/"
+        response = get_test(url_var, get_interfaces, rf)
         assert response.status_code == 200

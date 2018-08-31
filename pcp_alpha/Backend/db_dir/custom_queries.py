@@ -74,13 +74,13 @@ def insert_brain_jobs_w3(w3_jobs):
             # fake an ID
             inserted["generated_keys"].append("invalid-job")
         else:
-            print(param_item)
+            print("param_item:\n{}\n".format(param_item))
             attempted = brain.queries.insert_jobs([param_item], verify_jobs=False)
             inserted["generated_keys"].extend(attempted["generated_keys"])
             inserted["inserted"] += 1
 
     print("log: db job from W3 was inserted to Brain.Jobs")
-    print("{}\n".format(inserted))
+    print("inserted:\n{}\n".format(inserted))
     return inserted
 
 
@@ -206,3 +206,66 @@ def get_brain_file(file_id):
     except ValueError:
         response = None
     return response
+
+
+def get_plugin_list_query():
+    """
+
+    :return:
+    """
+    # This function will be modified in the future
+    return_plugin_list = list()
+    plugin_list = brain.controller.plugins.get_plugins()
+    for plugin_item in plugin_list:
+        return_plugin_list.append(plugin_item)
+    return return_plugin_list
+
+
+def get_interface_list():
+    """
+
+    :return:
+    """
+    return brain.controller.plugins.get_interfaces()
+
+
+def update_plugin_to_brain(plugin):
+    """
+
+    :param plugin:
+    :return:
+    """
+    response = None
+    if plugin["id"] == "NEW":
+        all_ports = "-".join(plugin['ExternalPorts']).replace("/", "")
+        del (plugin['id'])  # allow database to generate a new id
+        plugin["ServiceName"] = "{}-{}".format(plugin["Name"],
+                                               all_ports)
+        plugin["InternalPorts"] = plugin['ExternalPorts']
+        plugin["State"] = "Available"
+        plugin["ServiceID"] = "NEW"
+        response = brain.controller.plugins.create_plugin(plugin,
+                                                          verify_plugin=True)
+    else:
+        response = brain.controller.plugins.update_plugin(plugin,
+                                                          verify_plugin=True)
+    return response
+
+
+def desired_plugin_state_brain(plugin_id_list, desired_state):
+    """
+
+    :param plugin_id_list:
+    :param desired_state: 
+    :return: 
+    """
+    return_objects = list()
+    for plugin_id_item in plugin_id_list:
+        if desired_state == 'activate':
+            return_object = brain.controller.plugins.activate(plugin_id_item.strip('\"'))
+        elif desired_state == 'restart':
+            return_object = brain.controller.plugins.restart(plugin_id_item.strip('\"'))
+        else:
+            return_object = brain.controller.plugins.stop(plugin_id_item.strip('\"'))
+        return_objects.append(return_object)
+    return return_objects
