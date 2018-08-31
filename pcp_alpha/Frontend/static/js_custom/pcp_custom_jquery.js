@@ -933,7 +933,7 @@ function clear_new_jobs(){
 
 // DRAG
 function drag_target(){
-   // console.log("drag_target");
+   console.log("drag_target");
 	$(".gridSelect tbody tr").draggable({
         appendTo: $("#third_box_content"),
 	    helper: function(){
@@ -955,13 +955,15 @@ function drag_target(){
             }
             var container = $('<table/>').attr({'id':'draggingContainer', 'style': 'position: absolute;z-index: 1'});
             container.append(container_to_drag.clone().removeClass("selected"));
-            $("#third_box_content tr").attr({'style': 'position: relative;z-index: 1000'});
+            // $("#third_box_content tr").attr({'style': 'position: relative;z-index: 1000'});
+            $("#third_box_content tr").addClass("wayBack");
             hover_w3_for_target();
             return container;
 	    },
 	    revert: function(){
 	        hide_drop_all();
 	        hover_int = 0;
+	        $("#third_box_content tr").removeClass("wayBack");
 	        return true;
         }
 	});
@@ -1180,7 +1182,7 @@ function set_w3_job_status(full_update=false){
 
 
 function drop_command_to_multiple(ev) {
-//    console.log("drop_command_to_multiple");  // debug
+   // console.log("drop_command_to_multiple");  // debug
     ev.preventDefault();
     var command_json = ev.dataTransfer.getData("text");
     $("#w3_drop_to_all").css("display", "none");
