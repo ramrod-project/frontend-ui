@@ -93,7 +93,8 @@ _TEST_COMMANDS = [
     {
         "CommandName": "echo",
         "Tooltip": '\nEcho\n\nClient Returns this string verbatim\n'
-                   '\nArguments:\n1. String to Echo\n\nReturns:\nString\n',
+                   '\nArguments:\n1. String to Echo'
+                   '\nOptArguments:\n1. String to Put on STDOUT\n\nReturns:\nString\n',
         "Output": True,
         "Inputs": [
             {
@@ -103,7 +104,14 @@ _TEST_COMMANDS = [
                 "Value": "echo user input"
             },
         ],
-        "OptionalInputs": []
+        "OptionalInputs": [
+            {
+                "Name": "OptionalEchoString",
+                "Type": "textbox",
+                "Tooltip": "This string will be printed to remote stderr",
+                "Value": ""
+            },
+        ]
     },
     {
         "CommandName": "terminal_input",
