@@ -543,6 +543,12 @@ Functions down below are for w3
 -----------------------------------------------------------------------------------------------------
 */
 function drop_target_into_job_row(job_row_id, target_js, target_js_str=""){
+    /*
+    Params:
+    job_row_id == destination job row
+    target_js == json target
+    target_js_str == json target as a string
+     */
     if (job_row_is_mutable(job_row_id)){
         if (target_js_str.length == 0){
             target_js_str = JSON.stringify(target_js)
@@ -687,7 +693,14 @@ function quick_action_function(source, source_widget_id, source_widget){
         if (inc === 0){  // check if job rows doesn't exist in W3, create row
             add_new_job();
             drop_target_into_job_row(inc, row_js, source);
-        } else {  // else if no job rows are highlighted, and job rows exist
+        // If job row or rows are highlighted
+        }
+        else if (inc !== 0 && w3_column.length > 0){
+            for (var counter_three= 0; counter_three < w3_column.length; counter_three++) {
+                drop_target_into_job_row(""+w3_column[counter_three], row_js, source);
+            }
+        }
+        else {  // else if no job rows are highlighted, and job rows exist
             for (var counter_two = 1; counter_two <= inc; counter_two++){
                 if ($("tr td#" + source_widget_id + counter_two)[0].textContent === ""){
                     drop_target_into_job_row(""+counter_two, row_js, source);
