@@ -562,6 +562,12 @@ Functions down below are for w3
 -----------------------------------------------------------------------------------------------------
 */
 function drop_target_into_job_row(job_row_id, target_js, target_js_str=""){
+    /*
+    Params:
+    job_row_id == destination job row
+    target_js == json target
+    target_js_str == json target as a string
+     */
     if (job_row_is_mutable(job_row_id)){
         if (target_js_str.length == 0){
             target_js_str = JSON.stringify(target_js)
@@ -706,7 +712,14 @@ function quick_action_function(source, source_widget_id, source_widget){
         if (inc === 0){  // check if job rows doesn't exist in W3, create row
             add_new_job();
             drop_target_into_job_row(inc, row_js, source);
-        } else {  // else if no job rows are highlighted, and job rows exist
+        // If job row or rows are highlighted
+        }
+        else if (inc !== 0 && w3_column.length > 0){
+            for (var counter_three= 0; counter_three < w3_column.length; counter_three++) {
+                drop_target_into_job_row(""+w3_column[counter_three], row_js, source);
+            }
+        }
+        else {  // else if no job rows are highlighted, and job rows exist
             for (var counter_two = 1; counter_two <= inc; counter_two++){
                 if ($("tr td#" + source_widget_id + counter_two)[0].textContent === ""){
                     drop_target_into_job_row(""+counter_two, row_js, source);
@@ -939,7 +952,7 @@ function clear_new_jobs(){
 
 // DRAG
 function drag_target(){
-   // console.log("drag_target");
+   console.log("drag_target");
 	$(".gridSelect tbody tr").draggable({
         appendTo: $("#third_box_content"),
 	    helper: function(){
@@ -961,13 +974,15 @@ function drag_target(){
             }
             var container = $('<table/>').attr({'id':'draggingContainer', 'style': 'position: absolute;z-index: 1'});
             container.append(container_to_drag.clone().removeClass("selected"));
-            $("#third_box_content tr").attr({'style': 'position: relative;z-index: 1000'});
+            // $("#third_box_content tr").attr({'style': 'position: relative;z-index: 1000'});
+            $("#third_box_content tr").addClass("wayBack");
             hover_w3_for_target();
             return container;
 	    },
 	    revert: function(){
 	        hide_drop_all();
 	        hover_int = 0;
+	        $("#third_box_content tr").removeClass("wayBack");
 	        return true;
         }
 	});
@@ -1186,7 +1201,7 @@ function set_w3_job_status(full_update=false){
 
 
 function drop_command_to_multiple(ev) {
-//    console.log("drop_command_to_multiple");  // debug
+   // console.log("drop_command_to_multiple");  // debug
     ev.preventDefault();
     var command_json = ev.dataTransfer.getData("text");
     $("#w3_drop_to_all").css("display", "none");

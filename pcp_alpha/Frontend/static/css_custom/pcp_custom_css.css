@@ -60,3 +60,7 @@ input.terminal-window {
     padding-right: 0.3em;
     list-style-type:none
 }
+.wayBack {
+    position: relative;
+    z-index: 1000;
+}
