@@ -713,6 +713,7 @@ function quick_action_function(source, source_widget_id, source_widget){
     source_widget_id == commandid or pluginid
     source_widget = target or command
      */
+    
     var BreakException= {};
     var highlighted_job_row = w3_highlighted_array,
         command_temp_str = JSON.stringify(current_command_template),
