@@ -60,7 +60,13 @@ input.terminal-window {
     padding-right: 0.3em;
     list-style-type:none
 }
-.wayBack {
+
+.custom_drag {
+    position: relative;
+    z-index: 100;
+}
+
+.w3_box_css {
     position: relative;
     z-index: 1000;
 }
