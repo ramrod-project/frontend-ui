@@ -19,9 +19,9 @@ var active_sequence = "1";
 var exec_int = 0;
 var job_select_table;
 var w3_highlighted_row,
-    w3_highlighted_array,
     w3_content_index,
     w3_highlighted_array = [],
+    as_highlighted_checker = {},
     start_timer_interval,
     start_timer_map = {};
 
@@ -29,6 +29,7 @@ var timer_on = 1,
     time_var,
     test_server = 'ws://' + window.location.hostname + ':3000/monitor',
     test_ws = new WebSocket(test_server);
+as_highlighted_checker[active_sequence] = 0;
 
 
 $(document).ready(function() {
@@ -54,13 +55,13 @@ $(document).ready(function() {
         select: true
     });
     // $(".dataTables_empty").empty();
-
     $('#job_table tbody').on( 'click', 'tr', function () {
         if ($(this).hasClass('selected')) {
             $(this).removeClass('selected');
             w3_content_index = w3_highlighted_array.indexOf($(this)[0].rowIndex);
             if (w3_content_index > -1){
                 w3_highlighted_array.splice(w3_content_index, 1);
+                as_highlighted_checker[active_sequence] = 0;
             }
 
         }
@@ -69,6 +70,7 @@ $(document).ready(function() {
             $(this).addClass('selected');
             w3_highlighted_row = $(this)[0].rowIndex;
             w3_highlighted_array.push(w3_highlighted_row);
+            as_highlighted_checker[active_sequence] = 1;
         }
     });
 
@@ -377,6 +379,63 @@ function filter_w2() {
     }
 }
 
+
+
+function add_intput_to_command_builder(input_id, input_i, template_key){
+    var new_input;
+    var new_selector;
+    new_input = document.createElement("input");
+    // if input.type == file_list
+    if (current_command_template[template_key][input_i]['Type'] === 'file_list'){
+        var file_list = $(".upload_file_list li div label");
+        // file list dropdown
+        new_selector = $("<select/>")
+            .attr({"class": "form-control mySelect",
+                   "style": "width:250px"})
+            .attr("id", "argumentid_"+input_id)
+            .css("display", "none");
+
+        $("#commandIdBuilder")
+            .append($("<div/>")
+                .attr({"class": "form-group"})
+                .append(new_selector.css("display", "")));
+
+        for (var n=0; n<file_list.length; n++){
+            current_command_template[template_key][input_i]['Value'] = file_list[n].innerText;
+            $(".mySelect")
+                .change(update_argument)
+                .append(
+                    $("<option/>")
+                        .attr("value", file_list[n].innerText)
+                        .text(file_list[n].innerText));
+        }
+    }
+    // if input.type == textbox
+    else {
+        new_input.label = "argumentid_("+input_i+")";
+        new_input.id = "argumentid_"+input_id;
+        new_input.title = current_command_template[template_key][input_i]["Tooltip"];
+        new_input.onchange = update_argument;
+        new_input.onkeyup = update_argument;
+        new_input.placeholder = current_command_template[template_key][input_i]['Value'];
+
+        var new_input_holder = $("<div/>").append(new_input);
+        $("#commandIdBuilder").append(new_input_holder);
+        $("#"+new_input.id).tooltip({
+                                      classes: {"ui-tooltip": "highlight"},
+                                      items: 'span',
+                                      position: {
+                                        my: "left top",
+                                        at: "right+5",
+                                        collision: "none"
+                                      }
+                                    });
+    }
+}
+
+
+
+
 function get_commands_func(){
 //    console.log("get_commands_func");  // debug
 //    console.log($(this)[0].parentElement.id);
@@ -385,9 +444,8 @@ function get_commands_func(){
     var row_id = $(this)[0].parentElement.id.substring(10, $(this)[0].id.length);
     var plugin_name_var = $("#name_tag_id"+row_id+" a span")[1].innerText;
     var check_content_var = false;
-    var quick_action_button,
-        new_input,
-        new_selector;
+    var quick_action_button;
+    var argid = 0;
 
     $.ajax({
         type: "GET",
@@ -472,55 +530,12 @@ function get_commands_func(){
 
 
                 for (var input_i = 0; input_i < current_command_template['Inputs'].length; input_i++){
-                    new_input = document.createElement("input");
-
-                    // if input.type == file_list
-                    if (current_command_template["Inputs"][input_i]['Type'] === 'file_list'){
-                        var file_list = $(".upload_file_list li div h4");
-                        // file list dropdown
-                        new_selector = $("<select/>")
-                            .attr({"class": "form-control mySelect",
-                                   "style": "width:250px"})
-                            .attr("id", "argumentid_"+input_i)
-                            .css("display", "none");
-
-                        $("#commandIdBuilder")
-                            .append($("<div/>")
-                                .attr({"class": "form-group"})
-                                .append(new_selector.css("display", "")));
-
-
-                        for (var n=0; n<file_list.length; n++){
-                            current_command_template["Inputs"][input_i]['Value'] = file_list[n].innerText;
-                            $(".mySelect")
-                                .change(update_argument)
-                                .append(
-                                    $("<option/>")
-                                        .attr("value", file_list[n].innerText)
-                                        .text(file_list[n].innerText));
-                        }
-                    }
-                    // if input.type == textbox
-                    else {
-                        new_input.label = "argumentid_("+input_i+")";
-                        new_input.id = "argumentid_"+input_i;
-                        new_input.title = current_command_template['Inputs'][input_i]["Tooltip"];
-                        new_input.onchange = update_argument;
-                        new_input.onkeyup = update_argument;
-                        new_input.placeholder = current_command_template["Inputs"][input_i]['Value'];
-
-                        var new_input_holder = $("<div/>").append(new_input);
-                        $("#commandIdBuilder").append(new_input_holder);
-                        $("#"+new_input.id).tooltip({
-                                                      classes: {"ui-tooltip": "highlight"},
-                                                      items: 'span',
-                                                      position: {
-                                                        my: "left top",
-                                                        at: "right+5",
-                                                        collision: "none"
-                                                      }
-                                                    });
-                    }
+                    add_intput_to_command_builder(argid, input_i, "Inputs");
+                    argid = argid + 1;
+                }
+                for (var input_oi = 0; input_oi < current_command_template["OptionalInputs"].length; input_oi++){
+                    add_intput_to_command_builder(argid, input_oi, "OptionalInputs");
+                    argid = argid + 1;
                 }
                 $("a#add_command_to_job_id").click(add_command_to_job_sc_button);  // command to job shortcut button
             });
@@ -530,11 +545,17 @@ function get_commands_func(){
         }
     })
 }
+
 function update_argument(event){
     var source = event.target || event.srcElement;
-    var cmditem = source.id.substring(11,source.id.length);
+    var cmditem = get_number_from_id(source.id, "argumentid_");
+    var assumed_input = "Inputs";
+    if (Number(cmditem) >= current_command_template[assumed_input].length){
+        cmditem = cmditem - current_command_template[assumed_input].length;
+        assumed_input = "OptionalInputs";
+    }
     console.warn("updating commdn item "+ cmditem);
-    current_command_template["Inputs"][cmditem]["Value"] = source.value;
+    current_command_template[assumed_input][cmditem]["Value"] = source.value;
     document.getElementById("JSON_Command_DATA").innerText = JSON.stringify(current_command_template);
 }
 /*
@@ -543,6 +564,12 @@ Functions down below are for w3
 -----------------------------------------------------------------------------------------------------
 */
 function drop_target_into_job_row(job_row_id, target_js, target_js_str=""){
+    /*
+    Params:
+    job_row_id == destination job row
+    target_js == json target
+    target_js_str == json target as a string
+     */
     if (job_row_is_mutable(job_row_id)){
         if (target_js_str.length == 0){
             target_js_str = JSON.stringify(target_js)
@@ -669,6 +696,21 @@ function save_job_state(){
     });
 }
 
+function as_checker_func(as){
+    var highlighted_job_row = w3_highlighted_array;
+    as_highlighted_checker[as] = 0;
+    try {
+        sequences[as].forEach(function(value) {
+            if (highlighted_job_row.includes(Number(value))){
+                as_highlighted_checker[as] = 1;
+            }
+        });
+    } catch (e) {
+        if (e!==BreakException) throw e;
+    }
+    return as_highlighted_checker[as]
+}
+
 function quick_action_function(source, source_widget_id, source_widget){
     /*
     Quick action button handler for commands & targets
@@ -677,7 +719,9 @@ function quick_action_function(source, source_widget_id, source_widget){
     source_widget_id == commandid or pluginid
     source_widget = target or command
      */
-    var w3_column = w3_highlighted_array,
+
+    var BreakException= {};
+    var highlighted_job_row = w3_highlighted_array,
         command_temp_str = JSON.stringify(current_command_template),
         new_job_row_arry_checker = [];
 
@@ -687,18 +731,32 @@ function quick_action_function(source, source_widget_id, source_widget){
         if (inc === 0){  // check if job rows doesn't exist in W3, create row
             add_new_job();
             drop_target_into_job_row(inc, row_js, source);
+        } else if (inc !== 0 && as_highlighted_checker[active_sequence] !== 0){
+            try {
+                sequences[active_sequence].forEach(function(value) {
+                    if (highlighted_job_row.includes(Number(value))){
+                        drop_target_into_job_row(""+value, row_js, source);
+                    }
+                });
+            } catch(e) {
+                if (e!==BreakException) throw e;
+            }
         } else {  // else if no job rows are highlighted, and job rows exist
-            for (var counter_two = 1; counter_two <= inc; counter_two++){
-                if ($("tr td#" + source_widget_id + counter_two)[0].textContent === ""){
-                    drop_target_into_job_row(""+counter_two, row_js, source);
-                    break;
-                } else {
-                    new_job_row_arry_checker.push(counter_two);
-                }
+            try {
+                sequences[active_sequence].forEach(function(value) {
+                    if ($("tr td#" + source_widget_id + value)[0].textContent === "") {
+                        drop_target_into_job_row(""+value, row_js, source);
+                        throw BreakException;
+                    } else {
+                        new_job_row_arry_checker.push(value);
+                    }
+                });
+            } catch (e) {
+                if (e!==BreakException) throw e;
             }
         }
         // if all job rows iterated and all filled, create  new job row
-        if (new_job_row_arry_checker.length === inc) {
+        if (new_job_row_arry_checker.length === sequences[active_sequence].size) {
             add_new_job();
             drop_target_into_job_row(inc, row_js, source);
         }
@@ -707,36 +765,44 @@ function quick_action_function(source, source_widget_id, source_widget){
         // check if job rows doesn't exist in W3, create row
         if (inc === 0) {
             add_new_job();
-            // $("tr td#commandid"+inc);
             drop_command_into_hole(current_command_template,
                                    command_temp_str,
                                    $("tr td#" + source_widget_id + inc),
                                    "" + inc);
         // If job row or rows are highlighted
-        } else if (inc !== 0 && w3_column.length > 0) {
-            for (var counter_one = 0; counter_one < w3_column.length; counter_one++) {
-                drop_command_into_hole(current_command_template,
-                                       command_temp_str,
-                                       $("tr td#" + source_widget_id + w3_column[counter_one]),
-                                       "" + (counter_one + 1));
+        } else if (inc !== 0 && as_highlighted_checker[active_sequence] !== 0) {
+            try {
+                sequences[active_sequence].forEach(function(value) {
+                    if (highlighted_job_row.includes(Number(value))){
+                        drop_command_into_hole(current_command_template,
+                            command_temp_str,
+                            $("tr td#" + source_widget_id + value),
+                            ""+value);
+                    }
+                });
+            } catch(e) {
+                if (e!==BreakException) throw e;
             }
         // else if no job rows are highlighted, and job rows exist
         } else {
-            for (var counter_three = 1; counter_three <= inc; counter_three++) {
-                // if a command box  or plugin box is not empty in the latest job row (Iterate through job rows)
-                if ($("tr td#" + source_widget_id + counter_three)[0].textContent === "") {
-                    drop_command_into_hole(current_command_template,
-                                           command_temp_str,
-                                           $("tr td#" + source_widget_id + counter_three),
-                                           ""+counter_three);
-                    break;
-                } else {
-                    new_job_row_arry_checker.push(counter_three);
-                }
+            try {
+                sequences[active_sequence].forEach(function(value) {
+                    if ($("tr td#" + source_widget_id + value)[0].textContent === ""){
+                        drop_command_into_hole(current_command_template,
+                            command_temp_str,
+                            $("tr td#" + source_widget_id + value),
+                            ""+value);
+                        throw BreakException;
+                    } else {
+                        new_job_row_arry_checker.push(value);
+                  }
+                });
+            } catch(e) {
+                if (e!==BreakException) throw e;
             }
         }
         // if all job rows iterated and all filled, create  new job row
-        if (new_job_row_arry_checker.length === inc) {
+        if (new_job_row_arry_checker.length === sequences[active_sequence].size) {
             add_new_job();
             drop_command_into_hole(current_command_template,
                 command_temp_str,
@@ -795,12 +861,14 @@ function synchronize_job_sequence_tabs(tab_id){
     var other_tab = $('#output_tabs a[href="#outq_'+tab_id+'"]');
     other_tab.tab('show');
     synchronize_sequence_tab_rows(tab_id);
+    as_checker_func(active_sequence);
 }
 function synchronize_output_sequence_tabs(tab_id){
     active_sequence = tab_id;
     var other_tab = $('#jobq_tabs a[href="#jobq_'+tab_id+'"]');
     other_tab.tab('show');
     synchronize_sequence_tab_rows(tab_id);
+    as_checker_func(active_sequence);
 }
 function synchronize_sequence_tab_rows(sequence_id){
     var _dt = new Date(Number(sequence_starttime_map[sequence_id]) * 1000);
@@ -940,15 +1008,17 @@ function drag_target(){
             } else if (container_to_drag.length == 1) {
                 display_drop_all();
             }
-            var container = $('<table/>').attr({'id':'draggingContainer', 'style': 'position: absolute;z-index: 1'});
+            var container = $('<table/>').attr({'id':'draggingContainer'}).addClass('custom_drag');
             container.append(container_to_drag.clone().removeClass("selected"));
-            $("#third_box_content tr").attr({'style': 'position: relative;z-index: 1000'});
+            $("#third_box_content tr").addClass('the_second_class');
             hover_w3_for_target();
             return container;
 	    },
 	    revert: function(){
 	        hide_drop_all();
 	        hover_int = 0;
+	        $("#draggingContainer").removeClass('custom_drag');
+	        $("#third_box_content tr").removeClass('w3_box_css');
 	        return true;
         }
 	});
@@ -1167,7 +1237,7 @@ function set_w3_job_status(full_update=false){
 
 
 function drop_command_to_multiple(ev) {
-//    console.log("drop_command_to_multiple");  // debug
+   // console.log("drop_command_to_multiple");  // debug
     ev.preventDefault();
     var command_json = ev.dataTransfer.getData("text");
     $("#w3_drop_to_all").css("display", "none");
