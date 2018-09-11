@@ -13,6 +13,7 @@ var id_map = {};
 var id_status_map = {};
 var id_reverse_map = {};
 var id_replication_map = {};
+var target_id_map = {};
 var current_plugin_commands = [];
 var ws_map = {};
 var active_sequence = "1";
@@ -77,6 +78,7 @@ $(document).ready(function() {
     ws_map["status"] = open_websocket("status", status_change_ws_callback);
     ws_map["files"] = open_websocket("files", files_change_ws_callback);
     ws_map['plugins'] = open_websocket("plugins", plugins_change_ws_callback);
+    ws_map['telemetry'] = open_websocket("telemetry", telemetry_change_ws_callback);
     start_ping_pong();
 
     $("#upload_files_need_refreshed").hide();
@@ -156,6 +158,7 @@ $(document).ready(function() {
     $("#clear_seq_buttonid").click(hide_current_sequence);
     $("#persist_button").click(save_job_state);
     $("#loader_button").click(load_job_state);
+    generate_target_id_map();
     $("#w3_drop_target_to_all").droppable({
         drop: function (event, ui){
             var selected_var = ui.helper.children();
@@ -177,7 +180,17 @@ $(document).ready(function() {
     });
 
 });
-
+function generate_target_id_map(){
+    var rows = $("#target_box_contentid tr td a span");
+    for (var i in rows){
+        var row_id = rows[i].id;
+        if (row_id !== undefined && row_id.indexOf("nameidjson")!==-1){
+            var row_js = JSON.parse(rows[i].innerText);
+            var row_num = get_number_from_id(row_id, "nameidjson");
+            target_id_map[row_js.id] = row_num;
+        }
+    }
+}
 /*
 -----------------------------------------------------------------------------------------------------
 Websockets functions
@@ -278,6 +291,13 @@ function files_change_ws_callback(message){
 function plugins_change_ws_callback(message){
     if (message.data.length > 0 && message.data[0] == "{"){
         $("#plugins_need_refreshed").show();
+    }
+}
+function telemetry_change_ws_callback(message){
+    if (message.data.length > 0 && message.data[0] == "{"){
+        var data_js = JSON.parse(message.data);
+        $("#target_info"+target_id_map[data_js.id])[0].title = JSON.stringify(data_js.Optional, null, 2);
+        console.log(data_js);
     }
 }
 
