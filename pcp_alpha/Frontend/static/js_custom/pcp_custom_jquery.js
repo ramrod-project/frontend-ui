@@ -387,7 +387,7 @@ function add_intput_to_command_builder(input_id, input_i, template_key){
     new_input = document.createElement("input");
     // if input.type == file_list
     if (current_command_template[template_key][input_i]['Type'] === 'file_list'){
-        var file_list = $(".upload_file_list li div h4");
+        var file_list = $(".upload_file_list li div label");
         // file list dropdown
         new_selector = $("<select/>")
             .attr({"class": "form-control mySelect",
