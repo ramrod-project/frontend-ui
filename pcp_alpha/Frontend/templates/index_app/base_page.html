@@ -156,14 +156,6 @@ desired effect
     <!-- Content Header (Page header) -->
     <section class="content-header">
       {% block breadcrumb %}
-      <h1>
-        PCP Dashboard
-        <small>Home page</small>
-      </h1>
-      <!--<ol class="breadcrumb">-->
-        <!--<li><a href="#"><i class="fa fa-dashboard"></i> Main</a></li>-->
-        <!--<li class="active">Here</li>-->
-      <!--</ol>-->
       {% endblock %}
     </section>
 
@@ -178,209 +170,145 @@ desired effect
       <div class="row">
         <!--W1-->
         <div class="col-md-6">
-            <div class="nav-tabs-custom box-success">
-            <!-- Left box TABS HERE -->
-                <ul class="nav nav-tabs">
-                    <li class="pull-left header"><i class="fa fa-laptop"></i> Target List</li>
-                    <!--<li class="active"><a href="#tab_1" data-toggle="tab">tab 1 here</a></li>-->
-                    <!--<li><a href="#tab_3" data-toggle="tab">tab 2 here</a></li>-->
-
-                    <!--Minimize and Maximize buttons-->
-                    <!--<li class="pull-right">-->
-                        <!--<button type="button" class="btn bg-grey btn-sm" data-widget="collapse"><i class="fa fa-minus"></i>-->
-                        <!--</button>-->
-                        <!--<button type="button" class="btn bg-grey btn-sm" data-widget="remove"><i class="fa fa-times"></i>-->
-                        <!--</button>-->
-                    <!--</li>-->
-                    <!--/Minimize and Maximize buttons-->
-
-                    <!-- Search button -->
-                    <li class="pull-right">
-                        <div id="user_search_hide_id" class="input-group input-group-sm" style="width: 150px;">
-                            <input class="form-control pull-right" id="searchNameHere_id" name="searchNameHere" placeholder="Search">
-                            <div id="user_search_button_hide_id" class="input-group-btn">
-                                <button id="user_search" type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
-                            </div>
-                        </div>
-                    </li>
-                    <!-- /Search button -->
-                </ul>
-                <!-- /Left box TABS HERE -->
-                <div id="w1_command_active_filter" class="alert alert-info" ></div>
-                <form action="/action/get_command_list/" method="get" onsubmit="return false;">
-                <div class="tab-content">
-                  <div class="box box-primary">
-                    <!--box body-->
-                    <div id="targetTableWrapper" class="box-body">
-                      <div id="example2_wrapper" class="dataTables_wrapper form-inline dt-bootstrap">
-                          <div class="row">
-                              <div class="col-sm-6">
-
-                              </div>
-                              <div class="col-sm-6">
-
-                              </div>
-                          </div>
-                          <div class="row">
-                              <div id="targtTableScroll">
-                                  <div class="col-sm-12">
-                                      <table id="target_table" class="table table-bordered table-hover dataTable display gridSelect" role="grid" aria-describedby="target_table_info">
-                                          <thead>
-                                          <tr role="row">
-                                              <!--<th class="sorting_asc" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Rendering engine: activate to sort column descending">-->
-                                                  <!--Row #-->
-                                              <!--</th>-->
-                                              <th class="sorting text" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Plugin Name: activate to sort column ascending">
-                                                  Plugin Name
-                                              </th>
-                                              <th class="sorting text" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Location: activate to sort column ascending">
-                                                  Location
-                                              </th>
-                                              <th class="sorting text" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">
-
-                                              </th>
-                                          </tr>
-                                          </thead>
-                                          <tbody id="target_box_contentid" class="target_box_content">
-                                          {% if host_dict %}
-                                            {% for items in host_dict %}
-                                                <!--<a name="name_tag_name">-->
-                                                <tr role="row" class="odd" id="target_row{{ forloop.counter0 }}">
-                                                    <!--<td>-->
-                                                        <!--<input class="target_checkbox" type="checkbox">&nbsp;{{ forloop.counter }}<br>-->
-                                                    <!--</td>-->
-                                                    <td id="name_tag_id{{ forloop.counter0 }}" class="clickable-row-col1" onclick="#">
-                                                        <a href="#">
-                                                        <span style="display:none" id="nameidjson{{ forloop.counter0 }}">{{ items.json }}</span>
-                                                        <span>{{ items.PluginName }}</span>
-                                                        </a>
-                                                    </td>
-                                                    <td id="address_tag_id{{ forloop.counter0 }}" class="clickable-row-col2" onclick="#">
-                                                        <a href="#">
-                                                        <span>{{ items.Location }}</span>
-                                                        </a>
-                                                    </td>
-                                                    <td id="action_tad_id{{ forloop.counter0 }}" style="text-align: center; width: 80px;" class="clickable-row-col3" onclick="#">
-                                                        <span id="edit_target_id">
-                                                            <a href="/edit_target_form/{{ items.id }}/" target="_blank" class="btn btn-social-icon btn-bitbucket btn-xs" data-toggle="tooltip" title="Edit Target">
-                                                                <i class="fa fa-edit"></i>
-                                                            </a>
-                                                        </span>
-                                                        <span id="add_job_sc_id_attr">
-                                                            <a href="#" id="add_job_sc_id{{ forloop.counter0 }}" class="btn btn-social-icon btn-linkedin btn-xs" data-toggle="tooltip" title="Add Target to W3">
-                                                                <i class="fa fa-tasks"></i>
-                                                            </a>
-                                                        </span>
-                                                        <span>
-                                                            <button id="open_terminal_id{{ forloop.counter0 }}"
-                                                                    class="btn btn-social-icon btn-twitter btn-xs terminal_opener_sc fa fa-laptop"
-                                                                    title="Open Terminal to this Target (May require prior initialization)"
-                                                                    data-toggle="modal"
-                                                                    data-target="#terminal-modal"
-                                                                    data-terminaldata='{"target":{{ items.json }}, "sequence":"_C_2_2"}'>
-                                                            </button>
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                                <!--</a>-->
-                                            {% endfor %}
-                                          {% endif %}
-                                          </tbody>
-                                          <tfoot>
-    {#                                      <tr>#}
-    {#                                          <!--<th rowspan="1" colspan="1">Row #</th>-->#}
-    {#                                          <th rowspan="1" colspan="1">Plugin Name</th>#}
-    {#                                          <th rowspan="1" colspan="1">Location</th>#}
-    {#                                          <th rowspan="1" colspan="1"></th>#}
-    {#                                      </tr>#}
-                                          </tfoot>
-                                      </table>
-                                  </div>
-                              </div>
-                          </div>
-                          <div class="row">
-                          </div>
-                      </div>
-                    </div>
-                    <!-- /.box-body -->
-                  </div>
-                    <div class="tab-pane" id="tab_2" name="tab_2">
-                    </div>
-                    <div class="tab-pane" id="tab_3">
-                    </div>
-                    <!-- /.tab-pane -->
+          <div class="box box-default" id="w1_box">
+            <!--W1 Header-->
+            <div class="box-header with-border">
+              <h2 class="box-title"><i class="fa fa-laptop"></i> Target List</h2>
+              <!--Search Input-->
+              <div class="box-tools pull-right" style="width: 160px;">
+                <div class="has-feedback" style="width: 130px;">
+                  <input class="form-control input-sm" id="searchNameHere_id" name="searchNameHere" placeholder="Search" type="text">
+                  <span class="glyphicon glyphicon-search form-control-feedback text-muted"></span>
                 </div>
-                </form>
-                <!-- /.tab-content -->
+              </div>
+              <!--/Search Input-->
+
+              <!--Collapse Button-->
+              <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" id="w1_collapse_id" data-widget="collapse" onclick="synchronize_tw_collapse('w1')"><i class="fa fa-minus"></i></button>
+              </div>
+              <!--/Collapse Button-->
             </div>
-          <!-- /.box -->
+            <!--/W1 Header-->
+            <div id="w1_command_active_filter" class="alert alert-info" ></div>
+
+            <!--W1 Body-->
+            <div class="box-body" id="w1_body_box">
+              <div class="row">
+                <div class="col-sm-12">
+                  <table id="target_table" class="table table-bordered table-hover dataTable display gridSelect" role="grid" aria-describedby="target_table_info">
+                    <thead>
+                    <tr role="row">
+                      <th class="sorting text" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Plugin Name: activate to sort column ascending">
+                        Plugin Name
+                      </th>
+                      <th class="sorting text" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Location: activate to sort column ascending">
+                        Location
+                      </th>
+                      <th class="sorting text" tabindex="0" aria-controls="target_table" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">
+
+                      </th>
+                    </tr>
+                    </thead>
+                    <tbody id="target_box_contentid" class="target_box_content">
+                    {% if host_dict %}
+                      {% for items in host_dict %}
+                        <tr role="row" class="odd" id="target_row{{ forloop.counter0 }}">
+                          <td id="name_tag_id{{ forloop.counter0 }}" class="clickable-row-col1" onclick="">
+                            <a href="#">
+                              <span style="display:none" id="nameidjson{{ forloop.counter0 }}">{{ items.json }}</span>
+                              <span>{{ items.PluginName }}</span>
+                            </a>
+                          </td>
+                          <td id="address_tag_id{{ forloop.counter0 }}" class="clickable-row-col2" onclick="">
+                            <a href="#">
+                              <span>{{ items.Location }}</span>
+                            </a>
+                          </td>
+                          <td id="action_tad_id{{ forloop.counter0 }}" style="text-align: center; width: 80px;" class="clickable-row-col3" onclick="">
+                            <span id="edit_target_id">
+                              <a href="/edit_target_form/{{ items.id }}/" target="_blank" class="btn btn-social-icon btn-bitbucket btn-xs" data-toggle="tooltip" title="Edit Target">
+                                <i class="fa fa-edit"></i>
+                              </a>
+                            </span>
+                            <span id="add_job_sc_id_attr">
+                                <a href="#" id="add_job_sc_id{{ forloop.counter0 }}" class="btn btn-social-icon btn-linkedin btn-xs" data-toggle="tooltip" title="Add Target to W3">
+                                    <i class="fa fa-tasks"></i>
+                                </a>
+                            </span>
+                            <span>
+                              <button id="open_terminal_id{{ forloop.counter0 }}"
+                                      class="btn btn-social-icon btn-twitter btn-xs terminal_opener_sc fa fa-laptop"
+                                      title="Open Terminal to this Target (May require prior initialization)"
+                                      data-toggle="modal"
+                                      data-target="#terminal-modal"
+                                      data-terminaldata='{"target":{{ items.json }}, "sequence":"_C_2_2"}'>
+                              </button>
+                            </span>
+                          </td>
+                          </tr>
+                      {% endfor %}
+                    {% endif %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <!--/W1 Body-->
+          </div>
         </div>
         <!--/W1-->
 
-      <!--W2-->
-      <div class="col-md-6">
-        <div class="nav-tabs-custom">
-        <!-- W2 Tabs -->
-            <ul class="nav nav-tabs">
-                <li class="pull-left header"><i class="fa fa-exchange"></i> Command Builder</li>
-
-                <li class="pull-right">
-                    <span class="input-group input-group-sm" style="width: 150px;">
-                        <input class="form-control pull-right" id="searchCommand_id" name="searchCommandHere" placeholder="Search">
-                    </span>
-                </li>
-                <!--<li class="active"><a href="#tab_1" data-toggle="tab">tab 1 here</a></li>-->
-                <!--<li><a href="#tab_3" data-toggle="tab">tab 2 here</a></li>-->
-
-                <!--Minimize and Maximize buttons-->
-                <!--<li class="pull-right">-->
-                    <!--<button type="button" class="btn bg-grey btn-sm" data-widget="collapse"><i class="fa fa-minus"></i>-->
-                    <!--</button>-->
-                    <!--<button type="button" class="btn bg-grey btn-sm" data-widget="remove"><i class="fa fa-times"></i>-->
-                    <!--</button>-->
-                <!--</li>-->
-                <!--/Minimize and Maximize buttons-->
-            </ul>
-            <div id="w2_command_active_filter" class="alert alert-info" ></div>
-        <!-- /W2 Tabs -->
-            <div class="box box-primary">
-                <div class="box-body">
-                    <div class="row">
-                        <div class="col-xs-4">
-                            <div class="box-header theContentHeader">
-                            </div>
-
-                            <div class="tab-content theContent" style="width:250px">
-{#                                <div class="tab-pane active" id="tab1">#}
-{#                                </div>#}
-{#                                <div class="tab-pane" id="tab_4" name="tab_2">#}
-{#                                    <ul>#}
-{##}
-{#                                    </ul>#}
-{#                                </div>#}
-{#                                <div class="tab-pane" id="tab_5">#}
-{#                                </div>#}
-                            </div>
-                        </div>
-
-                        <div class="col-xs-8">
-                            <div class="box-header tooltipHeader">
-                                <!--<p><b>Tooltip:</b></p>-->
-                            </div>
-                            <div class="tab-content tooltipContent">
-
-                            </div>
-                        </div>
-                    </div>
+        <!--W2-->
+        <div class="col-md-6">
+          <div class="box box-default" id="w2_box">
+            <!--W2 Header-->
+            <div class="box-header with-border">
+              <h2 class="box-title"><i class="fa fa-exchange"></i> Command Builder</h2>
+              <!--Search Input-->
+              <div class="box-tools pull-right" style="width: 160px;">
+                <div class="has-feedback" style="width: 130px;">
+                  <input class="form-control input-sm" id="searchCommand_id" name="searchCommandHere" placeholder="Search" type="text">
+                  <span class="glyphicon glyphicon-search form-control-feedback text-muted"></span>
                 </div>
+              </div>
+              <!--/Search Input-->
+
+              <!--Collapse Button-->
+              <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" id="w2_collapse_id" data-widget="collapse" onclick="synchronize_tw_collapse('w2')"><i class="fa fa-minus"></i></button>
+              </div>
+              <!--/Collapse Button-->
             </div>
-            <div class="box-footer theContentArgument" onclick="#" draggable="true" ondragstart="drag_command(event)" ondragend="drag_end_command(event)" id="boxtwofooterid">
+            <!--/W2 Header-->
+            <div id="w2_command_active_filter" class="alert alert-info" ></div>
+
+            <!--W2 Body-->
+            <div class="box-body" id="w2_body_box">
+              <div class="row">
+                <!--Command List-->
+                <div class="col-xs-4">
+                  <div class="box-header theContentHeader"></div>
+                  <div class="tab-content theContent" style="width:250px"></div>
+                </div>
+                <!--/Command List-->
+                <!--Tooltip For Command-->
+                <div class="col-xs-8">
+                  <div class="box-header tooltipHeader"></div>
+                  <div class="tab-content tooltipContent"></div>
+                </div>
+                <!--/Tooltip For Command-->
+              </div>
             </div>
-            <!-- /.tab-content -->
+            <!--/W2 Body-->
+
+            <!--W2 Footer-->
+            <div class="box-footer theContentArgument" onclick="" draggable="true" ondragstart="drag_command(event)" ondragend="drag_end_command(event)" id="boxtwofooterid"></div>
+            <!--/W2 Footer-->
+
+          </div>
         </div>
-      <!-- /.box -->
-    </div>
-    <!--/W2-->
+        <!--/W2-->
     </div>
 
     <!--Second Row-->
@@ -393,23 +321,22 @@ desired effect
                 <ul id="jobq_tabs" class="nav nav-tabs newTabContent">
                     <li class="pull-left header"><i class="fa fa-tasks"></i> Jobs Queue </li>
                     <li onclick="synchronize_job_sequence_tabs(1)" class="active"><a href="#jobq_1" data-toggle="tab">A</a></li>
-                    <!--<li><a href="#tab_3" data-toggle="tab">Seq B</a></li>-->
                     <li id="new_jobq_button"><a href="#tab_n" value=1 class="fa fa-plus"></a></li>
 
-                    <!--Minimize and Maximize buttons-->
-                    <!--<li class="pull-right">-->
-                        <!--<button type="button" class="btn bg-grey btn-sm" data-widget="collapse"><i class="fa fa-minus"></i>-->
-                        <!--</button>-->
-                        <!--<button type="button" class="btn bg-grey btn-sm" data-widget="remove"><i class="fa fa-times"></i>-->
-                        <!--</button>-->
-                    <!--</li>-->
-                    <!--/Minimize and Maximize buttons-->
+                    <!--Collapse Button-->
+                    <li class="pull-right">
+                      <button type="button" class="btn btn-box-tool" id="w3_collapse_id" data-widget="collapse" onclick="synchronize_bw_collapse('w3')"><i class="fa fa-minus"></i></button>
+                    </li>
+                    <!--/Collapse Button-->
+
+                    <!--Clear Buttons-->
                     <li class="pull-right"><button type="submit" class="btn btn-default" id="clear_buttonid">Clear All</button></li>
                     <li class="pull-right"><button type="submit" class="btn btn-default" id="clear_seq_buttonid">Clear Sequence</button></li>
+                    <!--/Clear Buttons-->
                 </ul>
                 <div id="w3_notification_id" class="alert alert-info" style="display: none;"></div>
                 <!-- /W3 Tabs -->
-                <div class="box box-primary">
+                <div class="box box-primary" id="w3_box">
                     <div class="box-header">
                         <button type="submit" id="addjob_top_button" value="0" class="btn btn-default">Add Job</button>
                         <span class="pull-right">
@@ -463,10 +390,15 @@ desired effect
                 <ul id="output_tabs" class="nav nav-tabs">
                     <li class="pull-left header"><i class="fa fa-check-square-o"></i> Job Output</li>
                     <li class="active" onclick="synchronize_output_sequence_tabs(1);"><a href="#outq_1" data-toggle="tab">A</a></li>
+                    <!--Collapse Button-->
+                    <li class="pull-right">
+                      <button type="button" class="btn btn-box-tool" id="w4_collapse_id" data-widget="collapse" onclick="synchronize_bw_collapse('w4')"><i class="fa fa-minus"></i></button>
+                    </li>
+                    <!--/Collapse Button-->
                 </ul>
                 <!-- /W4 Tabs -->
                 <!--Content-->
-                <div class="box box-primary">
+                <div class="box box-primary" id="w4_box">
 
                     <div class="box-body">
                         <input type="checkbox" name="truncate_ouput" value="1024" id="truncate_output_to" checked>

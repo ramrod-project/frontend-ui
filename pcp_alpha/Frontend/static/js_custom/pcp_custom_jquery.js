@@ -379,6 +379,33 @@ function filter_w2() {
     }
 }
 
+// W3 and W4 internal collapse buttons
+function w3_collapse_test(){
+    $("#w3_box").boxWidget('toggle');
+}
+function w4_collapse_test(){
+    $("#w4_box").boxWidget('toggle');
+}
+
+// Collapse buttons for top widgets
+function synchronize_tw_collapse(widget){
+    if (widget !== 'w1'){
+        $("#w1_box").boxWidget('toggle');
+    } else if (widget !== 'w2') {
+        $("#w2_box").boxWidget('toggle');
+    }
+}
+
+// Collapse buttons for bottom widgets
+function synchronize_bw_collapse(widget){
+    if (widget !== 'w3'){
+        $("#w3_box").boxWidget('toggle');
+        w4_collapse_test();
+    } else if (widget !== 'w4') {
+        $("#w4_box").boxWidget('toggle');
+        w3_collapse_test();
+    }
+}
 
 
 function add_intput_to_command_builder(input_id, input_i, template_key){
@@ -1010,7 +1037,7 @@ function drag_target(){
             }
             var container = $('<table/>').attr({'id':'draggingContainer'}).addClass('custom_drag');
             container.append(container_to_drag.clone().removeClass("selected"));
-            $("#third_box_content tr").addClass('the_second_class');
+            $("#third_box_content tr").addClass('w3_box_css');
             hover_w3_for_target();
             return container;
 	    },
