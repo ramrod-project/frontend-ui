@@ -1037,7 +1037,7 @@ function drag_target(){
             }
             var container = $('<table/>').attr({'id':'draggingContainer'}).addClass('custom_drag');
             container.append(container_to_drag.clone().removeClass("selected"));
-            $("#third_box_content tr").addClass('the_second_class');
+            $("#third_box_content tr").addClass('w3_box_css');
             hover_w3_for_target();
             return container;
 	    },
