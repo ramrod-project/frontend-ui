@@ -296,8 +296,11 @@ function plugins_change_ws_callback(message){
 function telemetry_change_ws_callback(message){
     if (message.data.length > 0 && message.data[0] == "{"){
         var data_js = JSON.parse(message.data);
-        $("#target_info"+target_id_map[data_js.id])[0].title = JSON.stringify(data_js.Optional, null, 2);
+        $("#target_row"+target_id_map[data_js.id])[0].title = JSON.stringify(data_js.Optional, null, 2);
         console.log(data_js);
+        Object.keys(data_js.Optional).forEach(function(key) {
+            console.log(key);
+        });
     }
 }
 
