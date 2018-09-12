@@ -34,7 +34,37 @@ _TEST_TARGETS = [
         "Location": location_generated_num("172.16.5."),
         "Port": "8002",
         "Optional": "Document Here"
-    }
+    },
+    {
+        "PluginName": "Plugin2",
+        "Location": location_generated_num("172.16.5."),
+        "Port": "8002",
+        "Optional": "Document Here"
+    },
+    {
+        "PluginName": "Plugin3",
+        "Location": location_generated_num("172.16.5."),
+        "Port": "8002",
+        "Optional": "Document Here"
+    },
+    {
+        "PluginName": "Plugin4",
+        "Location": location_generated_num("172.16.5."),
+        "Port": "8002",
+        "Optional": "Document Here"
+    },
+    {
+        "PluginName": "Plugin5",
+        "Location": location_generated_num("172.16.5."),
+        "Port": "8002",
+        "Optional": "Document Here"
+    },
+    {
+        "PluginName": "Plugin6",
+        "Location": location_generated_num("172.16.5."),
+        "Port": "8002",
+        "Optional": "Document Here"
+    },
 ]
 
 _TEST_COMMANDS = [

@@ -57,14 +57,20 @@
           border-color: rgba(0, 0, 0, 0.2);
         }
 
-        #targetTableWrapper {
+        .targetTableWrapper {
             position: relative;
+            overflow: hidden;
+            width: auto;
+            height: 360px;
         }
-        #targtTableScroll {
-            max-height: 250px;
+        .targtTableScroll {
+            max-height: 330px;
             overflow: auto;
-            {#margin-top: 44px;#}
+            overflow-x: hidden;
         }
+        /*.gridSelect {*/
+            /*width: 70%;*/
+        /*}*/
 
     </style>
     {% block styles %}{% endblock %}
@@ -193,8 +199,8 @@ desired effect
             <div id="w1_command_active_filter" class="alert alert-info" ></div>
 
             <!--W1 Body-->
-            <div class="box-body" id="w1_body_box">
-              <div class="row">
+            <div class="box-body targetTableWrapper" id="w1_body_box">
+              <div class="row targtTableScroll">
                 <div class="col-sm-12">
                   <table id="target_table" class="table table-bordered table-hover dataTable display gridSelect" role="grid" aria-describedby="target_table_info">
                     <thead>
