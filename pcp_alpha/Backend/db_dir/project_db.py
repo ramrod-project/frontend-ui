@@ -22,14 +22,14 @@ _TEST_TARGETS = [
         "Location": location_generated_num("172.16.5."),
         "Port": "8002",
         "Optional": {"init": "hello",
-                     "Common": {}}
+                     "Common": {"User": "xxx"}}
     },
     {
         "PluginName": "Plugin1",
         "Location": location_generated_num("172.16.5."),
         "Port": "8002",
         "Optional": {"init": "hello",
-                     "Specific": {}}
+                     "Specific": {"abc": "def"}}
     },
     {
         "PluginName": "Plugin1",
@@ -38,7 +38,7 @@ _TEST_TARGETS = [
         "Optional": {"init": "goodbye",
                      "Common": {"Checkin": 0,
                                 "Admin": False,
-                                "User": ""},
+                                "User": "yyy"},
                      "Specific": {'Drive': 't',
                                   'InternalLocation': 't',
                                   'Location': '127.0.0.1',

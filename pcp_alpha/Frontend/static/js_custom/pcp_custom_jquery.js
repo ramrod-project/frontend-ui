@@ -188,8 +188,31 @@ function generate_target_id_map(){
             var row_js = JSON.parse(rows[i].innerText);
             var row_num = get_number_from_id(row_id, "nameidjson");
             target_id_map[row_js.id] = row_num;
+            render_target_tooltip(row_js)
         }
     }
+}
+
+function recursive_pretty_print(obj, depth=0) {
+    var result = "";
+    for (var key in obj) {
+        result = result + Array(depth+1).join("    ");
+        if (typeof(obj[key]) == 'object') {
+            result = result + key + "\n";
+            result = result + recursive_pretty_print(obj[key], depth+1);
+        } else {
+            result = result + key + ": " + obj[key];
+            //alert(key + ": " + obj[key]);
+            result = result + "\n";
+        }
+    }
+    return result;
+}
+
+function render_target_tooltip(data_js){
+    var tooltip_content = recursive_pretty_print(data_js.Optional);
+    $("#target_row"+target_id_map[data_js.id])[0].title = tooltip_content;
+
 }
 /*
 -----------------------------------------------------------------------------------------------------
