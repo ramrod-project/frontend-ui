@@ -21,19 +21,39 @@ _TEST_TARGETS = [
         "PluginName": "Plugin1",
         "Location": location_generated_num("172.16.5."),
         "Port": "8002",
-        "Optional": "Document Here"
+        "Optional": {"init": "hello",
+                     "Common": {"User": "xxx"}}
     },
     {
         "PluginName": "Plugin1",
         "Location": location_generated_num("172.16.5."),
         "Port": "8002",
-        "Optional": "Document Here"
+        "Optional": {"init": "hello",
+                     "Specific": {"abc": "def"}}
     },
     {
         "PluginName": "Plugin1",
         "Location": location_generated_num("172.16.5."),
         "Port": "8002",
-        "Optional": "Document Here"
+        "Optional": {"init": "goodbye",
+                     "Common": {"Checkin": 0,
+                                "Admin": False,
+                                "User": "yyy"},
+                     "Specific": {'Drive': 't',
+                                  'InternalLocation': 't',
+                                  'Location': '127.0.0.1',
+                                  'Admin': False,
+                                  'ContactTime': 1536764446.644752,
+                                  'telemetry': {"name": "hi",
+                                                "exit": 20,
+                                                "exitmethod": 0,
+                                                "user": "ok",
+                                                "host": "here",
+                                                "desk": "firm",
+                                                "ip": "yes",
+                                                "adm": "please"}
+                                 }
+                     }
     }
 ]
 
