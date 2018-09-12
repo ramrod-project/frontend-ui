@@ -13,6 +13,7 @@ var id_map = {};
 var id_status_map = {};
 var id_reverse_map = {};
 var id_replication_map = {};
+var target_id_map = {};
 var current_plugin_commands = [];
 var ws_map = {};
 var active_sequence = "1";
@@ -77,6 +78,7 @@ $(document).ready(function() {
     ws_map["status"] = open_websocket("status", status_change_ws_callback);
     ws_map["files"] = open_websocket("files", files_change_ws_callback);
     ws_map['plugins'] = open_websocket("plugins", plugins_change_ws_callback);
+    ws_map['telemetry'] = open_websocket("telemetry", telemetry_change_ws_callback);
     start_ping_pong();
 
     $("#upload_files_need_refreshed").hide();
@@ -156,6 +158,7 @@ $(document).ready(function() {
     $("#clear_seq_buttonid").click(hide_current_sequence);
     $("#persist_button").click(save_job_state);
     $("#loader_button").click(load_job_state);
+    generate_target_id_map();
     $("#w3_drop_target_to_all").droppable({
         drop: function (event, ui){
             var selected_var = ui.helper.children();
@@ -177,7 +180,39 @@ $(document).ready(function() {
     });
 
 });
+function generate_target_id_map(){
+    var rows = $("#target_box_contentid tr td a span");
+    for (var i in rows){
+        var row_id = rows[i].id;
+        if (row_id !== undefined && row_id.indexOf("nameidjson")!==-1){
+            var row_js = JSON.parse(rows[i].innerText);
+            var row_num = get_number_from_id(row_id, "nameidjson");
+            target_id_map[row_js.id] = row_num;
+            render_target_tooltip(row_js)
+        }
+    }
+}
 
+function recursive_pretty_print(obj, depth=0) {
+    var result = "";
+    for (var key in obj) {
+        result = result + Array(depth+1).join("    ");
+        if (typeof(obj[key]) == 'object') {
+            result = result + key + "\n";
+            result = result + recursive_pretty_print(obj[key], depth+1);
+        } else {
+            result = result + key + ": " + obj[key];
+            result = result + "\n";
+        }
+    }
+    return result;
+}
+
+function render_target_tooltip(data_js){
+    var tooltip_content = recursive_pretty_print(data_js.Optional);
+    $("#target_row"+target_id_map[data_js.id])[0].title = tooltip_content;
+
+}
 /*
 -----------------------------------------------------------------------------------------------------
 Websockets functions
@@ -280,6 +315,12 @@ function plugins_change_ws_callback(message){
         $("#plugins_need_refreshed").show();
     }
 }
+function telemetry_change_ws_callback(message){
+    if (message.data.length > 0 && message.data[0] == "{"){
+        var data_js = JSON.parse(message.data);
+        $("#target_row"+target_id_map[data_js.id])[0].title = recursive_pretty_print(data_js.Optional);
+    }
+}
 
 // ** TESTING ONLY **
 // Testing the websocket - for job status
@@ -379,6 +420,33 @@ function filter_w2() {
     }
 }
 
+// W3 and W4 internal collapse buttons
+function w3_collapse_test(){
+    $("#w3_box").boxWidget('toggle');
+}
+function w4_collapse_test(){
+    $("#w4_box").boxWidget('toggle');
+}
+
+// Collapse buttons for top widgets
+function synchronize_tw_collapse(widget){
+    if (widget !== 'w1'){
+        $("#w1_box").boxWidget('toggle');
+    } else if (widget !== 'w2') {
+        $("#w2_box").boxWidget('toggle');
+    }
+}
+
+// Collapse buttons for bottom widgets
+function synchronize_bw_collapse(widget){
+    if (widget !== 'w3'){
+        $("#w3_box").boxWidget('toggle');
+        w4_collapse_test();
+    } else if (widget !== 'w4') {
+        $("#w4_box").boxWidget('toggle');
+        w3_collapse_test();
+    }
+}
 
 
 function add_intput_to_command_builder(input_id, input_i, template_key){
@@ -1010,7 +1078,7 @@ function drag_target(){
             }
             var container = $('<table/>').attr({'id':'draggingContainer'}).addClass('custom_drag');
             container.append(container_to_drag.clone().removeClass("selected"));
-            $("#third_box_content tr").addClass('the_second_class');
+            $("#third_box_content tr").addClass('w3_box_css');
             hover_w3_for_target();
             return container;
 	    },
