@@ -1102,7 +1102,8 @@ function clear_new_jobs(){
 function drag_target(){
    // console.log("drag_target");
 	$(".gridSelect tbody tr").draggable({
-        appendTo: $("#third_box_content"),
+        // appendTo: $("#third_box_content"),
+        appendTo: "body",
 	    helper: function(){
 	        var selected_var = $(".gridSelect tbody tr.selected");
             var container_to_drag;
@@ -1117,10 +1118,11 @@ function drag_target(){
 
             if (container_to_drag.length === 0) {
                 container_to_drag = $(this).addClass('selected');
-            } else if (container_to_drag.length == 1) {
+            } else if (container_to_drag.length === 1) {
                 display_drop_all();
             }
-            var container = $('<table/>').attr({'id':'draggingContainer'}).addClass('custom_drag');
+            // var container = $('<table/>').attr({'id':'draggingContainer'}).addClass('custom_drag');
+	        var container = $('<table/>').attr({'id':'draggingContainer'});
             container.append(container_to_drag.clone().removeClass("selected"));
             $("#third_box_content tr").addClass('w3_box_css');
             hover_w3_for_target();
@@ -1129,7 +1131,7 @@ function drag_target(){
 	    revert: function(){
 	        hide_drop_all();
 	        hover_int = 0;
-	        $("#draggingContainer").removeClass('custom_drag');
+	        // $("#draggingContainer").removeClass('custom_drag');
 	        $("#third_box_content tr").removeClass('w3_box_css');
 	        return true;
         }
