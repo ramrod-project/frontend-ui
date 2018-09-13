@@ -384,6 +384,11 @@ function filter_w2() {
         }
     }
 }
+
+function onLoadTest(element, element_two){
+    $(element).addClass('loaded');
+    $(element_two).addClass('loaded');
+}
 // abstract this later
 // also add animations for top widgets for bottom widgets when minimized
 function widget_expand_or_collapse(widget){
@@ -398,35 +403,55 @@ function widget_expand_or_collapse(widget){
 
     if (widget === 'w1'){
         if (!w1_col_box.boxWidget()[0].classList.contains('collapsed-box')) {
-            w3_scroll[0].style.maxHeight = "600px";
-            w4_scroll[0].style.maxHeight = "600px";
+            w3_scroll.removeAttr('style');
+            w4_scroll.removeAttr('style');
+            setTimeout(function() {
+                onLoadTest(w3_scroll, w4_scroll);
+            }, 400);
         } else {
+            w3_scroll.removeClass('loaded');
+            w4_scroll.removeClass('loaded');
             w3_scroll[0].style.maxHeight = "330px";
             w4_scroll[0].style.maxHeight = "330px";
         }
     } else if (widget === 'w2') {
         if (!w2_col_box.boxWidget()[0].classList.contains('collapsed-box')) {
-            w3_scroll[0].style.maxHeight = "600px";
-            w4_scroll[0].style.maxHeight = "600px";
+            w3_scroll.removeAttr('style');
+            w4_scroll.removeAttr('style');
+            setTimeout(function() {
+                onLoadTest(w3_scroll, w4_scroll);
+            }, 400);
         } else {
+            w3_scroll.removeClass('loaded');
+            w4_scroll.removeClass('loaded');
             w3_scroll[0].style.maxHeight = "330px";
             w4_scroll[0].style.maxHeight = "330px";
         }
     } else if (widget === 'w3') {
         if(w3_col_id[0].children[0].classList[1] !== "fa-minus") {
-            w1_scroll[0].style.maxHeight = "600px";
-            w2_scroll[0].style.maxHeight = "600px";
+            w1_scroll.removeAttr('style');
+            w2_scroll.removeAttr('style');
+            setTimeout(function() {
+                onLoadTest(w1_scroll, w2_scroll);
+            }, 500);
         }
         else if(w3_col_id[0].children[0].classList[1] === "fa-minus") {
+            w1_scroll.removeClass('loaded');
+            w2_scroll.removeClass('loaded');
             w1_scroll[0].style.maxHeight = "330px";
             w2_scroll[0].style.maxHeight = "330px";
         }
     } else if (widget === 'w4'){
         if(w4_col_id[0].children[0].classList[1] !== "fa-minus") {
-            w1_scroll[0].style.maxHeight = "600px";
-            w2_scroll[0].style.maxHeight = "600px";
+            w1_scroll.removeAttr('style');
+            w2_scroll.removeAttr('style');
+            setTimeout(function() {
+                onLoadTest(w1_scroll, w2_scroll);
+            }, 500);
         }
         else if(w4_col_id[0].children[0].classList[1] === "fa-minus") {
+            w1_scroll.removeClass('loaded');
+            w2_scroll.removeClass('loaded');
             w1_scroll[0].style.maxHeight = "330px";
             w2_scroll[0].style.maxHeight = "330px";
         }
