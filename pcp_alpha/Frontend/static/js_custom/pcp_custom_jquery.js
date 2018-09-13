@@ -7,6 +7,7 @@ var MAX_MANUAL_CHECK_COUNT = 30;
 var INITIAL_JOB_STATUS = "Waiting";
 var inc = 0;
 var hover_int = 0;
+var active_sequence = "1";
 var sequences = {"1": new Set()};
 var sequence_starttime_map = {"1":  Math.floor((new Date().valueOf())/1000).toString()};
 var sequence_expiretime_map = {"1": undefined};
@@ -17,7 +18,6 @@ var id_replication_map = {};
 var target_id_map = {};
 var current_plugin_commands = [];
 var ws_map = {};
-var active_sequence = "1";
 var exec_int = 0;
 var job_select_table;
 var w3_highlighted_row,
@@ -138,7 +138,7 @@ $(document).ready(function() {
     var startup_expire = new Date(new Date().getTime() + 3 * 24 * 60 * 60 * 1000); //72 hours in future
     $("#job_sequence_expire_unix")[0].value = Math.floor(startup_expire.getTime()/1000).toString();
     $("#job_sequence_expire").datepicker( "setDate", startup_expire );
-
+    sequence_expiretime_map[active_sequence] = $("#job_sequence_expire_unix")[0].value;
 
     $("#truncate_output_to").change(change_truncate_value);
     change_truncate_value();
@@ -299,8 +299,13 @@ function status_change_update_dom(job_dom_id, status){
             .attr({"class": "label label-"+status})
             .text(status));
     if (status == "Done"){
-
         execute_sequence_output(id_map[job_dom_id]);
+    } else if (status == "Error") {
+        clearInterval(start_timer_map[job_dom_id]);
+        $("#updateid"+job_dom_id).empty();
+        $("#updateid"+job_dom_id).append($("<span/>")
+            .attr({"class": "label-"+status})
+            .text(status));
     }
 }
 
@@ -1512,41 +1517,47 @@ function execute_sequence(){
    // console.log("execute_sequence function has been called");  // debug
     exec_int = 1;
     hide_drop_all();
-    var jobs = prepare_jobs_list();
-    var jobs_json = JSON.stringify(jobs);
-    var sequence_start_time;
-    $.ajax({
-        type: "GET",
-        url: "/action/get_w3_data/",
-        data: {"jobs": jobs_json},
-        datatype: 'json',
-        success: function(data) {
-            var job_ids = data.generated_keys;
-            job_id = job_ids[0];
-            sequence_start_time = parseInt(sequence_starttime_map[active_sequence]);
-            for (var index = 0; index < job_ids.length; ++index) {
-                if (job_ids[index] != "invalid-job"){
-                    var dom_id = index+1;
-                    id_reverse_map[job_ids[index]] = dom_id;
-                    id_map[index+1] = job_ids[index];
+    var desired_start = Number(sequence_starttime_map[active_sequence]);
+    var desired_expire = Number(sequence_expiretime_map[active_sequence]);
+    if (desired_start < desired_expire){
+        var jobs = prepare_jobs_list();
+        var jobs_json = JSON.stringify(jobs);
+        var sequence_start_time;
+        $.ajax({
+            type: "GET",
+            url: "/action/get_w3_data/",
+            data: {"jobs": jobs_json},
+            datatype: 'json',
+            success: function(data) {
+                var job_ids = data.generated_keys;
+                job_id = job_ids[0];
+                sequence_start_time = parseInt(sequence_starttime_map[active_sequence]);
+                for (var index = 0; index < job_ids.length; ++index) {
+                    if (job_ids[index] != "invalid-job"){
+                        var dom_id = index+1;
+                        id_reverse_map[job_ids[index]] = dom_id;
+                        id_map[index+1] = job_ids[index];
 
-                    if (ws_map['status'].readyState === ws_map['status'].OPEN) {
-                        $("#updateid" + dom_id).empty();
-                        final_countdown_function(sequence_start_time, dom_id);
-                    } else {
-                        execute_sequence_output(job_ids[index]);
+                        if (ws_map['status'].readyState === ws_map['status'].OPEN) {
+                            $("#updateid" + dom_id).empty();
+                            final_countdown_function(sequence_start_time, dom_id);
+                        } else {
+                            execute_sequence_output(job_ids[index]);
+                        }
+
                     }
-
                 }
+            },
+            error: function (data) {
+                console.log("ERROR @ execute_sequence function")
+            },
+            complete: function(data){
+                exec_int = 0;
             }
-        },
-        error: function (data) {
-            console.log("ERROR @ execute_sequence function")
-        },
-        complete: function(data){
-            exec_int = 0;
-        }
-    })
+        })
+    } else {
+        alert("Sequence Expire must be later than sequence start");
+    }
 }
 
 /*
