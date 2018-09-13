@@ -33,6 +33,12 @@ as_highlighted_checker[active_sequence] = 0;
 
 
 $(document).ready(function() {
+    // W4 header height === W4 header height
+    var w3_header_height = $("div.box-header.w3_header_class").height();
+    $("div.box-header.w4_header_class").height(w3_header_height);
+
+    syncScroll($(".w3TableScroll"), $(".w4TableScroll"));
+    syncScroll($(".w4TableScroll"), $(".w3TableScroll"));
 
     $("#terminal-save").click(onclick_terminal_submit);
     $("#terminal-cmd").keyup(function(e){
@@ -378,33 +384,86 @@ function filter_w2() {
         }
     }
 }
+// abstract this later
+// also add animations for top widgets for bottom widgets when minimized
+function widget_expand_or_collapse(widget){
+    var w1_col_box = $("#w1_box"),
+        w2_col_box = $("#w2_box"),
+        w3_col_id = $("#w3_collapse_id"),
+        w4_col_id = $("#w4_collapse_id"),
+        w1_scroll = $(".w1TableScroll"),
+        w2_scroll = $(".w2TableScroll"),
+        w3_scroll = $(".w3TableScroll"),
+        w4_scroll = $(".w4TableScroll");
+
+    if (widget === 'w1'){
+        if (!w1_col_box.boxWidget()[0].classList.contains('collapsed-box')) {
+            w3_scroll[0].style.maxHeight = "600px";
+            w4_scroll[0].style.maxHeight = "600px";
+        } else {
+            w3_scroll[0].style.maxHeight = "330px";
+            w4_scroll[0].style.maxHeight = "330px";
+        }
+    } else if (widget === 'w2') {
+        if (!w2_col_box.boxWidget()[0].classList.contains('collapsed-box')) {
+            w3_scroll[0].style.maxHeight = "600px";
+            w4_scroll[0].style.maxHeight = "600px";
+        } else {
+            w3_scroll[0].style.maxHeight = "330px";
+            w4_scroll[0].style.maxHeight = "330px";
+        }
+    } else if (widget === 'w3') {
+        if(w3_col_id[0].children[0].classList[1] !== "fa-minus") {
+            w1_scroll[0].style.maxHeight = "600px";
+            w2_scroll[0].style.maxHeight = "600px";
+        }
+        else if(w3_col_id[0].children[0].classList[1] === "fa-minus") {
+            w1_scroll[0].style.maxHeight = "330px";
+            w2_scroll[0].style.maxHeight = "330px";
+        }
+    } else if (widget === 'w4'){
+        if(w4_col_id[0].children[0].classList[1] !== "fa-minus") {
+            w1_scroll[0].style.maxHeight = "600px";
+            w2_scroll[0].style.maxHeight = "600px";
+        }
+        else if(w4_col_id[0].children[0].classList[1] === "fa-minus") {
+            w1_scroll[0].style.maxHeight = "330px";
+            w2_scroll[0].style.maxHeight = "330px";
+        }
+    }
+}
 
 // W3 and W4 internal collapse buttons
-function w3_collapse_test(){
-    $("#w3_box").boxWidget('toggle');
-}
-function w4_collapse_test(){
-    $("#w4_box").boxWidget('toggle');
+function bw_collapse_buttons(w3_col_id, w4_col_id){
+    if (w4_col_id[0].children[0].className !== "fa fa-plus" ||
+        w3_col_id[0].children[0].className !== "fa fa-plus"){
+
+        w3_col_id[0].children[0].className = "fa fa-plus";
+        w4_col_id[0].children[0].className = "fa fa-plus";
+    } else {
+        w3_col_id[0].children[0].className = "fa fa-minus";
+        w4_col_id[0].children[0].className = "fa fa-minus";
+    }
 }
 
 // Collapse buttons for top widgets
-function synchronize_tw_collapse(widget){
-    if (widget !== 'w1'){
-        $("#w1_box").boxWidget('toggle');
-    } else if (widget !== 'w2') {
+function synch_widget_collapse(widget){
+    var w3_col_id = $("#w3_collapse_id"),
+        w4_col_id = $("#w4_collapse_id");
+    if (widget === 'w1'){
         $("#w2_box").boxWidget('toggle');
-    }
-}
-
-// Collapse buttons for bottom widgets
-function synchronize_bw_collapse(widget){
-    if (widget !== 'w3'){
+    } else if (widget === 'w2') {
+        $("#w1_box").boxWidget('toggle');
+    } else if (widget === 'w3') {
         $("#w3_box").boxWidget('toggle');
-        w4_collapse_test();
-    } else if (widget !== 'w4') {
         $("#w4_box").boxWidget('toggle');
-        w3_collapse_test();
+        bw_collapse_buttons(w3_col_id, w4_col_id);
+    } else if (widget === 'w4'){
+        $("#w4_box").boxWidget('toggle');
+        $("#w3_box").boxWidget('toggle');
+        bw_collapse_buttons(w3_col_id, w4_col_id);
     }
+    widget_expand_or_collapse(widget);
 }
 
 
@@ -542,10 +601,11 @@ function get_commands_func(){
                 $(".theContentArgument")
                     .append($("<div id='commandIdBuilder'/>")
                         .text($(this)[0].text));
-                $(".theContentArgument")
-                    .append($("<div id='JSON_Command_DATA'/>")
-                        .addClass("text-muted small")
-                        .text(JSON.stringify(current_command_template)));
+                // JSON development data on W2 footer
+                // $(".theContentArgument")
+                //     .append($("<div id='JSON_Command_DATA'/>")
+                //         .addClass("text-muted small")
+                //         .text(JSON.stringify(current_command_template)));
 
                 // quick action button to add command template to a highlighted job row
                 quick_action_button = $("<a/>")
@@ -1705,3 +1765,13 @@ function terminal_opened(event){
 function get_number_from_id(id_str, pretext){
     return id_str.substring(pretext.length, id_str.length);
 }
+
+function syncScroll(element1, element2) {
+    element1.scroll(function (e) {
+        var ignore = ignoreScrollEvents;
+        ignoreScrollEvents = false;
+        if (ignore) return;
+        ignoreScrollEvents = true;
+        element2.scrollTop(element1.scrollTop())
+    })
+  }
