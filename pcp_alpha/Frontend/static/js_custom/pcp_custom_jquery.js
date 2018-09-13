@@ -9,6 +9,7 @@ var inc = 0;
 var hover_int = 0;
 var sequences = {"1": new Set()};
 var sequence_starttime_map = {"1":  Math.floor((new Date().valueOf())/1000).toString()};
+var sequence_expiretime_map = {"1": undefined};
 var id_map = {};
 var id_status_map = {};
 var id_reverse_map = {};
@@ -116,23 +117,27 @@ $(document).ready(function() {
     $("#job_sequence_timer").datetimepicker({
                                              minDate: new Date(),
                                              onClose: function(dateText, inst) {
-                                                 var date_split = dateText.split(" ");
-                                                 var mdy = date_split[0].split("/");
-                                                 var hm = date_split[1].split(":");
-                                                 var dt_obj = new Date(Number(mdy[2]),
-                                                                       Number(mdy[0])-1,
-                                                                       mdy[1],
-                                                                       hm[0],
-                                                                       hm[1], 0, 0);
-                                                 var py_dt = Math.floor(dt_obj.getTime()/1000).toString();
+                                                 var py_dt = datetext_to_unix_time(dateText);
                                                  $("#job_sequence_time_unix")[0].value = py_dt;
                                                  sequence_starttime_map[active_sequence] = py_dt;
+                                             },
+                                             onSelect: function (selectedDateTime){
+                                             }});
+    $("#job_sequence_expire").datetimepicker({
+                                             minDate: new Date(),
+                                             onClose: function(dateText, inst) {
+                                                 var py_dt = datetext_to_unix_time(dateText);
+                                                 $("#job_sequence_expire_unix")[0].value = py_dt;
+                                                 sequence_expiretime_map[active_sequence] = py_dt;
                                              },
                                              onSelect: function (selectedDateTime){
                                              }});
     var startup_date = new Date();
     $("#job_sequence_time_unix")[0].value = Math.floor(startup_date.getTime()/1000).toString();
     $("#job_sequence_timer").datepicker( "setDate", startup_date );
+    var startup_expire = new Date(new Date().getTime() + 3 * 24 * 60 * 60 * 1000); //72 hours in future
+    $("#job_sequence_expire_unix")[0].value = Math.floor(startup_expire.getTime()/1000).toString();
+    $("#job_sequence_expire").datepicker( "setDate", startup_expire );
 
 
     $("#truncate_output_to").change(change_truncate_value);
@@ -180,6 +185,19 @@ $(document).ready(function() {
     });
 
 });
+
+function datetext_to_unix_time(dateText){
+     var date_split = dateText.split(" ");
+     var mdy = date_split[0].split("/");
+     var hm = date_split[1].split(":");
+     var dt_obj = new Date(Number(mdy[2]),
+                           Number(mdy[0])-1,
+                           mdy[1],
+                           hm[0],
+                           hm[1], 0, 0);
+     var py_dt = Math.floor(dt_obj.getTime()/1000).toString();
+     return py_dt;
+}
 function generate_target_id_map(){
     var rows = $("#target_box_contentid tr td a span");
     for (var i in rows){
@@ -690,6 +708,7 @@ function load_job_state(){
                 }
             }
             sequence_starttime_map = data.sequence_starttime_map; // must remain below add_sequence_tab loop
+            sequence_expiretime_map = date.sequence_expiretime_map;
             set_w3_job_status(full_update=true);
             synchronize_job_sequence_tabs(active_sequence);
             synchronize_output_sequence_tabs(active_sequence);
@@ -724,6 +743,7 @@ function save_job_state(){
                         "id_reverse_map": id_reverse_map,
                         "id_status_map": id_status_map,
                         "sequence_starttime_map": sequence_starttime_map,
+                        "sequence_expiretime_map": sequence_expiretime_map,
                         "jobs": [],
                         "sequences": local_sequences,
                         "active_sequence": active_sequence};
@@ -910,7 +930,9 @@ function add_sequence_tab(clear=true){
         sequences[next_tab] = new Set();
     }
     var new_tab_start_time =  Math.floor((new Date().valueOf()) / 1000);
+    var new_tab_expire_time = new_tab_start_time + 3 * 24 * 60* 60;
     sequence_starttime_map[next_tab] = new_tab_start_time.toString();
+    sequence_expiretime_map[next_tab] = new_tab_expire_time.toString();
     $('#new_jobq_button')
         .before('<li id="jobB_'+next_tab+'" onclick="synchronize_job_sequence_tabs('+next_tab+')"><a href="#jobq_'+next_tab+'" data-toggle="tab">'+next_tab+'</a></li>');
     $('#jobq_content')
@@ -946,6 +968,14 @@ function synchronize_sequence_tab_rows(sequence_id){
         display_date += ("0" + _dt.getMinutes()).slice(-2);
     $("#job_sequence_time_unix")[0].value = sequence_starttime_map[sequence_id];
     $("#job_sequence_timer")[0].value = display_date;
+    var _et = new Date(Number(sequence_expiretime_map[sequence_id]) * 1000);
+    var display_expire_date = $.datepicker.formatDate('mm/dd/yy ', _et);
+        display_expire_date += ("0" + _et.getHours()).slice(-2);
+        display_expire_date += ":";
+        display_expire_date += ("0" + _et.getMinutes()).slice(-2);
+    $("#job_sequence_expire_unix")[0].value = sequence_expiretime_map[sequence_id];
+    $("#job_sequence_expire")[0].value = display_expire_date;
+
     var job_row_ids = $("#third_box_content tr" );
     var ouput_row_objs = $("#W4Rows tr");
     for (var i = 1; i <= job_row_ids.length; i++){
@@ -1416,6 +1446,7 @@ function prepare_jobs_list(){
                                      "Port":  String(json_target_data.Port),},
                        "Status": INITIAL_JOB_STATUS,
                        "StartTime": Number(sequence_starttime_map[active_sequence])+(uid/1000),
+                       "ExpireTime": Number(sequence_expiretime_map[active_sequence])+(uid/1000),
                        "JobCommand": command};
             id_status_map[uid] = INITIAL_JOB_STATUS;
             jobs.push(job);

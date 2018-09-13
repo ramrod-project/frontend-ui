@@ -340,7 +340,12 @@ desired effect
                     <div class="box-header">
                         <button type="submit" id="addjob_top_button" value="0" class="btn btn-default">Add Job</button>
                         <span class="pull-right">
-                            <label>Sequence Start</label>
+                            <label>Sequence Expire</label><br>
+                            <input size="13" id="job_sequence_expire"/>
+                            <input size="9" disabled=true id="job_sequence_expire_unix"/>
+                        </span>
+                        <span class="pull-right">
+                            <label>Sequence Start</label><br>
                             <input size="13" id="job_sequence_timer"/>
                             <input size="9" disabled=true id="job_sequence_time_unix"/>
                         </span>
