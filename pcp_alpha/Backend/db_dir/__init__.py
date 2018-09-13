@@ -54,43 +54,50 @@ _TEST_TARGETS = [
         "PluginName": "Plugin1",
         "Location": location_generated_num("172.16.5."),
         "Port": "8002",
-        "Optional": "Document Here"
+        "Optional": {"init": "hello",
+                     "Specific": {"abc": "def"}}
     },
     {
         "PluginName": "Plugin1",
         "Location": location_generated_num("172.16.5."),
         "Port": "8002",
-        "Optional": "Document Here"
+        "Optional": {"init": "hello",
+                     "Specific": {"abc": "def"}}
     },
     {
         "PluginName": "Plugin1",
         "Location": location_generated_num("172.16.5."),
         "Port": "8002",
-        "Optional": "Document Here"
+        "Optional": {"init": "hello",
+                     "Specific": {"abc": "def"}}
     },
     {
         "PluginName": "Plugin2",
         "Location": location_generated_num("172.16.5."),
         "Port": "8002",
-        "Optional": "Document Here"
+        "Optional": {"init": "hello",
+                     "Specific": {"abc": "def"}}
     },
     {
         "PluginName": "Plugin3",
         "Location": location_generated_num("172.16.5."),
         "Port": "8002",
-        "Optional": "Document Here"
+        "Optional": {"init": "hello",
+                     "Specific": {"abc": "def"}}
     },
     {
         "PluginName": "Plugin4",
         "Location": location_generated_num("172.16.5."),
         "Port": "8002",
-        "Optional": "Document Here"
+        "Optional": {"init": "hello",
+                     "Specific": {"abc": "def"}}
     },
     {
         "PluginName": "Plugin5",
         "Location": location_generated_num("172.16.5."),
         "Port": "8002",
-        "Optional": "Document Here"
+        "Optional": {"init": "hello",
+                     "Specific": {"abc": "def"}}
     }
 ]
 
