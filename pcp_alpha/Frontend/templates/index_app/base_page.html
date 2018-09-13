@@ -56,15 +56,69 @@
           background-color: #e68a00;
           border-color: rgba(0, 0, 0, 0.2);
         }
-
-        #targetTableWrapper {
+        .w1TableWrapper {
             position: relative;
+            overflow: hidden;
+            /*width: auto;*/
+            /*height: 360px;*/
         }
-        #targtTableScroll {
-            max-height: 250px;
+        .w1TableScroll {
+            max-height: 330px;
             overflow: auto;
-            {#margin-top: 44px;#}
+            overflow-x: hidden;
+            transition: max-height 0.76s ease-in;
         }
+        .w1TableScroll.loaded {
+            max-height: 600px;
+        }
+        .w2TableWrapper {
+            position: relative;
+            overflow: hidden;
+            /*width: auto;*/
+            /*height: 360px;*/
+        }
+        .w2TableScroll {
+            max-height: 330px;
+            overflow: auto;
+            overflow-x: hidden;
+            transition: max-height 0.76s ease-in;
+        }
+        .w2TableScroll.loaded {
+            max-height: 600px;
+        }
+        .w3TableWrapper {
+            position: relative;
+            overflow: hidden;
+            /*width: auto;*/
+            /*height: 360px;*/
+        }
+        .w3TableScroll {
+            max-height: 330px;
+            overflow: auto;
+            overflow-x: hidden;
+            transition: max-height 0.76s ease-in;
+        }
+        .w3TableScroll.loaded {
+            max-height: 600px;
+        }
+        .w4TableWrapper {
+            position: relative;
+            overflow: hidden;
+            /*width: auto;*/
+            /*height: 360px;*/
+        }
+        .w4TableScroll {
+            max-height: 330px;
+            overflow: auto;
+            overflow-x: hidden;
+            transition: max-height 0.76s ease-in;
+        }
+        .w4TableScroll.loaded {
+            max-height: 600px;
+        }
+        /*.gridSelect {*/
+            /*width: 70%;*/
+        /*}*/
 
     </style>
     {% block styles %}{% endblock %}
@@ -128,7 +182,7 @@ desired effect
 
       <!-- Sidebar Menu -->
       <ul class="sidebar-menu" data-widget="tree">
-        <li class="header">HEADER</li>
+        <li class="header">Version 1.0.8</li>
         <!-- Links on the sidebar -->
         <li class="active"><a href="/"><i class="fa fa-home text-aqua"></i> <span>Home Page</span></a></li>
         <li><a href="/new_target_form/" id="add_target_id"><i class="fa fa-laptop text-aqua"></i> <span>Add Target</span></a></li>
@@ -154,10 +208,10 @@ desired effect
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
     <!-- Content Header (Page header) -->
-    <section class="content-header">
-      {% block breadcrumb %}
-      {% endblock %}
-    </section>
+    <!--<section class="content-header">-->
+      <!--{% block breadcrumb %}-->
+      <!--{% endblock %}-->
+    <!--</section>-->
 
     <!-- Main content -->
     <section class="content container-fluid">
@@ -185,7 +239,7 @@ desired effect
 
               <!--Collapse Button-->
               <div class="box-tools pull-right">
-                <button type="button" class="btn btn-box-tool" id="w1_collapse_id" data-widget="collapse" onclick="synchronize_tw_collapse('w1')"><i class="fa fa-minus"></i></button>
+                <button type="button" class="btn btn-box-tool" id="w1_collapse_id" data-widget="collapse" onclick="synch_widget_collapse('w1')"><i class="fa fa-minus"></i></button>
               </div>
               <!--/Collapse Button-->
             </div>
@@ -193,8 +247,8 @@ desired effect
             <div id="w1_command_active_filter" class="alert alert-info" ></div>
 
             <!--W1 Body-->
-            <div class="box-body" id="w1_body_box">
-              <div class="row">
+            <div class="box-body w1TableWrapper" id="w1_body_box">
+              <div class="row w1TableScroll">
                 <div class="col-sm-12">
                   <table id="target_table" class="table table-bordered table-hover dataTable display gridSelect" role="grid" aria-describedby="target_table_info">
                     <thead>
@@ -214,18 +268,18 @@ desired effect
                     {% if host_dict %}
                       {% for items in host_dict %}
                         <tr role="row" class="odd" id="target_row{{ forloop.counter0 }}">
-                          <td id="name_tag_id{{ forloop.counter0 }}" class="clickable-row-col1" onclick="">
+                          <td id="name_tag_id{{ forloop.counter0 }}" class="clickable-row-col1" onclick="" style="width: 42.5%;">
                             <a href="#">
                               <span style="display:none" id="nameidjson{{ forloop.counter0 }}">{{ items.json }}</span>
                               <span>{{ items.PluginName }}</span>
                             </a>
                           </td>
-                          <td id="address_tag_id{{ forloop.counter0 }}" class="clickable-row-col2" onclick="">
+                          <td id="address_tag_id{{ forloop.counter0 }}" class="clickable-row-col2" onclick="" style="width: 42.5%;">
                             <a href="#">
                               <span>{{ items.Location }}</span>
                             </a>
                           </td>
-                          <td id="action_tad_id{{ forloop.counter0 }}" style="text-align: center; width: 80px;" class="clickable-row-col3" onclick="">
+                          <td id="action_tad_id{{ forloop.counter0 }}" style="text-align: center; width: 15%;" class="clickable-row-col3" onclick="">
                             <span id="edit_target_id">
                               <a href="/edit_target_form/{{ items.id }}/" target="_blank" class="btn btn-social-icon btn-bitbucket btn-xs" data-toggle="tooltip" title="Edit Target">
                                 <i class="fa fa-edit"></i>
@@ -276,7 +330,7 @@ desired effect
 
               <!--Collapse Button-->
               <div class="box-tools pull-right">
-                <button type="button" class="btn btn-box-tool" id="w2_collapse_id" data-widget="collapse" onclick="synchronize_tw_collapse('w2')"><i class="fa fa-minus"></i></button>
+                <button type="button" class="btn btn-box-tool" id="w2_collapse_id" data-widget="collapse" onclick="synch_widget_collapse('w2')"><i class="fa fa-minus"></i></button>
               </div>
               <!--/Collapse Button-->
             </div>
@@ -284,8 +338,8 @@ desired effect
             <div id="w2_command_active_filter" class="alert alert-info" ></div>
 
             <!--W2 Body-->
-            <div class="box-body" id="w2_body_box">
-              <div class="row">
+            <div class="box-body w2TableWrapper" id="w2_body_box">
+              <div class="row w2TableScroll">
                 <!--Command List-->
                 <div class="col-xs-4">
                   <div class="box-header theContentHeader"></div>
@@ -325,7 +379,7 @@ desired effect
 
                     <!--Collapse Button-->
                     <li class="pull-right">
-                      <button type="button" class="btn btn-box-tool" id="w3_collapse_id" data-widget="collapse" onclick="synchronize_bw_collapse('w3')"><i class="fa fa-minus"></i></button>
+                      <button type="button" class="btn btn-box-tool" id="w3_collapse_id" data-widget="collapse" onclick="synch_widget_collapse('w3')"><i class="fa fa-minus"></i></button>
                     </li>
                     <!--/Collapse Button-->
 
@@ -337,7 +391,7 @@ desired effect
                 <div id="w3_notification_id" class="alert alert-info" style="display: none;"></div>
                 <!-- /W3 Tabs -->
                 <div class="box box-primary" id="w3_box">
-                    <div class="box-header">
+                    <div class="box-header w3_header_class">
                         <button type="submit" id="addjob_top_button" value="0" class="btn btn-default">Add Job</button>
                         <span class="pull-right">
                             <label>Sequence Start</label>
@@ -347,29 +401,31 @@ desired effect
                         <div id="w3_drop_to_all" style="outline: 1px dashed #ABABAB; outline-offset: 1px; text-align: center; display: none; "><br>Drop Here to apply the command to <strong>all</strong> jobs<br><br></div>
                         <div id="w3_drop_target_to_all" style="outline: 1px dashed #ABABAB; outline-offset: 1px; text-align: center; display: none; "><br>Drop Here to apply to <strong>all</strong> jobs<br><br></div>
                     </div>
-                    <div class="box-body">
-                        <div id="jobq_content" class="tab-content">
-                            <div id="jobq_1" class="tab-pane active"> </div>
-                            <div id="example3_wrapper" class="dataTables_wrapper form-inline dt-bootstrap">
-                                <table id="job_table" class="table table-bordered table-hover dataTable display gridSelect2" role="grid" aria-describedby="job_table_info">
-                                    <thead>
-                                        <tr role="row">
-                                            <th rowspan="1" colspan="1">
-                                                Job #</th>
-                                            <th rowspan="1" colspan="1">
-                                                Plugin Name</th>
-                                            <th rowspan="1" colspan="1">
-                                                Host</th>
-                                            <th rowspan="1" colspan="1">
-                                                Command</th>
-                                            <th rowspan="1" colspan="1">
-                                                Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="thirdBoxContent" id="third_box_content">
-                                    </tbody>
-                                </table>
-                            </div>
+                    <div class="box-body w3TableWrapper">
+                        <div class="w3TableScroll">
+                          <div id="jobq_content" class="tab-content">
+                              <div id="jobq_1" class="tab-pane active"> </div>
+                              <div id="example3_wrapper" class="dataTables_wrapper form-inline dt-bootstrap">
+                                  <table id="job_table" class="table table-bordered table-hover dataTable display gridSelect2" role="grid" aria-describedby="job_table_info">
+                                      <thead>
+                                          <tr role="row">
+                                              <th rowspan="1" colspan="1">
+                                                  Job #</th>
+                                              <th rowspan="1" colspan="1">
+                                                  Plugin Name</th>
+                                              <th rowspan="1" colspan="1">
+                                                  Host</th>
+                                              <th rowspan="1" colspan="1">
+                                                  Command</th>
+                                              <th rowspan="1" colspan="1">
+                                                  Status</th>
+                                          </tr>
+                                      </thead>
+                                      <tbody class="thirdBoxContent" id="third_box_content">
+                                      </tbody>
+                                  </table>
+                              </div>
+                          </div>
                         </div>
                     </div>
                     <div class="box-footer">
@@ -392,17 +448,20 @@ desired effect
                     <li class="active" onclick="synchronize_output_sequence_tabs(1);"><a href="#outq_1" data-toggle="tab">A</a></li>
                     <!--Collapse Button-->
                     <li class="pull-right">
-                      <button type="button" class="btn btn-box-tool" id="w4_collapse_id" data-widget="collapse" onclick="synchronize_bw_collapse('w4')"><i class="fa fa-minus"></i></button>
+                      <button type="button" class="btn btn-box-tool" id="w4_collapse_id" data-widget="collapse" onclick="synch_widget_collapse('w4')"><i class="fa fa-minus"></i></button>
                     </li>
                     <!--/Collapse Button-->
                 </ul>
                 <!-- /W4 Tabs -->
                 <!--Content-->
                 <div class="box box-primary" id="w4_box">
+                  <div class="box-header w4_header_class">
+                    <input type="checkbox" name="truncate_ouput" value="1024" id="truncate_output_to" checked>
+                    <label for="truncate_output_to">Truncate output</label>
+                  </div>
+                    <div class="box-body w4TableWrapper">
+                      <div class="w4TableScroll">
 
-                    <div class="box-body">
-                        <input type="checkbox" name="truncate_ouput" value="1024" id="truncate_output_to" checked>
-                        <label for="truncate_output_to">Truncate output</label>
                         <div id="outq_content" class="tab-content">
                             <div id="outq_1" class="tab-pane active"> </div>
 
@@ -426,6 +485,7 @@ desired effect
                             </tbody>
                             </thead>
                         </table>
+                      </div>
                     </div>
                 </div>
                 <!--/Content-->
@@ -443,14 +503,14 @@ desired effect
   <!-- /.content-wrapper -->
 
   <!-- Main Footer -->
-  <footer class="main-footer">
-    <!-- To the right -->
-    <div class="pull-right hidden-xs">
-        <strong>Version 1.0.8</strong>
-    </div>
-    <!-- Default to the left -->
-    <strong>Demo Version for the <a id="nooo_id" href="#">PCP Project</a></strong> :)
-  </footer>
+  <!--<footer class="main-footer">-->
+    <!--&lt;!&ndash; To the right &ndash;&gt;-->
+    <!--<div class="pull-right hidden-xs">-->
+        <!--<strong>Version 1.0.8</strong>-->
+    <!--</div>-->
+    <!--&lt;!&ndash; Default to the left &ndash;&gt;-->
+    <!--<strong>Demo Version for the <a id="nooo_id" href="#">PCP Project</a></strong> :)-->
+  <!--</footer>-->
 
   <!-- Control Sidebar -->
   <aside class="control-sidebar control-sidebar-dark">
@@ -472,7 +532,6 @@ desired effect
                       <div class="dz-message dz-default needsclick">
                         Drop files here or click to upload.<br>
                       </div>
-{#                      <input type="file" name="file" />#}
                   </div>
               </div>
               <div class="progress progress-xxs" style="visibility: hidden;">
@@ -544,10 +603,10 @@ desired effect
   <div class="control-sidebar-bg"></div>
 </div>
 <!-- ./wrapper -->
-<audio id="easter_egg_one_id">
-    <source src="{% static 'media_test/nooo.mp3' %}" type="audio/mpeg">
-  Your browser does not support the audio element.
-</audio>
+<!--<audio id="easter_egg_one_id">-->
+    <!--<source src="{% static 'media_test/nooo.mp3' %}" type="audio/mpeg">-->
+  <!--Your browser does not support the audio element.-->
+<!--</audio>-->
 
 
 <div class="modal modal-info bs-example-modal-lg fade" id="terminal-modal" tabindex="-1" role="dialog" aria-labelledby="terminal-modal-label">
