@@ -663,4 +663,4 @@ class TestDataHandling(object):
         job_id = json.loads(response.getvalue().decode())['generated_keys'][0]
         sleep(2)
         second_url = "/stop_job/{}/".format(job_id)
-        assert stop_job(rf.get(second_url, HTTP_USER_AGENT='Mozilla/5.0')).status_code == 200
+        assert stop_job(rf.get(second_url, HTTP_USER_AGENT='Mozilla/5.0'), job_id).status_code == 200
