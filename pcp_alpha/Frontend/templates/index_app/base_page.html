@@ -116,6 +116,15 @@
         .w4TableScroll.loaded {
             max-height: 600px;
         }
+        .sticky {
+          position: fixed;
+          top: 0;
+          width: 100%;
+        }
+
+        .sticky + .contentTest {
+          padding-top: 102px;
+        }
         /*.gridSelect {*/
             /*width: 70%;*/
         /*}*/
@@ -338,7 +347,7 @@ desired effect
             <div id="w2_command_active_filter" class="alert alert-info" ></div>
 
             <!--W2 Body-->
-            <div class="box-body w2TableWrapper" id="w2_body_box">
+            <div class="box-body w2TableWrapper contentTest" id="w2_body_box">
               <div class="row w2TableScroll">
                 <!--Command List-->
                 <div class="col-xs-4">
@@ -347,7 +356,7 @@ desired effect
                 </div>
                 <!--/Command List-->
                 <!--Tooltip For Command-->
-                <div class="col-xs-8">
+                <div class="col-xs-8" id="toolTipTest">
                   <div class="box-header tooltipHeader"></div>
                   <div class="tab-content tooltipContent"></div>
                 </div>

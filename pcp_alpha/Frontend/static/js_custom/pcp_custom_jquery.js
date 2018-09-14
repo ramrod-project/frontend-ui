@@ -662,6 +662,27 @@ function get_commands_func(){
                 $(".tooltipContent")
                     .append("<pre>" + current_command_template.Tooltip + "</pre>");
 
+                // $("#toolTipTest")
+                var header = document.getElementById("toolTipTest");
+                var sticky = header.offsetTop;
+                  if (window.pageYOffset > sticky) {
+                      header.classList.add("sticky");
+                  } else {
+                      header.classList.remove("sticky");
+                  }
+
+                $("#toolTipTest").each(function(arg, el){
+                    console.log($(el));
+                    console.log($(el).position);
+                    console.log($(el).closest);
+                    console.log($(el).closest(".anchor"));
+                    $(el).position({
+                        of:  $(el).closest(".anchor")[0],
+                        my:  "right top",
+                        at:  "right+20 top+10"
+                    });
+                });
+
                 //footer
                 $(".theContentArgument").empty();
                 $(".theContentArgument")

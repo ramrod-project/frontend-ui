@@ -504,6 +504,70 @@ _TEST_COMMANDS2 = [
         ],
         "OptionalInputs": []
     },
+    #  test command 16
+    {
+        "CommandName": "command16",
+        "Tooltip": '\ncommand16\n\nThis is for testing\nits like echo'
+                   '\nArguments:\n1. String to Echo\n\nReturns:\nString\n',
+        "Output": True,
+        "Inputs": [
+            {
+                "Name": "EchoString",
+                "Type": "textbox",
+                "Tooltip": "This string will be echoed back",
+                "Value": "echo user input"
+            },
+        ],
+        "OptionalInputs": []
+    },
+    #  test command 17
+    {
+        "CommandName": "command17",
+        "Tooltip": '\ncommand17\n\nThis is for testing\nits like echo'
+                   '\nArguments:\n1. String to Echo\n\nReturns:\nString\n',
+        "Output": True,
+        "Inputs": [
+            {
+                "Name": "EchoString",
+                "Type": "textbox",
+                "Tooltip": "This string will be echoed back",
+                "Value": "echo user input"
+            },
+        ],
+        "OptionalInputs": []
+    },
+    #  test command 18
+    {
+        "CommandName": "command18",
+        "Tooltip": '\ncommand15\n\nThis is for testing\nits like echo'
+                   '\ncommand18:\n1. String to Echo\n\nReturns:\nString\n',
+        "Output": True,
+        "Inputs": [
+            {
+                "Name": "EchoString",
+                "Type": "textbox",
+                "Tooltip": "This string will be echoed back",
+                "Value": "echo user input"
+            },
+        ],
+        "OptionalInputs": []
+    },
+    #  test command 19
+    {
+        "CommandName": "command19",
+        "Tooltip": '\ncommand19\n\nThis is for testing\nits like echo'
+                   '\nArguments:\n1. String to Echo\n\nReturns:\nString\n',
+        "Output": True,
+        "Inputs": [
+            {
+                "Name": "EchoString",
+                "Type": "textbox",
+                "Tooltip": "This string will be echoed back",
+                "Value": "echo user input"
+            },
+        ],
+        "OptionalInputs": []
+    },
 ]
 
 
