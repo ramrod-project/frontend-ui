@@ -438,3 +438,12 @@ def get_interfaces(request):
     return HttpResponse(json.dumps(interfaces),
                         content_type='application/json')
 
+def stop_job(request, job_id):
+    """
+
+    :param request:
+    :return:
+    """
+    response = {"ok": "ok"}
+    return HttpResponse(json.dumps(response),
+                        content_type='application/json')
