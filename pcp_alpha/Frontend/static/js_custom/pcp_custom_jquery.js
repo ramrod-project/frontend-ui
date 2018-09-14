@@ -25,7 +25,8 @@ var w3_highlighted_row,
     w3_highlighted_array = [],
     as_highlighted_checker = {},
     start_timer_interval,
-    start_timer_map = {};
+    start_timer_map = {},
+    countdown_map = {};
 
 var timer_on = 1,
     time_var,
@@ -306,8 +307,9 @@ function status_change_update_dom(job_dom_id, status){
             .text(status));
     if (status == "Done"){
         execute_sequence_output(id_map[job_dom_id]);
-    } else if (status == "Error") {
+    } else if (status == "Error" || status == "Stopped") {
         clearInterval(start_timer_map[job_dom_id]);
+        clearInterval(countdown_map[job_dom_id]);
         $("#update_spin"+job_dom_id).remove();
         $("#updateid"+job_dom_id).empty();
         $("#updateid"+job_dom_id).append($("<span/>").text(status));
@@ -1143,6 +1145,30 @@ function delete_job_from_w3(event){
     synchronize_output_sequence_tabs(active_sequence);
     var dan = "ok";
 }
+function stop_job_from_w3(event){
+    var source = event.target || event.srcElement;
+    var job_item = get_number_from_id(source.id, "stopjob");
+    $(source).removeClass("fa-fire-extinguisher");
+    $(source).addClass("fa-hourglass-start");
+    $.ajax({
+        type: "GET",
+        url: "/stop_job/"+id_map[job_item]+"/",
+        datatype: 'json',
+        success: function(data) {
+            if (data.errors == 0){
+                $(source).hide();
+                if ($("#jobrow"+job_item).hasClass("selected")){
+                    as_highlighted_checker[active_sequence]--;
+                    $("#jobrow"+job_item).removeClass("selected");
+                }
+                as_highlighted_checker[active_sequence]
+            } else {
+                $(source).removeClass("fa-hourglass-start");
+                $(source).addClass("fa-fire-extinguisher");
+            }
+        }
+    });
+}
 
 // Clear job content in w3
 function clear_new_jobs(){
@@ -1337,10 +1363,7 @@ function job_row_is_mutable(job_row){
         var current_status = $("#jobstatusid"+job_row+" span");
         result =  ((current_status.length == 0) ||
                    (current_status.length >=1 && ( current_status[0].innerText == "Valid" ||
-                                                   current_status[0].innerText == "Invalid" ||
-                                                   current_status[0].innerText == "Preparing" ||
-                                                   current_status[0].innerText == "Stopped"  ||
-                                                   current_status[0].innerText == "Error")));
+                                                   current_status[0].innerText == "Invalid")));
     }
     return result;
 }
@@ -1450,14 +1473,7 @@ function drop_command_into_hole(command, command_json, command_td, row_id){
    // console.log("drop_command_into_hole");
     var current_status = $("#jobstatusid"+row_id+" span");
     var MAX_DISPLAY_ARGUMENT = 36;
-    if ((current_status.length == 0) ||
-        (current_status.length >=1 && command_td.length == 1 && ( current_status[0].innerText == "Invalid" ||
-                                                                  current_status[0].innerText == "Valid" ||
-                                                                  current_status[0].innerText == "Preparing" ||
-                                                                  current_status[0].innerText == "Stopped"  ||
-                                                                  current_status[0].innerText == "Error")
-        )
-    ){
+    if (job_row_is_mutable(row_id)){
         command_td.empty();
         var new_div = document.createElement("div");
         new_div.innerText = command_json;
@@ -1595,6 +1611,7 @@ function final_countdown_function(start_time, dom_id) {
         }
 
     },1000);
+    countdown_map[dom_id] = interval_var;
 }
 
 // Execute Sequence function down below are for w3+w4
@@ -1622,7 +1639,14 @@ function execute_sequence(){
                         var dom_id = index+1;
                         id_reverse_map[job_ids[index]] = dom_id;
                         id_map[index+1] = job_ids[index];
-
+                        $("#trashjob"+dom_id)
+                            .parent()
+                            .append(
+                                $("<a>")
+                                    .attr({"id": "stopjob"+dom_id})
+                                    .addClass("fa fa-fire-extinguisher")
+                            );
+                        $("#stopjob"+dom_id).click(stop_job_from_w3);
                         if (ws_map['status'].readyState === ws_map['status'].OPEN) {
                             $("#updateid" + dom_id).empty();
                             final_countdown_function(sequence_start_time, dom_id);

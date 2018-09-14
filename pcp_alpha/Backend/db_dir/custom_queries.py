@@ -1,6 +1,8 @@
 import json
 import brain.queries
 from brain.binary import put_buffer, list_dir, get, delete
+from brain.jobs import InvalidStateTransition, STOP, transition
+from brain.static import STATUS_FIELD
 import brain
 
 from .project_db import connect, rtdb
@@ -269,3 +271,15 @@ def desired_plugin_state_brain(plugin_id_list, desired_state):
             return_object = brain.controller.plugins.stop(plugin_id_item.strip('\"'))
         return_objects.append(return_object)
     return return_objects
+
+def update_brain_stop_job(job_id):
+    job_obj = brain.queries.get_job_by_id(job_id)
+    success = True
+    if job_obj:
+        try:
+            new_state = transition(job_obj[STATUS_FIELD], STOP)
+            success = brain.queries.update_job_status(job_id, new_state)
+            success = success["r.db('Brain').table('Jobs')"]
+        except InvalidStateTransition:
+            success = {"errors": 1}
+    return success
