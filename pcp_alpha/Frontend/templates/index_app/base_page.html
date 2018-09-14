@@ -59,8 +59,6 @@
         .w1TableWrapper {
             position: relative;
             overflow: hidden;
-            /*width: auto;*/
-            /*height: 360px;*/
         }
         .w1TableScroll {
             max-height: 330px;
@@ -74,8 +72,6 @@
         .w2TableWrapper {
             position: relative;
             overflow: hidden;
-            /*width: auto;*/
-            /*height: 360px;*/
         }
         .w2TableScroll {
             max-height: 330px;
@@ -89,8 +85,6 @@
         .w3TableWrapper {
             position: relative;
             overflow: hidden;
-            /*width: auto;*/
-            /*height: 360px;*/
         }
         .w3TableScroll {
             max-height: 330px;
@@ -104,8 +98,6 @@
         .w4TableWrapper {
             position: relative;
             overflow: hidden;
-            /*width: auto;*/
-            /*height: 360px;*/
         }
         .w4TableScroll {
             max-height: 330px;
@@ -116,18 +108,26 @@
         .w4TableScroll.loaded {
             max-height: 600px;
         }
-        .sticky {
-          position: fixed;
-          top: 0;
-          width: 100%;
+        .tooltipContent {
+          width: 568px;
         }
 
-        .sticky + .contentTest {
-          padding-top: 102px;
+        .tooltipWrapper {
+            position: relative;
+            overflow: hidden;
         }
-        /*.gridSelect {*/
-            /*width: 70%;*/
-        /*}*/
+        .tooltipScroll {
+            max-height: 280px;
+            overflow: auto;
+            overflow-x: hidden;
+            transition: max-height 0.76s ease-in;
+        }
+        .tooltipScroll.loaded {
+            max-height: 460px;
+        }
+        .fixed_tooltip {
+          position: fixed;
+        }
 
     </style>
     {% block styles %}{% endblock %}
@@ -348,17 +348,24 @@ desired effect
 
             <!--W2 Body-->
             <div class="box-body w2TableWrapper contentTest" id="w2_body_box">
-              <div class="row w2TableScroll">
+              <div class="row w2TableScroll" onscroll="fixed_tooltip()">
                 <!--Command List-->
                 <div class="col-xs-4">
                   <div class="box-header theContentHeader"></div>
                   <div class="tab-content theContent" style="width:250px"></div>
                 </div>
                 <!--/Command List-->
+
                 <!--Tooltip For Command-->
-                <div class="col-xs-8" id="toolTipTest">
-                  <div class="box-header tooltipHeader"></div>
-                  <div class="tab-content tooltipContent"></div>
+                <div class="col-xs-8 tooltipTest" id="toolTipTest">
+                  <div id="tooltipColumn" class="">
+                      <div class="box-header tooltipHeader"></div>
+                      <div class="tooltipWrapper">
+                        <div class="tooltipScroll">
+                          <div class="tab-content tooltipContent"></div>
+                        </div>
+                      </div>
+                  </div>
                 </div>
                 <!--/Tooltip For Command-->
               </div>

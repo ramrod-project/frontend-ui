@@ -32,6 +32,19 @@ var timer_on = 1,
     test_ws = new WebSocket(test_server);
 as_highlighted_checker[active_sequence] = 0;
 
+// $("#tooltipColumn").affix({
+//     offset: {
+//         top: function (){
+//             // var navOutHeight = $("")
+//             return this.top = "118px";
+//         },
+//         bottom: function () {
+//             var navBottom = $("#boxtwofooterid").outerHeight(true);
+//             return (this.bottom) = navBottom;
+//         }
+//     }
+// });
+
 
 $(document).ready(function() {
     // W4 header height === W4 header height
@@ -186,6 +199,21 @@ $(document).ready(function() {
     });
 
 });
+var scroll_position = 0;
+$(window).scroll(function () {
+   var current_scroll_pos = $(this).scrollTop();
+   if (current_scroll_pos > scroll_position && $("#tooltipColumn").hasClass("fixed_tooltip")) {
+       //Scrolling Down
+       $("#tooltipColumn").removeClass("fixed_tooltip");
+   } else if ($("#tooltipColumn").hasClass("fixed_tooltip")) {
+      //Scrolling Up
+      $("#tooltipColumn").removeClass("fixed_tooltip");
+   }
+});
+function fixed_tooltip(){
+    $("#tooltipColumn").addClass("fixed_tooltip");
+}
+
 function generate_target_id_map(){
     var rows = $("#target_box_contentid tr td a span");
     for (var i in rows){
@@ -426,9 +454,15 @@ function filter_w2() {
     }
 }
 
-function onLoadTest(element, element_two){
-    $(element).addClass('loaded');
-    $(element_two).addClass('loaded');
+function onLoadTest(element, element_two, w2_tooltip=0){
+    if (w2_tooltip !== 0){
+        $(element).addClass('loaded');
+        $(element_two).addClass('loaded');
+        $(w2_tooltip).addClass('loaded');
+    } else {
+        $(element).addClass('loaded');
+        $(element_two).addClass('loaded');
+    }
 }
 // abstract this later
 // also add animations for top widgets for bottom widgets when minimized
@@ -440,7 +474,8 @@ function widget_expand_or_collapse(widget){
         w1_scroll = $(".w1TableScroll"),
         w2_scroll = $(".w2TableScroll"),
         w3_scroll = $(".w3TableScroll"),
-        w4_scroll = $(".w4TableScroll");
+        w4_scroll = $(".w4TableScroll"),
+        tooltip_scroll = $(".tooltipScroll");
 
     if (widget === 'w1'){
         if (!w1_col_box.boxWidget()[0].classList.contains('collapsed-box')) {
@@ -472,29 +507,35 @@ function widget_expand_or_collapse(widget){
         if(w3_col_id[0].children[0].classList[1] !== "fa-minus") {
             w1_scroll.removeAttr('style');
             w2_scroll.removeAttr('style');
+            tooltip_scroll.removeAttr('style');
             setTimeout(function() {
-                onLoadTest(w1_scroll, w2_scroll);
+                onLoadTest(w1_scroll, w2_scroll, tooltip_scroll);
             }, 500);
         }
         else if(w3_col_id[0].children[0].classList[1] === "fa-minus") {
             w1_scroll.removeClass('loaded');
             w2_scroll.removeClass('loaded');
+            tooltip_scroll.removeClass('loaded');
             w1_scroll[0].style.maxHeight = "330px";
             w2_scroll[0].style.maxHeight = "330px";
+            tooltip_scroll[0].style.maxHeight = "280px";
         }
     } else if (widget === 'w4'){
         if(w4_col_id[0].children[0].classList[1] !== "fa-minus") {
             w1_scroll.removeAttr('style');
             w2_scroll.removeAttr('style');
+            tooltip_scroll.removeAttr('style');
             setTimeout(function() {
-                onLoadTest(w1_scroll, w2_scroll);
+                onLoadTest(w1_scroll, w2_scroll, tooltip_scroll);
             }, 500);
         }
         else if(w4_col_id[0].children[0].classList[1] === "fa-minus") {
             w1_scroll.removeClass('loaded');
             w2_scroll.removeClass('loaded');
+            tooltip_scroll.removeClass('loaded');
             w1_scroll[0].style.maxHeight = "330px";
             w2_scroll[0].style.maxHeight = "330px";
+            tooltip_scroll[0].style.maxHeight = "280px";
         }
     }
 }
@@ -670,18 +711,6 @@ function get_commands_func(){
                   } else {
                       header.classList.remove("sticky");
                   }
-
-                $("#toolTipTest").each(function(arg, el){
-                    console.log($(el));
-                    console.log($(el).position);
-                    console.log($(el).closest);
-                    console.log($(el).closest(".anchor"));
-                    $(el).position({
-                        of:  $(el).closest(".anchor")[0],
-                        my:  "right top",
-                        at:  "right+20 top+10"
-                    });
-                });
 
                 //footer
                 $(".theContentArgument").empty();

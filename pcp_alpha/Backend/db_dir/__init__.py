@@ -267,8 +267,44 @@ _TEST_COMMANDS2 = [
     #  test command 1
     {
         "CommandName": "command1",
-        "Tooltip": '\ncommand1\n\nThis is for testing\nits like echo'
-                   '\nArguments:\n1. String to Echo\n\nReturns:\nString\n',
+        "Tooltip": '\ncommand1\n\nThis is for testing testinskldfjslkdjfslkjdfksj\nits like echo'
+                   '\nArguments:\n1. String to Echo\n\n2. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n\nReturns:\nString\n',
         "Output": True,
         "Inputs": [
             {
@@ -284,7 +320,18 @@ _TEST_COMMANDS2 = [
     {
         "CommandName": "command2",
         "Tooltip": '\ncommand2\n\nThis is for testing\nits like echo'
-                   '\nArguments:\n1. String to Echo\n\nReturns:\nString\n',
+                   '\nArguments:\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\nReturns:\nString\n',
         "Output": True,
         "Inputs": [
             {
