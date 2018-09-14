@@ -660,7 +660,7 @@ class TestDataHandling(object):
         response = execute_sequence_controller(rf.get(first_url))
         assert "inserted" in str(response.content)
         assert response.status_code == 200
-        job_id = response.getvalue().decode()['generated_keys'][0]
-        sleep(5)
+        job_id = json.loads(response.getvalue().decode())['generated_keys'][0]
+        sleep(2)
         second_url = "/stop_job/{}/".format(job_id)
         assert stop_job(rf.get(second_url, HTTP_USER_AGENT='Mozilla/5.0')).status_code == 200
