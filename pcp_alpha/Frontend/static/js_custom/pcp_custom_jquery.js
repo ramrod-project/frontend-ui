@@ -1524,14 +1524,13 @@ function prepare_jobs_list(){
                 .append($("<span/>")
                     .attr({"class": "label label-"+INITIAL_JOB_STATUS})
                     .text(INITIAL_JOB_STATUS));
-
+            $("#trashjob"+(j+1)).hide();
             var uid = j+1;
             var terminal = $("#updateid"+uid).parent();
             var plugin_name_data = $("#pluginid"+(j+1))[0].textContent;  // correct json target data with plugin name
             var json_target_data = JSON.parse($("#pluginid"+(j+1)+" span")[0].innerText);
             var command_json = $("#commandid"+(j+1)+" div")[0].innerText;
             var command = JSON.parse(command_json);
-
             var job = {"JobTarget": {"PluginName": String(json_target_data.PluginName),
                                      "Location": String(json_target_data.Location),
                                      "Port":  String(json_target_data.Port),},
