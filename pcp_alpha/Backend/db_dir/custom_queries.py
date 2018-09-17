@@ -164,6 +164,7 @@ def load_jobs_state(state_id):
     output = None
     conn = connect()
     ensure_uiw3(conn)
+    output = RBX.table("UIW3").get(state_id).run(conn)
     return output
 
 

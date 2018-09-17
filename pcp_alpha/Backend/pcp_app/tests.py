@@ -583,8 +583,8 @@ class TestDataHandling(object):
         :param rf: request factory
         :return: status code
         """
-        url_var = "action/load_state/"
-        response = get_test(url_var, load_job_state, rf)
+        url_var = "action/load_state/?requested_state=kasjldfkjsakldjf"
+        response = load_job_state(rf.get(url_var, HTTP_USER_AGENT='Mozilla/5.0'))
         assert response.status_code == 200
 
     @staticmethod
@@ -595,7 +595,7 @@ class TestDataHandling(object):
         :return: status code
         """
         url_var = "action/state_names/"
-        response = get_test(url_var, get_state_names, rf)
+        response = get_state_names(rf.get(url_var, HTTP_USER_AGENT='Mozilla/5.0'))
         assert response.status_code == 200
 
     @staticmethod

@@ -27,8 +27,10 @@ var w3_highlighted_row,
     w3_highlighted_array = [],
     as_highlighted_checker = {},
     start_timer_interval,
-    start_timer_map = {},
-    countdown_map = {};
+    countdown_map = {},
+    start_timer_map = {};
+var scroll_position = 0,
+    scroll_checker = 0;
 
 var timer_on = 1,
     time_var,
@@ -218,6 +220,22 @@ function datetext_to_unix_time(dateText){
      var py_dt = Math.floor(dt_obj.getTime()/1000).toString();
      return py_dt;
 }
+$(window).scroll(function () {
+    var current_scroll_pos = $(this).scrollTop();
+    scroll_checker = current_scroll_pos;
+    if (current_scroll_pos > scroll_position && $("#tooltipColumn").hasClass("fixed_tooltip")) {
+        //Scrolling
+        $("#tooltipColumn").removeClass("fixed_tooltip");
+    }
+});
+function fixed_tooltip(){
+    if(scroll_checker === 0 && $("#preToolTipContent")[0]){
+        $("#tooltipColumn").addClass("fixed_tooltip");
+    } else {
+        $("#tooltipColumn").removeClass("fixed_tooltip");
+    }
+}
+
 function generate_target_id_map(){
     var rows = $("#target_box_contentid tr td a span");
     for (var i in rows){
@@ -466,9 +484,15 @@ function filter_w2() {
     }
 }
 
-function onLoadTest(element, element_two){
-    $(element).addClass('loaded');
-    $(element_two).addClass('loaded');
+function onLoadTest(element, element_two, w2_tooltip=0){
+    if (w2_tooltip !== 0){
+        $(element).addClass('loaded');
+        $(element_two).addClass('loaded');
+        $(w2_tooltip).addClass('loaded');
+    } else {
+        $(element).addClass('loaded');
+        $(element_two).addClass('loaded');
+    }
 }
 // abstract this later
 // also add animations for top widgets for bottom widgets when minimized
@@ -480,7 +504,8 @@ function widget_expand_or_collapse(widget){
         w1_scroll = $(".w1TableScroll"),
         w2_scroll = $(".w2TableScroll"),
         w3_scroll = $(".w3TableScroll"),
-        w4_scroll = $(".w4TableScroll");
+        w4_scroll = $(".w4TableScroll"),
+        tooltip_scroll = $(".tooltipScroll");
 
     if (widget === 'w1'){
         if (!w1_col_box.boxWidget()[0].classList.contains('collapsed-box')) {
@@ -512,29 +537,35 @@ function widget_expand_or_collapse(widget){
         if(w3_col_id[0].children[0].classList[1] !== "fa-minus") {
             w1_scroll.removeAttr('style');
             w2_scroll.removeAttr('style');
+            tooltip_scroll.removeAttr('style');
             setTimeout(function() {
-                onLoadTest(w1_scroll, w2_scroll);
+                onLoadTest(w1_scroll, w2_scroll, tooltip_scroll);
             }, 500);
         }
         else if(w3_col_id[0].children[0].classList[1] === "fa-minus") {
             w1_scroll.removeClass('loaded');
             w2_scroll.removeClass('loaded');
+            tooltip_scroll.removeClass('loaded');
             w1_scroll[0].style.maxHeight = "330px";
             w2_scroll[0].style.maxHeight = "330px";
+            tooltip_scroll[0].style.maxHeight = "280px";
         }
     } else if (widget === 'w4'){
         if(w4_col_id[0].children[0].classList[1] !== "fa-minus") {
             w1_scroll.removeAttr('style');
             w2_scroll.removeAttr('style');
+            tooltip_scroll.removeAttr('style');
             setTimeout(function() {
-                onLoadTest(w1_scroll, w2_scroll);
+                onLoadTest(w1_scroll, w2_scroll, tooltip_scroll);
             }, 500);
         }
         else if(w4_col_id[0].children[0].classList[1] === "fa-minus") {
             w1_scroll.removeClass('loaded');
             w2_scroll.removeClass('loaded');
+            tooltip_scroll.removeClass('loaded');
             w1_scroll[0].style.maxHeight = "330px";
             w2_scroll[0].style.maxHeight = "330px";
+            tooltip_scroll[0].style.maxHeight = "280px";
         }
     }
 }
@@ -629,15 +660,15 @@ function add_intput_to_command_builder(input_id, input_i, template_key){
 
 
 function get_commands_func(){
-//    console.log("get_commands_func");  // debug
-//    console.log($(this)[0].parentElement.id);
-
     // plugin name the user clicked
     var row_id = $(this)[0].parentElement.id.substring(10, $(this)[0].id.length);
     var plugin_name_var = $("#name_tag_id"+row_id+" a span")[1].innerText;
     var check_content_var = false;
     var quick_action_button;
     var argid = 0;
+    if ($("#tooltipColumn").hasClass("fixed_tooltip")) {
+        $("#tooltipColumn").removeClass("fixed_tooltip");
+    }
 
     $.ajax({
         type: "GET",
@@ -647,14 +678,13 @@ function get_commands_func(){
         success: function(data) {
             // check if w2 should re-render or not
             current_plugin_commands = data;
-            if($(".theContent li a").length > 0){
+            if($(".theContent li a").length > 0 && $(".theContent li a").length === data.length){
                 for(var int = 0; int < $(".theContent li a").length; int++){
                     if(data[0].CommandName == $(".theContent li a")[int].text){
                         check_content_var = true;
                     }
                 }
             }
-
             // empty content in w2 if different plugin name was clicked previously
             if (!check_content_var){
                 $(".tooltipHeader").empty();
@@ -699,8 +729,18 @@ function get_commands_func(){
                         .append($("<b/>")
                             .text("Tooltip:")));
                 $(".tooltipContent").empty();
+                $("#preToolTipContent").empty();
                 $(".tooltipContent")
-                    .append("<pre>" + current_command_template.Tooltip + "</pre>");
+                    .append("<pre id='preToolTipContent'>" + current_command_template.Tooltip + "</pre>");
+
+                // $("#toolTipTest")
+                var header = document.getElementById("toolTipTest");
+                var sticky = header.offsetTop;
+                  if (window.pageYOffset > sticky) {
+                      header.classList.add("sticky");
+                  } else {
+                      header.classList.remove("sticky");
+                  }
 
                 //footer
                 $(".theContentArgument").empty();
@@ -1972,4 +2012,4 @@ function syncScroll(element1, element2) {
         ignoreScrollEvents = true;
         element2.scrollTop(element1.scrollTop())
     })
-  }
+}
