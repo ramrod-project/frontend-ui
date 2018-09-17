@@ -576,16 +576,16 @@ class TestDataHandling(object):
             response = post_test(url_var, {}, persist_job_state, rf)
             assert response.status_code == 200
 
-    # @staticmethod
-    # def test_job_state3(rf):
-    #     """
-    #     This test imitates load a job state in W3
-    #     :param rf: request factory
-    #     :return: status code
-    #     """
-    #     url_var = "action/load_state/"
-    #     response = get_test(url_var, load_job_state, rf)
-    #     assert response.status_code == 200
+    @staticmethod
+    def test_job_state3(rf):
+        """
+        This test imitates load a job state in W3
+        :param rf: request factory
+        :return: status code
+        """
+        url_var = "action/load_state/"
+        response = get_state_names(rf.get(url_var, HTTP_USER_AGENT='Mozilla/5.0'), 'anything')
+        assert response.status_code == 200
 
     @staticmethod
     def test_get_job_state(rf):
@@ -595,7 +595,7 @@ class TestDataHandling(object):
         :return: status code
         """
         url_var = "action/state_names/"
-        response = get_test(url_var, get_state_names, rf)
+        response = get_state_names(rf.get(url_var, HTTP_USER_AGENT='Mozilla/5.0'), 'anything')
         assert response.status_code == 200
 
     @staticmethod
