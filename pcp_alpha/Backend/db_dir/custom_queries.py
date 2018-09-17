@@ -7,6 +7,8 @@ import brain
 
 from .project_db import connect, rtdb
 
+RBX = rtdb.db("Brain")
+
 
 # Note: Refactor this file as a CRUD class in the future
 def get_brain_targets():
@@ -19,6 +21,11 @@ def get_brain_targets():
         item['json'] = json.dumps(item)
         items.append(item)
     return items
+
+
+def ensure_uiw3(conn):
+    if not RBX.table_list().contains("UIW3").run(conn):
+        RBX.table_create("UIW3").run(conn)
 
 
 def get_specific_commands(user_selection):
@@ -136,21 +143,16 @@ def persist_jobs_state(current_state):
     :return:
     """
     conn = connect()
-    rbx = rtdb.db("Brain")
-    #current_state["id"] = 1  # static ID so it overwrites
-    if not rbx.table_list().contains("UIW3").run(conn):
-        rbx.table_create("UIW3").run(conn)
-    output = rbx.table("UIW3").insert(current_state,
+    ensure_uiw3(conn)
+    output = RBX.table("UIW3").insert(current_state,
                                       conflict="replace").run(conn)
     return output
 
 
 def db_get_state_names():
     conn = connect()
-    rbx = rtdb.db("Brain")
-    if not rbx.table_list().contains("UIW3").run(conn):
-        rbx.table_create("UIW3").run(conn)
-    output = rbx.table("UIW3").pluck("id").order_by("id").run(conn)
+    ensure_uiw3(conn)
+    output = RBX.table("UIW3").pluck("id").order_by("id").run(conn)
     ids = [x['id'] for x in output]
     return ids
 
@@ -161,9 +163,7 @@ def load_jobs_state(state_id):
     """
     output = None
     conn = connect()
-    rbx = rtdb.db("Brain")
-    if rbx.table_list().contains("UIW3").run(conn):
-        output = rbx.table("UIW3").get(state_id).run(conn)
+    ensure_uiw3(conn)
     return output
 
 
