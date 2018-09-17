@@ -25,25 +25,14 @@ var w3_highlighted_row,
     as_highlighted_checker = {},
     start_timer_interval,
     start_timer_map = {};
+var scroll_position = 0,
+    scroll_checker = 0;
 
 var timer_on = 1,
     time_var,
     test_server = 'ws://' + window.location.hostname + ':3000/monitor',
     test_ws = new WebSocket(test_server);
 as_highlighted_checker[active_sequence] = 0;
-
-// $("#tooltipColumn").affix({
-//     offset: {
-//         top: function (){
-//             // var navOutHeight = $("")
-//             return this.top = "118px";
-//         },
-//         bottom: function () {
-//             var navBottom = $("#boxtwofooterid").outerHeight(true);
-//             return (this.bottom) = navBottom;
-//         }
-//     }
-// });
 
 
 $(document).ready(function() {
@@ -129,6 +118,10 @@ $(document).ready(function() {
         } else {
             console.log("draggable object for one object");
         }
+            // tooltip scroll resets the height of the tooltip
+        if ($("#tooltipColumn").hasClass("fixed_tooltip")) {
+            $("#tooltipColumn").removeClass("fixed_tooltip");
+        }
     });
 
     // Date Time picker
@@ -199,19 +192,21 @@ $(document).ready(function() {
     });
 
 });
-var scroll_position = 0;
+
 $(window).scroll(function () {
-   var current_scroll_pos = $(this).scrollTop();
-   if (current_scroll_pos > scroll_position && $("#tooltipColumn").hasClass("fixed_tooltip")) {
-       //Scrolling Down
-       $("#tooltipColumn").removeClass("fixed_tooltip");
-   } else if ($("#tooltipColumn").hasClass("fixed_tooltip")) {
-      //Scrolling Up
-      $("#tooltipColumn").removeClass("fixed_tooltip");
-   }
+    var current_scroll_pos = $(this).scrollTop();
+    scroll_checker = current_scroll_pos;
+    if (current_scroll_pos > scroll_position && $("#tooltipColumn").hasClass("fixed_tooltip")) {
+        //Scrolling
+        $("#tooltipColumn").removeClass("fixed_tooltip");
+    }
 });
 function fixed_tooltip(){
-    $("#tooltipColumn").addClass("fixed_tooltip");
+    if(scroll_checker === 0 && $("#preToolTipContent")[0]){
+        $("#tooltipColumn").addClass("fixed_tooltip");
+    } else {
+        $("#tooltipColumn").removeClass("fixed_tooltip");
+    }
 }
 
 function generate_target_id_map(){
@@ -630,15 +625,15 @@ function add_intput_to_command_builder(input_id, input_i, template_key){
 
 
 function get_commands_func(){
-//    console.log("get_commands_func");  // debug
-//    console.log($(this)[0].parentElement.id);
-
     // plugin name the user clicked
     var row_id = $(this)[0].parentElement.id.substring(10, $(this)[0].id.length);
     var plugin_name_var = $("#name_tag_id"+row_id+" a span")[1].innerText;
     var check_content_var = false;
     var quick_action_button;
     var argid = 0;
+    if ($("#tooltipColumn").hasClass("fixed_tooltip")) {
+        $("#tooltipColumn").removeClass("fixed_tooltip");
+    }
 
     $.ajax({
         type: "GET",
@@ -648,14 +643,13 @@ function get_commands_func(){
         success: function(data) {
             // check if w2 should re-render or not
             current_plugin_commands = data;
-            if($(".theContent li a").length > 0){
+            if($(".theContent li a").length > 0 && $(".theContent li a").length === data.length){
                 for(var int = 0; int < $(".theContent li a").length; int++){
                     if(data[0].CommandName == $(".theContent li a")[int].text){
                         check_content_var = true;
                     }
                 }
             }
-
             // empty content in w2 if different plugin name was clicked previously
             if (!check_content_var){
                 $(".tooltipHeader").empty();
@@ -700,8 +694,9 @@ function get_commands_func(){
                         .append($("<b/>")
                             .text("Tooltip:")));
                 $(".tooltipContent").empty();
+                $("#preToolTipContent").empty();
                 $(".tooltipContent")
-                    .append("<pre>" + current_command_template.Tooltip + "</pre>");
+                    .append("<pre id='preToolTipContent'>" + current_command_template.Tooltip + "</pre>");
 
                 // $("#toolTipTest")
                 var header = document.getElementById("toolTipTest");
@@ -1892,4 +1887,4 @@ function syncScroll(element1, element2) {
         ignoreScrollEvents = true;
         element2.scrollTop(element1.scrollTop())
     })
-  }
+}

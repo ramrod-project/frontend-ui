@@ -24,13 +24,13 @@ _TEST_TARGETS = [
         "Optional": {"init": "hello",
                      "Common": {"User": "xxx"}}
     },
-    {
-        "PluginName": "Plugin1",
-        "Location": location_generated_num("172.16.5."),
-        "Port": "8002",
-        "Optional": {"init": "hello",
-                     "Specific": {"abc": "def"}}
-    },
+    # {
+    #     "PluginName": "Plugin1",
+    #     "Location": location_generated_num("172.16.5."),
+    #     "Port": "8002",
+    #     "Optional": {"init": "hello",
+    #                  "Specific": {"abc": "def"}}
+    # },
     {
         "PluginName": "Plugin2",
         "Location": location_generated_num("172.16.5."),
@@ -55,24 +55,24 @@ _TEST_TARGETS = [
         "Port": "8002",
         "Optional": "Document Here"
     },
-    {
-        "PluginName": "Plugin6",
-        "Location": location_generated_num("172.16.5."),
-        "Port": "8002",
-        "Optional": "Document Here"
-    },
-    {
-        "PluginName": "Plugin7",
-        "Location": location_generated_num("172.16.5."),
-        "Port": "8002",
-        "Optional": "Document Here"
-    },
-    {
-        "PluginName": "Plugin8",
-        "Location": location_generated_num("172.16.5."),
-        "Port": "8002",
-        "Optional": "Document Here"
-    },
+    # {
+    #     "PluginName": "Plugin6",
+    #     "Location": location_generated_num("172.16.5."),
+    #     "Port": "8002",
+    #     "Optional": "Document Here"
+    # },
+    # {
+    #     "PluginName": "Plugin7",
+    #     "Location": location_generated_num("172.16.5."),
+    #     "Port": "8002",
+    #     "Optional": "Document Here"
+    # },
+    # {
+    #     "PluginName": "Plugin8",
+    #     "Location": location_generated_num("172.16.5."),
+    #     "Port": "8002",
+    #     "Optional": "Document Here"
+    # },
 
     {
         "PluginName": "Plugin1",
