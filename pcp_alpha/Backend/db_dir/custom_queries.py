@@ -137,7 +137,7 @@ def persist_jobs_state(current_state):
     """
     conn = connect()
     rbx = rtdb.db("Brain")
-    current_state["id"] = 1  # static ID so it overwrites
+    #current_state["id"] = 1  # static ID so it overwrites
     if not rbx.table_list().contains("UIW3").run(conn):
         rbx.table_create("UIW3").run(conn)
     output = rbx.table("UIW3").insert(current_state,
@@ -145,7 +145,17 @@ def persist_jobs_state(current_state):
     return output
 
 
-def load_jobs_state():
+def db_get_state_names():
+    conn = connect()
+    rbx = rtdb.db("Brain")
+    if not rbx.table_list().contains("UIW3").run(conn):
+        rbx.table_create("UIW3").run(conn)
+    output = rbx.table("UIW3").pluck("id").order_by("id").run(conn)
+    ids = [x['id'] for x in output]
+    return ids
+
+
+def load_jobs_state(state_id):
     """
     :return:
     """
@@ -153,7 +163,7 @@ def load_jobs_state():
     conn = connect()
     rbx = rtdb.db("Brain")
     if rbx.table_list().contains("UIW3").run(conn):
-        output = rbx.table("UIW3").get(1).run(conn)
+        output = rbx.table("UIW3").get(state_id).run(conn)
     return output
 
 
