@@ -4,7 +4,7 @@ from .views import get_commands_controller, new_target_form, val_target_form, ex
     w4_output_controller, w4_output_controller_download, edit_target_form, val_edit_target_form, \
     persist_job_state, load_job_state, delete_specific_target, file_upload_list, del_file_from_list, \
     get_file_listing, get_file, get_plugin_list, update_plugin, desired_plugin_state_controller, \
-    get_interfaces, stop_job
+    get_interfaces, stop_job, get_state_names
 
 
 app_name = 'pcp_app'
@@ -20,6 +20,7 @@ urlpatterns = [
     path('action/val_edit_target_form/<target_id>/', val_edit_target_form),  # url for val_capability_form controller
     path('action/save_state/', persist_job_state),              # url for save_state
     path('action/load_state/', load_job_state),                 # url for save_state
+    path('action/state_names/', get_state_names),  # url for save_state
     path('delete_target_row/<target_id>/', delete_specific_target),         # url to delete specific target
     path('file_upload/', file_upload_list),  # file upload
     path('file_listing/', get_file_listing),  # populate file list to ui

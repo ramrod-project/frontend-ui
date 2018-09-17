@@ -19,7 +19,7 @@ from pcp_alpha.Backend.pcp_app.views import get_commands_controller, \
     execute_sequence_controller, w4_output_controller, w4_output_controller_download, \
     new_target_form, val_target_form, val_edit_target_form, edit_target_form, \
     delete_specific_target, file_upload_list, persist_job_state, load_job_state, \
-    del_file_from_list, get_file_listing, get_file, get_interfaces, stop_job
+    del_file_from_list, get_file_listing, get_file, get_interfaces, stop_job, get_state_names
 
 ECHO_JOB_ID = str(uuid4())
 NOW = time()
@@ -585,6 +585,17 @@ class TestDataHandling(object):
         """
         url_var = "action/load_state/"
         response = get_test(url_var, load_job_state, rf)
+        assert response.status_code == 200
+
+    @staticmethod
+    def test_get_job_state(rf):
+        """
+        This test imitates saving a job state in W3
+        :param rf: request factory
+        :return: status code
+        """
+        url_var = "action/state_names/"
+        response = get_test(url_var, get_state_names, rf)
         assert response.status_code == 200
 
     @staticmethod

@@ -45,6 +45,17 @@ $(document).ready(function() {
     syncScroll($(".w3TableScroll"), $(".w4TableScroll"));
     syncScroll($(".w4TableScroll"), $(".w3TableScroll"));
 
+    $("#w3_current_selector").hide();
+    $("#w3_dn_check_button").hide();
+    $("#w3_up_check_button").hide();
+    $("#w3toss_button").hide();
+    $("#w3_selector_loading").hide();
+    $("#w3_namer").hide();
+    $("#w3toss_button").click(close_state_loader);
+    $("#w3_up_check_button").click(save_job_state_by_name);
+    $("#w3_dn_check_button").click(load_job_state_by_name);
+
+
     $("#terminal-save").click(onclick_terminal_submit);
     $("#terminal-cmd").keyup(function(e){
         if(e.keyCode == 13) {
@@ -768,13 +779,50 @@ function drop_target_into_job_row(job_row_id, target_js, target_js_str=""){
     }
 }
 
+
 function load_job_state(){
+    close_state_loader();
+    var dropdown_names = $("#w3_current_selector");
+    dropdown_names.empty();
+
+    $("#w3_dn_check_button").show();
+    $("#w3toss_button").show();
+    $("#w3_selector_loading").show();
+    $.ajax({
+        type: "GET",
+        url: "/action/state_names/",
+        datatype: 'json',
+        success: function (data) {
+            var name_selector = $("#w3_current_selector");
+            for(var i=0; i <  data.length; i++){
+                name_selector.append($("<option/>")
+                    .val(data[i])
+                    .text(data[i])
+                );
+            }
+            $("#w3_selector_loading").hide();
+            $("#w3_current_selector").show();
+        }
+    });
+}
+
+function close_state_loader(){
+    $("#w3_current_selector").hide();
+    $("#w3_dn_check_button").hide();
+    $("#w3_selector_loading").hide();
+    $("#w3_namer").hide();
+    $("#w3_up_check_button").hide();
+    $("#w3toss_button").hide();
+}
+
+function load_job_state_by_name(){
     $("#download_status").removeClass("fa-cloud-download");
     $("#download_status").removeClass("fa-money");
     $("#download_status").addClass("fa-hourglass-end");
     $.ajax({
         type: "GET",
         url: "/action/load_state/",
+        data: {"requested_state": $("#w3_current_selector").val()},
         datatype: 'json',
         success: function(data) {
             clear_new_jobs();
@@ -804,7 +852,7 @@ function load_job_state(){
                 }
             }
             sequence_starttime_map = data.sequence_starttime_map; // must remain below add_sequence_tab loop
-            sequence_expiretime_map = date.sequence_expiretime_map;
+            sequence_expiretime_map = data.sequence_expiretime_map;
             set_w3_job_status(full_update=true);
             synchronize_job_sequence_tabs(active_sequence);
             synchronize_output_sequence_tabs(active_sequence);
@@ -813,6 +861,7 @@ function load_job_state(){
             setTimeout( function() {
                 $("#download_status").removeClass("fa-money");
                 $("#download_status").addClass("fa-cloud-download");
+                close_state_loader();
                 }, 3000);
         }
     })
@@ -830,12 +879,23 @@ function json_list_to_set(key, value) {
   return value;
 }
 
+
 function save_job_state(){
+    close_state_loader();
+    $("#w3_namer").show();
+    $("#w3_up_check_button").show();
+    $("#w3toss_button").show();
+}
+
+
+function save_job_state_by_name(){
     $("#upload_status").removeClass("fa-cloud-upload");
     $("#upload_status").removeClass("fa-money");
     $("#upload_status").addClass("fa-hourglass-end");
+    var state_name = $("#w3_namer").val();
     var local_sequences = JSON.parse(JSON.stringify(sequences, json_set_to_list));
-    var data_package = {"id_map": id_map,
+    var data_package = {"id": state_name,
+                        "id_map": id_map,
                         "id_reverse_map": id_reverse_map,
                         "id_status_map": id_status_map,
                         "sequence_starttime_map": sequence_starttime_map,
@@ -875,6 +935,7 @@ function save_job_state(){
             setTimeout( function() {
                 $("#upload_status").removeClass("fa-money");
                 $("#upload_status").addClass("fa-cloud-upload");
+                close_state_loader();
                 }, 3000 );
         }
     });
