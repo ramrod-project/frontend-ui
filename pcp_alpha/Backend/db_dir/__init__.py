@@ -274,8 +274,44 @@ _TEST_COMMANDS2 = [
     #  test command 1
     {
         "CommandName": "command1",
-        "Tooltip": '\ncommand1\n\nThis is for testing\nits like echo'
-                   '\nArguments:\n1. String to Echo\n\nReturns:\nString\n',
+        "Tooltip": '\ncommand1\n\nThis is for testing testinskldfjslkdjfslkjdfksj\nits like echo'
+                   '\nArguments:\n1. String to Echo\n\n2. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n\nReturns:\nString\n',
         "Output": True,
         "Inputs": [
             {
@@ -291,7 +327,18 @@ _TEST_COMMANDS2 = [
     {
         "CommandName": "command2",
         "Tooltip": '\ncommand2\n\nThis is for testing\nits like echo'
-                   '\nArguments:\n1. String to Echo\n\nReturns:\nString\n',
+                   '\nArguments:\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\n1. String to Echo\n\n1. String to Echo\n\n1. String to Echo\n'
+                   '\nReturns:\nString\n',
         "Output": True,
         "Inputs": [
             {
@@ -499,6 +546,70 @@ _TEST_COMMANDS2 = [
     {
         "CommandName": "command15",
         "Tooltip": '\ncommand15\n\nThis is for testing\nits like echo'
+                   '\nArguments:\n1. String to Echo\n\nReturns:\nString\n',
+        "Output": True,
+        "Inputs": [
+            {
+                "Name": "EchoString",
+                "Type": "textbox",
+                "Tooltip": "This string will be echoed back",
+                "Value": "echo user input"
+            },
+        ],
+        "OptionalInputs": []
+    },
+    #  test command 16
+    {
+        "CommandName": "command16",
+        "Tooltip": '\ncommand16\n\nThis is for testing\nits like echo'
+                   '\nArguments:\n1. String to Echo\n\nReturns:\nString\n',
+        "Output": True,
+        "Inputs": [
+            {
+                "Name": "EchoString",
+                "Type": "textbox",
+                "Tooltip": "This string will be echoed back",
+                "Value": "echo user input"
+            },
+        ],
+        "OptionalInputs": []
+    },
+    #  test command 17
+    {
+        "CommandName": "command17",
+        "Tooltip": '\ncommand17\n\nThis is for testing\nits like echo'
+                   '\nArguments:\n1. String to Echo\n\nReturns:\nString\n',
+        "Output": True,
+        "Inputs": [
+            {
+                "Name": "EchoString",
+                "Type": "textbox",
+                "Tooltip": "This string will be echoed back",
+                "Value": "echo user input"
+            },
+        ],
+        "OptionalInputs": []
+    },
+    #  test command 18
+    {
+        "CommandName": "command18",
+        "Tooltip": '\ncommand15\n\nThis is for testing\nits like echo'
+                   '\ncommand18:\n1. String to Echo\n\nReturns:\nString\n',
+        "Output": True,
+        "Inputs": [
+            {
+                "Name": "EchoString",
+                "Type": "textbox",
+                "Tooltip": "This string will be echoed back",
+                "Value": "echo user input"
+            },
+        ],
+        "OptionalInputs": []
+    },
+    #  test command 19
+    {
+        "CommandName": "command19",
+        "Tooltip": '\ncommand19\n\nThis is for testing\nits like echo'
                    '\nArguments:\n1. String to Echo\n\nReturns:\nString\n',
         "Output": True,
         "Inputs": [
