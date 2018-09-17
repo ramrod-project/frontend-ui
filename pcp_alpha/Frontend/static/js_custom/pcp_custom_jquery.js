@@ -713,10 +713,10 @@ function get_commands_func(){
                     .append($("<div id='commandIdBuilder'/>")
                         .text($(this)[0].text));
                 // JSON development data on W2 footer
-                // $(".theContentArgument")
-                //     .append($("<div id='JSON_Command_DATA'/>")
-                //         .addClass("text-muted small")
-                //         .text(JSON.stringify(current_command_template)));
+                $(".theContentArgument")
+                    .append($("<div id='JSON_Command_DATA'/>")
+                        .addClass("text-muted small")
+                        .text(JSON.stringify(current_command_template)));
 
                 // quick action button to add command template to a highlighted job row
                 quick_action_button = $("<a/>")
