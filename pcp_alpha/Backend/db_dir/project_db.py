@@ -197,6 +197,8 @@ _TEST_COMMANDS = [
 TEST_PORT_DATA = {
     "InterfaceName": "eth0",
     "Interface": "192.16.5.240",
+    "OS": "posix",
+    "NodeHostName": "linuxHost",
     "TCPPorts": ["9999", "4243"],
     "UDPPorts": []
 }
@@ -204,6 +206,8 @@ TEST_PORT_DATA = {
 TEST_PORT_DATA2 = {
     "InterfaceName": "eth0",
     "Interface": "10.10.10.10",
+    "OS": "nt",
+    "NodeHostName": "ntHost1",
     "TCPPorts": [],
     "UDPPorts": ["4242"]
 }

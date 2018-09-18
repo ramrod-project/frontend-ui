@@ -25,6 +25,7 @@ var BLANK_PLUGIN = {
 };
 
 var plugin_list_map = {};
+var plugin_name_map = {};
 var interfaces = [];
 var plugin_names = [];
 var num_plugins = [];
@@ -44,8 +45,17 @@ function add_plugin_name(name){
             .text(name));
     }
 }
+function handle_selected_plugin_change(new_plugin_name){
+    var selected_plugin = plugin_name_map[new_plugin_name];
+    $('#plugin-os').val(plugin_name_map[new_plugin_name].OS);
+    var required_os = selected_plugin.OS;
+    if (required_os == "all") {
+        required_os = false;  // if it doesn't matter, it doesn't matter
+    }
+    get_interfaces(required_os);
+}
 
-function get_interfaces(){
+function get_interfaces(hostos_filter=false){
     $.ajax({
         type: "GET",
         url: "/get_interfaces/",
@@ -55,10 +65,12 @@ function get_interfaces(){
             var iface = $("#plugin-interface");
             iface.empty();
             for (var i=0; i<data.length; i++){
-                iface.append($("<option/>")
-                    .val(data[i])
-                    .text(data[i])
-                );
+                if (!hostos_filter || data[i].OS == hostos_filter){
+                    iface.append($("<option/>")
+                        .val(data[i].Interface)
+                        .text(data[i].Interface + " " + data[i].NodeHostName + " (" + data[i].OS + ")")
+                    );
+                }
             }
         },
         error: function (data) {
@@ -164,6 +176,7 @@ function get_plugin_list() {
         datatype: 'json',
         success: function(data) {
             plugin_list_map = {};
+            plugin_name_map = {};
             for (var count=0; count<data.length; count++){
                 plugin_list_map[data[count]['id']] = data[count];
                 if (data[count].ServiceName !== "AuxiliaryServices"){
@@ -176,6 +189,7 @@ function get_plugin_list() {
                         $("#stop_button"+count).hide();
                     } else {
                         // This is a TEMPLATE object
+                        plugin_name_map[data[count].Name] = data[count];
                         add_plugin_name(data[count].Name);
                     }
                 }
@@ -239,6 +253,7 @@ function verify_plugin_name(){
         $("#pf_name").addClass("has-error");
         $("#pf_name_help").show();
     }
+    handle_selected_plugin_change(plugin_name.val());
     return !$("#plugin-save")[0].disabled;
 }
 
@@ -361,6 +376,7 @@ $(document).ready(function() {
     $("#plugin-environment").change(verify_plugin_environment);
     $("#plugin-environment").keyup(verify_plugin_environment);
 
+    $("#pf_os").hide();
     $("#plugin-os").change(verify_plugin_os);
     $("#plugin-os").keyup(verify_plugin_os);
 });
