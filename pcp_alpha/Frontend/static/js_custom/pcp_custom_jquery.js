@@ -1834,7 +1834,7 @@ function render_job_output_to_page(job_guid, data){
     var download_link = $('<a>[Download]</a>');
     download_link.attr({"href": "/action/get_full_output_data/?job_id="+job_guid+"&job_number="+updateid});
     $("#w4_output_content"+updateid)
-        .append($("<div/>")
+        .append($("<div/>").attr({"id": "download_link_id"+updateid})
             .append(download_link));
     $("#updatestatusid"+updateid).empty();
     $("#updatestatusid"+updateid)
@@ -2050,6 +2050,16 @@ function syncScroll(element1, element2) {
 }
 
 function anchor_w4_output(job_row){
-    var element = document.getElementById("updateid"+job_row);
-    element.scrollIntoView({behavior: "smooth"});
+    setTimeout(function (){
+        var sequence_size = sequences[1].size;
+        if (job_row === sequence_size || job_row === (sequence_size - 1)) {
+            console.log("last two");
+            var element = document.getElementById("download_link_id"+job_row);
+            element.scrollIntoView({behavior: "smooth"});
+        } else {
+            console.log("NOT last two");
+            var element = document.getElementById("updateid"+job_row);
+            element.scrollIntoView({behavior: "smooth"});
+        }
+    }, 500);
 }
