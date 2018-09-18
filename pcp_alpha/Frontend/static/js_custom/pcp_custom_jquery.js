@@ -451,7 +451,9 @@ function filter_w1(){
         var row_id = to_filter[row_i].id.substring(10, to_filter[row_i].id.length),
             target_json = $("#name_tag_id"+row_id+" a span")[0].innerHTML,
             target = JSON.parse(target_json);
-        if (target.PluginName.toLowerCase().includes(filter_content)  || target.Location.toLowerCase().includes(filter_content) ){
+        if (target.PluginName.toLowerCase().includes(filter_content)
+            || target.Location.toLowerCase().includes(filter_content)
+            || target.Port.toLowerCase().includes(filter_content) ){
             $(to_filter[row_i]).css("display", "");
         } else {
             $(to_filter[row_i]).css("display", "none");
