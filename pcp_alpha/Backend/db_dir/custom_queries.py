@@ -239,7 +239,10 @@ def get_interface_list():
 
     :return:
     """
-    return brain.controller.plugins.get_interfaces()
+    #  return brain.controller.plugins.get_interfaces()
+    cur = brain.static.RPP.run(connect())
+    output = [x for x in cur]
+    return output
 
 
 def update_plugin_to_brain(plugin):

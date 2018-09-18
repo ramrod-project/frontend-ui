@@ -10,6 +10,45 @@ from .custom_data import (
 
 # Plugins
 plugins = [{
+    "id": "1-1-A-AA",
+    "Name": "Plugin1",
+    "ServiceName": "",
+    "ServiceID": "",
+    "State": "Available",
+    "DesiredState": "",
+    "OS": "nt",
+    "Interface": "",
+    "Environment": [],
+    "ExternalPorts": [],
+    "InternalPorts": []
+},
+{
+    "id": "1-1-A-AAA",
+    "Name": "Plugin3",
+    "ServiceName": "",
+    "ServiceID": "",
+    "State": "Available",
+    "DesiredState": "",
+    "OS": "all",
+    "Interface": "",
+    "Environment": [],
+    "ExternalPorts": [],
+    "InternalPorts": []
+},
+{
+    "id": "1-1-A-A",
+    "Name": "Plugin2",
+    "ServiceName": "",
+    "ServiceID": "",
+    "State": "Available",
+    "DesiredState": "",
+    "OS": "posix",
+    "Interface": "",
+    "Environment": [],
+    "ExternalPorts": [],
+    "InternalPorts": []
+},
+{
     "id": "1-1-A",
     "Name": "Plugin1",
     "ServiceName": "Plugin1-9999tcp",
