@@ -1140,8 +1140,14 @@ function add_sequence_tab(clear=true){
         .append('<li id="outB_'+next_tab+'" onclick="synchronize_output_sequence_tabs('+next_tab+')"><a href="#outq_'+next_tab+'" data-toggle="tab">'+next_tab+'</a></li>');
     $('#outq_content')
         .append('<div class="tab-pane" id="outq_'+next_tab+'"></div>');
-    $("#outq_"+next_tab).tab('show');
-    $("#jobq_"+next_tab).tab('show')
+
+    setTimeout(
+        function() {
+            synchronize_job_sequence_tabs(next_tab);
+            synchronize_output_sequence_tabs(next_tab);
+        }
+        , 33
+    );
 }
 function synchronize_job_sequence_tabs(tab_id){
     active_sequence = tab_id;
