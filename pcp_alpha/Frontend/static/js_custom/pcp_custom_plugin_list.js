@@ -72,6 +72,8 @@ function get_interfaces(hostos_filter=false){
                         .val(data[i].Interface)
                         .text(data[i].Interface + " " + data[i].NodeHostName + " (" + data[i].OS + ")")
                     );
+                    iface.val(data[i].Interface);
+                    verify_plugin_interface();
                 }
             }
         },
@@ -180,7 +182,7 @@ function get_plugin_list() {
             plugin_list_map = {};
             plugin_name_map = {};
             for (var count=0; count<data.length; count++){
-                plugin_list_map[data[count]['id']] = data[count];
+                plugin_list_map[data[count].id] = data[count];
                 if (data[count].ServiceName !== "AuxiliaryServices"){
                     if (data[count].hasOwnProperty("ServiceID") && data[count].ServiceID !== ""){
                         // This is a running plugin
@@ -277,7 +279,6 @@ function verify_plugin_interface(){
     console.log("verify_plugin_interface");
     var plugin_interface = $("#plugin-interface"),
         helper_checker = 0;
-    asssplugin_interface.val();
     $("#plugin-os").val(interface_map[plugin_interface.val()].OS);
     var plugin_interface_option = $("#plugin-interface option:selected");
     if(plugin_interface_option.length > 0) {
