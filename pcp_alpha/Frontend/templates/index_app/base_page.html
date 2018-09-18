@@ -86,26 +86,26 @@
             position: relative;
             overflow: hidden;
         }
-        .w3TableScroll {
+        #w3TableScroll {
             max-height: 330px;
             overflow: auto;
             overflow-x: hidden;
             transition: max-height 0.76s ease-in;
         }
-        .w3TableScroll.loaded {
+        #w3TableScroll.loaded {
             max-height: 600px;
         }
         .w4TableWrapper {
             position: relative;
             overflow: hidden;
         }
-        .w4TableScroll {
+        #w4TableScroll {
             max-height: 330px;
             overflow: auto;
             overflow-x: hidden;
             transition: max-height 0.76s ease-in;
         }
-        .w4TableScroll.loaded {
+        #w4TableScroll.loaded {
             max-height: 600px;
         }
 
@@ -126,6 +126,41 @@
         .fixed_tooltip {
           position: fixed;
           width: 29%;
+        }
+        .w4_output_collapsible_button {
+           background-color: #777;
+           color: white;
+           cursor: pointer;
+           padding: 5px;
+           width: 100%;
+           border: none;
+           text-align: left;
+           outline: none;
+           font-size: 13px;
+        }
+        .active2, .w4_output_collapsible_button:hover {
+            background-color: #555;
+        }
+        .w4_output_collapsible_button:after {
+            content: '\002B';
+            color: white;
+            font-weight: bold;
+            float: right;
+            margin-left: 5px;
+        }
+        .active2:after {
+            content: "\2212";
+        }
+        /*.buttonW4Collapse {*/
+            /*content: "\2212";*/
+        /*}*/
+        .w4_output_content {
+            padding: 0 12px;
+            /*display: none;*/
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.7s ease-out;
+            background-color: #f1f1f1;
         }
 
     </style>
@@ -422,7 +457,7 @@ desired effect
                         <div id="w3_drop_target_to_all" style="outline: 1px dashed #ABABAB; outline-offset: 1px; text-align: center; display: none; "><br>Drop Here to apply to <strong>all</strong> jobs<br><br></div>
                     </div>
                     <div class="box-body w3TableWrapper">
-                        <div class="w3TableScroll">
+                        <div class="" id="w3TableScroll">
                           <div id="jobq_content" class="tab-content">
                               <div id="jobq_1" class="tab-pane active"> </div>
                               <div id="example3_wrapper" class="dataTables_wrapper form-inline dt-bootstrap">
@@ -486,7 +521,7 @@ desired effect
                     <label for="truncate_output_to">Truncate output</label>
                   </div>
                     <div class="box-body w4TableWrapper">
-                      <div class="w4TableScroll">
+                      <div class="" id="w4TableScroll">
 
                         <div id="outq_content" class="tab-content">
                             <div id="outq_1" class="tab-pane active"> </div>

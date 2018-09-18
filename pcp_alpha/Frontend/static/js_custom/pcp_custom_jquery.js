@@ -21,7 +21,7 @@ var current_plugin_commands = [];
 var ws_map = {};
 var exec_int = 0;
 var job_select_table;
-
+var ignoreScrollEvents = false;
 var w3_highlighted_row,
     w3_content_index,
     w3_highlighted_array = [],
@@ -44,8 +44,9 @@ $(document).ready(function() {
     var w3_header_height = $("div.box-header.w3_header_class").height();
     $("div.box-header.w4_header_class").height(w3_header_height);
 
-    syncScroll($(".w3TableScroll"), $(".w4TableScroll"));
-    syncScroll($(".w4TableScroll"), $(".w3TableScroll"));
+    // If w3 and w4 have scroll bars, they will be in synch together
+    // syncScroll($("#w3TableScroll"), $("#w4TableScroll"));
+    // syncScroll($("#w4TableScroll"), $("#w3TableScroll"));
 
     $("#w3_current_selector").hide();
     $("#w3_dn_check_button").hide();
@@ -78,8 +79,9 @@ $(document).ready(function() {
         ordering: false,
         select: true
     });
-    // $(".dataTables_empty").empty();
     $('#job_table tbody').on( 'click', 'tr', function () {
+        var row_index = $(this)[0].rowIndex;
+        w4_output_collapse2(row_index);
         if ($(this).hasClass('selected')) {
             $(this).removeClass('selected');
             w3_content_index = w3_highlighted_array.indexOf($(this)[0].rowIndex);
@@ -503,8 +505,8 @@ function widget_expand_or_collapse(widget){
         w4_col_id = $("#w4_collapse_id"),
         w1_scroll = $(".w1TableScroll"),
         w2_scroll = $(".w2TableScroll"),
-        w3_scroll = $(".w3TableScroll"),
-        w4_scroll = $(".w4TableScroll"),
+        w3_scroll = $("#w3TableScroll"),
+        w4_scroll = $("#w4TableScroll"),
         tooltip_scroll = $(".tooltipScroll");
 
     if (widget === 'w1'){
@@ -1209,7 +1211,7 @@ function add_new_job(){
     // content for w3
     $(".thirdBoxContent")
         .append($("<tr/>")
-            .attr({"role": "row","onclick": "#","id":"jobrow"+value,"class": "draggable_tr divw3row",
+            .attr({"role": "row","onclick": "anchor_w4_output("+value+")","id":"jobrow"+value,"class": "draggable_tr divw3row",
                 "style": "z-index: 200"})
             .append($("<td/>")
                     .append($("<div/>")
@@ -1789,6 +1791,34 @@ function change_truncate_value(){
     }
 }
 
+function w4_output_collapse2(job_row){
+    // W4 output un-collapse by w3
+    if ($("#updateid"+job_row)[0].children.length > 0) {
+        var w4_output_var = $("#w4_output_collapsible_button"+job_row);
+        w4_output_var[0].classList.toggle("active2");
+        var w4_content = w4_output_var[0].nextSibling;
+        var w4_pre_tag = w4_output_var[0].nextSibling.firstChild;
+        if (w4_content.style.maxHeight) {
+            w4_content.style.maxHeight = null;
+        } else {
+            w4_content.style.maxHeight = (w4_pre_tag.scrollHeight+35) + "px";
+        }
+    }
+}
+
+function w4_output_collapse(){
+    // w4 output un-collapse by click on w4 output job
+    $(this)[0].classList.toggle("active2");
+    var w4_content = $(this)[0].nextSibling;
+    var w4_pre_tag = $(this)[0].nextSibling.firstChild;
+
+    if (w4_content.style.maxHeight) {
+        w4_content.style.maxHeight = null;
+    } else {
+        w4_content.style.maxHeight = (w4_pre_tag.scrollHeight+35) + "px";
+    }
+}
+
 
 function render_job_output_to_page(job_guid, data){
     var updateid = id_reverse_map[job_guid];
@@ -1796,14 +1826,16 @@ function render_job_output_to_page(job_guid, data){
     $("#updateid"+updateid).empty();
     $("#updateid"+updateid).attr({"class": ""});
     $("#update_spin"+updateid).remove();
-    $('<pre id="updatecontent'+updateid+'"></pre>').appendTo("#updateid"+updateid);
+    $('<button class="w4_output_collapsible_button" id="w4_output_collapsible_button'+updateid+'">Test'+updateid+'</button>')
+        .appendTo("#updateid"+updateid);
+    $('<div class="w4_output_content" id="w4_output_content'+updateid+'"></div>').appendTo("#updateid"+updateid);
+    $('<pre id="updatecontent'+updateid+'"></pre>').appendTo("#w4_output_content"+updateid);
     $("#updatecontent"+updateid).text(data['Content']);
     var download_link = $('<a>[Download]</a>');
     download_link.attr({"href": "/action/get_full_output_data/?job_id="+job_guid+"&job_number="+updateid});
-    $("#updateid"+updateid)
-        .append($("<div style='background-color: white'/>")
+    $("#w4_output_content"+updateid)
+        .append($("<div/>")
             .append(download_link));
-    $("#updateid"+updateid).parent().css("background-color", "Fuchsia");
     $("#updatestatusid"+updateid).empty();
     $("#updatestatusid"+updateid)
         .append($("<span/>")
@@ -1817,6 +1849,8 @@ function render_job_output_to_page(job_guid, data){
     if (id_replication_map.hasOwnProperty(updateid)){
         render_job_output_to_secondary(id_replication_map[updateid], data);
     }
+    // w4 output un-collapse by click on w4 output job
+    // $("#w4_output_collapsible_button"+updateid).click(w4_output_collapse);
 }
 
 function render_job_output_to_secondary(secondary_id, data)
@@ -2004,6 +2038,7 @@ function get_number_from_id(id_str, pretext){
     return id_str.substring(pretext.length, id_str.length);
 }
 
+// Two scroll bars will be in synch together
 function syncScroll(element1, element2) {
     element1.scroll(function (e) {
         var ignore = ignoreScrollEvents;
@@ -2012,4 +2047,9 @@ function syncScroll(element1, element2) {
         ignoreScrollEvents = true;
         element2.scrollTop(element1.scrollTop())
     })
+}
+
+function anchor_w4_output(job_row){
+    var element = document.getElementById("updateid"+job_row);
+    element.scrollIntoView({behavior: "smooth"});
 }
