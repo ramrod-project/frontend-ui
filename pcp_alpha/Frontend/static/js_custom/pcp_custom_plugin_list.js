@@ -27,6 +27,7 @@ var BLANK_PLUGIN = {
 var plugin_list_map = {};
 var plugin_name_map = {};
 var interfaces = [];
+var interface_map = {};
 var plugin_names = [];
 var num_plugins = [];
 var checked_plugin_list_map = {};
@@ -47,7 +48,6 @@ function add_plugin_name(name){
 }
 function handle_selected_plugin_change(new_plugin_name){
     var selected_plugin = plugin_name_map[new_plugin_name];
-    $('#plugin-os').val(plugin_name_map[new_plugin_name].OS);
     var required_os = selected_plugin.OS;
     if (required_os == "all") {
         required_os = false;  // if it doesn't matter, it doesn't matter
@@ -63,8 +63,10 @@ function get_interfaces(hostos_filter=false){
         success: function(data) {
             interfaces = data;
             var iface = $("#plugin-interface");
+            interface_map = {};
             iface.empty();
             for (var i=0; i<data.length; i++){
+                interface_map[data[i].Interface] = data[i];
                 if (!hostos_filter || data[i].OS == hostos_filter){
                     iface.append($("<option/>")
                         .val(data[i].Interface)
@@ -275,6 +277,8 @@ function verify_plugin_interface(){
     console.log("verify_plugin_interface");
     var plugin_interface = $("#plugin-interface"),
         helper_checker = 0;
+    asssplugin_interface.val();
+    $("#plugin-os").val(interface_map[plugin_interface.val()].OS);
     var plugin_interface_option = $("#plugin-interface option:selected");
     if(plugin_interface_option.length > 0) {
         $("#plugin-save")[0].disabled = false;
