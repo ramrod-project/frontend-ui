@@ -211,7 +211,22 @@ TEST_PORT_DATA2 = {
     "TCPPorts": [],
     "UDPPorts": ["4242"]
 }
-
+TEST_PORT_DATA3 = {
+    "InterfaceName": "eth0",
+    "Interface": "10.10.10.12",
+    "OS": "posix",
+    "NodeHostName": "linuxHost2",
+    "TCPPorts": [],
+    "UDPPorts": []
+}
+TEST_PORT_DATA4 = {
+    "InterfaceName": "eth0",
+    "Interface": "10.10.10.11",
+    "OS": "nt",
+    "NodeHostName": "ntHost2",
+    "TCPPorts": [],
+    "UDPPorts": []
+}
 
 def table_clear(database, table):
     """Clears data from a table
