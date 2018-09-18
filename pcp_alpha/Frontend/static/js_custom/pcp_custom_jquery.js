@@ -1826,7 +1826,7 @@ function render_job_output_to_page(job_guid, data){
     $("#updateid"+updateid).empty();
     $("#updateid"+updateid).attr({"class": ""});
     $("#update_spin"+updateid).remove();
-    $('<button class="w4_output_collapsible_button" id="w4_output_collapsible_button'+updateid+'">Test'+updateid+'</button>')
+    $('<button class="w4_output_collapsible_button" id="w4_output_collapsible_button'+updateid+'">Job Output '+updateid+'</button>')
         .appendTo("#updateid"+updateid);
     $('<div class="w4_output_content" id="w4_output_content'+updateid+'"></div>').appendTo("#updateid"+updateid);
     $('<pre id="updatecontent'+updateid+'"></pre>').appendTo("#w4_output_content"+updateid);
