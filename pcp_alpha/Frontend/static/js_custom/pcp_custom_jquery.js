@@ -449,11 +449,8 @@ function filter_w1(){
 
     for (var row_i = 0; row_i < to_filter.length; row_i++){
         var row_id = to_filter[row_i].id.substring(10, to_filter[row_i].id.length),
-            target_json = $("#name_tag_id"+row_id+" a span")[0].innerHTML,
-            target = JSON.parse(target_json);
-        if (target.PluginName.toLowerCase().includes(filter_content)
-            || target.Location.toLowerCase().includes(filter_content)
-            || target.Port.toLowerCase().includes(filter_content) ){
+            target_json = $("#name_tag_id"+row_id+" a span")[0].innerHTML;
+        if (target_json.toLowerCase().includes(filter_content)){
             $(to_filter[row_i]).css("display", "");
         } else {
             $(to_filter[row_i]).css("display", "none");
