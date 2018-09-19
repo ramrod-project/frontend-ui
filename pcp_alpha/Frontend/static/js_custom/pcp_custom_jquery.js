@@ -6,6 +6,7 @@ This file was created for project pcp to add jquery functionality and other java
 var MAX_MANUAL_CHECK_COUNT = 30;
 var INITIAL_JOB_STATUS = "Waiting";
 var JOB_CAN_TERMINATE = {"Waiting":true, "Ready":true};
+var JOB_CAN_NOT_TERMINATE = {"Pending":true, "Active":true};
 var inc = 0;
 var hover_int = 0;
 var active_sequence = "1";
@@ -361,7 +362,10 @@ function status_change_ws_callback(message) {
                 var job_dom_id = id_reverse_map[job_id];
                 id_status_map[job_dom_id] = data.status;
                 status_change_update_dom(job_dom_id, data.status);
-                if (!(data.status in JOB_CAN_TERMINATE)){
+                if(data.status === "Done" || data.status === "Stopped"){
+                    $("#stopjob"+job_dom_id).hide();
+                    $("#trashjob"+job_dom_id).show();
+                } else if (!(data.status in JOB_CAN_TERMINATE) || !(data.status in JOB_CAN_NOT_TERMINATE)){
                     $("#stopjob"+job_dom_id).hide();
                 }
             }
