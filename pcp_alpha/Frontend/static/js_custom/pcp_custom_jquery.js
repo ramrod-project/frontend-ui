@@ -210,8 +210,8 @@ $(document).ready(function() {
 
 });
 
-function notification_function(msg1, msg2, msg3 = " directed to Job # "){
-    var notification_msg = msg1 + msg3 + msg2;
+function notification_function(msg1, msg2, msg3 = "directed to Job #"){
+    var notification_msg = msg1 + " " + msg3 + " " + msg2;
     $.notify({
         // options
         icon: 'glyphicon glyphicon-warning-sign',
@@ -1863,7 +1863,7 @@ function w4_output_collapse2(job_row){
             // notification
             var notification_msg1 = "Job # " + job_row,
             notification_msg2 = "job output # "+job_row,
-            notification_msg3 = " revealed ";
+            notification_msg3 = "revealed";
             notification_function(notification_msg1, notification_msg2, notification_msg3);
         }
     }
