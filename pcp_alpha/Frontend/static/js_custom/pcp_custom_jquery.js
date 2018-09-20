@@ -210,6 +210,56 @@ $(document).ready(function() {
 
 });
 
+function notification_function(msg1, msg2, msg3 = "directed to Job #"){
+    var notification_msg = msg1 + " " + msg3 + " " + msg2;
+    $.notify({
+        // options
+        icon: 'glyphicon glyphicon-warning-sign',
+        title: 'PCP Notification: ',
+        message: notification_msg,
+        // url: 'https://github.com/mouse0270/bootstrap-notify',
+        target: '_blank'
+    },{
+        // settings
+        element: 'body',
+        position: null,
+        type: 'info',
+        allow_dismiss: true,
+	    newest_on_top: false,
+        showProgressbar: false,
+        placement: {
+            from: "top",
+            align: "right"
+	    },
+        offset: 20,
+        spacing: 10,
+        z_index:1031,
+        delay: 5000,
+        timer: 1000,
+        url_target: '_blank',
+        mouse_over: null,
+        animate: {
+            enter: 'animated fadeInDown',
+            exit: 'animated fadeOutUp'
+        },
+        onShow: null,
+        onShown: null,
+        onClose: null,
+        onClosed: null,
+        icon_type: 'class',
+        template: '<div data-notify="container" class="col-xs-11 col-sm-3 alert alert-{0}" role="alert">' +
+            '<button type="button" aria-hidden="true" class="close" data-notify="dismiss">×</button>' +
+            '<span data-notify="icon"></span> ' +
+            '<span data-notify="title">{1}</span> ' +
+            '<span data-notify="message">{2}</span>' +
+            '<div class="progress" data-notify="progressbar">' +
+                '<div class="progress-bar progress-bar-{0}" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>' +
+            '</div>' +
+            '<a href="{3}" target="{4}" data-notify="url"></a>' +
+        '</div>'
+    });
+}
+
 function datetext_to_unix_time(dateText){
      var date_split = dateText.split(" ");
      var mdy = date_split[0].split("/");
@@ -694,7 +744,7 @@ function get_commands_func(){
             }
 
         	$(".theContent").empty();
-            
+
             // display command(s) in w2
             if (data.length == 1){
                 $(".theContent").append($("<li/>").text(data));
@@ -749,10 +799,10 @@ function get_commands_func(){
                     .append($("<div id='commandIdBuilder'/>")
                         .text($(this)[0].text));
                 // JSON development data on W2 footer
-                $(".theContentArgument")
-                    .append($("<div id='JSON_Command_DATA'/>")
-                        .addClass("text-muted small")
-                        .text(JSON.stringify(current_command_template)));
+                // $(".theContentArgument")
+                //     .append($("<div id='JSON_Command_DATA'/>")
+                //         .addClass("text-muted small")
+                //         .text(JSON.stringify(current_command_template)));
 
                 // quick action button to add command template to a highlighted job row
                 quick_action_button = $("<a/>")
@@ -816,6 +866,9 @@ function drop_target_into_job_row(job_row_id, target_js, target_js_str=""){
             .append($("<span/>")
                 .attr({"style": "display:none"})
                 .append(target_js_str));
+        var notification_msg1 = "Target " + target_js.PluginName,
+            notification_msg2 = ""+job_row_id;
+        notification_function(notification_msg1, notification_msg2);
 
     }
 }
@@ -1102,9 +1155,6 @@ function add_target_to_job_sc_button(){
     // console.log("add_target_to_job_sc");  // debug
     var w1_target_row_id = $(this)[0].parentElement.parentElement.parentElement.id.substring(10, $(this)[0].id.length),
         row_js_str = $("#nameidjson" + w1_target_row_id)[0].innerText;
-        // json_target_id = $(this)[0].parentElement.parentElement.parentElement.children[0].children[0].children[0].id,
-        // json_target_data = $("#"+json_target_id)[0].innerText;
-
     quick_action_function(row_js_str, "pluginid", "target");
     set_w3_job_status();
 
@@ -1614,6 +1664,9 @@ function drop_command_into_hole(command, command_json, command_td, row_id){
                       classes: {"ui-tooltip": "ui-corner-all ui-widget-shadow bg-light-blue-active color-palette"}
             });
         command_td[0].appendChild(display_div);
+        var notification_msg1 = "Command " + command.CommandName,
+        notification_msg2 = ""+row_id;
+        notification_function(notification_msg1, notification_msg2);
     } else {
         console.error("Can't drop command into job "+row_id+" (job already in Brain)");
     }
@@ -1807,6 +1860,11 @@ function w4_output_collapse2(job_row){
             w4_content.style.maxHeight = null;
         } else {
             w4_content.style.maxHeight = (w4_pre_tag.scrollHeight+35) + "px";
+            // notification
+            var notification_msg1 = "Job # " + job_row,
+            notification_msg2 = "job output # "+job_row,
+            notification_msg3 = "revealed";
+            notification_function(notification_msg1, notification_msg2, notification_msg3);
         }
     }
 }
@@ -2058,11 +2116,9 @@ function anchor_w4_output(job_row){
     setTimeout(function (){
         var sequence_size = sequences[1].size;
         if (job_row === sequence_size || job_row === (sequence_size - 1)) {
-            console.log("last two");
             var element = document.getElementById("download_link_id"+job_row);
             element.scrollIntoView({behavior: "smooth"});
         } else {
-            console.log("NOT last two");
             var element = document.getElementById("updateid"+job_row);
             element.scrollIntoView({behavior: "smooth"});
         }
