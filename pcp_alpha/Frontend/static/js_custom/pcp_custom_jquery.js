@@ -6,6 +6,7 @@ This file was created for project pcp to add jquery functionality and other java
 var MAX_MANUAL_CHECK_COUNT = 30;
 var INITIAL_JOB_STATUS = "Waiting";
 var JOB_CAN_TERMINATE = {"Waiting":true, "Ready":true};
+var JOB_CAN_NOT_TERMINATE = {"Pending":true, "Active":true};
 var inc = 0;
 var hover_int = 0;
 var active_sequence = "1";
@@ -79,26 +80,8 @@ $(document).ready(function() {
         ordering: false,
         select: true
     });
-    $('#job_table tbody').on( 'click', 'tr', function () {
-        var row_index = $(this)[0].rowIndex;
-        w4_output_collapse2(row_index);
-        if ($(this).hasClass('selected')) {
-            $(this).removeClass('selected');
-            w3_content_index = w3_highlighted_array.indexOf($(this)[0].rowIndex);
-            if (w3_content_index > -1){
-                w3_highlighted_array.splice(w3_content_index, 1);
-                as_highlighted_checker[active_sequence] = 0;
-            }
 
-        }
-        else {
-            job_select_table.$("tr.selected").removeClass('selected');
-            $(this).addClass('selected');
-            w3_highlighted_row = $(this)[0].rowIndex;
-            w3_highlighted_array.push(w3_highlighted_row);
-            as_highlighted_checker[active_sequence] = 1;
-        }
-    });
+    ex_seq_unselect();
 
     ws_map["status"] = open_websocket("status", status_change_ws_callback);
     ws_map["files"] = open_websocket("files", files_change_ws_callback);
@@ -260,6 +243,35 @@ function notification_function(msg1, msg2, msg3 = "directed to Job #"){
     });
 }
 
+function ex_seq_unselect(param=1){
+    // once sequence is executed it will
+    // de-select all job rows if selected.
+    if (param ===1){
+        $('#job_table tbody').on( 'click', 'tr', function () {
+            var row_index = $(this)[0].rowIndex;
+            w4_output_collapse2(row_index);
+            if ($(this).hasClass('selected')) {
+                $(this).removeClass('selected');
+                w3_content_index = w3_highlighted_array.indexOf($(this)[0].rowIndex);
+                if (w3_content_index > -1){
+                    w3_highlighted_array.splice(w3_content_index, 1);
+                    as_highlighted_checker[active_sequence] = 0;
+                }
+
+            }
+            else {
+                job_select_table.$("tr.selected").removeClass('selected');
+                $(this).addClass('selected');
+                w3_highlighted_row = $(this)[0].rowIndex;
+                w3_highlighted_array.push(w3_highlighted_row);
+                as_highlighted_checker[active_sequence] = 1;
+            }
+        });
+    } else {
+        $('#job_table tbody').off('click');
+    }
+}
+
 function datetext_to_unix_time(dateText){
      var date_split = dateText.split(" ");
      var mdy = date_split[0].split("/");
@@ -411,7 +423,10 @@ function status_change_ws_callback(message) {
                 var job_dom_id = id_reverse_map[job_id];
                 id_status_map[job_dom_id] = data.status;
                 status_change_update_dom(job_dom_id, data.status);
-                if (!(data.status in JOB_CAN_TERMINATE)){
+                if(data.status === "Done" || data.status === "Stopped"){
+                    $("#stopjob"+job_dom_id).hide();
+                    $("#trashjob"+job_dom_id).show();
+                } else if (!(data.status in JOB_CAN_TERMINATE) || !(data.status in JOB_CAN_NOT_TERMINATE)){
                     $("#stopjob"+job_dom_id).hide();
                 }
             }
@@ -568,8 +583,8 @@ function widget_expand_or_collapse(widget){
         } else {
             w3_scroll.removeClass('loaded');
             w4_scroll.removeClass('loaded');
-            w3_scroll[0].style.maxHeight = "330px";
-            w4_scroll[0].style.maxHeight = "330px";
+            w3_scroll[0].style.maxHeight = "360px";
+            w4_scroll[0].style.maxHeight = "360px";
         }
     } else if (widget === 'w2') {
         if (!w2_col_box.boxWidget()[0].classList.contains('collapsed-box')) {
@@ -581,8 +596,8 @@ function widget_expand_or_collapse(widget){
         } else {
             w3_scroll.removeClass('loaded');
             w4_scroll.removeClass('loaded');
-            w3_scroll[0].style.maxHeight = "330px";
-            w4_scroll[0].style.maxHeight = "330px";
+            w3_scroll[0].style.maxHeight = "360px";
+            w4_scroll[0].style.maxHeight = "360px";
         }
     } else if (widget === 'w3') {
         if(w3_col_id[0].children[0].classList[1] !== "fa-minus") {
@@ -597,8 +612,8 @@ function widget_expand_or_collapse(widget){
             w1_scroll.removeClass('loaded');
             w2_scroll.removeClass('loaded');
             tooltip_scroll.removeClass('loaded');
-            w1_scroll[0].style.maxHeight = "330px";
-            w2_scroll[0].style.maxHeight = "330px";
+            w1_scroll[0].style.maxHeight = "360px";
+            w2_scroll[0].style.maxHeight = "360px";
             tooltip_scroll[0].style.maxHeight = "280px";
         }
     } else if (widget === 'w4'){
@@ -614,8 +629,8 @@ function widget_expand_or_collapse(widget){
             w1_scroll.removeClass('loaded');
             w2_scroll.removeClass('loaded');
             tooltip_scroll.removeClass('loaded');
-            w1_scroll[0].style.maxHeight = "330px";
-            w2_scroll[0].style.maxHeight = "330px";
+            w1_scroll[0].style.maxHeight = "360px";
+            w2_scroll[0].style.maxHeight = "360px";
             tooltip_scroll[0].style.maxHeight = "280px";
         }
     }
@@ -799,10 +814,10 @@ function get_commands_func(){
                     .append($("<div id='commandIdBuilder'/>")
                         .text($(this)[0].text));
                 // JSON development data on W2 footer
-                // $(".theContentArgument")
-                //     .append($("<div id='JSON_Command_DATA'/>")
-                //         .addClass("text-muted small")
-                //         .text(JSON.stringify(current_command_template)));
+                $(".theContentArgument")
+                    .append($("<div id='JSON_Command_DATA'/>")
+                        .addClass("text-muted small")
+                        .text(JSON.stringify(current_command_template)));
 
                 // quick action button to add command template to a highlighted job row
                 quick_action_button = $("<a/>")
@@ -1803,6 +1818,7 @@ function execute_sequence(){
                 for (var index = 0; index < job_ids.length; ++index) {
                     if (job_ids[index] != "invalid-job"){
                         var dom_id = index+1;
+                        var job_row_var = $("#jobrow"+dom_id);
                         id_reverse_map[job_ids[index]] = dom_id;
                         id_map[index+1] = job_ids[index];
                         $("#trashjob"+dom_id)
@@ -1819,7 +1835,15 @@ function execute_sequence(){
                         } else {
                             execute_sequence_output(job_ids[index]);
                         }
-
+                        if ($("#jobrow"+dom_id).hasClass('selected')){
+                            $("#jobrow"+dom_id).removeClass('selected');
+                            // remove selected and from the selected list
+                            var w3_content_row = w3_highlighted_array.indexOf(job_row_var[0].rowIndex);
+                            if(w3_content_row > -1){
+                                w3_highlighted_array.splice(w3_content_row, 1);
+                            }
+                            ex_seq_unselect(0);
+                        }
                     }
                 }
             },
@@ -1828,6 +1852,7 @@ function execute_sequence(){
             },
             complete: function(data){
                 exec_int = 0;
+                ex_seq_unselect(1); // select job row is turned back on
             }
         })
     } else {
