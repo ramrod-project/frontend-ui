@@ -217,7 +217,7 @@ function notification_function(msg1, msg2, msg3 = "directed to Job #"){
         offset: 20,
         spacing: 10,
         z_index:1031,
-        delay: 5000,
+        delay: 4000,
         timer: 1000,
         url_target: '_blank',
         mouse_over: null,
@@ -247,6 +247,7 @@ function ex_seq_unselect(param=1){
     // once sequence is executed it will
     // de-select all job rows if selected.
     if (param ===1){
+        $('#job_table tbody').off('click');
         $('#job_table tbody').on( 'click', 'tr', function () {
             var row_index = $(this)[0].rowIndex;
             w4_output_collapse2(row_index);
@@ -1801,7 +1802,6 @@ function execute_sequence(){
     hide_drop_all();
     var desired_start = Number(sequence_starttime_map[active_sequence]);
     var desired_expire = Number(sequence_expiretime_map[active_sequence]);
-    var job_unselect_check = 0;
     if (desired_start < desired_expire){
         var jobs = prepare_jobs_list();
         var jobs_json = JSON.stringify(jobs);
@@ -1843,7 +1843,6 @@ function execute_sequence(){
                                 w3_highlighted_array.splice(w3_content_row, 1);
                             }
                             ex_seq_unselect(0);
-                            job_unselect_check = 1;
                         }
                     }
                 }
@@ -1853,9 +1852,6 @@ function execute_sequence(){
             },
             complete: function(data){
                 exec_int = 0;
-                if(job_unselect_check !== 0){
-                    ex_seq_unselect(1); // select job row is turned back on
-                }
             }
         })
     } else {
@@ -2002,6 +1998,7 @@ function execute_sequence_output(specific_id, counter=0, backoff=2000){
         datatype: 'json',
         success: function(data) {
             console.log("SUCCESS @ execute_sequence_output  function");
+            ex_seq_unselect(1); // select job row is turned back on
 
             if (data != 0){  // returns query
                 render_job_output_to_page(specific_id, data);
