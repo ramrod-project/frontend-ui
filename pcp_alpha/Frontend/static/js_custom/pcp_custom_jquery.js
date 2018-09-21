@@ -32,6 +32,8 @@ var w3_highlighted_row,
     start_timer_map = {};
 var scroll_position = 0,
     scroll_checker = 0;
+var num_jobs_to_ex = [];
+var job_row_checker = 0;
 
 var timer_on = 1,
     time_var,
@@ -217,7 +219,7 @@ function notification_function(msg1, msg2, msg3 = "directed to Job #"){
         offset: 20,
         spacing: 10,
         z_index:1031,
-        delay: 5000,
+        delay: 4000,
         timer: 1000,
         url_target: '_blank',
         mouse_over: null,
@@ -243,10 +245,26 @@ function notification_function(msg1, msg2, msg3 = "directed to Job #"){
     });
 }
 
+function unselect_job_row(job_num, param2=1){
+    var job_row_var = $("#jobrow"+job_num);
+    if ($("#jobrow"+job_num).hasClass('selected')){
+        $("#jobrow"+job_num).removeClass('selected');
+        // remove selected and from the selected list
+        var w3_content_row = w3_highlighted_array.indexOf(job_row_var[0].rowIndex);
+        if(w3_content_row > -1){
+            w3_highlighted_array.splice(w3_content_row, 1);
+        }
+        if(param2 !== 1){
+            ex_seq_unselect(0);
+        }
+    }
+}
+
 function ex_seq_unselect(param=1){
     // once sequence is executed it will
     // de-select all job rows if selected.
     if (param ===1){
+        $('#job_table tbody').off('click');
         $('#job_table tbody').on( 'click', 'tr', function () {
             var row_index = $(this)[0].rowIndex;
             w4_output_collapse2(row_index);
@@ -1801,7 +1819,6 @@ function execute_sequence(){
     hide_drop_all();
     var desired_start = Number(sequence_starttime_map[active_sequence]);
     var desired_expire = Number(sequence_expiretime_map[active_sequence]);
-    var job_unselect_check = 0;
     if (desired_start < desired_expire){
         var jobs = prepare_jobs_list();
         var jobs_json = JSON.stringify(jobs);
@@ -1835,16 +1852,8 @@ function execute_sequence(){
                         } else {
                             execute_sequence_output(job_ids[index]);
                         }
-                        if ($("#jobrow"+dom_id).hasClass('selected')){
-                            $("#jobrow"+dom_id).removeClass('selected');
-                            // remove selected and from the selected list
-                            var w3_content_row = w3_highlighted_array.indexOf(job_row_var[0].rowIndex);
-                            if(w3_content_row > -1){
-                                w3_highlighted_array.splice(w3_content_row, 1);
-                            }
-                            ex_seq_unselect(0);
-                            job_unselect_check = 1;
-                        }
+                        unselect_job_row(dom_id, 0);
+                        num_jobs_to_ex.push(index);
                     }
                 }
             },
@@ -1853,9 +1862,6 @@ function execute_sequence(){
             },
             complete: function(data){
                 exec_int = 0;
-                if(job_unselect_check !== 0){
-                    ex_seq_unselect(1); // select job row is turned back on
-                }
             }
         })
     } else {
@@ -2002,6 +2008,13 @@ function execute_sequence_output(specific_id, counter=0, backoff=2000){
         datatype: 'json',
         success: function(data) {
             console.log("SUCCESS @ execute_sequence_output  function");
+            unselect_job_row(updateid);
+            job_row_checker++;
+            if (job_row_checker >= num_jobs_to_ex.length){
+                ex_seq_unselect(1); // select job row is turned back on
+                job_row_checker = 0;
+                num_jobs_to_ex = [];
+            }
 
             if (data != 0){  // returns query
                 render_job_output_to_page(specific_id, data);
