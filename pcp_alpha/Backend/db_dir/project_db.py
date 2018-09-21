@@ -21,19 +21,39 @@ _TEST_TARGETS = [
         "PluginName": "Plugin1",
         "Location": location_generated_num("172.16.5."),
         "Port": "8002",
-        "Optional": "Document Here"
+        "Optional": {"init": "hello",
+                     "Common": {"User": "xxx"}}
     },
     {
         "PluginName": "Plugin1",
         "Location": location_generated_num("172.16.5."),
         "Port": "8002",
-        "Optional": "Document Here"
+        "Optional": {"init": "hello",
+                     "Specific": {"abc": "def"}}
     },
     {
         "PluginName": "Plugin1",
         "Location": location_generated_num("172.16.5."),
         "Port": "8002",
-        "Optional": "Document Here"
+        "Optional": {"init": "goodbye",
+                     "Common": {"Checkin": 0,
+                                "Admin": False,
+                                "User": "yyy"},
+                     "Specific": {'Drive': 't',
+                                  'InternalLocation': 't',
+                                  'Location': '127.0.0.1',
+                                  'Admin': False,
+                                  'ContactTime': 1536764446.644752,
+                                  'telemetry': {"name": "hi",
+                                                "exit": 20,
+                                                "exitmethod": 0,
+                                                "user": "ok",
+                                                "host": "here",
+                                                "desk": "firm",
+                                                "ip": "yes",
+                                                "adm": "please"}
+                                 }
+                     }
     }
 ]
 
@@ -93,7 +113,8 @@ _TEST_COMMANDS = [
     {
         "CommandName": "echo",
         "Tooltip": '\nEcho\n\nClient Returns this string verbatim\n'
-                   '\nArguments:\n1. String to Echo\n\nReturns:\nString\n',
+                   '\nArguments:\n1. String to Echo'
+                   '\nOptArguments:\n1. String to Put on STDOUT\n\nReturns:\nString\n',
         "Output": True,
         "Inputs": [
             {
@@ -103,7 +124,14 @@ _TEST_COMMANDS = [
                 "Value": "echo user input"
             },
         ],
-        "OptionalInputs": []
+        "OptionalInputs": [
+            {
+                "Name": "OptionalEchoString",
+                "Type": "textbox",
+                "Tooltip": "This string will be printed to remote stderr",
+                "Value": ""
+            },
+        ]
     },
     {
         "CommandName": "terminal_input",

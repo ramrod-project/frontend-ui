@@ -40,13 +40,13 @@ before_script:
   - ./cc-test-reporter after-build -t coverage.py --exit-code 0
 
 script:
-  - docker build -t ramrodpcp/frontend-ui:$TAG .
+  - docker build -t ramrodpcp/frontend-ui:test .
   - docker network create test
   - docker run -d --rm --name rethinkdb -p 28015:28015 -e "STAGE=DEV" -e "LOGLEVEL=DEBUG"
     --network test ramrodpcp/database-brain:$TAG
   - sleep 5
   - docker run -d --rm --name frontend -p 8080:8080 -e "STAGE=QA" -e "LOGLEVEL=DEBUG"
-    --network test ramrodpcp/frontend-ui:$TAG
+    --network test ramrodpcp/frontend-ui:test
   - sleep 10
   - curl http://127.0.0.1:8080
   - docker ps
@@ -54,8 +54,11 @@ script:
   - docker stop frontend
   - docker stop rethinkdb
   - docker network prune -f
+  # e2e tests
+  - bash <(curl -s https://raw.githubusercontent.com/ramrod-project/integration-stack/$TRAVIS_BRANCH/scripts/e2e.sh)
 
 after_success:
+  - docker tag ramrodpcp/frontend-ui:test ramrodpcp/frontend-ui:$TAG
   - if [[ "$TRAVIS_PULL_REQUEST" == "false" ]];
     then echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin; fi
   - if [[ "$TRAVIS_PULL_REQUEST" == "false" ]];
