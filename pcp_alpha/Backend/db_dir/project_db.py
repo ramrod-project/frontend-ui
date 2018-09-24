@@ -6,7 +6,7 @@ and validating information in the Brain.
 import sys
 from brain import connect, r as rtdb
 from brain import check_dev_env, check_prod_env
-from . import plugins
+from . import plugins, _TEST_COMMANDS2
 
 from .custom_data import (
     location_generated_num,
@@ -24,13 +24,57 @@ _TEST_TARGETS = [
         "Optional": {"init": "hello",
                      "Common": {"User": "xxx"}}
     },
+    # {
+    #     "PluginName": "Plugin1",
+    #     "Location": location_generated_num("172.16.5."),
+    #     "Port": "8002",
+    #     "Optional": {"init": "hello",
+    #                  "Specific": {"abc": "def"}}
+    # },
     {
-        "PluginName": "Plugin1",
+        "PluginName": "Plugin2",
         "Location": location_generated_num("172.16.5."),
         "Port": "8002",
+        "Optional": "Document Here"
+    },
+    {
+        "PluginName": "Plugin3",
+        "Location": location_generated_num("172.16.5."),
+        "Port": "8003",
+        "Optional": "Document Here"
+    },
+    {
+        "PluginName": "Plugin4",
+        "Location": location_generated_num("172.16.5."),
+        "Port": "8004",
+        "Optional": "Document Here"
+    },
+    {
+        "PluginName": "Plugin5",
+        "Location": location_generated_num("172.16.5."),
+        "Port": "5005",
         "Optional": {"init": "hello",
                      "Specific": {"abc": "def"}}
     },
+    # {
+    #     "PluginName": "Plugin6",
+    #     "Location": location_generated_num("172.16.5."),
+    #     "Port": "8002",
+    #     "Optional": "Document Here"
+    # },
+    # {
+    #     "PluginName": "Plugin7",
+    #     "Location": location_generated_num("172.16.5."),
+    #     "Port": "8002",
+    #     "Optional": "Document Here"
+    # },
+    # {
+    #     "PluginName": "Plugin8",
+    #     "Location": location_generated_num("172.16.5."),
+    #     "Port": "8002",
+    #     "Optional": "Document Here"
+    # },
+
     {
         "PluginName": "Plugin1",
         "Location": location_generated_num("172.16.5."),
@@ -153,6 +197,8 @@ _TEST_COMMANDS = [
 TEST_PORT_DATA = {
     "InterfaceName": "eth0",
     "Interface": "192.16.5.240",
+    "OS": "posix",
+    "NodeHostName": "linuxHost",
     "TCPPorts": ["9999", "4243"],
     "UDPPorts": []
 }
@@ -160,10 +206,27 @@ TEST_PORT_DATA = {
 TEST_PORT_DATA2 = {
     "InterfaceName": "eth0",
     "Interface": "10.10.10.10",
+    "OS": "nt",
+    "NodeHostName": "ntHost1",
     "TCPPorts": [],
     "UDPPorts": ["4242"]
 }
-
+TEST_PORT_DATA3 = {
+    "InterfaceName": "eth0",
+    "Interface": "10.10.10.12",
+    "OS": "posix",
+    "NodeHostName": "linuxHost2",
+    "TCPPorts": [],
+    "UDPPorts": []
+}
+TEST_PORT_DATA4 = {
+    "InterfaceName": "eth0",
+    "Interface": "10.10.10.11",
+    "OS": "nt",
+    "NodeHostName": "ntHost2",
+    "TCPPorts": [],
+    "UDPPorts": []
+}
 
 def table_clear(database, table):
     """Clears data from a table
@@ -229,6 +292,11 @@ def tables_check(database, tables):
         in the database.
     """
     db_con_var = connect()
+    if "Plugin2" in tables:
+        print("\nlog: db {}.{} table exist locally"
+              .format(database, "Plugin2"))
+        table_clear(database, "Plugin2")
+
     for i, table_name in enumerate(tables):
         # {database}.{table_name} does exist
         if rtdb.db(database).table_list().contains(
@@ -300,13 +368,16 @@ def confirm_plugin_db_info():
             print("\nlog: db Plugins doesn't exist locally")
             rtdb.db_create("Plugins").run(db_con_var)
             print("log: db Plugins didn't exist, was created to locally")
-            tables_create("Plugins", ["Plugin1"])
+            tables_create("Plugins", ["Plugin1", "Plugin2"])
         else:  # if Plugins does exit locally
             print("\nlog: db Plugins exist locally")
-            non_existing_tables = tables_check("Plugins", ["Plugin1"])
+            non_existing_tables = tables_check("Plugins", ["Plugin1", "Plugin2"])
             tables_create("Plugins", non_existing_tables)
         rtdb.db("Plugins").table("Plugin1").insert(
             _TEST_COMMANDS
+        ).run(db_con_var)
+        rtdb.db("Plugins").table("Plugin2").insert(
+            _TEST_COMMANDS2
         ).run(db_con_var)
         rtdb.db("Controller").table("Plugins").delete().run(db_con_var)
         rtdb.db("Controller").table("Plugins")\

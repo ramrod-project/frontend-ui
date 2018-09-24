@@ -19,7 +19,7 @@ from pcp_alpha.Backend.pcp_app.views import get_commands_controller, \
     execute_sequence_controller, w4_output_controller, w4_output_controller_download, \
     new_target_form, val_target_form, val_edit_target_form, edit_target_form, \
     delete_specific_target, file_upload_list, persist_job_state, load_job_state, \
-    del_file_from_list, get_file_listing, get_file, get_interfaces
+    del_file_from_list, get_file_listing, get_file, get_interfaces, stop_job, get_state_names
 
 ECHO_JOB_ID = str(uuid4())
 NOW = time()
@@ -583,8 +583,19 @@ class TestDataHandling(object):
         :param rf: request factory
         :return: status code
         """
-        url_var = "action/load_state/"
-        response = get_test(url_var, load_job_state, rf)
+        url_var = "action/load_state/?requested_state=kasjldfkjsakldjf"
+        response = load_job_state(rf.get(url_var, HTTP_USER_AGENT='Mozilla/5.0'))
+        assert response.status_code == 200
+
+    @staticmethod
+    def test_get_job_state(rf):
+        """
+        This test imitates saving a job state in W3
+        :param rf: request factory
+        :return: status code
+        """
+        url_var = "action/state_names/"
+        response = get_state_names(rf.get(url_var, HTTP_USER_AGENT='Mozilla/5.0'))
         assert response.status_code == 200
 
     @staticmethod
@@ -638,3 +649,29 @@ class TestDataHandling(object):
         url_var = "get_interfaces/"
         response = get_test(url_var, get_interfaces, rf)
         assert response.status_code == 200
+
+
+    @staticmethod
+    def test_stop_job(rf):
+        """
+        This test is replicating the data displayed in W4 when a user clicks
+        on 'Execute Sequence' button at the bottom right of w3. With correct data.
+        """
+        first_url = "/action/get_w3_data/?jobs=%5B%7B%22JobTarget%22%3A%7B%22Plugin" \
+                    "Name%22%3A%22Plugin1%22%2C%22Location%22%3A%22172.16.5.179%22%2" \
+                    "C%22Port%22%3A0%7D%2C%22Status%22%3A%22Ready%22%2C%22StartTime%" \
+                    "22%3A0%2C%22JobCommand%22%3A%7B%22CommandName%22%3A%22echo%22%2C" \
+                    "%22Tooltip%22%3A%22%5CnEcho%5Cn%5CnClient%20Returns%20this%20stri" \
+                    "ng%20verbatim%5Cn%5CnArguments%3A%5Cn1.%20String%20to%20Echo%5Cn%5" \
+                    "CnReturns%3A%5CnString%5Cn%22%2C%22Output%22%3Atrue%2C%22Inputs%22" \
+                    "%3A%5B%7B%22Value%22%3A%22sdfsdfsdf%22%2C%22Type%22%3A%22textbox%22" \
+                    "%2C%22Name%22%3A%22EchoString%22%2C%22Tooltip%22%3A%22This%20string%" \
+                    "20will%20be%20echoed%20back%22%7D%5D%7D%7D%5D"
+
+        response = execute_sequence_controller(rf.get(first_url))
+        assert "inserted" in str(response.content)
+        assert response.status_code == 200
+        job_id = json.loads(response.getvalue().decode())['generated_keys'][0]
+        sleep(2)
+        second_url = "/stop_job/{}/".format(job_id)
+        assert stop_job(rf.get(second_url, HTTP_USER_AGENT='Mozilla/5.0'), job_id).status_code == 200

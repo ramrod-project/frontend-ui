@@ -1,9 +1,13 @@
 import json
 import brain.queries
 from brain.binary import put_buffer, list_dir, get, delete
+from brain.jobs import InvalidStateTransition, STOP, transition
+from brain.static import STATUS_FIELD
 import brain
 
 from .project_db import connect, rtdb
+
+RBX = rtdb.db("Brain")
 
 
 # Note: Refactor this file as a CRUD class in the future
@@ -17,6 +21,11 @@ def get_brain_targets():
         item['json'] = json.dumps(item)
         items.append(item)
     return items
+
+
+def ensure_uiw3(conn):
+    if not RBX.table_list().contains("UIW3").run(conn):
+        RBX.table_create("UIW3").run(conn)
 
 
 def get_specific_commands(user_selection):
@@ -134,24 +143,28 @@ def persist_jobs_state(current_state):
     :return:
     """
     conn = connect()
-    rbx = rtdb.db("Brain")
-    current_state["id"] = 1  # static ID so it overwrites
-    if not rbx.table_list().contains("UIW3").run(conn):
-        rbx.table_create("UIW3").run(conn)
-    output = rbx.table("UIW3").insert(current_state,
+    ensure_uiw3(conn)
+    output = RBX.table("UIW3").insert(current_state,
                                       conflict="replace").run(conn)
     return output
 
 
-def load_jobs_state():
+def db_get_state_names():
+    conn = connect()
+    ensure_uiw3(conn)
+    output = RBX.table("UIW3").pluck("id").order_by("id").run(conn)
+    ids = [x['id'] for x in output]
+    return ids
+
+
+def load_jobs_state(state_id):
     """
     :return:
     """
     output = None
     conn = connect()
-    rbx = rtdb.db("Brain")
-    if rbx.table_list().contains("UIW3").run(conn):
-        output = rbx.table("UIW3").get(1).run(conn)
+    ensure_uiw3(conn)
+    output = RBX.table("UIW3").get(state_id).run(conn)
     return output
 
 
@@ -226,7 +239,10 @@ def get_interface_list():
 
     :return:
     """
-    return brain.controller.plugins.get_interfaces()
+    #  return brain.controller.plugins.get_interfaces()
+    cur = brain.static.RPP.run(connect())
+    output = [x for x in cur]
+    return output
 
 
 def update_plugin_to_brain(plugin):
@@ -269,3 +285,15 @@ def desired_plugin_state_brain(plugin_id_list, desired_state):
             return_object = brain.controller.plugins.stop(plugin_id_item.strip('\"'))
         return_objects.append(return_object)
     return return_objects
+
+def update_brain_stop_job(job_id):
+    job_obj = brain.queries.get_job_by_id(job_id)
+    success = True
+    if job_obj:
+        try:
+            new_state = transition(job_obj[STATUS_FIELD], STOP)
+            success = brain.queries.update_job_status(job_id, new_state)
+            success = success["r.db('Brain').table('Jobs')"]
+        except InvalidStateTransition:
+            success = {"errors": 1}
+    return success

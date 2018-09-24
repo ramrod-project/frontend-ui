@@ -5,10 +5,14 @@ This file was created for project pcp to add jquery functionality and other java
 */
 var MAX_MANUAL_CHECK_COUNT = 30;
 var INITIAL_JOB_STATUS = "Waiting";
+var JOB_CAN_TERMINATE = {"Waiting":true, "Ready":true};
+var JOB_CAN_NOT_TERMINATE = {"Pending":true, "Active":true};
 var inc = 0;
 var hover_int = 0;
+var active_sequence = "1";
 var sequences = {"1": new Set()};
 var sequence_starttime_map = {"1":  Math.floor((new Date().valueOf())/1000).toString()};
+var sequence_expiretime_map = {"1": undefined};
 var id_map = {};
 var id_status_map = {};
 var id_reverse_map = {};
@@ -16,15 +20,20 @@ var id_replication_map = {};
 var target_id_map = {};
 var current_plugin_commands = [];
 var ws_map = {};
-var active_sequence = "1";
 var exec_int = 0;
 var job_select_table;
+var ignoreScrollEvents = false;
 var w3_highlighted_row,
     w3_content_index,
     w3_highlighted_array = [],
     as_highlighted_checker = {},
     start_timer_interval,
+    countdown_map = {},
     start_timer_map = {};
+var scroll_position = 0,
+    scroll_checker = 0;
+var num_jobs_to_ex = [];
+var job_row_checker = 0;
 
 var timer_on = 1,
     time_var,
@@ -34,6 +43,24 @@ as_highlighted_checker[active_sequence] = 0;
 
 
 $(document).ready(function() {
+    // W4 header height === W4 header height
+    var w3_header_height = $("div.box-header.w3_header_class").height();
+    $("div.box-header.w4_header_class").height(w3_header_height);
+
+    // If w3 and w4 have scroll bars, they will be in synch together
+    // syncScroll($("#w3TableScroll"), $("#w4TableScroll"));
+    // syncScroll($("#w4TableScroll"), $("#w3TableScroll"));
+
+    $("#w3_current_selector").hide();
+    $("#w3_dn_check_button").hide();
+    $("#w3_up_check_button").hide();
+    $("#w3toss_button").hide();
+    $("#w3_selector_loading").hide();
+    $("#w3_namer").hide();
+    $("#w3toss_button").click(close_state_loader);
+    $("#w3_up_check_button").click(save_job_state_by_name);
+    $("#w3_dn_check_button").click(load_job_state_by_name);
+
 
     $("#terminal-save").click(onclick_terminal_submit);
     $("#terminal-cmd").keyup(function(e){
@@ -55,25 +82,8 @@ $(document).ready(function() {
         ordering: false,
         select: true
     });
-    // $(".dataTables_empty").empty();
-    $('#job_table tbody').on( 'click', 'tr', function () {
-        if ($(this).hasClass('selected')) {
-            $(this).removeClass('selected');
-            w3_content_index = w3_highlighted_array.indexOf($(this)[0].rowIndex);
-            if (w3_content_index > -1){
-                w3_highlighted_array.splice(w3_content_index, 1);
-                as_highlighted_checker[active_sequence] = 0;
-            }
 
-        }
-        else {
-            job_select_table.$("tr.selected").removeClass('selected');
-            $(this).addClass('selected');
-            w3_highlighted_row = $(this)[0].rowIndex;
-            w3_highlighted_array.push(w3_highlighted_row);
-            as_highlighted_checker[active_sequence] = 1;
-        }
-    });
+    ex_seq_unselect();
 
     ws_map["status"] = open_websocket("status", status_change_ws_callback);
     ws_map["files"] = open_websocket("files", files_change_ws_callback);
@@ -116,24 +126,28 @@ $(document).ready(function() {
     $("#job_sequence_timer").datetimepicker({
                                              minDate: new Date(),
                                              onClose: function(dateText, inst) {
-                                                 var date_split = dateText.split(" ");
-                                                 var mdy = date_split[0].split("/");
-                                                 var hm = date_split[1].split(":");
-                                                 var dt_obj = new Date(Number(mdy[2]),
-                                                                       Number(mdy[0])-1,
-                                                                       mdy[1],
-                                                                       hm[0],
-                                                                       hm[1], 0, 0);
-                                                 var py_dt = Math.floor(dt_obj.getTime()/1000).toString();
+                                                 var py_dt = datetext_to_unix_time(dateText);
                                                  $("#job_sequence_time_unix")[0].value = py_dt;
                                                  sequence_starttime_map[active_sequence] = py_dt;
+                                             },
+                                             onSelect: function (selectedDateTime){
+                                             }});
+    $("#job_sequence_expire").datetimepicker({
+                                             minDate: new Date(),
+                                             onClose: function(dateText, inst) {
+                                                 var py_dt = datetext_to_unix_time(dateText);
+                                                 $("#job_sequence_expire_unix")[0].value = py_dt;
+                                                 sequence_expiretime_map[active_sequence] = py_dt;
                                              },
                                              onSelect: function (selectedDateTime){
                                              }});
     var startup_date = new Date();
     $("#job_sequence_time_unix")[0].value = Math.floor(startup_date.getTime()/1000).toString();
     $("#job_sequence_timer").datepicker( "setDate", startup_date );
-
+    var startup_expire = new Date(new Date().getTime() + 3 * 24 * 60 * 60 * 1000); //72 hours in future
+    $("#job_sequence_expire_unix")[0].value = Math.floor(startup_expire.getTime()/1000).toString();
+    $("#job_sequence_expire").datepicker( "setDate", startup_expire );
+    sequence_expiretime_map[active_sequence] = $("#job_sequence_expire_unix")[0].value;
 
     $("#truncate_output_to").change(change_truncate_value);
     change_truncate_value();
@@ -180,6 +194,130 @@ $(document).ready(function() {
     });
 
 });
+
+function notification_function(msg1, msg2, msg3 = "directed to Job #"){
+    var notification_msg = msg1 + " " + msg3 + " " + msg2;
+    $.notify({
+        // options
+        icon: 'glyphicon glyphicon-warning-sign',
+        title: 'PCP Notification: ',
+        message: notification_msg,
+        // url: 'https://github.com/mouse0270/bootstrap-notify',
+        target: '_blank'
+    },{
+        // settings
+        element: 'body',
+        position: null,
+        type: 'info',
+        allow_dismiss: true,
+	    newest_on_top: false,
+        showProgressbar: false,
+        placement: {
+            from: "top",
+            align: "right"
+	    },
+        offset: 20,
+        spacing: 10,
+        z_index:1031,
+        delay: 4000,
+        timer: 1000,
+        url_target: '_blank',
+        mouse_over: null,
+        animate: {
+            enter: 'animated bounceInLeft',
+            exit: 'animated bounceOutRight'
+        },
+        onShow: null,
+        onShown: null,
+        onClose: null,
+        onClosed: null,
+        icon_type: 'class',
+        template: '<div data-notify="container" class="col-xs-11 col-sm-3 alert alert-{0}" role="alert">' +
+            '<button type="button" aria-hidden="true" class="close" data-notify="dismiss">×</button>' +
+            '<span data-notify="icon"></span> ' +
+            '<span data-notify="title">{1}</span> ' +
+            '<span data-notify="message">{2}</span>' +
+            '<div class="progress" data-notify="progressbar">' +
+                '<div class="progress-bar progress-bar-{0}" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>' +
+            '</div>' +
+            '<a href="{3}" target="{4}" data-notify="url"></a>' +
+        '</div>'
+    });
+}
+
+function unselect_job_row(job_num, param2=1){
+    var job_row_var = $("#jobrow"+job_num);
+    if ($("#jobrow"+job_num).hasClass('selected')){
+        $("#jobrow"+job_num).removeClass('selected');
+        // remove selected and from the selected list
+        var w3_content_row = w3_highlighted_array.indexOf(job_row_var[0].rowIndex);
+        if(w3_content_row > -1){
+            w3_highlighted_array.splice(w3_content_row, 1);
+        }
+        if(param2 !== 1){
+            ex_seq_unselect(0);
+        }
+    }
+}
+
+function ex_seq_unselect(param=1){
+    // once sequence is executed it will
+    // de-select all job rows if selected.
+    if (param ===1){
+        $('#job_table tbody').off('click');
+        $('#job_table tbody').on( 'click', 'tr', function () {
+            var row_index = $(this)[0].rowIndex;
+            w4_output_collapse2(row_index);
+            if ($(this).hasClass('selected')) {
+                $(this).removeClass('selected');
+                w3_content_index = w3_highlighted_array.indexOf($(this)[0].rowIndex);
+                if (w3_content_index > -1){
+                    w3_highlighted_array.splice(w3_content_index, 1);
+                    as_highlighted_checker[active_sequence] = 0;
+                }
+
+            }
+            else {
+                job_select_table.$("tr.selected").removeClass('selected');
+                $(this).addClass('selected');
+                w3_highlighted_row = $(this)[0].rowIndex;
+                w3_highlighted_array.push(w3_highlighted_row);
+                as_highlighted_checker[active_sequence] = 1;
+            }
+        });
+    } else {
+        $('#job_table tbody').off('click');
+    }
+}
+
+function datetext_to_unix_time(dateText){
+     var date_split = dateText.split(" ");
+     var mdy = date_split[0].split("/");
+     var hm = date_split[1].split(":");
+     var dt_obj = new Date(Number(mdy[2]),
+                           Number(mdy[0])-1,
+                           mdy[1],
+                           hm[0],
+                           hm[1], 0, 0);
+     var py_dt = Math.floor(dt_obj.getTime()/1000).toString();
+     return py_dt;
+}
+$(window).scroll(function () {
+    var current_scroll_pos = $(this).scrollTop();
+    scroll_checker = current_scroll_pos;
+    if (current_scroll_pos > scroll_position && $("#tooltipColumn").hasClass("fixed_tooltip")) {
+        //Scrolling
+        $("#tooltipColumn").removeClass("fixed_tooltip");
+    }
+});
+function fixed_tooltip(){
+    if(scroll_checker === 0 && $("#preToolTipContent")[0]){
+        $("#tooltipColumn").addClass("fixed_tooltip");
+    } else {
+        $("#tooltipColumn").removeClass("fixed_tooltip");
+    }
+}
+
 function generate_target_id_map(){
     var rows = $("#target_box_contentid tr td a span");
     for (var i in rows){
@@ -281,8 +419,13 @@ function status_change_update_dom(job_dom_id, status){
             .attr({"class": "label label-"+status})
             .text(status));
     if (status == "Done"){
-
         execute_sequence_output(id_map[job_dom_id]);
+    } else if (status == "Error" || status == "Stopped") {
+        clearInterval(start_timer_map[job_dom_id]);
+        clearInterval(countdown_map[job_dom_id]);
+        $("#update_spin"+job_dom_id).remove();
+        $("#updateid"+job_dom_id).empty();
+        $("#updateid"+job_dom_id).append($("<span/>").text(status));
     }
 }
 
@@ -298,6 +441,12 @@ function status_change_ws_callback(message) {
                 var job_dom_id = id_reverse_map[job_id];
                 id_status_map[job_dom_id] = data.status;
                 status_change_update_dom(job_dom_id, data.status);
+                if(data.status === "Done" || data.status === "Stopped"){
+                    $("#stopjob"+job_dom_id).hide();
+                    $("#trashjob"+job_dom_id).show();
+                } else if (!(data.status in JOB_CAN_TERMINATE) || !(data.status in JOB_CAN_NOT_TERMINATE)){
+                    $("#stopjob"+job_dom_id).hide();
+                }
             }
         }
     }
@@ -383,9 +532,8 @@ function filter_w1(){
 
     for (var row_i = 0; row_i < to_filter.length; row_i++){
         var row_id = to_filter[row_i].id.substring(10, to_filter[row_i].id.length),
-            target_json = $("#name_tag_id"+row_id+" a span")[0].innerHTML,
-            target = JSON.parse(target_json);
-        if (target.PluginName.toLowerCase().includes(filter_content)  || target.Location.toLowerCase().includes(filter_content) ){
+            target_json = $("#name_tag_id"+row_id+" a span")[0].innerHTML;
+        if (target_json.toLowerCase().includes(filter_content)){
             $(to_filter[row_i]).css("display", "");
         } else {
             $(to_filter[row_i]).css("display", "none");
@@ -420,32 +568,123 @@ function filter_w2() {
     }
 }
 
-// W3 and W4 internal collapse buttons
-function w3_collapse_test(){
-    $("#w3_box").boxWidget('toggle');
+function onLoadTest(element, element_two, w2_tooltip=0){
+    if (w2_tooltip !== 0){
+        $(element).addClass('loaded');
+        $(element_two).addClass('loaded');
+        $(w2_tooltip).addClass('loaded');
+    } else {
+        $(element).addClass('loaded');
+        $(element_two).addClass('loaded');
+    }
 }
-function w4_collapse_test(){
-    $("#w4_box").boxWidget('toggle');
+// abstract this later
+// also add animations for top widgets for bottom widgets when minimized
+function widget_expand_or_collapse(widget){
+    var w1_col_box = $("#w1_box"),
+        w2_col_box = $("#w2_box"),
+        w3_col_id = $("#w3_collapse_id"),
+        w4_col_id = $("#w4_collapse_id"),
+        w1_scroll = $(".w1TableScroll"),
+        w2_scroll = $(".w2TableScroll"),
+        w3_scroll = $("#w3TableScroll"),
+        w4_scroll = $("#w4TableScroll"),
+        tooltip_scroll = $(".tooltipScroll");
+
+    if (widget === 'w1'){
+        if (!w1_col_box.boxWidget()[0].classList.contains('collapsed-box')) {
+            w3_scroll.removeAttr('style');
+            w4_scroll.removeAttr('style');
+            setTimeout(function() {
+                onLoadTest(w3_scroll, w4_scroll);
+            }, 400);
+        } else {
+            w3_scroll.removeClass('loaded');
+            w4_scroll.removeClass('loaded');
+            w3_scroll[0].style.maxHeight = "360px";
+            w4_scroll[0].style.maxHeight = "360px";
+        }
+    } else if (widget === 'w2') {
+        if (!w2_col_box.boxWidget()[0].classList.contains('collapsed-box')) {
+            w3_scroll.removeAttr('style');
+            w4_scroll.removeAttr('style');
+            setTimeout(function() {
+                onLoadTest(w3_scroll, w4_scroll);
+            }, 400);
+        } else {
+            w3_scroll.removeClass('loaded');
+            w4_scroll.removeClass('loaded');
+            w3_scroll[0].style.maxHeight = "360px";
+            w4_scroll[0].style.maxHeight = "360px";
+        }
+    } else if (widget === 'w3') {
+        if(w3_col_id[0].children[0].classList[1] !== "fa-minus") {
+            w1_scroll.removeAttr('style');
+            w2_scroll.removeAttr('style');
+            tooltip_scroll.removeAttr('style');
+            setTimeout(function() {
+                onLoadTest(w1_scroll, w2_scroll, tooltip_scroll);
+            }, 500);
+        }
+        else if(w3_col_id[0].children[0].classList[1] === "fa-minus") {
+            w1_scroll.removeClass('loaded');
+            w2_scroll.removeClass('loaded');
+            tooltip_scroll.removeClass('loaded');
+            w1_scroll[0].style.maxHeight = "360px";
+            w2_scroll[0].style.maxHeight = "360px";
+            tooltip_scroll[0].style.maxHeight = "280px";
+        }
+    } else if (widget === 'w4'){
+        if(w4_col_id[0].children[0].classList[1] !== "fa-minus") {
+            w1_scroll.removeAttr('style');
+            w2_scroll.removeAttr('style');
+            tooltip_scroll.removeAttr('style');
+            setTimeout(function() {
+                onLoadTest(w1_scroll, w2_scroll, tooltip_scroll);
+            }, 500);
+        }
+        else if(w4_col_id[0].children[0].classList[1] === "fa-minus") {
+            w1_scroll.removeClass('loaded');
+            w2_scroll.removeClass('loaded');
+            tooltip_scroll.removeClass('loaded');
+            w1_scroll[0].style.maxHeight = "360px";
+            w2_scroll[0].style.maxHeight = "360px";
+            tooltip_scroll[0].style.maxHeight = "280px";
+        }
+    }
+}
+
+// W3 and W4 internal collapse buttons
+function bw_collapse_buttons(w3_col_id, w4_col_id){
+    if (w4_col_id[0].children[0].className !== "fa fa-plus" ||
+        w3_col_id[0].children[0].className !== "fa fa-plus"){
+
+        w3_col_id[0].children[0].className = "fa fa-plus";
+        w4_col_id[0].children[0].className = "fa fa-plus";
+    } else {
+        w3_col_id[0].children[0].className = "fa fa-minus";
+        w4_col_id[0].children[0].className = "fa fa-minus";
+    }
 }
 
 // Collapse buttons for top widgets
-function synchronize_tw_collapse(widget){
-    if (widget !== 'w1'){
-        $("#w1_box").boxWidget('toggle');
-    } else if (widget !== 'w2') {
+function synch_widget_collapse(widget){
+    var w3_col_id = $("#w3_collapse_id"),
+        w4_col_id = $("#w4_collapse_id");
+    if (widget === 'w1'){
         $("#w2_box").boxWidget('toggle');
-    }
-}
-
-// Collapse buttons for bottom widgets
-function synchronize_bw_collapse(widget){
-    if (widget !== 'w3'){
+    } else if (widget === 'w2') {
+        $("#w1_box").boxWidget('toggle');
+    } else if (widget === 'w3') {
         $("#w3_box").boxWidget('toggle');
-        w4_collapse_test();
-    } else if (widget !== 'w4') {
         $("#w4_box").boxWidget('toggle');
-        w3_collapse_test();
+        bw_collapse_buttons(w3_col_id, w4_col_id);
+    } else if (widget === 'w4'){
+        $("#w4_box").boxWidget('toggle');
+        $("#w3_box").boxWidget('toggle');
+        bw_collapse_buttons(w3_col_id, w4_col_id);
     }
+    widget_expand_or_collapse(widget);
 }
 
 
@@ -505,15 +744,15 @@ function add_intput_to_command_builder(input_id, input_i, template_key){
 
 
 function get_commands_func(){
-//    console.log("get_commands_func");  // debug
-//    console.log($(this)[0].parentElement.id);
-
     // plugin name the user clicked
     var row_id = $(this)[0].parentElement.id.substring(10, $(this)[0].id.length);
     var plugin_name_var = $("#name_tag_id"+row_id+" a span")[1].innerText;
     var check_content_var = false;
     var quick_action_button;
     var argid = 0;
+    if ($("#tooltipColumn").hasClass("fixed_tooltip")) {
+        $("#tooltipColumn").removeClass("fixed_tooltip");
+    }
 
     $.ajax({
         type: "GET",
@@ -523,14 +762,13 @@ function get_commands_func(){
         success: function(data) {
             // check if w2 should re-render or not
             current_plugin_commands = data;
-            if($(".theContent li a").length > 0){
+            if($(".theContent li a").length > 0 && $(".theContent li a").length === data.length){
                 for(var int = 0; int < $(".theContent li a").length; int++){
                     if(data[0].CommandName == $(".theContent li a")[int].text){
                         check_content_var = true;
                     }
                 }
             }
-
             // empty content in w2 if different plugin name was clicked previously
             if (!check_content_var){
                 $(".tooltipHeader").empty();
@@ -539,7 +777,7 @@ function get_commands_func(){
             }
 
         	$(".theContent").empty();
-            
+
             // display command(s) in w2
             if (data.length == 1){
                 $(".theContent").append($("<li/>").text(data));
@@ -575,14 +813,25 @@ function get_commands_func(){
                         .append($("<b/>")
                             .text("Tooltip:")));
                 $(".tooltipContent").empty();
+                $("#preToolTipContent").empty();
                 $(".tooltipContent")
-                    .append("<pre>" + current_command_template.Tooltip + "</pre>");
+                    .append("<pre id='preToolTipContent'>" + current_command_template.Tooltip + "</pre>");
+
+                // $("#toolTipTest")
+                var header = document.getElementById("toolTipTest");
+                var sticky = header.offsetTop;
+                  if (window.pageYOffset > sticky) {
+                      header.classList.add("sticky");
+                  } else {
+                      header.classList.remove("sticky");
+                  }
 
                 //footer
                 $(".theContentArgument").empty();
                 $(".theContentArgument")
                     .append($("<div id='commandIdBuilder'/>")
                         .text($(this)[0].text));
+                // JSON development data on W2 footer
                 $(".theContentArgument")
                     .append($("<div id='JSON_Command_DATA'/>")
                         .addClass("text-muted small")
@@ -650,17 +899,57 @@ function drop_target_into_job_row(job_row_id, target_js, target_js_str=""){
             .append($("<span/>")
                 .attr({"style": "display:none"})
                 .append(target_js_str));
+        var notification_msg1 = "Target " + target_js.PluginName,
+            notification_msg2 = ""+job_row_id;
+        notification_function(notification_msg1, notification_msg2);
 
     }
 }
 
+
 function load_job_state(){
+    close_state_loader();
+    var dropdown_names = $("#w3_current_selector");
+    dropdown_names.empty();
+
+    $("#w3_dn_check_button").show();
+    $("#w3toss_button").show();
+    $("#w3_selector_loading").show();
+    $.ajax({
+        type: "GET",
+        url: "/action/state_names/",
+        datatype: 'json',
+        success: function (data) {
+            var name_selector = $("#w3_current_selector");
+            for(var i=0; i <  data.length; i++){
+                name_selector.append($("<option/>")
+                    .val(data[i])
+                    .text(data[i])
+                );
+            }
+            $("#w3_selector_loading").hide();
+            $("#w3_current_selector").show();
+        }
+    });
+}
+
+function close_state_loader(){
+    $("#w3_current_selector").hide();
+    $("#w3_dn_check_button").hide();
+    $("#w3_selector_loading").hide();
+    $("#w3_namer").hide();
+    $("#w3_up_check_button").hide();
+    $("#w3toss_button").hide();
+}
+
+function load_job_state_by_name(){
     $("#download_status").removeClass("fa-cloud-download");
     $("#download_status").removeClass("fa-money");
     $("#download_status").addClass("fa-hourglass-end");
     $.ajax({
         type: "GET",
         url: "/action/load_state/",
+        data: {"requested_state": $("#w3_current_selector").val()},
         datatype: 'json',
         success: function(data) {
             clear_new_jobs();
@@ -690,6 +979,7 @@ function load_job_state(){
                 }
             }
             sequence_starttime_map = data.sequence_starttime_map; // must remain below add_sequence_tab loop
+            sequence_expiretime_map = data.sequence_expiretime_map;
             set_w3_job_status(full_update=true);
             synchronize_job_sequence_tabs(active_sequence);
             synchronize_output_sequence_tabs(active_sequence);
@@ -698,6 +988,7 @@ function load_job_state(){
             setTimeout( function() {
                 $("#download_status").removeClass("fa-money");
                 $("#download_status").addClass("fa-cloud-download");
+                close_state_loader();
                 }, 3000);
         }
     })
@@ -715,15 +1006,27 @@ function json_list_to_set(key, value) {
   return value;
 }
 
+
 function save_job_state(){
+    close_state_loader();
+    $("#w3_namer").show();
+    $("#w3_up_check_button").show();
+    $("#w3toss_button").show();
+}
+
+
+function save_job_state_by_name(){
     $("#upload_status").removeClass("fa-cloud-upload");
     $("#upload_status").removeClass("fa-money");
     $("#upload_status").addClass("fa-hourglass-end");
+    var state_name = $("#w3_namer").val();
     var local_sequences = JSON.parse(JSON.stringify(sequences, json_set_to_list));
-    var data_package = {"id_map": id_map,
+    var data_package = {"id": state_name,
+                        "id_map": id_map,
                         "id_reverse_map": id_reverse_map,
                         "id_status_map": id_status_map,
                         "sequence_starttime_map": sequence_starttime_map,
+                        "sequence_expiretime_map": sequence_expiretime_map,
                         "jobs": [],
                         "sequences": local_sequences,
                         "active_sequence": active_sequence};
@@ -759,6 +1062,7 @@ function save_job_state(){
             setTimeout( function() {
                 $("#upload_status").removeClass("fa-money");
                 $("#upload_status").addClass("fa-cloud-upload");
+                close_state_loader();
                 }, 3000 );
         }
     });
@@ -884,9 +1188,6 @@ function add_target_to_job_sc_button(){
     // console.log("add_target_to_job_sc");  // debug
     var w1_target_row_id = $(this)[0].parentElement.parentElement.parentElement.id.substring(10, $(this)[0].id.length),
         row_js_str = $("#nameidjson" + w1_target_row_id)[0].innerText;
-        // json_target_id = $(this)[0].parentElement.parentElement.parentElement.children[0].children[0].children[0].id,
-        // json_target_data = $("#"+json_target_id)[0].innerText;
-
     quick_action_function(row_js_str, "pluginid", "target");
     set_w3_job_status();
 
@@ -910,7 +1211,9 @@ function add_sequence_tab(clear=true){
         sequences[next_tab] = new Set();
     }
     var new_tab_start_time =  Math.floor((new Date().valueOf()) / 1000);
+    var new_tab_expire_time = new_tab_start_time + 3 * 24 * 60* 60;
     sequence_starttime_map[next_tab] = new_tab_start_time.toString();
+    sequence_expiretime_map[next_tab] = new_tab_expire_time.toString();
     $('#new_jobq_button')
         .before('<li id="jobB_'+next_tab+'" onclick="synchronize_job_sequence_tabs('+next_tab+')"><a href="#jobq_'+next_tab+'" data-toggle="tab">'+next_tab+'</a></li>');
     $('#jobq_content')
@@ -921,8 +1224,14 @@ function add_sequence_tab(clear=true){
         .append('<li id="outB_'+next_tab+'" onclick="synchronize_output_sequence_tabs('+next_tab+')"><a href="#outq_'+next_tab+'" data-toggle="tab">'+next_tab+'</a></li>');
     $('#outq_content')
         .append('<div class="tab-pane" id="outq_'+next_tab+'"></div>');
-    $("#outq_"+next_tab).tab('show');
-    $("#jobq_"+next_tab).tab('show')
+
+    setTimeout(
+        function() {
+            synchronize_job_sequence_tabs(next_tab);
+            synchronize_output_sequence_tabs(next_tab);
+        }
+        , 33
+    );
 }
 function synchronize_job_sequence_tabs(tab_id){
     active_sequence = tab_id;
@@ -946,6 +1255,14 @@ function synchronize_sequence_tab_rows(sequence_id){
         display_date += ("0" + _dt.getMinutes()).slice(-2);
     $("#job_sequence_time_unix")[0].value = sequence_starttime_map[sequence_id];
     $("#job_sequence_timer")[0].value = display_date;
+    var _et = new Date(Number(sequence_expiretime_map[sequence_id]) * 1000);
+    var display_expire_date = $.datepicker.formatDate('mm/dd/yy ', _et);
+        display_expire_date += ("0" + _et.getHours()).slice(-2);
+        display_expire_date += ":";
+        display_expire_date += ("0" + _et.getMinutes()).slice(-2);
+    $("#job_sequence_expire_unix")[0].value = sequence_expiretime_map[sequence_id];
+    $("#job_sequence_expire")[0].value = display_expire_date;
+
     var job_row_ids = $("#third_box_content tr" );
     var ouput_row_objs = $("#W4Rows tr");
     for (var i = 1; i <= job_row_ids.length; i++){
@@ -982,7 +1299,7 @@ function add_new_job(){
     // content for w3
     $(".thirdBoxContent")
         .append($("<tr/>")
-            .attr({"role": "row","onclick": "#","id":"jobrow"+value,"class": "draggable_tr divw3row",
+            .attr({"role": "row","onclick": "anchor_w4_output("+value+")","id":"jobrow"+value,"class": "draggable_tr divw3row",
                 "style": "z-index: 200"})
             .append($("<td/>")
                     .append($("<div/>")
@@ -1024,6 +1341,30 @@ function delete_job_from_w3(event){
     synchronize_output_sequence_tabs(active_sequence);
     var dan = "ok";
 }
+function stop_job_from_w3(event){
+    var source = event.target || event.srcElement;
+    var job_item = get_number_from_id(source.id, "stopjob");
+    $(source).removeClass("fa-fire-extinguisher");
+    $(source).addClass("fa-hourglass-start");
+    $.ajax({
+        type: "GET",
+        url: "/stop_job/"+id_map[job_item]+"/",
+        datatype: 'json',
+        success: function(data) {
+            if (data.errors == 0){
+                $(source).hide();
+                if ($("#jobrow"+job_item).hasClass("selected")){
+                    as_highlighted_checker[active_sequence]--;
+                    $("#jobrow"+job_item).removeClass("selected");
+                }
+                as_highlighted_checker[active_sequence]
+            } else {
+                $(source).removeClass("fa-hourglass-start");
+                $(source).addClass("fa-fire-extinguisher");
+            }
+        }
+    });
+}
 
 // Clear job content in w3
 function clear_new_jobs(){
@@ -1058,7 +1399,8 @@ function clear_new_jobs(){
 function drag_target(){
    // console.log("drag_target");
 	$(".gridSelect tbody tr").draggable({
-        appendTo: $("#third_box_content"),
+        // appendTo: $("#third_box_content"),
+        appendTo: "body",
 	    helper: function(){
 	        var selected_var = $(".gridSelect tbody tr.selected");
             var container_to_drag;
@@ -1073,10 +1415,11 @@ function drag_target(){
 
             if (container_to_drag.length === 0) {
                 container_to_drag = $(this).addClass('selected');
-            } else if (container_to_drag.length == 1) {
+            } else if (container_to_drag.length === 1) {
                 display_drop_all();
             }
-            var container = $('<table/>').attr({'id':'draggingContainer'}).addClass('custom_drag');
+            // var container = $('<table/>').attr({'id':'draggingContainer'}).addClass('custom_drag');
+	        var container = $('<table/>').attr({'id':'draggingContainer'});
             container.append(container_to_drag.clone().removeClass("selected"));
             $("#third_box_content tr").addClass('w3_box_css');
             hover_w3_for_target();
@@ -1085,7 +1428,7 @@ function drag_target(){
 	    revert: function(){
 	        hide_drop_all();
 	        hover_int = 0;
-	        $("#draggingContainer").removeClass('custom_drag');
+	        // $("#draggingContainer").removeClass('custom_drag');
 	        $("#third_box_content tr").removeClass('w3_box_css');
 	        return true;
         }
@@ -1159,7 +1502,6 @@ function drop_target(hover_object){
         drop: function (event, ui) {
             if (hover_int != 0){
                 var selected_var = ui.helper.children();
-                // console.log(selected_var);
                 var list_cap = 0;
 
                 for(var int = 0; int < selected_var.length; int++){
@@ -1216,10 +1558,7 @@ function job_row_is_mutable(job_row){
         var current_status = $("#jobstatusid"+job_row+" span");
         result =  ((current_status.length == 0) ||
                    (current_status.length >=1 && ( current_status[0].innerText == "Valid" ||
-                                                   current_status[0].innerText == "Invalid" ||
-                                                   current_status[0].innerText == "Preparing" ||
-                                                   current_status[0].innerText == "Stopped"  ||
-                                                   current_status[0].innerText == "Error")));
+                                                   current_status[0].innerText == "Invalid")));
     }
     return result;
 }
@@ -1329,14 +1668,7 @@ function drop_command_into_hole(command, command_json, command_td, row_id){
    // console.log("drop_command_into_hole");
     var current_status = $("#jobstatusid"+row_id+" span");
     var MAX_DISPLAY_ARGUMENT = 36;
-    if ((current_status.length == 0) ||
-        (current_status.length >=1 && command_td.length == 1 && ( current_status[0].innerText == "Invalid" ||
-                                                                  current_status[0].innerText == "Valid" ||
-                                                                  current_status[0].innerText == "Preparing" ||
-                                                                  current_status[0].innerText == "Stopped"  ||
-                                                                  current_status[0].innerText == "Error")
-        )
-    ){
+    if (job_row_is_mutable(row_id)){
         command_td.empty();
         var new_div = document.createElement("div");
         new_div.innerText = command_json;
@@ -1364,6 +1696,9 @@ function drop_command_into_hole(command, command_json, command_td, row_id){
                       classes: {"ui-tooltip": "ui-corner-all ui-widget-shadow bg-light-blue-active color-palette"}
             });
         command_td[0].appendChild(display_div);
+        var notification_msg1 = "Command " + command.CommandName,
+        notification_msg2 = ""+row_id;
+        notification_function(notification_msg1, notification_msg2);
     } else {
         console.error("Can't drop command into job "+row_id+" (job already in Brain)");
     }
@@ -1403,19 +1738,19 @@ function prepare_jobs_list(){
                 .append($("<span/>")
                     .attr({"class": "label label-"+INITIAL_JOB_STATUS})
                     .text(INITIAL_JOB_STATUS));
-
+            $("#trashjob"+(j+1)).hide();
             var uid = j+1;
             var terminal = $("#updateid"+uid).parent();
             var plugin_name_data = $("#pluginid"+(j+1))[0].textContent;  // correct json target data with plugin name
             var json_target_data = JSON.parse($("#pluginid"+(j+1)+" span")[0].innerText);
             var command_json = $("#commandid"+(j+1)+" div")[0].innerText;
             var command = JSON.parse(command_json);
-
             var job = {"JobTarget": {"PluginName": String(json_target_data.PluginName),
                                      "Location": String(json_target_data.Location),
                                      "Port":  String(json_target_data.Port),},
                        "Status": INITIAL_JOB_STATUS,
                        "StartTime": Number(sequence_starttime_map[active_sequence])+(uid/1000),
+                       "ExpireTime": Number(sequence_expiretime_map[active_sequence])+(uid/1000),
                        "JobCommand": command};
             id_status_map[uid] = INITIAL_JOB_STATUS;
             jobs.push(job);
@@ -1474,6 +1809,7 @@ function final_countdown_function(start_time, dom_id) {
         }
 
     },1000);
+    countdown_map[dom_id] = interval_var;
 }
 
 // Execute Sequence function down below are for w3+w4
@@ -1481,41 +1817,56 @@ function execute_sequence(){
    // console.log("execute_sequence function has been called");  // debug
     exec_int = 1;
     hide_drop_all();
-    var jobs = prepare_jobs_list();
-    var jobs_json = JSON.stringify(jobs);
-    var sequence_start_time;
-    $.ajax({
-        type: "GET",
-        url: "/action/get_w3_data/",
-        data: {"jobs": jobs_json},
-        datatype: 'json',
-        success: function(data) {
-            var job_ids = data.generated_keys;
-            job_id = job_ids[0];
-            sequence_start_time = parseInt(sequence_starttime_map[active_sequence]);
-            for (var index = 0; index < job_ids.length; ++index) {
-                if (job_ids[index] != "invalid-job"){
-                    var dom_id = index+1;
-                    id_reverse_map[job_ids[index]] = dom_id;
-                    id_map[index+1] = job_ids[index];
-
-                    if (ws_map['status'].readyState === ws_map['status'].OPEN) {
-                        $("#updateid" + dom_id).empty();
-                        final_countdown_function(sequence_start_time, dom_id);
-                    } else {
-                        execute_sequence_output(job_ids[index]);
+    var desired_start = Number(sequence_starttime_map[active_sequence]);
+    var desired_expire = Number(sequence_expiretime_map[active_sequence]);
+    if (desired_start < desired_expire){
+        var jobs = prepare_jobs_list();
+        var jobs_json = JSON.stringify(jobs);
+        var sequence_start_time;
+        $.ajax({
+            type: "GET",
+            url: "/action/get_w3_data/",
+            data: {"jobs": jobs_json},
+            datatype: 'json',
+            success: function(data) {
+                var job_ids = data.generated_keys;
+                job_id = job_ids[0];
+                sequence_start_time = parseInt(sequence_starttime_map[active_sequence]);
+                for (var index = 0; index < job_ids.length; ++index) {
+                    if (job_ids[index] != "invalid-job"){
+                        var dom_id = index+1;
+                        var job_row_var = $("#jobrow"+dom_id);
+                        id_reverse_map[job_ids[index]] = dom_id;
+                        id_map[index+1] = job_ids[index];
+                        $("#trashjob"+dom_id)
+                            .parent()
+                            .append(
+                                $("<a>")
+                                    .attr({"id": "stopjob"+dom_id})
+                                    .addClass("fa fa-fire-extinguisher")
+                            );
+                        $("#stopjob"+dom_id).click(stop_job_from_w3);
+                        if (ws_map['status'].readyState === ws_map['status'].OPEN) {
+                            $("#updateid" + dom_id).empty();
+                            final_countdown_function(sequence_start_time, dom_id);
+                        } else {
+                            execute_sequence_output(job_ids[index]);
+                        }
+                        unselect_job_row(dom_id, 0);
+                        num_jobs_to_ex.push(index);
                     }
-
                 }
+            },
+            error: function (data) {
+                console.log("ERROR @ execute_sequence function")
+            },
+            complete: function(data){
+                exec_int = 0;
             }
-        },
-        error: function (data) {
-            console.log("ERROR @ execute_sequence function")
-        },
-        complete: function(data){
-            exec_int = 0;
-        }
-    })
+        })
+    } else {
+        alert("Sequence Expire must be later than sequence start");
+    }
 }
 
 /*
@@ -1532,6 +1883,39 @@ function change_truncate_value(){
     }
 }
 
+function w4_output_collapse2(job_row){
+    // W4 output un-collapse by w3
+    if ($("#updateid"+job_row)[0].children.length > 0) {
+        var w4_output_var = $("#w4_output_collapsible_button"+job_row);
+        w4_output_var[0].classList.toggle("active2");
+        var w4_content = w4_output_var[0].nextSibling;
+        var w4_pre_tag = w4_output_var[0].nextSibling.firstChild;
+        if (w4_content.style.maxHeight) {
+            w4_content.style.maxHeight = null;
+        } else {
+            w4_content.style.maxHeight = (w4_pre_tag.scrollHeight+35) + "px";
+            // notification
+            var notification_msg1 = "Job # " + job_row,
+            notification_msg2 = "job output # "+job_row,
+            notification_msg3 = "revealed";
+            notification_function(notification_msg1, notification_msg2, notification_msg3);
+        }
+    }
+}
+
+function w4_output_collapse(){
+    // w4 output un-collapse by click on w4 output job
+    $(this)[0].classList.toggle("active2");
+    var w4_content = $(this)[0].nextSibling;
+    var w4_pre_tag = $(this)[0].nextSibling.firstChild;
+
+    if (w4_content.style.maxHeight) {
+        w4_content.style.maxHeight = null;
+    } else {
+        w4_content.style.maxHeight = (w4_pre_tag.scrollHeight+35) + "px";
+    }
+}
+
 
 function render_job_output_to_page(job_guid, data){
     var updateid = id_reverse_map[job_guid];
@@ -1539,14 +1923,16 @@ function render_job_output_to_page(job_guid, data){
     $("#updateid"+updateid).empty();
     $("#updateid"+updateid).attr({"class": ""});
     $("#update_spin"+updateid).remove();
-    $('<pre id="updatecontent'+updateid+'"></pre>').appendTo("#updateid"+updateid);
+    $('<button class="w4_output_collapsible_button" id="w4_output_collapsible_button'+updateid+'">Job Output '+updateid+'</button>')
+        .appendTo("#updateid"+updateid);
+    $('<div class="w4_output_content" id="w4_output_content'+updateid+'"></div>').appendTo("#updateid"+updateid);
+    $('<pre id="updatecontent'+updateid+'"></pre>').appendTo("#w4_output_content"+updateid);
     $("#updatecontent"+updateid).text(data['Content']);
     var download_link = $('<a>[Download]</a>');
     download_link.attr({"href": "/action/get_full_output_data/?job_id="+job_guid+"&job_number="+updateid});
-    $("#updateid"+updateid)
-        .append($("<div style='background-color: white'/>")
+    $("#w4_output_content"+updateid)
+        .append($("<div/>").attr({"id": "download_link_id"+updateid})
             .append(download_link));
-    $("#updateid"+updateid).parent().css("background-color", "Fuchsia");
     $("#updatestatusid"+updateid).empty();
     $("#updatestatusid"+updateid)
         .append($("<span/>")
@@ -1560,6 +1946,8 @@ function render_job_output_to_page(job_guid, data){
     if (id_replication_map.hasOwnProperty(updateid)){
         render_job_output_to_secondary(id_replication_map[updateid], data);
     }
+    // w4 output un-collapse by click on w4 output job
+    // $("#w4_output_collapsible_button"+updateid).click(w4_output_collapse);
 }
 
 function render_job_output_to_secondary(secondary_id, data)
@@ -1620,6 +2008,13 @@ function execute_sequence_output(specific_id, counter=0, backoff=2000){
         datatype: 'json',
         success: function(data) {
             console.log("SUCCESS @ execute_sequence_output  function");
+            unselect_job_row(updateid);
+            job_row_checker++;
+            if (job_row_checker >= num_jobs_to_ex.length){
+                ex_seq_unselect(1); // select job row is turned back on
+                job_row_checker = 0;
+                num_jobs_to_ex = [];
+            }
 
             if (data != 0){  // returns query
                 render_job_output_to_page(specific_id, data);
@@ -1745,4 +2140,28 @@ function terminal_opened(event){
 
 function get_number_from_id(id_str, pretext){
     return id_str.substring(pretext.length, id_str.length);
+}
+
+// Two scroll bars will be in synch together
+function syncScroll(element1, element2) {
+    element1.scroll(function (e) {
+        var ignore = ignoreScrollEvents;
+        ignoreScrollEvents = false;
+        if (ignore) return;
+        ignoreScrollEvents = true;
+        element2.scrollTop(element1.scrollTop())
+    })
+}
+
+function anchor_w4_output(job_row){
+    setTimeout(function (){
+        var sequence_size = sequences[1].size;
+        if (job_row === sequence_size || job_row === (sequence_size - 1)) {
+            var element = document.getElementById("download_link_id"+job_row);
+            element.scrollIntoView({behavior: "smooth"});
+        } else {
+            var element = document.getElementById("updateid"+job_row);
+            element.scrollIntoView({behavior: "smooth"});
+        }
+    }, 500);
 }

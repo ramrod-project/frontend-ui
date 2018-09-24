@@ -12,7 +12,7 @@ from Backend.db_dir.custom_queries import get_specific_commands, insert_brain_jo
     get_specific_brain_output, get_brain_output_content, insert_new_target, get_brain_targets, \
     persist_jobs_state, load_jobs_state, upload_file_to_brain, del_file_upload_from_brain, \
     get_brain_files, get_brain_file, get_plugin_list_query, desired_plugin_state_brain, \
-    get_interface_list, update_plugin_to_brain
+    get_interface_list, update_plugin_to_brain, update_brain_stop_job, db_get_state_names
 
 from .forms import TargetForm, verify_plugin_data
 
@@ -37,6 +37,12 @@ def persist_job_state(request):
                             content_type="application/json")
 
 
+def get_state_names(request):
+    if request.method == 'GET':
+        return HttpResponse(json.dumps(db_get_state_names()),
+                            content_type="application/json")
+
+
 def load_job_state(request):
     """
     current_state = {"id_map": {},
@@ -50,7 +56,8 @@ def load_job_state(request):
     :return: <str> json output
     """
     if request.method == 'GET':
-        return HttpResponse(json.dumps(load_jobs_state()),
+        requested_state = request.GET.get('requested_state')
+        return HttpResponse(json.dumps(load_jobs_state(requested_state)),
                             content_type="application/json")
 
 
@@ -438,3 +445,14 @@ def get_interfaces(request):
     return HttpResponse(json.dumps(interfaces),
                         content_type='application/json')
 
+def stop_job(request, job_id):
+    """
+
+    :param request:
+    :return:
+    """
+    response = {"errors": 0}
+    if request.method == 'GET':
+        response = update_brain_stop_job(job_id)
+    return HttpResponse(json.dumps(response),
+                        content_type='application/json')
