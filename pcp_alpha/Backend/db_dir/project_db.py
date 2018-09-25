@@ -5,6 +5,7 @@ and validating information in the Brain.
 """
 import sys
 from copy import deepcopy
+from random import randint
 from brain import connect, r as rtdb
 from brain import check_dev_env, check_prod_env
 from . import plugins, _TEST_COMMANDS2
@@ -204,8 +205,8 @@ TEST_SAVED_COMMANDS =[
      "Command": deepcopy(_TEST_COMMANDS[2])
      }
 ]
-TEST_SAVED_COMMANDS[0]["Command"]["Inputs"][0]['Value'] = "/tmp/hello_world"
-TEST_SAVED_COMMANDS[1]["Command"]["Inputs"][0]['Value'] = "/tmp/another-file"
+for _TEST_SAVE_COMMAND in TEST_SAVED_COMMANDS:
+    _TEST_SAVE_COMMAND["Command"]["Inputs"][0]['Value'] = str(randint(9999, 9999999))
 
 TEST_PORT_DATA = {
     "InterfaceName": "eth0",
