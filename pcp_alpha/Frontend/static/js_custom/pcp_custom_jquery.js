@@ -36,6 +36,7 @@ var scroll_position = 0,
     scroll_checker = 0;
 var num_jobs_to_ex = [];
 var job_row_checker = 0;
+var debug_msg_checker = 0;
 
 var timer_on = 1,
     time_var,
@@ -206,7 +207,26 @@ $(document).ready(function() {
 
 });
 
-function notification_function(msg1, msg2, msg3 = "directed to Job #"){
+function debug_sidebar_msg_list(param_type, notification_msg){
+    if(param_type === "danger"){
+        debug_msg_checker++;
+        $("#control-sidebar-settings-tab-log")
+            .append($("<ul/>").attr({"class": "control-sidebar-menu"})
+                .append($("<li/>")
+                    .append($("<a/>")
+                        .attr({"href": "javascript:;"})
+                        .append($("<h4/>")
+                            .attr({"class": "control-sidebar-subheading"})
+                            .text("Message "+debug_msg_checker))
+                        .append($("<h4/>")
+                            .attr({"class": "control-sidebar-subheading"})
+                            .append($("<p/>")
+                                .text(notification_msg))))));
+
+    }
+}
+
+function notification_function(msg1, msg2, msg3 = "directed to Job #", param_type="info"){
     var notification_msg = msg1 + " " + msg3 + " " + msg2;
     $.notify({
         // options
@@ -219,7 +239,7 @@ function notification_function(msg1, msg2, msg3 = "directed to Job #"){
         // settings
         element: 'body',
         position: null,
-        type: 'info',
+        type: param_type,
         allow_dismiss: true,
 	    newest_on_top: false,
         showProgressbar: false,
@@ -254,6 +274,7 @@ function notification_function(msg1, msg2, msg3 = "directed to Job #"){
             '<a href="{3}" target="{4}" data-notify="url"></a>' +
         '</div>'
     });
+    debug_sidebar_msg_list(param_type, notification_msg);
 }
 
 function unselect_job_row(job_num, param2=1){
@@ -1903,7 +1924,13 @@ function drop_command_into_hole(command, command_json, command_td, row_id){
         notification_msg2 = ""+row_id;
         notification_function(notification_msg1, notification_msg2);
     } else {
-        console.error("Can't drop command into job "+row_id+" (job already in Brain)");
+        // console.error("Can't drop command into job "+row_id+" (job already in Brain)");
+        // notification warning
+        var msg1 = "Can't drop command into job",
+            msg3 = row_id,
+            msg2 = "(job already in Brain)",
+            info_type = "danger";
+        notification_function(msg1, msg2, msg3, info_type);
     }
 }
 
@@ -2317,6 +2344,10 @@ function terminal_opener(event) {
     var visible_commands = $("#third_box_content tr:visible");
     var visible_ouput = $("#W4Rows tr:visible");
     for (var i=0; i<visible_commands.length; i++){
+        var get_job_row_id = get_number_from_id(visible_commands[i].id, "jobrow");
+        if(job_row_is_mutable(get_job_row_id)){
+            continue;
+        }
         var command_td = $(visible_commands[i]).find("td")[3];
         var target_cells = $(visible_commands[i]).find("td span");
         var target = null;
