@@ -443,9 +443,16 @@ function status_change_ws_callback(message) {
                 status_change_update_dom(job_dom_id, data.status);
                 if(data.status === "Done" || data.status === "Stopped"){
                     $("#stopjob"+job_dom_id).hide();
+                    $("#resetjob"+job_dom_id).hide();
                     $("#trashjob"+job_dom_id).show();
-                } else if (!(data.status in JOB_CAN_TERMINATE) || !(data.status in JOB_CAN_NOT_TERMINATE)){
+                }
+                else if(data.status === "Error"){
                     $("#stopjob"+job_dom_id).hide();
+                    $("#resetjob"+job_dom_id).show();
+                }
+                else if (!(data.status in JOB_CAN_TERMINATE) || !(data.status in JOB_CAN_NOT_TERMINATE)){
+                    $("#stopjob"+job_dom_id).hide();
+                    $("#resetjob"+job_dom_id).hide();
                 }
             }
         }
@@ -897,7 +904,7 @@ function drop_target_into_job_row(job_row_id, target_js, target_js_str=""){
         $("#pluginid"+job_row_id)[0].innerText = target_js.PluginName+":"+target_js.Port;
         $("#pluginid"+job_row_id)
             .append($("<span/>")
-                .attr({"style": "display:none"})
+                .attr({"id": "jobTargetidJSON"+job_row_id, "style": "display:none"})
                 .append(target_js_str));
         var notification_msg1 = "Target " + target_js.PluginName,
             notification_msg2 = ""+job_row_id;
@@ -1366,6 +1373,49 @@ function stop_job_from_w3(event){
     });
 }
 
+function reset_job_from_w3(event){
+    var source = event.target,
+        job_item = get_number_from_id(source.id, "resetjob"),
+        parse_job_num = parseInt(job_item),
+        job_target_row_json = $("#jobTargetidJSON"+job_item),
+        job_command_row_json = $("#jobCommandidJSON"+job_item),
+        row_js = JSON.parse(job_target_row_json[0].textContent),
+        new_job_array_checker = [],
+        row_command_str_js = job_command_row_json[0].textContent,
+        row_command_js = JSON.parse(row_command_str_js);
+
+    if(inc === parse_job_num) {
+        add_new_job();
+        drop_target_into_job_row(inc, row_js, job_target_row_json[0].textContent);
+        drop_command_into_hole(row_command_js,
+                               row_command_str_js,
+                               $("tr td#commandid"+inc),
+                               inc);
+    }
+    // iterate through active sequence to see if target, and command columns are filled
+    else if (inc !== parse_job_num && inc > parse_job_num){
+        try{
+            sequences[active_sequence].forEach(function(value) {
+                if ($("tr td#pluginid" + value)[0].textContent === "" && $("tr td#commandid" + value)[0].textContent === "") {
+                    drop_target_into_job_row(""+value, row_js, job_target_row_json[0].textContent);
+                    drop_command_into_hole(row_command_js, row_command_str_js, $("tr td#commandid"+value), value);
+                    throw BreakException;
+                } else {
+                    new_job_array_checker.push(value);
+                }
+            });
+        } catch (e) {
+            if (e!==BreakException) throw e;
+        }
+    }
+    // if all job rows iterated and all filled, create  new job row
+    if (new_job_array_checker.length === sequences[active_sequence].size) {
+        add_new_job();
+        drop_target_into_job_row(inc, row_js, job_target_row_json[0].textContent);
+        drop_command_into_hole(row_command_js, row_command_str_js, $("tr td#commandid"+inc), "" + inc);
+    }
+}
+
 // Clear job content in w3
 function clear_new_jobs(){
     $(".thirdBoxContent").empty();
@@ -1665,7 +1715,12 @@ function drop_command_to_multiple(ev) {
 }
 
 function drop_command_into_hole(command, command_json, command_td, row_id){
-   // console.log("drop_command_into_hole");
+   /*
+   command == object json
+   command_json == json string
+   command_td == destination job command column
+   row_id == destination job command row
+   */
     var current_status = $("#jobstatusid"+row_id+" span");
     var MAX_DISPLAY_ARGUMENT = 36;
     if (job_row_is_mutable(row_id)){
@@ -1673,6 +1728,7 @@ function drop_command_into_hole(command, command_json, command_td, row_id){
         var new_div = document.createElement("div");
         new_div.innerText = command_json;
         new_div.style.display = 'none';
+        new_div.setAttribute("id", "jobCommandidJSON"+row_id);
         var display_string = command['CommandName'] + " (";
         var args_str = "";
         var args_str_truncated = "";
@@ -1840,12 +1896,18 @@ function execute_sequence(){
                         id_map[index+1] = job_ids[index];
                         $("#trashjob"+dom_id)
                             .parent()
+                            // stop job
                             .append(
                                 $("<a>")
                                     .attr({"id": "stopjob"+dom_id})
                                     .addClass("fa fa-fire-extinguisher")
-                            );
+                            )
+                            // reset job
+                            .append($("<a>")
+                                    .attr({"id": "resetjob"+dom_id, "style": "display: none;"})
+                                    .addClass("fa fa-rotate-left"));
                         $("#stopjob"+dom_id).click(stop_job_from_w3);
+                        $("#resetjob"+dom_id).click(reset_job_from_w3);
                         if (ws_map['status'].readyState === ws_map['status'].OPEN) {
                             $("#updateid" + dom_id).empty();
                             final_countdown_function(sequence_start_time, dom_id);
@@ -1885,7 +1947,7 @@ function change_truncate_value(){
 
 function w4_output_collapse2(job_row){
     // W4 output un-collapse by w3
-    if ($("#updateid"+job_row)[0].children.length > 0) {
+    if ($("#updateid"+job_row)[0].children.length > 0 && $("#updatestatusid"+job_row)[0].innerText !== "Error") {
         var w4_output_var = $("#w4_output_collapsible_button"+job_row);
         w4_output_var[0].classList.toggle("active2");
         var w4_content = w4_output_var[0].nextSibling;
@@ -1915,7 +1977,6 @@ function w4_output_collapse(){
         w4_content.style.maxHeight = (w4_pre_tag.scrollHeight+35) + "px";
     }
 }
-
 
 function render_job_output_to_page(job_guid, data){
     var updateid = id_reverse_map[job_guid];
@@ -2154,14 +2215,17 @@ function syncScroll(element1, element2) {
 }
 
 function anchor_w4_output(job_row){
-    setTimeout(function (){
-        var sequence_size = sequences[1].size;
-        if (job_row === sequence_size || job_row === (sequence_size - 1)) {
-            var element = document.getElementById("download_link_id"+job_row);
-            element.scrollIntoView({behavior: "smooth"});
-        } else {
-            var element = document.getElementById("updateid"+job_row);
-            element.scrollIntoView({behavior: "smooth"});
-        }
-    }, 500);
+    var current_status = $("#jobstatusid"+job_row+" span");
+    if (current_status[0].innerText !== "Error") {
+        setTimeout(function (){
+            var sequence_size = sequences[1].size;
+            if (job_row === sequence_size || job_row === (sequence_size - 1)) {
+                var element = document.getElementById("download_link_id"+job_row);
+                element.scrollIntoView({behavior: "smooth"});
+            } else {
+                var element = document.getElementById("updateid"+job_row);
+                element.scrollIntoView({behavior: "smooth"});
+            }
+        }, 500);
+    }
 }
