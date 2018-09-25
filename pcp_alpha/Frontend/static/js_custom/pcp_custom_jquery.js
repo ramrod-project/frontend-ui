@@ -936,6 +936,7 @@ function render_command_to_json_display(event){
                         .append($("<i/>").attr({"id": "add_command_to_job_id2" ,"class": "fa fa-tasks"}));
     $("#JSON_Command_DATA").text(JSON.stringify(current_saved_commands[saved_cmd_name]));
     $("#commandIdBuilder").empty();
+    $("#commandIdBuilder").text(saved_cmd_name);
     $("#commandIdBuilder").append(quick_action_button);
     $("a#add_command_to_job_id").click(add_command_to_job_sc_button);
 }
