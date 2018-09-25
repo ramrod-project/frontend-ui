@@ -4,7 +4,7 @@ from .views import get_commands_controller, new_target_form, val_target_form, ex
     w4_output_controller, w4_output_controller_download, edit_target_form, val_edit_target_form, \
     persist_job_state, load_job_state, delete_specific_target, file_upload_list, del_file_from_list, \
     get_file_listing, get_file, get_plugin_list, update_plugin, desired_plugin_state_controller, \
-    get_interfaces, stop_job, get_state_names
+    get_interfaces, stop_job, get_state_names, get_saved_command_list, put_saved_command
 
 
 app_name = 'pcp_app'
@@ -21,6 +21,8 @@ urlpatterns = [
     path('action/save_state/', persist_job_state),              # url for save_state
     path('action/load_state/', load_job_state),                 # url for save_state
     path('action/state_names/', get_state_names),  # url for save_state
+    path('action/get_saved_command_list/', get_saved_command_list),
+    path('action/put_saved_command/', put_saved_command),
     path('delete_target_row/<target_id>/', delete_specific_target),         # url to delete specific target
     path('file_upload/', file_upload_list),  # file upload
     path('file_listing/', get_file_listing),  # populate file list to ui
@@ -30,5 +32,5 @@ urlpatterns = [
     path('update_plugin/<plugin_id>/', update_plugin),
     path('get_interfaces/', get_interfaces),
     path('desired_plugin_state/', desired_plugin_state_controller),  # url for desired state action controller
-    path('stop_job/<job_id>/', stop_job)
+    path('stop_job/<job_id>/', stop_job),
     ]
