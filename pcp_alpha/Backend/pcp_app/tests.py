@@ -19,7 +19,8 @@ from pcp_alpha.Backend.pcp_app.views import get_commands_controller, \
     execute_sequence_controller, w4_output_controller, w4_output_controller_download, \
     new_target_form, val_target_form, val_edit_target_form, edit_target_form, \
     delete_specific_target, file_upload_list, persist_job_state, load_job_state, \
-    del_file_from_list, get_file_listing, get_file, get_interfaces, stop_job, get_state_names
+    del_file_from_list, get_file_listing, get_file, get_interfaces, stop_job, \
+    get_state_names, get_saved_command_list, put_saved_command
 
 ECHO_JOB_ID = str(uuid4())
 NOW = time()
@@ -675,3 +676,28 @@ class TestDataHandling(object):
         sleep(2)
         second_url = "/stop_job/{}/".format(job_id)
         assert stop_job(rf.get(second_url, HTTP_USER_AGENT='Mozilla/5.0'), job_id).status_code == 200
+
+    @staticmethod
+    def test_saved_commands(rf):
+        """
+        This test imitates load a job state in W3
+        :param rf: request factory
+        :return: status code
+        """
+        url_var = "action/get_saved_command_list/?plugin_name=Plugin1"
+        response = get_saved_command_list(rf.get(url_var, HTTP_USER_AGENT='Mozilla/5.0'))
+        assert response.status_code == 200
+
+    @staticmethod
+    def test_post_saved_command(rf):
+        post_data = {
+            "PluginName": "Plugin1",
+            "Name": "sample",
+            "Command_js": "{}",
+        }
+        url_var = "action/put_saved_command/"
+        response = post_test(url_var,
+                              post_data,
+                              put_saved_command,
+                              rf)
+        assert response.status_code == 302
