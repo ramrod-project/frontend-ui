@@ -1,33 +1,33 @@
-.label-Done {
+span.label-Done {
     background-color: #FF00FF;
 }
-.label-Invalid {
+span.label-Invalid {
     background-color: #B7B7B7;
     color: #333333;
 }
-.label-Valid {
+span.label-Valid {
     background-color: #ffffff;
     color: #333333;
 }
-.label-Pending {
+span.label-Pending {
     background-color: #00ffff;
     color: #333333;
 }
-.label-Error {
+span.label-Error {
     background-color: #CC0000;
 }
-.label-Active {
+span.label-Active {
     background-color: #FFFF00;
     color: #333333;
 }
-.label-Stopped {
+span.label-Stopped {
     background-color: #ff9900;
     color: #333333;
 }
-.label-Waiting {
+span.label-Waiting {
     background-color: #4A86E8;
 }
-.label-Ready {
+span.label-Ready {
     background-color: #00FF00;
     color: #333333;
 }
