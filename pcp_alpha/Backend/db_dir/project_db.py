@@ -4,6 +4,7 @@ Includes multiple functions for integrating with
 and validating information in the Brain.
 """
 import sys
+from copy import deepcopy
 from brain import connect, r as rtdb
 from brain import check_dev_env, check_prod_env
 from . import plugins, _TEST_COMMANDS2
@@ -193,6 +194,18 @@ _TEST_COMMANDS = [
     },
 ]
 
+TEST_SAVED_COMMANDS =[
+    {"Name": "test_saved_command_1",
+     "PluginName": "Plugin1",
+     "Command": deepcopy(_TEST_COMMANDS[0])
+     },
+    {"Name": "a_first_test_saved_command_1",
+     "PluginName": "Plugin1",
+     "Command": deepcopy(_TEST_COMMANDS[2])
+     }
+]
+TEST_SAVED_COMMANDS[0]["Command"]["Inputs"][0]['Value'] = "/tmp/hello_world"
+TEST_SAVED_COMMANDS[1]["Command"]["Inputs"][0]['Value'] = "/tmp/another-file"
 
 TEST_PORT_DATA = {
     "InterfaceName": "eth0",
@@ -386,6 +399,11 @@ def confirm_plugin_db_info():
         rtdb.db("Controller").table("Ports") \
             .insert([TEST_PORT_DATA,
                      TEST_PORT_DATA2]).run(db_con_var)
+        if rtdb.db("Brain").table_list().contains("UIW2").run(db_con_var):
+            rtdb.db("Brain").table("UIW2").delete().run(db_con_var)
+        else:
+            rtdb.db("Brain").table_create("UIW2").run(db_con_var)
+        rtdb.db("Brain").table("UIW2").insert(TEST_SAVED_COMMANDS).run(db_con_var)
 
         print("log: db Dummy data was inserted to Plugins.Plugin1 locally\n")
 

@@ -19,6 +19,8 @@ var id_reverse_map = {};
 var id_replication_map = {};
 var target_id_map = {};
 var current_plugin_commands = [];
+var current_saved_commands = {};
+var current_selected_plugin = "";
 var ws_map = {};
 var exec_int = 0;
 var job_select_table;
@@ -51,6 +53,15 @@ $(document).ready(function() {
     // syncScroll($("#w3TableScroll"), $("#w4TableScroll"));
     // syncScroll($("#w4TableScroll"), $("#w3TableScroll"));
 
+    //W2 Saver
+    close_command_loader();
+    $("#w2toss_button").click(close_command_loader);
+    $("#w2_up_check_button").click(save_command_by_name);
+    //$("#w2_dn_check_button").click(load_command_by_name);
+    $("#w2_persist_button").click(save_command_to_cloud);
+    $("#w2_loader_button").click(load_command_from_cloud);
+
+    //W3 Saver
     $("#w3_current_selector").hide();
     $("#w3_dn_check_button").hide();
     $("#w3_up_check_button").hide();
@@ -747,13 +758,14 @@ function get_commands_func(){
     // plugin name the user clicked
     var row_id = $(this)[0].parentElement.id.substring(10, $(this)[0].id.length);
     var plugin_name_var = $("#name_tag_id"+row_id+" a span")[1].innerText;
+    current_selected_plugin = plugin_name_var;
     var check_content_var = false;
     var quick_action_button;
     var argid = 0;
     if ($("#tooltipColumn").hasClass("fixed_tooltip")) {
         $("#tooltipColumn").removeClass("fixed_tooltip");
     }
-
+    close_command_loader();
     $.ajax({
         type: "GET",
         url: "/action/get_command_list/",
@@ -776,7 +788,7 @@ function get_commands_func(){
                 $(".theContentArgument").empty();
             }
 
-        	$(".theContent").empty();
+        	$("#theContent").empty();
 
             // display command(s) in w2
             if (data.length == 1){
@@ -793,12 +805,13 @@ function get_commands_func(){
             // $(".theContent")
             //     .append("<div/>")
             //     .attr({"style": "width:250px"});
-            $(".theContentHeader")
+            $("#theContentHeader")
                 .append("<h2 class='box-title'/>")
                 .text(plugin_name_var + "  command list");
 
             // User selects a command from W2
             $("a.acommandclass").click(function(){
+                $("#w2_persist_button").show();
                 //Compare user selection of command to query
                 for(var i2 = 0; i2 < data.length; i2++) {
                     if(data[i2].CommandName == $(this)[0].text){
@@ -845,7 +858,7 @@ function get_commands_func(){
                         .append($("<i/>").attr({"id": "add_command_to_job_id2" ,"class": "fa fa-tasks"}));
                 $("#commandIdBuilder").append(quick_action_button);
 
-
+                argid = 0;
                 for (var input_i = 0; input_i < current_command_template['Inputs'].length; input_i++){
                     add_intput_to_command_builder(argid, input_i, "Inputs");
                     argid = argid + 1;
@@ -875,6 +888,139 @@ function update_argument(event){
     current_command_template[assumed_input][cmditem]["Value"] = source.value;
     document.getElementById("JSON_Command_DATA").innerText = JSON.stringify(current_command_template);
 }
+
+function close_command_loader(){
+    $("#w2_builder").show();
+    $("#w2_builder_saved_command_list").hide();
+    $("#w2_current_selector").empty();
+    $("#w2_current_selector").hide();
+    $("#w2_up_check_button").hide();
+    $("#w2_dn_check_button").hide();
+    $("#w2toss_button").hide();
+    $("#w2_selector_loading").hide();
+    $("#w2_current_selector").hide();
+    $("#w2_namer").hide();
+    $(".tooltipHeader").empty();
+    $(".theContentArgument").empty();
+    $(".tooltipContent").empty();
+    $("#w2_save_feedback").hide();
+    $("#w2_persist_button").hide();
+    $("#w2_loader_button").hide();
+    if (current_selected_plugin.length > 0){
+        $("#w2_loader_button").show();
+    }
+}
+
+function load_command_from_cloud(){
+    close_command_loader();
+    $("#w2toss_button").show();
+    $("#w2_builder").hide();
+    $("#w2_loader_button").hide();
+    $("#w2_builder_saved_command_list").show();
+    $(".theContentArgument")
+        .append($("<div id='commandIdBuilder'/>"))
+        .append($("<div id='JSON_Command_DATA'/>")
+            .addClass("text-muted small"));
+    $("#savedContent").empty();
+    load_command_for_plugin_from_cloud(current_selected_plugin);
+}
+
+function render_command_to_json_display(event){
+    var source = event.target || event.srcElement;
+    var saved_cmd_name = source.innerHTML;
+    current_command_template = current_saved_commands[saved_cmd_name];
+    var quick_action_button = $("<a/>")
+                        .attr({"href": "#",
+                            "id": "add_command_to_job_id",
+                            "class":"btn btn-social-icon btn-linkedin btn-xs pull-right"})
+                        .append($("<i/>").attr({"id": "add_command_to_job_id2" ,"class": "fa fa-tasks"}));
+    $("#JSON_Command_DATA").text(JSON.stringify(current_saved_commands[saved_cmd_name]));
+    $("#commandIdBuilder").empty();
+    $("#commandIdBuilder").append(quick_action_button);
+    $("a#add_command_to_job_id").click(add_command_to_job_sc_button);
+}
+
+function render_saved_command_to_dom(saved_command_name){
+    var new_cmd = $("<a>")
+        .text(saved_command_name)
+        .attr({"href": "#"});
+    new_cmd.click(render_command_to_json_display);
+    $("#saved_cmd_list")
+        .append($("<li>")
+            .append(new_cmd));
+}
+
+function load_command_for_plugin_from_cloud(plugin_name_var){
+    $.ajax({
+        type: "GET",
+        url: "/action/get_saved_command_list/",
+        data: {"plugin_name": plugin_name_var},
+        datatype: 'json',
+        success: function (data) {
+            $("#savedContentHeader").text(plugin_name_var + " saved command list");
+            $("#savedContent")
+                .append($("<ol>")
+                    .attr({"id": "saved_cmd_list"}));
+            for(var i=0; i <  data.saved.length; i++){
+                current_saved_commands[data.saved[i].Name] = data.saved[i].Command;
+                render_saved_command_to_dom(data.saved[i].Name);
+            }
+
+        },
+    });
+}
+
+function save_command_to_cloud(){
+    //close_command_loader();
+    $("#w2_namer").show();
+    $("#w2_up_check_button").show();
+    $("#w2toss_button").show();
+}
+
+
+function save_command_by_name(event){
+    var source = event.target || event.srcElement;
+    var plugin_name = current_selected_plugin;
+    var user_completed_command = current_command_template;
+    var save_name = $("#w2_namer").val();
+    $("#w2_up_check_button i").removeClass("fa-check");
+    $("#w2_up_check_button i").addClass("fa-hourglass-end");
+    $("#w2_save_feedback").hide();
+    if (save_name.length > 0){
+        $.ajax({
+            type: "POST",
+            url: "/action/put_saved_command/",
+            data: {"PluginName": current_selected_plugin,
+                   "Command_js": JSON.stringify(user_completed_command),
+                   "Name": save_name
+            },
+            datatype: 'json',
+            success: function (data) {
+                $("#w2_up_check_button i").removeClass("fa-hourglass-end");
+                $("#w2_up_check_button i").addClass("fa-money");
+                if (data.errors > 0){
+                    $("#w2_save_feedback").text(data.first_error);
+                    $("#w2_save_feedback").show();
+                } else {
+                    var msg1 = "Saved command: ";
+                    var msg2 = save_name;
+                    var msg3 = plugin_name + " / ";
+                    notification_function(msg1, msg2, msg3);
+                }
+                setTimeout( function() {
+                    $("#w2_up_check_button i").removeClass("fa-money");
+                    $("#w2_up_check_button i").addClass("fa-check");
+                }, 2000);
+            },
+            error(data){
+                $("#w2_save_feedback").text(data);
+                $("#w2_save_feedback").show();
+            }
+        });
+    }
+
+}
+
 /*
 -----------------------------------------------------------------------------------------------------
 Functions down below are for w3

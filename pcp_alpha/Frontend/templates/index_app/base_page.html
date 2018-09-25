@@ -383,11 +383,24 @@ desired effect
 
             <!--W2 Body-->
             <div class="box-body w2TableWrapper contentTest" id="w2_body_box">
+                        <a id="w2_loader_button" class="btn btn-social-icon btn-linkedin btn-xs"><i id="w2_download_status" class="fa fa-cloud-download"></i></a>
+                        <a id="w2_persist_button" class="btn btn-social-icon btn-linkedin btn-xs"><i id="w2_upload_status" class="fa fa-cloud-upload"></i></a>
+                        <span id="w2_selector_loading" class="text-aqua fa fa-refresh fa-spin"></span>&nbsp
+                        <select id="w2_current_selector"></select>
+                        <input id="w2_namer">
+                        <a id="w2_up_check_button" class="btn btn-social-icon btn-linkedin btn-xs"><i class="fa fa-check"></i></a>
+                        <a id="w2_dn_check_button" class="btn btn-social-icon btn-linkedin btn-xs"><i class="fa fa-check"></i></a>
+                        <a id="w2toss_button" class="btn btn-social-icon btn-linkedin btn-xs"><i class="fa fa-remove"></i></a>
+                        <div id="w2_save_feedback" class="alert alert-danger"></div>
               <div class="row w2TableScroll" onscroll="fixed_tooltip()">
                 <!--Command List-->
-                <div class="col-xs-4">
-                  <div class="box-header theContentHeader"></div>
-                  <div class="tab-content theContent" style="width:250px"></div>
+                <div id="w2_builder" class="col-xs-4">
+                  <div id="theContentHeader" class="box-header theContentHeader"></div>
+                  <div id="theContent" class="tab-content theContent" style="width:250px"></div>
+                </div>
+                <div id="w2_builder_saved_command_list" class="col-xs-4">
+                  <div id="savedContentHeader" class="box-header"></div>
+                  <div id="savedContent" class="tab-content" style="width:250px"></div>
                 </div>
                 <!--/Command List-->
 
@@ -806,6 +819,7 @@ desired effect
 <!-- Project's custom js file -->
 <script src="{% static 'js_custom/pcp_custom_jquery.js' %}"></script>
 <script src="{% static 'js_custom/pcp_custom_plugin_list.js' %}"></script>
+<script src="{% static 'js_custom/pcp_custom_save_command.js' %}"></script>
 {% block extra_js %}{% endblock extra_js %}
 </body>
 </html>

@@ -286,6 +286,7 @@ def desired_plugin_state_brain(plugin_id_list, desired_state):
         return_objects.append(return_object)
     return return_objects
 
+
 def update_brain_stop_job(job_id):
     job_obj = brain.queries.get_job_by_id(job_id)
     success = True
@@ -297,3 +298,23 @@ def update_brain_stop_job(job_id):
         except InvalidStateTransition:
             success = {"errors": 1}
     return success
+
+
+def db_get_saved_command_list(plugin_name):
+    response = []
+    conn = connect()
+    if RBX.table_list().contains("UIW2").run(conn):
+        w2_filter = {"PluginName": plugin_name}
+        cur = RBX.table("UIW2").filter(w2_filter).order_by("Name").run(conn)
+        for saved in cur:
+            response.append(saved)
+    return response
+
+
+def db_put_saved_command(plugin_data):
+    conn = connect()
+    if not RBX.table_list().contains("UIW2").run(conn):
+        RBX.table_create("UIW2",
+                         primary_key="Name").run(conn)
+    response = RBX.table("UIW2").insert(plugin_data).run(conn)
+    return response
