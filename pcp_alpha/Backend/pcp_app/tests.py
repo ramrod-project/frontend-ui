@@ -700,4 +700,4 @@ class TestDataHandling(object):
                               post_data,
                               put_saved_command,
                               rf)
-        assert response.status_code == 302
+        assert response.status_code == 200
