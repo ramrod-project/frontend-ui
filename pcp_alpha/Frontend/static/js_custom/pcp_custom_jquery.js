@@ -207,7 +207,7 @@ $(document).ready(function() {
 
 });
 
-function debug_sidebar_msg_list(param_type, notification_msg){
+function debug_rightsidebar_msg_list(param_type, notification_msg){
     if(param_type === "danger"){
         debug_msg_checker++;
         $("#control-sidebar-settings-tab-log")
@@ -274,7 +274,7 @@ function notification_function(msg1, msg2, msg3 = "directed to Job #", param_typ
             '<a href="{3}" target="{4}" data-notify="url"></a>' +
         '</div>'
     });
-    debug_sidebar_msg_list(param_type, notification_msg);
+    debug_rightsidebar_msg_list(param_type, notification_msg);
 }
 
 function unselect_job_row(job_num, param2=1){
