@@ -68,6 +68,7 @@ def get_specific_command(w3_plugin_name, w3_command_name):
     command = brain.queries.get_plugin_command(w3_plugin_name, w3_command_name)
     return command
 
+
 def insert_brain_job_if_ok(response_refernece, param_item):
     plugin = param_item['JobTarget']['PluginName']
     command = param_item['JobCommand']['CommandName']
@@ -78,6 +79,7 @@ def insert_brain_job_if_ok(response_refernece, param_item):
         response_refernece["inserted"] += 1
     else:
         response_refernece["generated_keys"].append("invalid-job")
+
 
 def insert_brain_jobs_w3(w3_jobs):
     """
