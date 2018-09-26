@@ -69,6 +69,18 @@ def get_specific_command(w3_plugin_name, w3_command_name):
     return command
 
 
+def insert_brain_job_if_ok(response_refernece, param_item):
+    plugin = param_item['JobTarget']['PluginName']
+    command = param_item['JobCommand']['CommandName']
+    if brain.queries.plugin_exists(plugin) and brain.queries.get_plugin_command(plugin, command):
+        print("param_item:\n{}\n".format(param_item))
+        attempted = brain.queries.insert_jobs([param_item], verify_jobs=False)
+        response_refernece["generated_keys"].extend(attempted["generated_keys"])
+        response_refernece["inserted"] += 1
+    else:
+        response_refernece["generated_keys"].append("invalid-job")
+
+
 def insert_brain_jobs_w3(w3_jobs):
     """
     insert_brain_jobs_w3 function inserts data from W3 in Brain.Jobs table
@@ -83,10 +95,7 @@ def insert_brain_jobs_w3(w3_jobs):
             # fake an ID
             inserted["generated_keys"].append("invalid-job")
         else:
-            print("param_item:\n{}\n".format(param_item))
-            attempted = brain.queries.insert_jobs([param_item], verify_jobs=False)
-            inserted["generated_keys"].extend(attempted["generated_keys"])
-            inserted["inserted"] += 1
+            insert_brain_job_if_ok(inserted, param_item)
 
     print("log: db job from W3 was inserted to Brain.Jobs")
     print("inserted:\n{}\n".format(inserted))
