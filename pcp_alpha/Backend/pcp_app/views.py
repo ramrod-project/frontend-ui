@@ -12,7 +12,8 @@ from Backend.db_dir.custom_queries import get_specific_commands, insert_brain_jo
     get_specific_brain_output, get_brain_output_content, insert_new_target, get_brain_targets, \
     persist_jobs_state, load_jobs_state, upload_file_to_brain, del_file_upload_from_brain, \
     get_brain_files, get_brain_file, get_plugin_list_query, desired_plugin_state_brain, \
-    get_interface_list, update_plugin_to_brain, update_brain_stop_job, db_get_state_names
+    get_interface_list, update_plugin_to_brain, update_brain_stop_job, db_get_state_names, \
+    db_get_saved_command_list, db_put_saved_command
 
 from .forms import TargetForm, verify_plugin_data
 
@@ -445,6 +446,7 @@ def get_interfaces(request):
     return HttpResponse(json.dumps(interfaces),
                         content_type='application/json')
 
+
 def stop_job(request, job_id):
     """
 
@@ -454,5 +456,29 @@ def stop_job(request, job_id):
     response = {"errors": 0}
     if request.method == 'GET':
         response = update_brain_stop_job(job_id)
+    return HttpResponse(json.dumps(response),
+                        content_type='application/json')
+
+
+def get_saved_command_list(request):
+    response = {"errors": 0,
+                "saved": []}
+    if request.method == 'GET':
+        plugin_name = request.GET.get('plugin_name')
+        response['saved'] = db_get_saved_command_list(plugin_name)
+    return HttpResponse(json.dumps(response),
+                        content_type='application/json')
+
+
+@csrf_exempt
+def put_saved_command(request):
+    response = {"errors": 0,
+                "saved": []}
+    if request.method == "POST":
+        plugin_data = {"id": request.POST.get("Name"),
+                       "Name": request.POST.get("Name"),
+                       "PluginName": request.POST.get("PluginName"),
+                       "Command": json.loads(request.POST.get("Command_js"))}
+        response = db_put_saved_command(plugin_data)
     return HttpResponse(json.dumps(response),
                         content_type='application/json')

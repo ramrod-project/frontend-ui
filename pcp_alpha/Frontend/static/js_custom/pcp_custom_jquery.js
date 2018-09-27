@@ -19,6 +19,8 @@ var id_reverse_map = {};
 var id_replication_map = {};
 var target_id_map = {};
 var current_plugin_commands = [];
+var current_saved_commands = {};
+var current_selected_plugin = "";
 var ws_map = {};
 var exec_int = 0;
 var job_select_table;
@@ -51,6 +53,15 @@ $(document).ready(function() {
     // syncScroll($("#w3TableScroll"), $("#w4TableScroll"));
     // syncScroll($("#w4TableScroll"), $("#w3TableScroll"));
 
+    //W2 Saver
+    close_command_loader();
+    $("#w2toss_button").click(close_command_loader);
+    $("#w2_up_check_button").click(save_command_by_name);
+    //$("#w2_dn_check_button").click(load_command_by_name);
+    $("#w2_persist_button").click(save_command_to_cloud);
+    $("#w2_loader_button").click(load_command_from_cloud);
+
+    //W3 Saver
     $("#w3_current_selector").hide();
     $("#w3_dn_check_button").hide();
     $("#w3_up_check_button").hide();
@@ -195,7 +206,7 @@ $(document).ready(function() {
 
 });
 
-function notification_function(msg1, msg2, msg3 = "directed to Job #"){
+function notification_function(msg1, msg2, msg3 = "directed to Job #", param_type="info"){
     var notification_msg = msg1 + " " + msg3 + " " + msg2;
     $.notify({
         // options
@@ -208,7 +219,7 @@ function notification_function(msg1, msg2, msg3 = "directed to Job #"){
         // settings
         element: 'body',
         position: null,
-        type: 'info',
+        type: param_type,
         allow_dismiss: true,
 	    newest_on_top: false,
         showProgressbar: false,
@@ -443,9 +454,16 @@ function status_change_ws_callback(message) {
                 status_change_update_dom(job_dom_id, data.status);
                 if(data.status === "Done" || data.status === "Stopped"){
                     $("#stopjob"+job_dom_id).hide();
+                    $("#resetjob"+job_dom_id).hide();
                     $("#trashjob"+job_dom_id).show();
-                } else if (!(data.status in JOB_CAN_TERMINATE) || !(data.status in JOB_CAN_NOT_TERMINATE)){
+                }
+                else if(data.status === "Error"){
                     $("#stopjob"+job_dom_id).hide();
+                    $("#resetjob"+job_dom_id).show();
+                }
+                else if (!(data.status in JOB_CAN_TERMINATE) || !(data.status in JOB_CAN_NOT_TERMINATE)){
+                    $("#stopjob"+job_dom_id).hide();
+                    $("#resetjob"+job_dom_id).hide();
                 }
             }
         }
@@ -747,13 +765,14 @@ function get_commands_func(){
     // plugin name the user clicked
     var row_id = $(this)[0].parentElement.id.substring(10, $(this)[0].id.length);
     var plugin_name_var = $("#name_tag_id"+row_id+" a span")[1].innerText;
+    current_selected_plugin = plugin_name_var;
     var check_content_var = false;
     var quick_action_button;
     var argid = 0;
     if ($("#tooltipColumn").hasClass("fixed_tooltip")) {
         $("#tooltipColumn").removeClass("fixed_tooltip");
     }
-
+    close_command_loader();
     $.ajax({
         type: "GET",
         url: "/action/get_command_list/",
@@ -776,7 +795,7 @@ function get_commands_func(){
                 $(".theContentArgument").empty();
             }
 
-        	$(".theContent").empty();
+        	$("#theContent").empty();
 
             // display command(s) in w2
             if (data.length == 1){
@@ -793,12 +812,13 @@ function get_commands_func(){
             // $(".theContent")
             //     .append("<div/>")
             //     .attr({"style": "width:250px"});
-            $(".theContentHeader")
+            $("#theContentHeader")
                 .append("<h2 class='box-title'/>")
                 .text(plugin_name_var + "  command list");
 
             // User selects a command from W2
             $("a.acommandclass").click(function(){
+                $("#w2_persist_button").show();
                 //Compare user selection of command to query
                 for(var i2 = 0; i2 < data.length; i2++) {
                     if(data[i2].CommandName == $(this)[0].text){
@@ -845,7 +865,7 @@ function get_commands_func(){
                         .append($("<i/>").attr({"id": "add_command_to_job_id2" ,"class": "fa fa-tasks"}));
                 $("#commandIdBuilder").append(quick_action_button);
 
-
+                argid = 0;
                 for (var input_i = 0; input_i < current_command_template['Inputs'].length; input_i++){
                     add_intput_to_command_builder(argid, input_i, "Inputs");
                     argid = argid + 1;
@@ -875,6 +895,140 @@ function update_argument(event){
     current_command_template[assumed_input][cmditem]["Value"] = source.value;
     document.getElementById("JSON_Command_DATA").innerText = JSON.stringify(current_command_template);
 }
+
+function close_command_loader(){
+    $("#w2_builder").show();
+    $("#w2_builder_saved_command_list").hide();
+    $("#w2_current_selector").empty();
+    $("#w2_current_selector").hide();
+    $("#w2_up_check_button").hide();
+    $("#w2_dn_check_button").hide();
+    $("#w2toss_button").hide();
+    $("#w2_selector_loading").hide();
+    $("#w2_current_selector").hide();
+    $("#w2_namer").hide();
+    $(".tooltipHeader").empty();
+    $(".theContentArgument").empty();
+    $(".tooltipContent").empty();
+    $("#w2_save_feedback").hide();
+    $("#w2_persist_button").hide();
+    $("#w2_loader_button").hide();
+    if (current_selected_plugin.length > 0){
+        $("#w2_loader_button").show();
+    }
+}
+
+function load_command_from_cloud(){
+    close_command_loader();
+    $("#w2toss_button").show();
+    $("#w2_builder").hide();
+    $("#w2_loader_button").hide();
+    $("#w2_builder_saved_command_list").show();
+    $(".theContentArgument")
+        .append($("<div id='commandIdBuilder'/>"))
+        .append($("<div id='JSON_Command_DATA'/>")
+            .addClass("text-muted small"));
+    $("#savedContent").empty();
+    load_command_for_plugin_from_cloud(current_selected_plugin);
+}
+
+function render_command_to_json_display(event){
+    var source = event.target || event.srcElement;
+    var saved_cmd_name = source.innerHTML;
+    current_command_template = current_saved_commands[saved_cmd_name];
+    var quick_action_button = $("<a/>")
+                        .attr({"href": "#",
+                            "id": "add_command_to_job_id",
+                            "class":"btn btn-social-icon btn-linkedin btn-xs pull-right"})
+                        .append($("<i/>").attr({"id": "add_command_to_job_id2" ,"class": "fa fa-tasks"}));
+    $("#JSON_Command_DATA").text(JSON.stringify(current_saved_commands[saved_cmd_name]));
+    $("#commandIdBuilder").empty();
+    $("#commandIdBuilder").text(saved_cmd_name);
+    $("#commandIdBuilder").append(quick_action_button);
+    $("a#add_command_to_job_id").click(add_command_to_job_sc_button);
+}
+
+function render_saved_command_to_dom(saved_command_name){
+    var new_cmd = $("<a>")
+        .text(saved_command_name)
+        .attr({"href": "#"});
+    new_cmd.click(render_command_to_json_display);
+    $("#saved_cmd_list")
+        .append($("<li>")
+            .append(new_cmd));
+}
+
+function load_command_for_plugin_from_cloud(plugin_name_var){
+    $.ajax({
+        type: "GET",
+        url: "/action/get_saved_command_list/",
+        data: {"plugin_name": plugin_name_var},
+        datatype: 'json',
+        success: function (data) {
+            $("#savedContentHeader").text(plugin_name_var + " saved command list");
+            $("#savedContent")
+                .append($("<ol>")
+                    .attr({"id": "saved_cmd_list"}));
+            for(var i=0; i <  data.saved.length; i++){
+                current_saved_commands[data.saved[i].Name] = data.saved[i].Command;
+                render_saved_command_to_dom(data.saved[i].Name);
+            }
+
+        },
+    });
+}
+
+function save_command_to_cloud(){
+    //close_command_loader();
+    $("#w2_namer").show();
+    $("#w2_up_check_button").show();
+    $("#w2toss_button").show();
+}
+
+
+function save_command_by_name(event){
+    var source = event.target || event.srcElement;
+    var plugin_name = current_selected_plugin;
+    var user_completed_command = current_command_template;
+    var save_name = $("#w2_namer").val();
+    $("#w2_up_check_button i").removeClass("fa-check");
+    $("#w2_up_check_button i").addClass("fa-hourglass-end");
+    $("#w2_save_feedback").hide();
+    if (save_name.length > 0){
+        $.ajax({
+            type: "POST",
+            url: "/action/put_saved_command/",
+            data: {"PluginName": current_selected_plugin,
+                   "Command_js": JSON.stringify(user_completed_command),
+                   "Name": save_name
+            },
+            datatype: 'json',
+            success: function (data) {
+                $("#w2_up_check_button i").removeClass("fa-hourglass-end");
+                $("#w2_up_check_button i").addClass("fa-money");
+                if (data.errors > 0){
+                    $("#w2_save_feedback").text(data.first_error);
+                    $("#w2_save_feedback").show();
+                } else {
+                    var msg1 = "Saved command: ";
+                    var msg2 = save_name;
+                    var msg3 = plugin_name + " / ";
+                    notification_function(msg1, msg2, msg3);
+                }
+                setTimeout( function() {
+                    $("#w2_up_check_button i").removeClass("fa-money");
+                    $("#w2_up_check_button i").addClass("fa-check");
+                }, 2000);
+            },
+            error(data){
+                $("#w2_save_feedback").text(data);
+                $("#w2_save_feedback").show();
+            }
+        });
+    }
+
+}
+
 /*
 -----------------------------------------------------------------------------------------------------
 Functions down below are for w3
@@ -897,7 +1051,7 @@ function drop_target_into_job_row(job_row_id, target_js, target_js_str=""){
         $("#pluginid"+job_row_id)[0].innerText = target_js.PluginName+":"+target_js.Port;
         $("#pluginid"+job_row_id)
             .append($("<span/>")
-                .attr({"style": "display:none"})
+                .attr({"id": "jobTargetidJSON"+job_row_id, "style": "display:none"})
                 .append(target_js_str));
         var notification_msg1 = "Target " + target_js.PluginName,
             notification_msg2 = ""+job_row_id;
@@ -1366,10 +1520,58 @@ function stop_job_from_w3(event){
     });
 }
 
+function reset_job_from_w3(event){
+    var source = event.target,
+        job_item = get_number_from_id(source.id, "resetjob"),
+        parse_job_num = parseInt(job_item),
+        job_target_row_json = $("#jobTargetidJSON"+job_item),
+        job_command_row_json = $("#jobCommandidJSON"+job_item),
+        row_js = JSON.parse(job_target_row_json[0].textContent),
+        new_job_array_checker = [],
+        row_command_str_js = job_command_row_json[0].textContent,
+        row_command_js = JSON.parse(row_command_str_js);
+
+    if(inc === parse_job_num) {
+        add_new_job();
+        drop_target_into_job_row(inc, row_js, job_target_row_json[0].textContent);
+        drop_command_into_hole(row_command_js,
+                               row_command_str_js,
+                               $("tr td#commandid"+inc),
+                               inc);
+    }
+    // iterate through active sequence to see if target, and command columns are filled
+    else if (inc !== parse_job_num && inc > parse_job_num){
+        try{
+            sequences[active_sequence].forEach(function(value) {
+                if ($("tr td#pluginid" + value)[0].textContent === "" && $("tr td#commandid" + value)[0].textContent === "") {
+                    drop_target_into_job_row(""+value, row_js, job_target_row_json[0].textContent);
+                    drop_command_into_hole(row_command_js, row_command_str_js, $("tr td#commandid"+value), value);
+                    throw BreakException;
+                } else {
+                    new_job_array_checker.push(value);
+                }
+            });
+        } catch (e) {
+            if (e!==BreakException) throw e;
+        }
+    }
+    // if all job rows iterated and all filled, create  new job row
+    if (new_job_array_checker.length === sequences[active_sequence].size) {
+        add_new_job();
+        drop_target_into_job_row(inc, row_js, job_target_row_json[0].textContent);
+        drop_command_into_hole(row_command_js, row_command_str_js, $("tr td#commandid"+inc), "" + inc);
+    }
+}
+
 // Clear job content in w3
 function clear_new_jobs(){
     $(".thirdBoxContent").empty();
     $("#W4Rows").empty();
+    for (var member in id_reverse_map) {
+        clearInterval(start_timer_map[id_reverse_map[member]]);
+        clearInterval(countdown_map[id_reverse_map[member]]);
+        delete id_reverse_map[member];
+    }
     id_reverse_map = {};
     id_map = {};
     id_status_map = {};
@@ -1665,7 +1867,12 @@ function drop_command_to_multiple(ev) {
 }
 
 function drop_command_into_hole(command, command_json, command_td, row_id){
-   // console.log("drop_command_into_hole");
+   /*
+   command == object json
+   command_json == json string
+   command_td == destination job command column
+   row_id == destination job command row
+   */
     var current_status = $("#jobstatusid"+row_id+" span");
     var MAX_DISPLAY_ARGUMENT = 36;
     if (job_row_is_mutable(row_id)){
@@ -1673,6 +1880,7 @@ function drop_command_into_hole(command, command_json, command_td, row_id){
         var new_div = document.createElement("div");
         new_div.innerText = command_json;
         new_div.style.display = 'none';
+        new_div.setAttribute("id", "jobCommandidJSON"+row_id);
         var display_string = command['CommandName'] + " (";
         var args_str = "";
         var args_str_truncated = "";
@@ -1700,7 +1908,13 @@ function drop_command_into_hole(command, command_json, command_td, row_id){
         notification_msg2 = ""+row_id;
         notification_function(notification_msg1, notification_msg2);
     } else {
-        console.error("Can't drop command into job "+row_id+" (job already in Brain)");
+        // console.error("Can't drop command into job "+row_id+" (job already in Brain)");
+        // notification warning
+        var msg1 = "Can't drop command into job",
+            msg3 = row_id,
+            msg2 = "(job already in Brain)",
+            info_type = "danger";
+        notification_function(msg1, msg2, msg3, info_type);
     }
 }
 
@@ -1833,19 +2047,25 @@ function execute_sequence(){
                 job_id = job_ids[0];
                 sequence_start_time = parseInt(sequence_starttime_map[active_sequence]);
                 for (var index = 0; index < job_ids.length; ++index) {
+                    var dom_id = index+1;
                     if (job_ids[index] != "invalid-job"){
-                        var dom_id = index+1;
                         var job_row_var = $("#jobrow"+dom_id);
                         id_reverse_map[job_ids[index]] = dom_id;
                         id_map[index+1] = job_ids[index];
                         $("#trashjob"+dom_id)
                             .parent()
+                            // stop job
                             .append(
                                 $("<a>")
                                     .attr({"id": "stopjob"+dom_id})
                                     .addClass("fa fa-fire-extinguisher")
-                            );
+                            )
+                            // reset job
+                            .append($("<a>")
+                                    .attr({"id": "resetjob"+dom_id, "style": "display: none;"})
+                                    .addClass("fa fa-rotate-left"));
                         $("#stopjob"+dom_id).click(stop_job_from_w3);
+                        $("#resetjob"+dom_id).click(reset_job_from_w3);
                         if (ws_map['status'].readyState === ws_map['status'].OPEN) {
                             $("#updateid" + dom_id).empty();
                             final_countdown_function(sequence_start_time, dom_id);
@@ -1854,6 +2074,13 @@ function execute_sequence(){
                         }
                         unselect_job_row(dom_id, 0);
                         num_jobs_to_ex.push(index);
+                    } else {
+                        if ($("#jobstatusid"+dom_id + " span").text() == INITIAL_JOB_STATUS){
+                            id_status_map[dom_id] = "Error";
+                            status_change_update_dom(dom_id, "Error");
+                            notification_function("command ", "not appropriate for target", "", "danger");
+                            $("#updateid"+ dom_id).text("Command not appropriate for target")
+                        }
                     }
                 }
             },
@@ -1885,7 +2112,7 @@ function change_truncate_value(){
 
 function w4_output_collapse2(job_row){
     // W4 output un-collapse by w3
-    if ($("#updateid"+job_row)[0].children.length > 0) {
+    if ($("#updateid"+job_row)[0].children.length > 0 && $("#updatestatusid"+job_row)[0].innerText !== "Error") {
         var w4_output_var = $("#w4_output_collapsible_button"+job_row);
         w4_output_var[0].classList.toggle("active2");
         var w4_content = w4_output_var[0].nextSibling;
@@ -1915,7 +2142,6 @@ function w4_output_collapse(){
         w4_content.style.maxHeight = (w4_pre_tag.scrollHeight+35) + "px";
     }
 }
-
 
 function render_job_output_to_page(job_guid, data){
     var updateid = id_reverse_map[job_guid];
@@ -2109,6 +2335,10 @@ function terminal_opener(event) {
     var visible_commands = $("#third_box_content tr:visible");
     var visible_ouput = $("#W4Rows tr:visible");
     for (var i=0; i<visible_commands.length; i++){
+        var get_job_row_id = get_number_from_id(visible_commands[i].id, "jobrow");
+        if(job_row_is_mutable(get_job_row_id)){
+            continue;
+        }
         var command_td = $(visible_commands[i]).find("td")[3];
         var target_cells = $(visible_commands[i]).find("td span");
         var target = null;
@@ -2154,14 +2384,17 @@ function syncScroll(element1, element2) {
 }
 
 function anchor_w4_output(job_row){
-    setTimeout(function (){
-        var sequence_size = sequences[1].size;
-        if (job_row === sequence_size || job_row === (sequence_size - 1)) {
-            var element = document.getElementById("download_link_id"+job_row);
-            element.scrollIntoView({behavior: "smooth"});
-        } else {
-            var element = document.getElementById("updateid"+job_row);
-            element.scrollIntoView({behavior: "smooth"});
-        }
-    }, 500);
+    var current_status = $("#jobstatusid"+job_row+" span");
+    if (current_status[0].innerText !== "Error") {
+        setTimeout(function (){
+            var sequence_size = sequences[1].size;
+            if (job_row === sequence_size || job_row === (sequence_size - 1)) {
+                var element = document.getElementById("download_link_id"+job_row);
+                element.scrollIntoView({behavior: "smooth"});
+            } else {
+                var element = document.getElementById("updateid"+job_row);
+                element.scrollIntoView({behavior: "smooth"});
+            }
+        }, 500);
+    }
 }

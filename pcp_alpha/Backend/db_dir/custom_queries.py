@@ -6,7 +6,7 @@ from brain.static import STATUS_FIELD
 import brain
 
 from .project_db import connect, rtdb
-
+from .custom_state_change_queries import *
 RBX = rtdb.db("Brain")
 
 
@@ -69,6 +69,18 @@ def get_specific_command(w3_plugin_name, w3_command_name):
     return command
 
 
+def insert_brain_job_if_ok(response_refernece, param_item):
+    plugin = param_item['JobTarget']['PluginName']
+    command = param_item['JobCommand']['CommandName']
+    if brain.queries.plugin_exists(plugin) and brain.queries.get_plugin_command(plugin, command):
+        print("param_item:\n{}\n".format(param_item))
+        attempted = brain.queries.insert_jobs([param_item], verify_jobs=False)
+        response_refernece["generated_keys"].extend(attempted["generated_keys"])
+        response_refernece["inserted"] += 1
+    else:
+        response_refernece["generated_keys"].append("invalid-job")
+
+
 def insert_brain_jobs_w3(w3_jobs):
     """
     insert_brain_jobs_w3 function inserts data from W3 in Brain.Jobs table
@@ -83,10 +95,7 @@ def insert_brain_jobs_w3(w3_jobs):
             # fake an ID
             inserted["generated_keys"].append("invalid-job")
         else:
-            print("param_item:\n{}\n".format(param_item))
-            attempted = brain.queries.insert_jobs([param_item], verify_jobs=False)
-            inserted["generated_keys"].extend(attempted["generated_keys"])
-            inserted["inserted"] += 1
+            insert_brain_job_if_ok(inserted, param_item)
 
     print("log: db job from W3 was inserted to Brain.Jobs")
     print("inserted:\n{}\n".format(inserted))
@@ -245,55 +254,3 @@ def get_interface_list():
     return output
 
 
-def update_plugin_to_brain(plugin):
-    """
-
-    :param plugin:
-    :return:
-    """
-    response = None
-    if plugin["id"] == "NEW":
-        all_ports = "-".join(plugin['ExternalPorts']).replace("/", "")
-        del (plugin['id'])  # allow database to generate a new id
-        plugin["ServiceName"] = "{}-{}".format(plugin["Name"],
-                                               all_ports)
-        plugin["InternalPorts"] = plugin['ExternalPorts']
-        plugin["State"] = "Available"
-        plugin["ServiceID"] = "NEW"
-        response = brain.controller.plugins.create_plugin(plugin,
-                                                          verify_plugin=True)
-    else:
-        response = brain.controller.plugins.update_plugin(plugin,
-                                                          verify_plugin=True)
-    return response
-
-
-def desired_plugin_state_brain(plugin_id_list, desired_state):
-    """
-
-    :param plugin_id_list:
-    :param desired_state: 
-    :return: 
-    """
-    return_objects = list()
-    for plugin_id_item in plugin_id_list:
-        if desired_state == 'activate':
-            return_object = brain.controller.plugins.activate(plugin_id_item.strip('\"'))
-        elif desired_state == 'restart':
-            return_object = brain.controller.plugins.restart(plugin_id_item.strip('\"'))
-        else:
-            return_object = brain.controller.plugins.stop(plugin_id_item.strip('\"'))
-        return_objects.append(return_object)
-    return return_objects
-
-def update_brain_stop_job(job_id):
-    job_obj = brain.queries.get_job_by_id(job_id)
-    success = True
-    if job_obj:
-        try:
-            new_state = transition(job_obj[STATUS_FIELD], STOP)
-            success = brain.queries.update_job_status(job_id, new_state)
-            success = success["r.db('Brain').table('Jobs')"]
-        except InvalidStateTransition:
-            success = {"errors": 1}
-    return success
