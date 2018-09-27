@@ -1567,6 +1567,11 @@ function reset_job_from_w3(event){
 function clear_new_jobs(){
     $(".thirdBoxContent").empty();
     $("#W4Rows").empty();
+    for (var member in id_reverse_map) {
+        clearInterval(start_timer_map[id_reverse_map[member]]);
+        clearInterval(countdown_map[id_reverse_map[member]]);
+        delete id_reverse_map[member];
+    }
     id_reverse_map = {};
     id_map = {};
     id_status_map = {};
