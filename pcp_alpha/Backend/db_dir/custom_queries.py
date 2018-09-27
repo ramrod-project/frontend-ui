@@ -245,3 +245,16 @@ def get_interface_list():
     return output
 
 
+def get_log_data():
+    """
+
+    :return:
+    """
+    log_data_list = list()
+    conn = connect()
+    log_data = RBX.table("Logs").run(conn)
+    for log_item in log_data:
+        log_data_list.append(log_item)
+    return log_data_list
+
+
