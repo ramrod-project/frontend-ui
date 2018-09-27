@@ -8,14 +8,14 @@ from django.shortcuts import redirect
 from django.template import loader
 from django.views.decorators.csrf import csrf_exempt
 from ua_parser import user_agent_parser
-from Backend.db_dir.custom_queries import get_specific_commands, insert_brain_jobs_w3, \
-    get_specific_brain_output, get_brain_output_content, insert_new_target, get_brain_targets, \
+from pcp_alpha.Backend.db_dir.custom_queries import get_specific_commands, insert_brain_jobs_w3, \
+    get_specific_brain_output, get_brain_output_content, insert_new_target, \
     persist_jobs_state, load_jobs_state, upload_file_to_brain, del_file_upload_from_brain, \
     get_brain_files, get_brain_file, get_plugin_list_query, desired_plugin_state_brain, \
     get_interface_list, update_plugin_to_brain, update_brain_stop_job, db_get_state_names, \
     db_get_saved_command_list, db_put_saved_command
 
-from .forms import TargetForm, verify_plugin_data
+from .forms import TargetForm
 
 
 @csrf_exempt
@@ -39,6 +39,11 @@ def persist_job_state(request):
 
 
 def get_state_names(request):
+    """
+
+    :param request:
+    :return:
+    """
     if request.method == 'GET':
         return HttpResponse(json.dumps(db_get_state_names()),
                             content_type="application/json")
@@ -354,16 +359,6 @@ def get_file(request, file_id):
     return response
 
 
-def add_plugin(request):
-    """
-    pcp-507 task
-    Add plugin form
-    :param request:
-    :return:
-    """
-    pass
-
-
 def get_plugin_list(request):
     """
 
@@ -426,8 +421,8 @@ def desired_plugin_state_controller(request):
         desired_state = request.GET.get('desired_state')
         plugin_id_list = request.GET.get('plugin_id_list')
         response = HttpResponse(json.dumps(desired_plugin_state_brain(
-            plugin_id_list.split(','), desired_state)),
-            content_type='application/json')
+            plugin_id_list.split(','),
+            desired_state)), content_type='application/json')
         response.status_code = 200
         return response
 
@@ -461,6 +456,11 @@ def stop_job(request, job_id):
 
 
 def get_saved_command_list(request):
+    """
+
+    :param request:
+    :return:
+    """
     response = {"errors": 0,
                 "saved": []}
     if request.method == 'GET':
@@ -472,6 +472,11 @@ def get_saved_command_list(request):
 
 @csrf_exempt
 def put_saved_command(request):
+    """
+
+    :param request:
+    :return:
+    """
     response = {"errors": 0,
                 "saved": []}
     if request.method == "POST":
