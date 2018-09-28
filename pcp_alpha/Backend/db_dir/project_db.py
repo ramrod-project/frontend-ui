@@ -403,7 +403,7 @@ def confirm_plugin_db_info():
                      TEST_PORT_DATA2]).run(db_con_var)
         # Brain.Logs
         rtdb.db("Brain").table("Logs").delete().run(db_con_var)
-        rtdb.db("Brain").table("Logs").insert(gen_logs_data(200)).run(db_con_var)
+        rtdb.db("Brain").table("Logs").insert(gen_logs_data(50)).run(db_con_var)
         print("\nlog: db Dummy data was inserted to Brain.Logs locally\n")
 
         if rtdb.db("Brain").table_list().contains("UIW2").run(db_con_var):

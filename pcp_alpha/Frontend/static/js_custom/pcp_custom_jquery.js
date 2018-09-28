@@ -518,6 +518,8 @@ function logs_change_ws_callback(message){
     // if the user is on the home page?
     // If the user is on the logs page, it will
     // update the logs table.
+
+    // update the right side panel
 }
 
 // ** TESTING ONLY **
