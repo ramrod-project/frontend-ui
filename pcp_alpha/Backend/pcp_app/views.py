@@ -14,6 +14,7 @@ from pcp_alpha.Backend.db_dir.custom_queries import get_specific_commands, inser
     get_brain_files, get_brain_file, get_plugin_list_query, desired_plugin_state_brain, \
     get_interface_list, update_plugin_to_brain, update_brain_stop_job, db_get_state_names, \
     db_get_saved_command_list, db_put_saved_command
+from pcp_alpha.Backend import cc_helper_function_one
 
 from .forms import TargetForm
 
@@ -365,10 +366,11 @@ def get_plugin_list(request):
     :param request:
     :return:
     """
-    if request.method == "GET":
-        json_plugin_list_return = get_plugin_list_query()
-        return HttpResponse(json.dumps(json_plugin_list_return),
-                            content_type='application/json')
+    # if request.method == "GET":
+    #     json_plugin_list_return = get_plugin_list_query()
+    #     return HttpResponse(json.dumps(json_plugin_list_return),
+    #                         content_type='application/json')
+    return cc_helper_function_one(request, "GET", get_plugin_list_query)
 
 
 @csrf_exempt

@@ -13,26 +13,25 @@ def time_generator():
     return int(time.time()*1000) + randint(1, 10000)
 
 
-def datetime_random_generator():
-    return datetime.datetime(int(datetime.datetime.now().strftime("%Y")),
-                             randint(1, int(datetime.datetime.now().strftime("%m"))),
-                             randint(1, 30),
-                             randint(1, 25),
-                             randint(1, 60),
-                             randint(1, 60)
-                             ).strftime("%B %A %H:%M:%S")
+# def datetime_random_generator():
+#     return datetime.datetime(int(datetime.datetime.now().strftime("%Y")),
+#                              randint(1, int(datetime.datetime.now().strftime("%m"))),
+#                              randint(1, 30),
+#                              randint(1, 25),
+#                              randint(1, 60),
+#                              randint(1, 60)
+#                              ).strftime("%B %A %H:%M:%S")
 
 
-def rt_random_generator():
-    random_rt = "{} {} {} {} {} {}".format(int(datetime.datetime.now().strftime("%Y")),
-                                           randint(1, int(datetime.datetime.now().strftime("%m"))),
-                                           randint(1, 30),
-                                           randint(1, 25),
-                                           randint(1, 60),
-                                           randint(1, 60)
-                                           )
-    # return_rt = "".join(random_rt)
-    return random_rt
+# def rt_random_generator():
+#     random_rt = "{} {} {} {} {} {}".format(int(datetime.datetime.now().strftime("%Y")),
+#                                            randint(1, int(datetime.datetime.now().strftime("%m"))),
+#                                            randint(1, 30),
+#                                            randint(1, 25),
+#                                            randint(1, 60),
+#                                            randint(1, 60)
+#                                            )
+#     return random_rt
 
 
 def random_container():
