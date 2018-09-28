@@ -3,11 +3,11 @@
 This file was created for project pcp for logs using javascript.
 -----------------------------------------------------------------------------------------------------
 */
-var LOGS_DATATABLE = $('#logs_table').DataTable({
+var LOGS_DATA_TABLE = $('#logs_table').DataTable({
     searching: false
 });
 
-function update_logs_data_table(counter, param_ts, param_sh, param_sc, param_ll, param_lm){
+function update_logs_data_table(param_ts, param_sh, param_sc, param_ll, param_lm){
     var _dt = new Date(Number(param_ts));
     var display_date = $.datepicker.formatDate('mm/dd/yy ', _dt);
     display_date += ("0" + _dt.getHours()).slice(-2);
@@ -16,7 +16,17 @@ function update_logs_data_table(counter, param_ts, param_sh, param_sc, param_ll,
     display_date += ":";
     display_date += ("0" + _dt.getSeconds()).slice(-2);
 
-    LOGS_DATATABLE.row.add([display_date, param_sh, param_sc, param_ll, param_lm]).draw( false );
+    LOGS_DATA_TABLE.row.add([display_date, param_sh, param_sc, param_ll, param_lm]).draw( false );
+}
+
+function logs_change_ws_callback(message){
+    var log_data_js = JSON.parse(message.data);
+    update_logs_data_table(log_data_js.rt,
+                           log_data_js.shost,
+                           log_data_js.sourceServiceName,
+                           log_data_js.Severity,
+                           log_data_js.msg
+    );
 }
 
 
@@ -26,10 +36,8 @@ function get_data_logs(){
         url: "/logs_data/",
         datatype: 'json',
         success: function(data){
-            console.log("Success @ get_data_logs");
             for (var count=0; count<data.length; count++){
-                update_logs_data_table(count,
-                                       data[count].rt,
+                update_logs_data_table(data[count].rt,
                                        data[count].shost,
                                        data[count].sourceServiceName,
                                        data[count].Severity,
@@ -44,8 +52,5 @@ function get_data_logs(){
 
 
 $(document).ready(function() {
-    // var logs_datatable_var = $('#logs_table').DataTable({
-    //     searching: false
-    // });
     get_data_logs();
 } );

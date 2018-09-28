@@ -101,6 +101,7 @@ $(document).ready(function() {
     ws_map["files"] = open_websocket("files", files_change_ws_callback);
     ws_map['plugins'] = open_websocket("plugins", plugins_change_ws_callback);
     ws_map['telemetry'] = open_websocket("telemetry", telemetry_change_ws_callback);
+    ws_map['logs'] = open_websocket("logs", logs_change_ws_callback);
     start_ping_pong();
 
     $("#upload_files_need_refreshed").hide();
@@ -396,6 +397,7 @@ function ws_ping() {
         ws_map["status"] = open_websocket("status", status_change_ws_callback);
         ws_map["files"] = open_websocket("files", files_change_ws_callback);
         ws_map['plugins'] = open_websocket("plugins", plugins_change_ws_callback);
+        ws_map['logs'] = open_websocket("logs", logs_change_ws_callback);
         start_ping_pong();
     }, 5000);
 }
@@ -508,6 +510,14 @@ function telemetry_change_ws_callback(message){
         var data_js = JSON.parse(message.data);
         $("#target_row"+target_id_map[data_js.id])[0].title = recursive_pretty_print(data_js.Optional);
     }
+}
+
+function logs_change_ws_callback(message){
+    console.log(message);
+    // let the user know that logs have been updated
+    // if the user is on the home page?
+    // If the user is on the logs page, it will
+    // update the logs table.
 }
 
 // ** TESTING ONLY **
