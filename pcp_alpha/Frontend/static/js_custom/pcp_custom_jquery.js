@@ -1600,6 +1600,11 @@ function reset_job_from_w3(event){
 function clear_new_jobs(){
     $(".thirdBoxContent").empty();
     $("#W4Rows").empty();
+    for (var member in id_reverse_map) {
+        clearInterval(start_timer_map[id_reverse_map[member]]);
+        clearInterval(countdown_map[id_reverse_map[member]]);
+        delete id_reverse_map[member];
+    }
     id_reverse_map = {};
     id_map = {};
     id_status_map = {};
@@ -2075,8 +2080,8 @@ function execute_sequence(){
                 job_id = job_ids[0];
                 sequence_start_time = parseInt(sequence_starttime_map[active_sequence]);
                 for (var index = 0; index < job_ids.length; ++index) {
+                    var dom_id = index+1;
                     if (job_ids[index] != "invalid-job"){
-                        var dom_id = index+1;
                         var job_row_var = $("#jobrow"+dom_id);
                         id_reverse_map[job_ids[index]] = dom_id;
                         id_map[index+1] = job_ids[index];
@@ -2102,6 +2107,13 @@ function execute_sequence(){
                         }
                         unselect_job_row(dom_id, 0);
                         num_jobs_to_ex.push(index);
+                    } else {
+                        if ($("#jobstatusid"+dom_id + " span").text() == INITIAL_JOB_STATUS){
+                            id_status_map[dom_id] = "Error";
+                            status_change_update_dom(dom_id, "Error");
+                            notification_function("command ", "not appropriate for target", "", "danger");
+                            $("#updateid"+ dom_id).text("Command not appropriate for target")
+                        }
                     }
                 }
             },

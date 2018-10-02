@@ -8,7 +8,7 @@ from django.shortcuts import redirect
 from django.template import loader
 from django.views.decorators.csrf import csrf_exempt
 from ua_parser import user_agent_parser
-from pcp_alpha.Backend.db_dir.custom_queries import get_specific_commands, insert_brain_jobs_w3, \
+from Backend.db_dir.custom_queries import get_specific_commands, insert_brain_jobs_w3, \
     get_specific_brain_output, get_brain_output_content, insert_new_target, \
     persist_jobs_state, load_jobs_state, upload_file_to_brain, del_file_upload_from_brain, \
     get_brain_files, get_brain_file, get_plugin_list_query, desired_plugin_state_brain, \
@@ -423,8 +423,8 @@ def desired_plugin_state_controller(request):
         desired_state = request.GET.get('desired_state')
         plugin_id_list = request.GET.get('plugin_id_list')
         response = HttpResponse(json.dumps(desired_plugin_state_brain(
-            plugin_id_list.split(','),
-            desired_state)), content_type='application/json')
+            plugin_id_list.split(','), desired_state)),
+            content_type='application/json')
         response.status_code = 200
         return response
 
