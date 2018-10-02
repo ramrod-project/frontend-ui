@@ -36,6 +36,7 @@ var scroll_position = 0,
     scroll_checker = 0;
 var num_jobs_to_ex = [];
 var job_row_checker = 0;
+var debug_msg_checker = 0;
 
 var timer_on = 1,
     time_var,
@@ -100,6 +101,7 @@ $(document).ready(function() {
     ws_map["files"] = open_websocket("files", files_change_ws_callback);
     ws_map['plugins'] = open_websocket("plugins", plugins_change_ws_callback);
     ws_map['telemetry'] = open_websocket("telemetry", telemetry_change_ws_callback);
+    ws_map['logs'] = open_websocket("logs", logs_change_ws_callback);
     start_ping_pong();
 
     $("#upload_files_need_refreshed").hide();
@@ -206,6 +208,25 @@ $(document).ready(function() {
 
 });
 
+function debug_rightsidebar_msg_list(param_type, notification_msg){
+    if(param_type === "danger"){
+        debug_msg_checker++;
+        $("#control-sidebar-settings-tab-log")
+            .append($("<ul/>").attr({"class": "control-sidebar-menu"})
+                .append($("<li/>")
+                    .append($("<a/>")
+                        .attr({"href": "javascript:;"})
+                        .append($("<h4/>")
+                            .attr({"class": "control-sidebar-subheading"})
+                            .text("Message "+debug_msg_checker))
+                        .append($("<h4/>")
+                            .attr({"class": "control-sidebar-subheading"})
+                            .append($("<p/>")
+                                .text(notification_msg))))));
+
+    }
+}
+
 function notification_function(msg1, msg2, msg3 = "directed to Job #", param_type="info"){
     var notification_msg = msg1 + " " + msg3 + " " + msg2;
     $.notify({
@@ -254,6 +275,7 @@ function notification_function(msg1, msg2, msg3 = "directed to Job #", param_typ
             '<a href="{3}" target="{4}" data-notify="url"></a>' +
         '</div>'
     });
+    debug_rightsidebar_msg_list(param_type, notification_msg);
 }
 
 function unselect_job_row(job_num, param2=1){
@@ -375,6 +397,7 @@ function ws_ping() {
         ws_map["status"] = open_websocket("status", status_change_ws_callback);
         ws_map["files"] = open_websocket("files", files_change_ws_callback);
         ws_map['plugins'] = open_websocket("plugins", plugins_change_ws_callback);
+        ws_map['logs'] = open_websocket("logs", logs_change_ws_callback);
         start_ping_pong();
     }, 5000);
 }
@@ -487,6 +510,16 @@ function telemetry_change_ws_callback(message){
         var data_js = JSON.parse(message.data);
         $("#target_row"+target_id_map[data_js.id])[0].title = recursive_pretty_print(data_js.Optional);
     }
+}
+
+function logs_change_ws_callback(message){
+    console.log(message);
+    // let the user know that logs have been updated
+    // if the user is on the home page?
+    // If the user is on the logs page, it will
+    // update the logs table.
+
+    // update the right side panel
 }
 
 // ** TESTING ONLY **

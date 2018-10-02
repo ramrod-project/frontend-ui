@@ -9,6 +9,7 @@ from random import randint
 from brain import connect, r as rtdb
 from brain import check_dev_env, check_prod_env
 from . import plugins, _TEST_COMMANDS2
+from Backend.db_dir.custom_data import gen_logs_data
 
 from .custom_data import (
     location_generated_num,
@@ -400,6 +401,11 @@ def confirm_plugin_db_info():
         rtdb.db("Controller").table("Ports") \
             .insert([TEST_PORT_DATA,
                      TEST_PORT_DATA2]).run(db_con_var)
+        # Brain.Logs
+        rtdb.db("Brain").table("Logs").delete().run(db_con_var)
+        rtdb.db("Brain").table("Logs").insert(gen_logs_data(50)).run(db_con_var)
+        print("\nlog: db Dummy data was inserted to Brain.Logs locally\n")
+
         if rtdb.db("Brain").table_list().contains("UIW2").run(db_con_var):
             rtdb.db("Brain").table("UIW2").delete().run(db_con_var)
         else:

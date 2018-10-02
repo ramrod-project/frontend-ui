@@ -1,3 +1,4 @@
+"""Custom forms for adding and editing a target"""
 from django import forms
 from brain.checks import verify as brain_verify
 from brain.brain_pb2 import Plugin

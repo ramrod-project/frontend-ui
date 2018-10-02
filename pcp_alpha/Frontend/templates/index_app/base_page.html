@@ -230,6 +230,7 @@ desired effect
         <!-- Links on the sidebar -->
         <li class="active"><a href="/"><i class="fa fa-home text-aqua"></i> <span>Home Page</span></a></li>
         <li><a href="/new_target_form/" id="add_target_id"><i class="fa fa-laptop text-aqua"></i> <span>Add Target</span></a></li>
+        <li><a href="/logs_page/" id="leftside_log_id"><i class="fa fa-exclamation text-aqua"></i> <span>Logs</span></a></li>
         <!--<li><a href="#"><i class="fa fa-laptop text-aqua"></i> <span>Plugins</span></a></li>-->
         <!--<li class="treeview">-->
           <!--<a href="#"><i class="fa fa-fighter-jet text-aqua"></i> <span>Capabilities</span>-->
@@ -593,10 +594,11 @@ desired effect
     <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
       <li class="active"><a href="#control-sidebar-home-tab" data-toggle="tab"><i class="fa fa-dropbox"></i></a></li>
       <li><a href="#control-sidebar-settings-tab" data-toggle="tab"><i class="fa fa-plug"></i></a></li>
+      <li><a href="#control-sidebar-settings-tab-log" data-toggle="tab"><i class="fa fa-exclamation"></i></a></li>
     </ul>
     <!-- Tab panes -->
     <div class="tab-content">
-      <!-- Home tab content -->
+      <!--File Uploaded Sidebar -->
       <div class="tab-pane active" id="control-sidebar-home-tab">
         <h3 class="control-sidebar-heading">File Upload</h3>
         <ul class="control-sidebar-menu">
@@ -636,8 +638,8 @@ desired effect
         <!--<a id="bb_id" href="#">Testing for two</a>-->
         <!-- /.control-sidebar-menu -->
       </div>
-      <!-- /.tab-pane -->
-      <!-- Stats tab content -->
+      <!--/File Uploaded Sidebar -->
+      <!-- Plugins Sidebar -->
         <!--<span id="plugin_list_refresh" class="text-aqua fa fa-refresh"></span>-->
       <div class="tab-pane" id="control-sidebar-stats-tab">Stats Tab Content</div>
       <div class="tab-pane" id="control-sidebar-settings-tab">
@@ -669,7 +671,20 @@ desired effect
           <ul class="control-sidebar-menu plugin_list_display">
           </ul>
       </div>
-      <!-- /.tab-pane -->
+      <!-- /Plugins Sidebar -->
+      <!-- Log Sidebar -->
+      <div class="tab-pane" id="control-sidebar-settings-tab-log">
+        <h3 id="debug_sidebar_id" class="control-sidebar-heading">Recent Log Messages</h3>
+        <!--<ul class="control-sidebar-menu">-->
+          <!--<li>-->
+            <!--<a href="javascript:;">-->
+              <!--<h4 class="control-sidebar-subheading">Message 3</h4>-->
+              <!--<h4 class="control-sidebar-subheading"><p>Some information about this general settings option</p></h4>-->
+            <!--</a>-->
+          <!--</li>-->
+        <!--</ul>-->
+      </div>
+      <!-- /Log Sidebar -->
     </div>
   </aside>
   <!-- /.control-sidebar -->
