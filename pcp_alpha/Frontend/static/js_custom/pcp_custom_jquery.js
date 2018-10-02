@@ -208,22 +208,36 @@ $(document).ready(function() {
 
 });
 
-function debug_rightsidebar_msg_list(param_type, notification_msg){
+function sidebar_log_list(param_type, notification_msg){
+    var wrapper_height = $("#content-wrapper-id").height();
+    var log_header_height =- $("#debug_sidebar_id ").height();
+    var sub_height = $(".main-header").height() + $("#sidebar-tabs-id").height() +
+        log_header_height + $(".control-sidebar-heading").height(); // which is 120
+    var sidebar_max_height = wrapper_height - sub_height;
+    $("#div-sidebar-log-id").css({'max-height': ''+sidebar_max_height,
+        'overflow': 'auto',
+        'overflow-x': 'hidden'});
     if(param_type === "danger"){
         debug_msg_checker++;
-        $("#control-sidebar-settings-tab-log")
-            .append($("<ul/>").attr({"class": "control-sidebar-menu"})
-                .append($("<li/>")
-                    .append($("<a/>")
-                        .attr({"href": "javascript:;"})
-                        .append($("<h4/>")
-                            .attr({"class": "control-sidebar-subheading"})
-                            .text("Message "+debug_msg_checker))
-                        .append($("<h4/>")
-                            .attr({"class": "control-sidebar-subheading"})
-                            .append($("<p/>")
-                                .text(notification_msg))))));
+        $("#control-sidebar-menu-id")
+            .prepend($("<li/>")
+                .append($("<a/>")
+                    .attr({"href": "javascript:;"})
+                    .append($("<h4/>")
+                        .attr({"class": "control-sidebar-subheading"})
+                        .text("Message "+debug_msg_checker))
+                    .append($("<h4/>")
+                        .attr({"class": "control-sidebar-subheading"})
+                        .append($("<p/>")
+                            .html(notification_msg)))));
 
+    }
+    // if the length is more than 10 start deleting the first index
+    var log_list_len = $("#control-sidebar-menu-id.control-sidebar-menu li").length;
+    var log_list_id = $("#control-sidebar-menu-id");
+    if (log_list_len > 10){
+        // start deleting the older messages
+        log_list_id[0].children[10].remove();
     }
 }
 
@@ -275,7 +289,7 @@ function notification_function(msg1, msg2, msg3 = "directed to Job #", param_typ
             '<a href="{3}" target="{4}" data-notify="url"></a>' +
         '</div>'
     });
-    debug_rightsidebar_msg_list(param_type, notification_msg);
+    sidebar_log_list(param_type, notification_msg);
 }
 
 function unselect_job_row(job_num, param2=1){
@@ -513,13 +527,24 @@ function telemetry_change_ws_callback(message){
 }
 
 function logs_change_ws_callback(message){
-    console.log(message);
-    // let the user know that logs have been updated
-    // if the user is on the home page?
-    // If the user is on the logs page, it will
-    // update the logs table.
-
+    // console.log(message);
     // update the right side panel
+    var log_data_js = JSON.parse(message.data),
+        _dt = new Date(Number(log_data_js.rt)),
+        display_date = $.datepicker.formatDate('mm/dd/yy ', _dt),
+        bp = "<br/>";
+    display_date += ("0" + _dt.getHours()).slice(-2);
+    display_date += ":";
+    display_date += ("0" + _dt.getMinutes()).slice(-2);
+    display_date += ":";
+    display_date += ("0" + _dt.getSeconds()).slice(-2);
+
+    var log_msg = "RT: "+ display_date + bp +
+                  "SourceHost: "+ log_data_js.shot + bp +
+                  "SourceServiceName: "+ log_data_js.sourceServiceName + bp +
+                  "Severity: "+ log_data_js.Severity + bp +
+                  "Message: "+ log_data_js.msg;
+    sidebar_log_list("danger", log_msg);
 }
 
 // ** TESTING ONLY **

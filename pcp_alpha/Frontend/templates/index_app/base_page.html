@@ -251,7 +251,7 @@ desired effect
   </aside>
 
   <!-- Content Wrapper. Contains page content -->
-  <div class="content-wrapper">
+  <div class="content-wrapper" id="content-wrapper-id">
     <!-- Content Header (Page header) -->
     <!--<section class="content-header">-->
       <!--{% block breadcrumb %}-->
@@ -591,7 +591,7 @@ desired effect
   <!-- Control Sidebar -->
   <aside class="control-sidebar control-sidebar-dark">
     <!-- Create the tabs -->
-    <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
+    <ul class="nav nav-tabs nav-justified control-sidebar-tabs" id="sidebar-tabs-id">
       <li class="active"><a href="#control-sidebar-home-tab" data-toggle="tab"><i class="fa fa-dropbox"></i></a></li>
       <li><a href="#control-sidebar-settings-tab" data-toggle="tab"><i class="fa fa-plug"></i></a></li>
       <li><a href="#control-sidebar-settings-tab-log" data-toggle="tab"><i class="fa fa-exclamation"></i></a></li>
@@ -675,14 +675,16 @@ desired effect
       <!-- Log Sidebar -->
       <div class="tab-pane" id="control-sidebar-settings-tab-log">
         <h3 id="debug_sidebar_id" class="control-sidebar-heading">Recent Log Messages</h3>
-        <!--<ul class="control-sidebar-menu">-->
-          <!--<li>-->
-            <!--<a href="javascript:;">-->
-              <!--<h4 class="control-sidebar-subheading">Message 3</h4>-->
-              <!--<h4 class="control-sidebar-subheading"><p>Some information about this general settings option</p></h4>-->
-            <!--</a>-->
-          <!--</li>-->
-        <!--</ul>-->
+        <div id="div-sidebar-log-id">
+          <ul id="control-sidebar-menu-id" class="control-sidebar-menu">
+            <!--<li>-->
+              <!--<a href="javascript:;">-->
+                <!--<h4 class="control-sidebar-subheading">Message 3</h4>-->
+                <!--<h4 class="control-sidebar-subheading"><p>Some information about this general settings option</p></h4>-->
+              <!--</a>-->
+            <!--</li>-->
+          </ul>
+        </div>
       </div>
       <!-- /Log Sidebar -->
     </div>
