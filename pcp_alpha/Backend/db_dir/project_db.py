@@ -9,7 +9,7 @@ from random import randint
 from brain import connect, r as rtdb
 from brain import check_dev_env, check_prod_env
 from . import plugins, _TEST_COMMANDS2
-from pcp_alpha.Backend.db_dir.custom_data import gen_logs_data
+from Backend.db_dir.custom_data import gen_logs_data
 
 from .custom_data import (
     location_generated_num,

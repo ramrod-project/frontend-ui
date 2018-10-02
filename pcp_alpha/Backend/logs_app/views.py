@@ -2,8 +2,8 @@
 # import json
 from django.shortcuts import render
 # from django.http import HttpResponse
-from pcp_alpha.Backend.db_dir.custom_queries import get_log_data
-from pcp_alpha.Backend import cc_helper_function_one
+from Backend.db_dir.custom_queries import get_log_data
+from Backend.backend_help_func import cc_helper_function_one
 
 
 def render_log_page(request):
