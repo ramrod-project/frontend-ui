@@ -5,7 +5,7 @@ include =
     # plugins
     *pcp_app*
     *logs_app*
-    pcp_alpha/Backend/logs_app/*
+    *logs_app*
 
 omit =
     *Frontend*
