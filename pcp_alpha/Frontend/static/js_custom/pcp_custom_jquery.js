@@ -2084,7 +2084,7 @@ function execute_sequence(){
         var jobs_json = JSON.stringify(jobs);
         var sequence_start_time;
         $.ajax({
-            type: "GET",
+            type: "POST",
             url: "/action/get_w3_data/",
             data: {"jobs": jobs_json},
             datatype: 'json',
