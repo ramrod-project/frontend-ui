@@ -1,0 +1,49 @@
+{% extends "index_app/base_page.html" %}
+{% load static %}
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>PCP-Demo</title>
+</head>
+{% block content %}
+<div class="row">
+  <div class="col-md-12">
+    <div class="box box-default" id="logs_box">
+      <div class="box-header with-border">
+        <h2 class="box-title"><i class="fa fa-exclamation"></i> Logs Data Table</h2>
+      </div>
+      <div class="box-body" id="logs_box_body">
+        <div class="row">
+          <div class="col-sm-12">
+            <table id="logs_table" class="display" style="width:100%">
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Source Host</th>
+                  <th>Source Container</th>
+                  <th>Log Level</th>
+                  <th>Log Message</th>
+                </tr>
+              </thead>
+              <tbody id="logs_table_body">
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Source Host</th>
+                  <th>Source Container</th>
+                  <th>Log Level</th>
+                  <th>Log Message</th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="{% static 'js_custom/pcp_custom_logs.js' %}"></script>
+{% endblock extra_js %}

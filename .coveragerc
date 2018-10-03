@@ -4,6 +4,8 @@ include =
     *index_app*
     # plugins
     *pcp_app*
+    *logs_app*
+    *logs_app*
 
 omit =
     *Frontend*
