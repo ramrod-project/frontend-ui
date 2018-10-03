@@ -205,6 +205,7 @@ $(document).ready(function() {
             }
         }
     });
+    get_data_logs("home");
 
 });
 
@@ -527,24 +528,11 @@ function telemetry_change_ws_callback(message){
 }
 
 function logs_change_ws_callback(message){
-    // console.log(message);
     // update the right side panel
-    var log_data_js = JSON.parse(message.data),
-        _dt = new Date(Number(log_data_js.rt)),
-        display_date = $.datepicker.formatDate('mm/dd/yy ', _dt),
-        bp = "<br/>";
-    display_date += ("0" + _dt.getHours()).slice(-2);
-    display_date += ":";
-    display_date += ("0" + _dt.getMinutes()).slice(-2);
-    display_date += ":";
-    display_date += ("0" + _dt.getSeconds()).slice(-2);
-
-    var log_msg = "RT: "+ display_date + bp +
-                  "SourceHost: "+ log_data_js.shot + bp +
-                  "SourceServiceName: "+ log_data_js.sourceServiceName + bp +
-                  "Severity: "+ log_data_js.Severity + bp +
-                  "Message: "+ log_data_js.msg;
-    sidebar_log_list("danger", log_msg);
+    var message_data = message.data;
+    if(message_data.includes("{")){
+        sidebar_log_list("danger", sidebar_log_prep(message_data));
+    }
 }
 
 // ** TESTING ONLY **
