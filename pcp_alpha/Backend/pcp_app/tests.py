@@ -14,6 +14,7 @@ from pcp_alpha.Backend.db_dir.custom_data import location_generated_num
 from pcp_alpha.Backend.db_dir.project_db import rtdb
 from pcp_alpha.Backend.db_dir.custom_queries import get_specific_brain_targets, \
     get_specific_command, get_brain_targets
+from pcp_alpha.Backend.db_dir import plugins
 from pcp_alpha.Backend.pcp_app.views import get_commands_controller, \
     execute_sequence_controller, w4_output_controller, w4_output_controller_download, \
     new_target_form, val_target_form, val_edit_target_form, edit_target_form, \
@@ -687,18 +688,36 @@ class TestDataHandling(object):
 
     @staticmethod
     def test_desired_plugin_state_restart(rf):
-        url_var = "/desired_plugin_state/?plugin_id_list=%222-2-B%22&desired_state=restart"
+        desired_state = "restart"
+        url_var = "/desired_plugin_state/?plugin_id_list=%22{}%22&desired_state={}".format(plugins[4]['id'],
+                                                                                           desired_state)
         response = get_test(url_str=url_var, function_obj=desired_plugin_state_controller, rf=rf)
+        request_id = rf.get(url_var).GET['plugin_id_list']
+        assert "replaced" in str(response.content)
+        assert request_id.replace('"', '') == plugins[4]['id']
+        assert rf.get(url_var).GET['desired_state'] == desired_state
         assert response.status_code == 200
 
     @staticmethod
     def test_desired_plugin_state_stop(rf):
-        url_var = "/desired_plugin_state/?plugin_id_list=%222-2-B%22&desired_state=stop"
+        desired_state = "stop"
+        url_var = "/desired_plugin_state/?plugin_id_list=%22{}%22&desired_state={}".format(plugins[4]['id'],
+                                                                                           desired_state)
         response = get_test(url_str=url_var, function_obj=desired_plugin_state_controller, rf=rf)
+        request_id = rf.get(url_var).GET['plugin_id_list']
+        assert "replaced" in str(response.content)
+        assert request_id.replace('"', '') == plugins[4]['id']
+        assert rf.get(url_var).GET['desired_state'] == desired_state
         assert response.status_code == 200
 
     @staticmethod
     def test_desired_plugin_state_activate(rf):
-        url_var = "/desired_plugin_state/?plugin_id_list=%222-2-B%22&desired_state=activate"
+        desired_state = "activate"
+        url_var = "/desired_plugin_state/?plugin_id_list=%22{}%22&desired_state={}".format(plugins[4]['id'],
+                                                                                           desired_state)
         response = get_test(url_str=url_var, function_obj=desired_plugin_state_controller, rf=rf)
+        request_id = rf.get(url_var).GET['plugin_id_list']
+        assert "replaced" in str(response.content)
+        assert request_id.replace('"', '') == plugins[4]['id']
+        assert rf.get(url_var).GET['desired_state'] == desired_state
         assert response.status_code == 200
