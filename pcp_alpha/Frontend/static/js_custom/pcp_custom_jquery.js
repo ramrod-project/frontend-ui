@@ -36,6 +36,7 @@ var scroll_position = 0,
     scroll_checker = 0;
 var num_jobs_to_ex = [];
 var job_row_checker = 0;
+var debug_msg_checker = 0;
 
 var timer_on = 1,
     time_var,
@@ -100,6 +101,7 @@ $(document).ready(function() {
     ws_map["files"] = open_websocket("files", files_change_ws_callback);
     ws_map['plugins'] = open_websocket("plugins", plugins_change_ws_callback);
     ws_map['telemetry'] = open_websocket("telemetry", telemetry_change_ws_callback);
+    ws_map['logs'] = open_websocket("logs", logs_change_ws_callback);
     start_ping_pong();
 
     $("#upload_files_need_refreshed").hide();
@@ -203,8 +205,42 @@ $(document).ready(function() {
             }
         }
     });
+    get_data_logs("home");
 
 });
+
+function sidebar_log_list(param_type, notification_msg){
+    var wrapper_height = $("#content-wrapper-id").height();
+    var log_header_height =- $("#debug_sidebar_id ").height();
+    var sub_height = $(".main-header").height() + $("#sidebar-tabs-id").height() +
+        log_header_height + $(".control-sidebar-heading").height(); // which is 120
+    var sidebar_max_height = wrapper_height - sub_height;
+    $("#div-sidebar-log-id").css({'max-height': ''+sidebar_max_height,
+        'overflow': 'auto',
+        'overflow-x': 'hidden'});
+    if(param_type === "danger"){
+        debug_msg_checker++;
+        $("#control-sidebar-menu-id")
+            .prepend($("<li/>")
+                .append($("<a/>")
+                    .attr({"href": "javascript:;"})
+                    .append($("<h4/>")
+                        .attr({"class": "control-sidebar-subheading"})
+                        .text("Message "+debug_msg_checker))
+                    .append($("<h4/>")
+                        .attr({"class": "control-sidebar-subheading"})
+                        .append($("<p/>")
+                            .html(notification_msg)))));
+
+    }
+    // if the length is more than 10 start deleting the first index
+    var log_list_len = $("#control-sidebar-menu-id.control-sidebar-menu li").length;
+    var log_list_id = $("#control-sidebar-menu-id");
+    if (log_list_len > 10){
+        // start deleting the older messages
+        log_list_id[0].children[10].remove();
+    }
+}
 
 function notification_function(msg1, msg2, msg3 = "directed to Job #", param_type="info"){
     var notification_msg = msg1 + " " + msg3 + " " + msg2;
@@ -254,6 +290,7 @@ function notification_function(msg1, msg2, msg3 = "directed to Job #", param_typ
             '<a href="{3}" target="{4}" data-notify="url"></a>' +
         '</div>'
     });
+    sidebar_log_list(param_type, notification_msg);
 }
 
 function unselect_job_row(job_num, param2=1){
@@ -375,6 +412,7 @@ function ws_ping() {
         ws_map["status"] = open_websocket("status", status_change_ws_callback);
         ws_map["files"] = open_websocket("files", files_change_ws_callback);
         ws_map['plugins'] = open_websocket("plugins", plugins_change_ws_callback);
+        ws_map['logs'] = open_websocket("logs", logs_change_ws_callback);
         start_ping_pong();
     }, 5000);
 }
@@ -486,6 +524,14 @@ function telemetry_change_ws_callback(message){
     if (message.data.length > 0 && message.data[0] == "{"){
         var data_js = JSON.parse(message.data);
         $("#target_row"+target_id_map[data_js.id])[0].title = recursive_pretty_print(data_js.Optional);
+    }
+}
+
+function logs_change_ws_callback(message){
+    // update the right side panel
+    var message_data = message.data;
+    if(message_data.includes("{")){
+        sidebar_log_list("danger", sidebar_log_prep(message_data));
     }
 }
 
