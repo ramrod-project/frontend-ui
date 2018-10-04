@@ -19,7 +19,8 @@ from pcp_alpha.Backend.pcp_app.views import get_commands_controller, \
     new_target_form, val_target_form, val_edit_target_form, edit_target_form, \
     delete_specific_target, file_upload_list, persist_job_state, load_job_state, \
     del_file_from_list, get_file_listing, get_file, get_interfaces, stop_job, \
-    get_state_names, get_saved_command_list, put_saved_command
+    get_state_names, get_saved_command_list, put_saved_command, \
+    desired_plugin_state_controller
 
 ECHO_JOB_ID = str(uuid4())
 NOW = time()
@@ -682,4 +683,22 @@ class TestDataHandling(object):
                              post_data,
                              put_saved_command,
                              rf)
+        assert response.status_code == 200
+
+    @staticmethod
+    def test_desired_plugin_state_restart(rf):
+        url_var = "/desired_plugin_state/?plugin_id_list=%222-2-B%22&desired_state=restart"
+        response = get_test(url_str=url_var, function_obj=desired_plugin_state_controller, rf=rf)
+        assert response.status_code == 200
+
+    @staticmethod
+    def test_desired_plugin_state_stop(rf):
+        url_var = "/desired_plugin_state/?plugin_id_list=%222-2-B%22&desired_state=stop"
+        response = get_test(url_str=url_var, function_obj=desired_plugin_state_controller, rf=rf)
+        assert response.status_code == 200
+
+    @staticmethod
+    def test_desired_plugin_state_activate(rf):
+        url_var = "/desired_plugin_state/?plugin_id_list=%222-2-B%22&desired_state=activate"
+        response = get_test(url_str=url_var, function_obj=desired_plugin_state_controller, rf=rf)
         assert response.status_code == 200
