@@ -22,8 +22,4 @@ def log_data_controller(request):
     :param request:
     :return:
     """
-    # if request.method == "GET":
-    #     json_log_data = get_log_data()
-    #     return HttpResponse(json.dumps(json_log_data),
-    #                         content_type='application/json')
     return cc_helper_function_one(request, "GET", get_log_data)
