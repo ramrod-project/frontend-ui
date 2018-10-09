@@ -9,13 +9,14 @@ from django.template import loader
 from django.views.decorators.csrf import csrf_exempt
 from ua_parser import user_agent_parser
 from Backend.db_dir.custom_queries import get_specific_commands, insert_brain_jobs_w3, \
-    get_specific_brain_output, get_brain_output_content, insert_new_target, get_brain_targets, \
+    get_specific_brain_output, get_brain_output_content, insert_new_target, \
     persist_jobs_state, load_jobs_state, upload_file_to_brain, del_file_upload_from_brain, \
     get_brain_files, get_brain_file, get_plugin_list_query, desired_plugin_state_brain, \
     get_interface_list, update_plugin_to_brain, update_brain_stop_job, db_get_state_names, \
     db_get_saved_command_list, db_put_saved_command
+from Backend.backend_help_func import cc_helper_function_one
 
-from .forms import TargetForm, verify_plugin_data
+from .forms import TargetForm
 
 
 @csrf_exempt
@@ -39,6 +40,11 @@ def persist_job_state(request):
 
 
 def get_state_names(request):
+    """
+
+    :param request:
+    :return:
+    """
     if request.method == 'GET':
         return HttpResponse(json.dumps(db_get_state_names()),
                             content_type="application/json")
@@ -76,6 +82,7 @@ def get_commands_controller(request):
                         content_type="application/json")
 
 
+@csrf_exempt
 def execute_sequence_controller(request):
     """
     execute_sequence_controller function is called when the user clicks on
@@ -84,8 +91,8 @@ def execute_sequence_controller(request):
     :return: returns data from w3 to the ui
     """
     response = None
-    if request.method == 'GET':
-        jobs = json.loads(request.GET.get('jobs'))
+    if request.method == 'POST':
+        jobs = json.loads(request.POST.get('jobs'))
 
         # inserting to Brain.Jobs
         response = insert_brain_jobs_w3(jobs)
@@ -354,26 +361,17 @@ def get_file(request, file_id):
     return response
 
 
-def add_plugin(request):
-    """
-    pcp-507 task
-    Add plugin form
-    :param request:
-    :return:
-    """
-    pass
-
-
 def get_plugin_list(request):
     """
 
     :param request:
     :return:
     """
-    if request.method == "GET":
-        json_plugin_list_return = get_plugin_list_query()
-        return HttpResponse(json.dumps(json_plugin_list_return),
-                            content_type='application/json')
+    # if request.method == "GET":
+    #     json_plugin_list_return = get_plugin_list_query()
+    #     return HttpResponse(json.dumps(json_plugin_list_return),
+    #                         content_type='application/json')
+    return cc_helper_function_one(request, "GET", get_plugin_list_query)
 
 
 @csrf_exempt
@@ -461,6 +459,11 @@ def stop_job(request, job_id):
 
 
 def get_saved_command_list(request):
+    """
+
+    :param request:
+    :return:
+    """
     response = {"errors": 0,
                 "saved": []}
     if request.method == 'GET':
@@ -472,6 +475,11 @@ def get_saved_command_list(request):
 
 @csrf_exempt
 def put_saved_command(request):
+    """
+
+    :param request:
+    :return:
+    """
     response = {"errors": 0,
                 "saved": []}
     if request.method == "POST":
