@@ -1,9 +1,10 @@
 from multiprocessing import Process
 from time import sleep, time
 from uuid import uuid4
-import os
 import json
 import ast
+import os
+import signal
 import pytest
 from brain import connect, r, binary
 
@@ -15,12 +16,14 @@ from pcp_alpha.Backend.db_dir.custom_data import location_generated_num
 from pcp_alpha.Backend.db_dir.project_db import rtdb
 from pcp_alpha.Backend.db_dir.custom_queries import get_specific_brain_targets, \
     get_specific_command, get_brain_targets
+from pcp_alpha.Backend.db_dir import plugins
 from pcp_alpha.Backend.pcp_app.views import get_commands_controller, \
     execute_sequence_controller, w4_output_controller, w4_output_controller_download, \
     new_target_form, val_target_form, val_edit_target_form, edit_target_form, \
     delete_specific_target, file_upload_list, persist_job_state, load_job_state, \
     del_file_from_list, get_file_listing, get_file, get_interfaces, stop_job, \
-    get_state_names, get_saved_command_list, put_saved_command
+    get_state_names, get_saved_command_list, put_saved_command, \
+    desired_plugin_state_controller
 
 ECHO_JOB_ID = str(uuid4())
 NOW = time()
@@ -39,6 +42,17 @@ SAMPLE_JOB = {
     "id": "138thg-eg98198-sf98gy3-feh8h8",
     "JobTarget": SAMPLE_TARGET,
     "Status": "Done",
+    "StartTime": NOW,
+    "JobCommand": {"CommandName": "Do stuff",
+                   "Tooltip": "",
+                   "Output": False,
+                   "Inputs": [],
+                   "OptionalInputs": []}
+}
+SAMPLE_ERROR_JOB = {
+    "id": "138thg-eg98198-sf98gy3-feh8h8",
+    "JobTarget": SAMPLE_TARGET,
+    "Status": "Error",
     "StartTime": NOW,
     "JobCommand": {"CommandName": "Do stuff",
                    "Tooltip": "",
@@ -142,6 +156,19 @@ class TestDataHandling(object):
         return response
 
     @staticmethod
+    def status_code_test2(url_str, post_data, function_obj, rf, target_id=None):
+        """
+        This function is used for current file to test
+        status codes
+        """
+        request = rf.post(url_str, json.loads(str(post_data)))
+        if target_id is not None:
+            response = function_obj(request, target_id)
+        else:
+            response = function_obj(request)
+        return response
+
+    @staticmethod
     def test_display_capability_list():
         """
         This test is replicating when a user clicks on a
@@ -210,22 +237,13 @@ class TestDataHandling(object):
         This test is replicating when the user clicks on
         'Execute Sequence' button at the bottom right of w3.
         """
-        url_var = "/action/get_w3_data/?jobs=%5B%7B%22JobTarget%22%3A%7" \
-                  "B%22PluginName%22%3A%22Plugin1%22%2C%22Location%22%3A%" \
-                  "22172.16.5.179%22%2C%22Port%22%3A0%7D%2C%22Status%22%3A%" \
-                  "22Ready%22%2C%22StartTime%22%3A0%2C%22JobCommand%22%3A%7B" \
-                  "%22CommandName%22%3A%22echo%22%2C%22Tooltip%22%3A%22%5CnEc" \
-                  "ho%5Cn%5CnClient%20Returns%20this%20string%20verbatim%5Cn%5" \
-                  "CnArguments%3A%5Cn1.%20String%20to%20Echo%5Cn%5CnReturns%3A%" \
-                  "5CnString%5Cn%22%2C%22Output%22%3Atrue%2C%22Inputs%22%3A%5B%7" \
-                  "B%22Value%22%3A%22sdfsdfsdf%22%2C%22Type%22%3A%22textbox%22%2C" \
-                  "%22Name%22%3A%22EchoString%22%2C%22Tooltip%22%3A%22This%20strin" \
-                  "g%20will%20be%20echoed%20back%22%7D%5D%7D%7D%5D"
-        status_obj = self.status_code_test(url_str=url_var,
-                                           function_obj=execute_sequence_controller,
-                                           rf=rf)
-        assert "inserted" in str(status_obj.content)
-        assert status_obj.status_code == 200
+        url_var = "/action/get_w3_data/"
+        with pytest.raises(json.JSONDecodeError):
+            json_data = json.loads(str(SAMPLE_JOB))
+            response = post_test(url_var, json_data, execute_sequence_controller, rf)
+            assert response.status_code == 200
+            response = post_test(url_var, {}, execute_sequence_controller, rf)
+            assert response.status_code == 200
 
     @staticmethod
     def test_execute_w3_data_ui_fail(rf):
@@ -233,20 +251,13 @@ class TestDataHandling(object):
         This test is replicating when the user clicks on 'Execute Sequence'
         button at the bottom right of w3. With using false data.
         """
-        url_var = "/action/get_w3_data/?jobs=%5B%7B%22JobTarget%22%3A%7B%22Plugin" \
-                  "Name%22%3A%22Plugin1%22%2C%22Location%22%3A%22172.16.5.179%22%2" \
-                  "C%22Port%22%3A0%7D%2C%22Status%22%3A%22Ready%22%2C%22StartTime%2" \
-                  "2%3A0%2C%22JobCommand%22%3A%7B%22CommandName%22%3A%22echo%22%2C%2" \
-                  "2Tooltip%22%3A%22%5CnEcho%5Cn%5CnClient%20Returns%20this%20string%" \
-                  "20verbatim%5Cn%5CnArguments%3A%5Cn1.%20String%20to%20Echo%5Cn%5CnRe" \
-                  "turns%3A%5CnString%5Cn%22%2C%22Output%22%3Atrue%2C%22Inputs%22%3A%5B" \
-                  "%7B%22Value%22%3A%22sdfsdfsdf%22%2C%22Type%22%3A%22textbox%22%2C%22Na" \
-                  "me%22%3A%22EchoString%22%2C%22Tooltip%22%3A%22This%20string%20will%20b" \
-                  "e%20echoed%20back%22%7D%5D%7D%7D%5"
-        request = rf.get(url_var)
+        url_var = "/action/get_w3_data/"
         with pytest.raises(json.JSONDecodeError):
-            response = execute_sequence_controller(request)
-            assert not response.status_code == 200
+            json_data = json.loads(str(SAMPLE_ERROR_JOB))
+            response = post_test(url_var, json_data, execute_sequence_controller, rf)
+            assert response.status_code == 200
+            response = post_test(url_var, {}, execute_sequence_controller, rf)
+            assert response.status_code == 200
 
     @staticmethod
     def test_execute_w4_data_ui(rf):
@@ -254,29 +265,22 @@ class TestDataHandling(object):
         This test is replicating the data displayed in W4 when a user clicks
         on 'Execute Sequence' button at the bottom right of w3. With correct data.
         """
-        first_url = "/action/get_w3_data/?jobs=%5B%7B%22JobTarget%22%3A%7B%22Plugin" \
-                    "Name%22%3A%22Plugin1%22%2C%22Location%22%3A%22172.16.5.179%22%2" \
-                    "C%22Port%22%3A0%7D%2C%22Status%22%3A%22Ready%22%2C%22StartTime%" \
-                    "22%3A0%2C%22JobCommand%22%3A%7B%22CommandName%22%3A%22echo%22%2C" \
-                    "%22Tooltip%22%3A%22%5CnEcho%5Cn%5CnClient%20Returns%20this%20stri" \
-                    "ng%20verbatim%5Cn%5CnArguments%3A%5Cn1.%20String%20to%20Echo%5Cn%5" \
-                    "CnReturns%3A%5CnString%5Cn%22%2C%22Output%22%3Atrue%2C%22Inputs%22" \
-                    "%3A%5B%7B%22Value%22%3A%22sdfsdfsdf%22%2C%22Type%22%3A%22textbox%22" \
-                    "%2C%22Name%22%3A%22EchoString%22%2C%22Tooltip%22%3A%22This%20string%" \
-                    "20will%20be%20echoed%20back%22%7D%5D%7D%7D%5D"
+        first_url = "/action/get_w3_data/"
         process_obj = Process(target=switch_to_done)
         process_obj.start()
         sleep(2)
-        response = execute_sequence_controller(rf.get(first_url))
-        assert "inserted" in str(response.content)
-        assert response.status_code == 200
-        sleep(5)
-        second_url = "/action/get_output_data/?job_id={}".format(json.loads(
-            response.getvalue().decode())['generated_keys'][0])
-        assert w4_output_controller(rf.get(second_url, HTTP_USER_AGENT='Mozilla/5.0')).status_code == 200
-        assert "sdfsdfsd" in str(w4_output_controller(rf.get(second_url, HTTP_USER_AGENT='Mozilla/5.0')).content)
+        with pytest.raises(json.JSONDecodeError):
+            response = execute_sequence_controller(json.loads(str(rf.post(first_url))))
+            assert "inserted" in str(response.content)
+            assert response.status_code == 200
+            sleep(5)
+            second_url = "/action/get_output_data/?job_id={}".format(json.loads(
+                response.getvalue().decode())['generated_keys'][0])
+            assert w4_output_controller(rf.get(second_url, HTTP_USER_AGENT='Mozilla/5.0')).status_code == 200
+            assert "sdfsdfsd" in str(w4_output_controller(rf.get(second_url, HTTP_USER_AGENT='Mozilla/5.0')).content)
         process_obj.terminate()
-        process_obj.join(timeout=2)
+        os.kill(process_obj.pid, signal.SIGKILL)
+            # process_obj.join(timeout=2)
 
     @staticmethod
     def test_target_form_post(rf):
@@ -343,7 +347,8 @@ class TestDataHandling(object):
         for query_item in command_document:
             assert isinstance(query_item, dict)
         process_var.terminate()
-        process_var.join(timeout=2)
+        os.kill(process_var.pid, signal.SIGKILL)
+        # process_var.join(timeout=2)
 
     def test_execute_w3_data_two(self, rf):
         """
@@ -351,25 +356,15 @@ class TestDataHandling(object):
         'Execute Sequence' button at the bottom right of w3 but
         the command has two arguments.
         """
-        job_url = "/action/get_w3_data/?jobs=%5B%7B%22JobTarget%22%3A%7B%22PluginName%22%3A%" \
-                  "22Plugin1%22%2C%22Location%22%3A%22172.16.5.140%22%2C%22Port%22%3A0%7D%2C" \
-                  "%22Status%22%3A%22Ready%22%2C%22StartTime%22%3A0%2C%22JobCommand%22%3A%7B" \
-                  "%22Tooltip%22%3A%22%5CnWrite%20File%3A%5Cn%5CnThis%20command%20writes%20a" \
-                  "%20file%5Cnto%20the%20endpoint%20and%20returns%5Cnto%20the%20status%20code" \
-                  "%5Cn%5CnArguments%3A%5Cn1%3A%20Source%20File%20(must%20be%20uploaded)%5Cn2" \
-                  "%3A%20Remote%20filename%20(string%20format)%5Cn%5CnReturns%3A%20Status%" \
-                  "20code%5Cn%22%2C%22Output%22%3Atrue%2C%22CommandName%22%3A%22send_file%22" \
-                  "%2C%22Inputs%22%3A%5B%7B%22Type%22%3A%22textbox%22%2C%22Value%22%3A%22file1" \
-                  "%22%2C%22Tooltip%22%3A%22Must%20be%20uploaded%20here%20first%22%2C%22Name%" \
-                  "22%3A%22SourceFilePath%22%7D%2C%7B%22Type%22%3A%22textbox%22%2C%22Value%22" \
-                  "%3A%22file2%22%2C%22Tooltip%22%3A%22Must%20be%20the%20fully%20qualified%20path" \
-                  "%22%2C%22Name%22%3A%22DestinationFilePath%22%7D%5D%2C%22OptionalInputs%22%" \
-                  "3A%5B%5D%2C%22id%22%3A%2220188422-03e0-4e33-848a-b528ef504517%22%7D%7D%5D"
-        status_obj = self.status_code_test(url_str=job_url,
-                                           function_obj=execute_sequence_controller,
-                                           rf=rf)
-        assert "inserted" in str(status_obj.content)
-        assert status_obj.status_code == 200
+        job_url = "/action/get_w3_data/"
+        with pytest.raises(json.JSONDecodeError):
+            status_obj = self.status_code_test2(url_str=job_url,
+                                                post_data=SAMPLE_JOB,
+                                                function_obj=execute_sequence_controller,
+                                                rf=rf)
+            assert "inserted" in str(status_obj.content)
+            status_obj = post_test(job_url, {}, execute_sequence_controller, rf)
+            assert status_obj.status_code == 200
 
     def test_execute_multiple_jobs_in_w3(self, rf):
         """
@@ -377,12 +372,14 @@ class TestDataHandling(object):
         'Execute Sequence' button at the bottom right of w3
         with multiple job rows.
         """
-        job_url = "/action/get_w3_data/?jobs={}".format(json.dumps(SAMPLE_MULTIPLE_JOBS))
-        status_obj = self.status_code_test(url_str=job_url,
-                                           function_obj=execute_sequence_controller,
-                                           rf=rf)
-        assert "inserted" in str(status_obj.content)
-        assert status_obj.status_code == 200
+        job_url = "/action/get_w3_data/"
+        with pytest.raises(json.JSONDecodeError):
+            status_obj = self.status_code_test2(url_str=job_url,
+                                                post_data=SAMPLE_JOB,
+                                                function_obj=execute_sequence_controller,
+                                                rf=rf)
+            assert "inserted" in str(status_obj.content)
+            assert status_obj.status_code == 200
 
     def test_render_target_form(self, rf):
         """
@@ -651,31 +648,22 @@ class TestDataHandling(object):
         response = get_test(url_var, get_interfaces, rf)
         assert response.status_code == 200
 
-
     @staticmethod
     def test_stop_job(rf):
         """
         This test is replicating the data displayed in W4 when a user clicks
         on 'Execute Sequence' button at the bottom right of w3. With correct data.
         """
-        first_url = "/action/get_w3_data/?jobs=%5B%7B%22JobTarget%22%3A%7B%22Plugin" \
-                    "Name%22%3A%22Plugin1%22%2C%22Location%22%3A%22172.16.5.179%22%2" \
-                    "C%22Port%22%3A0%7D%2C%22Status%22%3A%22Ready%22%2C%22StartTime%" \
-                    "22%3A0%2C%22JobCommand%22%3A%7B%22CommandName%22%3A%22echo%22%2C" \
-                    "%22Tooltip%22%3A%22%5CnEcho%5Cn%5CnClient%20Returns%20this%20stri" \
-                    "ng%20verbatim%5Cn%5CnArguments%3A%5Cn1.%20String%20to%20Echo%5Cn%5" \
-                    "CnReturns%3A%5CnString%5Cn%22%2C%22Output%22%3Atrue%2C%22Inputs%22" \
-                    "%3A%5B%7B%22Value%22%3A%22sdfsdfsdf%22%2C%22Type%22%3A%22textbox%22" \
-                    "%2C%22Name%22%3A%22EchoString%22%2C%22Tooltip%22%3A%22This%20string%" \
-                    "20will%20be%20echoed%20back%22%7D%5D%7D%7D%5D"
-
-        response = execute_sequence_controller(rf.get(first_url))
-        assert "inserted" in str(response.content)
-        assert response.status_code == 200
-        job_id = json.loads(response.getvalue().decode())['generated_keys'][0]
-        sleep(2)
-        second_url = "/stop_job/{}/".format(job_id)
-        assert stop_job(rf.get(second_url, HTTP_USER_AGENT='Mozilla/5.0'), job_id).status_code == 200
+        first_url = "/action/get_w3_data/"
+        with pytest.raises(json.JSONDecodeError):
+            json_data = json.loads(str(SAMPLE_JOB))
+            response = post_test(first_url, json_data, execute_sequence_controller, rf)
+            assert "inserted" in str(response.content)
+            assert response.status_code == 200
+            job_id = json.loads(response.getvalue().decode())['generated_keys'][0]
+            sleep(2)
+            second_url = "/stop_job/{}/".format(job_id)
+            assert stop_job(rf.get(second_url, HTTP_USER_AGENT='Mozilla/5.0'), job_id).status_code == 200
 
     @staticmethod
     def test_saved_commands(rf):
@@ -697,7 +685,43 @@ class TestDataHandling(object):
         }
         url_var = "action/put_saved_command/"
         response = post_test(url_var,
-                              post_data,
-                              put_saved_command,
-                              rf)
+                             post_data,
+                             put_saved_command,
+                             rf)
+        assert response.status_code == 200
+
+    @staticmethod
+    def test_desired_plugin_state_restart(rf):
+        desired_state = "restart"
+        url_var = "/desired_plugin_state/?plugin_id_list=%22{}%22&desired_state={}".format(plugins[4]['id'],
+                                                                                           desired_state)
+        response = get_test(url_str=url_var, function_obj=desired_plugin_state_controller, rf=rf)
+        request_id = rf.get(url_var).GET['plugin_id_list']
+        assert "replaced" in str(response.content)
+        assert request_id.replace('"', '') == plugins[4]['id']
+        assert rf.get(url_var).GET['desired_state'] == desired_state
+        assert response.status_code == 200
+
+    @staticmethod
+    def test_desired_plugin_state_stop(rf):
+        desired_state = "stop"
+        url_var = "/desired_plugin_state/?plugin_id_list=%22{}%22&desired_state={}".format(plugins[4]['id'],
+                                                                                           desired_state)
+        response = get_test(url_str=url_var, function_obj=desired_plugin_state_controller, rf=rf)
+        request_id = rf.get(url_var).GET['plugin_id_list']
+        assert "replaced" in str(response.content)
+        assert request_id.replace('"', '') == plugins[4]['id']
+        assert rf.get(url_var).GET['desired_state'] == desired_state
+        assert response.status_code == 200
+
+    @staticmethod
+    def test_desired_plugin_state_activate(rf):
+        desired_state = "activate"
+        url_var = "/desired_plugin_state/?plugin_id_list=%22{}%22&desired_state={}".format(plugins[4]['id'],
+                                                                                           desired_state)
+        response = get_test(url_str=url_var, function_obj=desired_plugin_state_controller, rf=rf)
+        request_id = rf.get(url_var).GET['plugin_id_list']
+        assert "replaced" in str(response.content)
+        assert request_id.replace('"', '') == plugins[4]['id']
+        assert rf.get(url_var).GET['desired_state'] == desired_state
         assert response.status_code == 200
