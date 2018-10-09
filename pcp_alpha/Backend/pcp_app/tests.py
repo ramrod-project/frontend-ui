@@ -3,6 +3,8 @@ from time import sleep, time
 from uuid import uuid4
 import json
 import ast
+import os
+import signal
 import pytest
 from brain import connect, r, binary
 
@@ -276,12 +278,9 @@ class TestDataHandling(object):
                 response.getvalue().decode())['generated_keys'][0])
             assert w4_output_controller(rf.get(second_url, HTTP_USER_AGENT='Mozilla/5.0')).status_code == 200
             assert "sdfsdfsd" in str(w4_output_controller(rf.get(second_url, HTTP_USER_AGENT='Mozilla/5.0')).content)
-            try:
-                while True:
-                    process_obj.terminate()
-            except:
-                pass
-            process_obj.join(timeout=2)
+        process_obj.terminate()
+        os.kill(process_obj.pid, signal.SIGKILL)
+            # process_obj.join(timeout=2)
 
     @staticmethod
     def test_target_form_post(rf):
@@ -347,12 +346,9 @@ class TestDataHandling(object):
             "JobCommand": {'id': ECHO_JOB_ID}}).run(connect())
         for query_item in command_document:
             assert isinstance(query_item, dict)
-        try:
-            while True:
-                process_var.terminate()
-        except:
-            pass
-        process_var.join(timeout=2)
+        process_var.terminate()
+        os.kill(process_var.pid, signal.SIGKILL)
+        # process_var.join(timeout=2)
 
     def test_execute_w3_data_two(self, rf):
         """
