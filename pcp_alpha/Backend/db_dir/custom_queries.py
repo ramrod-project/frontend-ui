@@ -75,7 +75,8 @@ def insert_brain_job_if_ok(response_refernece, param_item):
     if brain.queries.plugin_exists(plugin) and brain.queries.get_plugin_command(plugin, command):
         print("param_item:\n{}\n".format(param_item))
         attempted = brain.queries.insert_jobs([param_item], verify_jobs=False)
-        response_refernece["generated_keys"].extend(attempted["generated_keys"])
+        new_keys = attempted["generated_keys"]
+        response_refernece["generated_keys"].extend(new_keys)
         response_refernece["inserted"] += 1
     else:
         response_refernece["generated_keys"].append("invalid-job")

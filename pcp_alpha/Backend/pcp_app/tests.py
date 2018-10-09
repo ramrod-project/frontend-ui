@@ -8,6 +8,8 @@ import signal
 import pytest
 from brain import connect, r, binary
 
+from copy import deepcopy
+
 from test.test_w4_switch_to_done import switch_to_done
 # from rethinkdb.errors import ReqlOpFailedError
 from pcp_alpha.Backend.Backend_tests.helper_test_functions import \
@@ -43,7 +45,7 @@ SAMPLE_JOB = {
     "JobTarget": SAMPLE_TARGET,
     "Status": "Done",
     "StartTime": NOW,
-    "JobCommand": {"CommandName": "Do stuff",
+    "JobCommand": {"CommandName": "echo",
                    "Tooltip": "",
                    "Output": False,
                    "Inputs": [],
@@ -238,12 +240,13 @@ class TestDataHandling(object):
         'Execute Sequence' button at the bottom right of w3.
         """
         url_var = "/action/get_w3_data/"
-        with pytest.raises(json.JSONDecodeError):
-            json_data = json.loads(str(SAMPLE_JOB))
-            response = post_test(url_var, json_data, execute_sequence_controller, rf)
-            assert response.status_code == 200
-            response = post_test(url_var, {}, execute_sequence_controller, rf)
-            assert response.status_code == 200
+        # with pytest.raises(json.JSONDecodeError):
+        my_job = deepcopy(SAMPLE_JOB)
+        del my_job["id"]
+        jobs_json = json.dumps([my_job])
+        json_data = {"jobs": jobs_json}
+        response = post_test(url_var, json_data, execute_sequence_controller, rf)
+        assert response.status_code == 200
 
     @staticmethod
     def test_execute_w3_data_ui_fail(rf):
