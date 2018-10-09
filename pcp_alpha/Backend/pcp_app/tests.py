@@ -230,54 +230,58 @@ class TestDataHandling(object):
         ]).run(connect())
         assert inserted['inserted'] == 1
 
-    # def test_execute_w3_data_ui(self, rf):
-    #     """
-    #     This test is replicating when the user clicks on
-    #     'Execute Sequence' button at the bottom right of w3.
-    #     """
-    #     url_var = "/action/get_w3_data/"
-    #     with pytest.raises(json.JSONDecodeError):
-    #         json_data = json.loads(str(SAMPLE_JOB))
-    #         response = post_test(url_var, json_data, execute_sequence_controller, rf)
-    #         assert response.status_code == 200
-    #         response = post_test(url_var, {}, execute_sequence_controller, rf)
-    #         assert response.status_code == 200
+    def test_execute_w3_data_ui(self, rf):
+        """
+        This test is replicating when the user clicks on
+        'Execute Sequence' button at the bottom right of w3.
+        """
+        url_var = "/action/get_w3_data/"
+        with pytest.raises(json.JSONDecodeError):
+            json_data = json.loads(str(SAMPLE_JOB))
+            response = post_test(url_var, json_data, execute_sequence_controller, rf)
+            assert response.status_code == 200
+            response = post_test(url_var, {}, execute_sequence_controller, rf)
+            assert response.status_code == 200
 
-    # @staticmethod
-    # def test_execute_w3_data_ui_fail(rf):
-    #     """
-    #     This test is replicating when the user clicks on 'Execute Sequence'
-    #     button at the bottom right of w3. With using false data.
-    #     """
-    #     url_var = "/action/get_w3_data/"
-    #     with pytest.raises(json.JSONDecodeError):
-    #         json_data = json.loads(str(SAMPLE_ERROR_JOB))
-    #         response = post_test(url_var, json_data, execute_sequence_controller, rf)
-    #         assert response.status_code == 200
-    #         response = post_test(url_var, {}, execute_sequence_controller, rf)
-    #         assert response.status_code == 200
+    @staticmethod
+    def test_execute_w3_data_ui_fail(rf):
+        """
+        This test is replicating when the user clicks on 'Execute Sequence'
+        button at the bottom right of w3. With using false data.
+        """
+        url_var = "/action/get_w3_data/"
+        with pytest.raises(json.JSONDecodeError):
+            json_data = json.loads(str(SAMPLE_ERROR_JOB))
+            response = post_test(url_var, json_data, execute_sequence_controller, rf)
+            assert response.status_code == 200
+            response = post_test(url_var, {}, execute_sequence_controller, rf)
+            assert response.status_code == 200
 
-    # @staticmethod
-    # def test_execute_w4_data_ui(rf):
-    #     """
-    #     This test is replicating the data displayed in W4 when a user clicks
-    #     on 'Execute Sequence' button at the bottom right of w3. With correct data.
-    #     """
-    #     first_url = "/action/get_w3_data/"
-    #     process_obj = Process(target=switch_to_done)
-    #     process_obj.start()
-    #     sleep(2)
-    #     with pytest.raises(json.JSONDecodeError):
-    #         response = execute_sequence_controller(json.loads(str(rf.post(first_url))))
-    #         assert "inserted" in str(response.content)
-    #         assert response.status_code == 200
-    #         sleep(5)
-    #         second_url = "/action/get_output_data/?job_id={}".format(json.loads(
-    #             response.getvalue().decode())['generated_keys'][0])
-    #         assert w4_output_controller(rf.get(second_url, HTTP_USER_AGENT='Mozilla/5.0')).status_code == 200
-    #         assert "sdfsdfsd" in str(w4_output_controller(rf.get(second_url, HTTP_USER_AGENT='Mozilla/5.0')).content)
-    #         process_obj.terminate()
-    #         process_obj.join(timeout=2)
+    @staticmethod
+    def test_execute_w4_data_ui(rf):
+        """
+        This test is replicating the data displayed in W4 when a user clicks
+        on 'Execute Sequence' button at the bottom right of w3. With correct data.
+        """
+        first_url = "/action/get_w3_data/"
+        process_obj = Process(target=switch_to_done)
+        process_obj.start()
+        sleep(2)
+        with pytest.raises(json.JSONDecodeError):
+            response = execute_sequence_controller(json.loads(str(rf.post(first_url))))
+            assert "inserted" in str(response.content)
+            assert response.status_code == 200
+            sleep(5)
+            second_url = "/action/get_output_data/?job_id={}".format(json.loads(
+                response.getvalue().decode())['generated_keys'][0])
+            assert w4_output_controller(rf.get(second_url, HTTP_USER_AGENT='Mozilla/5.0')).status_code == 200
+            assert "sdfsdfsd" in str(w4_output_controller(rf.get(second_url, HTTP_USER_AGENT='Mozilla/5.0')).content)
+            try:
+                while True:
+                    process_obj.terminate()
+            except:
+                pass
+            process_obj.join(timeout=2)
 
     @staticmethod
     def test_target_form_post(rf):
@@ -346,36 +350,36 @@ class TestDataHandling(object):
         process_var.terminate()
         process_var.join(timeout=2)
 
-    # def test_execute_w3_data_two(self, rf):
-    #     """
-    #     This test is replicating when the user clicks on
-    #     'Execute Sequence' button at the bottom right of w3 but
-    #     the command has two arguments.
-    #     """
-    #     job_url = "/action/get_w3_data/"
-    #     with pytest.raises(json.JSONDecodeError):
-    #         status_obj = self.status_code_test2(url_str=job_url,
-    #                                             post_data=SAMPLE_JOB,
-    #                                             function_obj=execute_sequence_controller,
-    #                                             rf=rf)
-    #         assert "inserted" in str(status_obj.content)
-    #         status_obj = post_test(job_url, {}, execute_sequence_controller, rf)
-    #         assert status_obj.status_code == 200
+    def test_execute_w3_data_two(self, rf):
+        """
+        This test is replicating when the user clicks on
+        'Execute Sequence' button at the bottom right of w3 but
+        the command has two arguments.
+        """
+        job_url = "/action/get_w3_data/"
+        with pytest.raises(json.JSONDecodeError):
+            status_obj = self.status_code_test2(url_str=job_url,
+                                                post_data=SAMPLE_JOB,
+                                                function_obj=execute_sequence_controller,
+                                                rf=rf)
+            assert "inserted" in str(status_obj.content)
+            status_obj = post_test(job_url, {}, execute_sequence_controller, rf)
+            assert status_obj.status_code == 200
 
-    # def test_execute_multiple_jobs_in_w3(self, rf):
-    #     """
-    #     This test is replicating when the user clicks on
-    #     'Execute Sequence' button at the bottom right of w3
-    #     with multiple job rows.
-    #     """
-    #     job_url = "/action/get_w3_data/"
-    #     with pytest.raises(json.JSONDecodeError):
-    #         status_obj = self.status_code_test2(url_str=job_url,
-    #                                             post_data=SAMPLE_JOB,
-    #                                             function_obj=execute_sequence_controller,
-    #                                             rf=rf)
-    #         assert "inserted" in str(status_obj.content)
-    #         assert status_obj.status_code == 200
+    def test_execute_multiple_jobs_in_w3(self, rf):
+        """
+        This test is replicating when the user clicks on
+        'Execute Sequence' button at the bottom right of w3
+        with multiple job rows.
+        """
+        job_url = "/action/get_w3_data/"
+        with pytest.raises(json.JSONDecodeError):
+            status_obj = self.status_code_test2(url_str=job_url,
+                                                post_data=SAMPLE_JOB,
+                                                function_obj=execute_sequence_controller,
+                                                rf=rf)
+            assert "inserted" in str(status_obj.content)
+            assert status_obj.status_code == 200
 
     def test_render_target_form(self, rf):
         """
@@ -644,22 +648,22 @@ class TestDataHandling(object):
         response = get_test(url_var, get_interfaces, rf)
         assert response.status_code == 200
 
-    # @staticmethod
-    # def test_stop_job(rf):
-    #     """
-    #     This test is replicating the data displayed in W4 when a user clicks
-    #     on 'Execute Sequence' button at the bottom right of w3. With correct data.
-    #     """
-    #     first_url = "/action/get_w3_data/"
-    #     with pytest.raises(json.JSONDecodeError):
-    #         json_data = json.loads(str(SAMPLE_JOB))
-    #         response = post_test(first_url, json_data, execute_sequence_controller, rf)
-    #         assert "inserted" in str(response.content)
-    #         assert response.status_code == 200
-    #         job_id = json.loads(response.getvalue().decode())['generated_keys'][0]
-    #         sleep(2)
-    #         second_url = "/stop_job/{}/".format(job_id)
-    #         assert stop_job(rf.get(second_url, HTTP_USER_AGENT='Mozilla/5.0'), job_id).status_code == 200
+    @staticmethod
+    def test_stop_job(rf):
+        """
+        This test is replicating the data displayed in W4 when a user clicks
+        on 'Execute Sequence' button at the bottom right of w3. With correct data.
+        """
+        first_url = "/action/get_w3_data/"
+        with pytest.raises(json.JSONDecodeError):
+            json_data = json.loads(str(SAMPLE_JOB))
+            response = post_test(first_url, json_data, execute_sequence_controller, rf)
+            assert "inserted" in str(response.content)
+            assert response.status_code == 200
+            job_id = json.loads(response.getvalue().decode())['generated_keys'][0]
+            sleep(2)
+            second_url = "/stop_job/{}/".format(job_id)
+            assert stop_job(rf.get(second_url, HTTP_USER_AGENT='Mozilla/5.0'), job_id).status_code == 200
 
     @staticmethod
     def test_saved_commands(rf):
