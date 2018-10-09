@@ -347,7 +347,11 @@ class TestDataHandling(object):
             "JobCommand": {'id': ECHO_JOB_ID}}).run(connect())
         for query_item in command_document:
             assert isinstance(query_item, dict)
-        process_var.terminate()
+        try:
+            while True:
+                process_var.terminate()
+        except:
+            pass
         process_var.join(timeout=2)
 
     def test_execute_w3_data_two(self, rf):
