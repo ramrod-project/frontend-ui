@@ -82,6 +82,7 @@ def get_commands_controller(request):
                         content_type="application/json")
 
 
+@csrf_exempt
 def execute_sequence_controller(request):
     """
     execute_sequence_controller function is called when the user clicks on
@@ -90,8 +91,8 @@ def execute_sequence_controller(request):
     :return: returns data from w3 to the ui
     """
     response = None
-    if request.method == 'GET':
-        jobs = json.loads(request.GET.get('jobs'))
+    if request.method == 'POST':
+        jobs = json.loads(request.POST.get('jobs'))
 
         # inserting to Brain.Jobs
         response = insert_brain_jobs_w3(jobs)
