@@ -757,7 +757,15 @@ desired effect
             <select class="form-control plugin-name" id="plugin-name">
             </select>
             <span id="pf_name_help" class="help-block">Select a Plugin Name</span>
-          <input type="text" class="form-control plugin-id" disabled id="plugin-id">
+            <input type="text" class="form-control plugin-id" disabled id="plugin-id">
+          </div>
+          <div id="pf_extra" class="form-group">
+            <label for="plugin-extra" class="control-label">Extra Features:</label>
+            <select class="form-control plugin-extra" id="plugin-extra">
+                <option value="true">true</option>
+                <option value="false">false</option>
+            </select>
+            <span id="pf_extra_help" class="help-block">Extra features is determined at container export </span>
           </div>
           <div class="form-group">
             <label for="plugin-state" class="control-label">State:</label>

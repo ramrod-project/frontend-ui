@@ -5,6 +5,7 @@
 var PLUGIN_STATE = "State";
 var PLUGIN_DESIRED_STATE = "DesiredState";
 var PLUGIN_OS = "OS";
+var PLUGIN_EXTRA = "Extra";
 var PLUGIN_NAME = "Name";
 var PLUGIN_INTERFACE = "Interface";
 var PLUGIN_ENVIRONMENT = "Environment";
@@ -51,6 +52,13 @@ function handle_selected_plugin_change(new_plugin_name){
     var required_os = selected_plugin.OS;
     if (required_os == "all") {
         required_os = false;  // if it doesn't matter, it doesn't matter
+    }
+    if (selected_plugin.hasOwnProperty("Extra") &&
+        selected_plugin.Extra){
+        $("#plugin-extra").val("true");
+    } else {
+
+        $("#plugin-extra").val("false");
     }
     get_interfaces(required_os);
 }
@@ -219,6 +227,7 @@ function onclick_plugin_save(event){
     plugin[PLUGIN_NAME] = $("#plugin-name").val();
     plugin[PLUGIN_INTERFACE] = $("#plugin-interface").val();
     plugin[PLUGIN_OS] = $("#plugin-os").val();
+    plugin[PLUGIN_EXTRA] = $("#plugin-extra").val();
     plugin[PLUGIN_ENVIRONMENT] = $("#plugin-environment").val().split(ITEM_SPLITTER);
     $.ajax({
         type: "POST",
@@ -404,6 +413,7 @@ $('#controller-modal').on('show.bs.modal', function (event) {
       .text("")
       .removeClass("ui-state-error")
       .removeClass("btn-pcp_button_color1");
+  $("#pf_extra").hide();
   modal.find('.plugin-id').val(plugin_list_map[plugin_id]["id"]);
   modal.find('.modal-title').text('Plugin: ' + plugin_list_map[plugin_id]["Name"]);
   modal.find('.plugin-name').val(plugin_list_map[plugin_id]["Name"]);
