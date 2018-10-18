@@ -413,7 +413,7 @@ $('#controller-modal').on('show.bs.modal', function (event) {
       .text("")
       .removeClass("ui-state-error")
       .removeClass("btn-pcp_button_color1");
-  //$("#pf_extra").hide();
+  $("#pf_extra").hide();
   modal.find('.plugin-id').val(plugin_list_map[plugin_id]["id"]);
   modal.find('.modal-title').text('Plugin: ' + plugin_list_map[plugin_id]["Name"]);
   modal.find('.plugin-name').val(plugin_list_map[plugin_id]["Name"]);
