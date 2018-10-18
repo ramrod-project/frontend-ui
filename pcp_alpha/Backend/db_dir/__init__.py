@@ -62,6 +62,7 @@ plugins = [{
     "Environment": ["STAGE=DEV", "NORMAL=1"],
     "ExternalPorts": ["9999/tcp"],
     "InternalPorts": ["9999/tcp"],
+    "Extra": False,
 }, {
     "id": "2-2-B",
     "Name": "Plugin2",
