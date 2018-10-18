@@ -200,8 +200,14 @@ def new_target_form(request):
     :return: New Target Form
     """
     template = loader.get_template('pcp_app/target_form.html')
+    plugins = get_plugin_list_query()
+    plugin_service_list = list()
+
+    for item in plugins:
+        if item['ServiceID']:
+            plugin_service_list.append(item)
     return HttpResponse(template.render(
-        context={'plugin_list': get_plugin_list_query(), },
+        context={'plugin_list': plugin_service_list, },
         request=request))
 
 
