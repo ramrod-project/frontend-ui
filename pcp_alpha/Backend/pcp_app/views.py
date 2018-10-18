@@ -388,7 +388,7 @@ def update_plugin(request, plugin_id):
     response = HttpResponse(content_type='application/json')
     if request.method == 'POST':
         plugin_data = request.POST.dict()
-        plugin_data["Extra"] = plugin_data["Extra"] == "true"
+        plugin_data["Extra"] = plugin_data.get("Extra") == "true"
         plugin_data['ExternalPorts[]'] = plugin_data['ExternalPorts[]']\
             .replace(" ", "")
         plugin_data['Environment[]'] = plugin_data['Environment[]'] \

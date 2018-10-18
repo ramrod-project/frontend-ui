@@ -84,7 +84,8 @@ class TestPluginData(object):
                        'Interface': '10.10.10.10',
                        'OS': 'posix',
                        'ExternalPorts[]': ['1111/tcp'],
-                       'Environment[]': ['STAGE=DEV', 'NORMAL=2']}
+                       'Environment[]': ['STAGE=DEV', 'NORMAL=2'],
+                       'Extra': True}
         response = post_test(url_var, update_data, update_plugin, rf, target_id="2-2-B")
         assert response.status_code == 200
 
@@ -103,7 +104,8 @@ class TestPluginData(object):
                        'Interface': '10.10.10.10',
                        'OS': 'posix',
                        'ExternalPorts[]': ['4242/tcp'],
-                       'Environment[]': ['STAGE=DEV', 'NORMAL=2']}
+                       'Environment[]': ['STAGE=DEV', 'NORMAL=2'],
+                       'Extra': True}
         response = post_test(url_var, update_data, update_plugin, rf, target_id="NEW")
         assert response.status_code == 200
 
