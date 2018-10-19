@@ -243,6 +243,7 @@ TEST_PORT_DATA4 = {
     "UDPPorts": []
 }
 
+
 def table_clear(database, table):
     """Clears data from a table
 
