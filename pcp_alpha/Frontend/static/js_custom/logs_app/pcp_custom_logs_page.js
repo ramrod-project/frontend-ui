@@ -17,6 +17,12 @@ var LOGS_DATA_TABLE = $('#logs_table').DataTable({
 });
 
 function update_logs_data_table(param_ts, param_sh, param_sc, param_ll, param_lm){
+    if(param_sh === undefined){
+        param_sh = "";
+    }
+    if(param_ll === undefined){
+        param_ll = "";
+    }
     LOGS_DATA_TABLE.row.add([date_time_test(param_ts), param_sh, param_sc, param_ll, param_lm]).draw( false );
     data_logs_limit(LOGS_DATA_TABLE);
 }
