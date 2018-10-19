@@ -81,9 +81,7 @@ def get_command_namespace(param_item):
 
 
 def acceptable_command_namespace(cache, cmd_ns, plugin, command):
-    if cmd_ns in cache:
-        return cache[cmd_ns]
-    else:
+    if cmd_ns not in cache:
         if brain.queries.plugin_exists(plugin) \
                 and brain.queries.get_plugin_command(plugin, command):
             cache[cmd_ns] = True
