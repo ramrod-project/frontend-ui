@@ -484,7 +484,7 @@ function status_change_ws_callback(message) {
     var data;
     if ('data' in message && message.data != null && message.data[0] == "[") {
         data_list = JSON.parse(message.data);
-        console.log(data_list);
+        //console.log(data_list);
         for (var i in data_list){
             data = data_list[i];
             var job_id = null;
