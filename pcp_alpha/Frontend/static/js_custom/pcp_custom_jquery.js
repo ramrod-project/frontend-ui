@@ -15,6 +15,7 @@ var sequence_starttime_map = {"1":  Math.floor((new Date().valueOf())/1000).toSt
 var sequence_expiretime_map = {"1": undefined};
 var id_map = {};
 var id_status_map = {};
+var status_deferred_updates = [];
 var id_reverse_map = {};
 var id_replication_map = {};
 var target_id_map = {};
@@ -479,49 +480,63 @@ function status_change_update_dom(job_dom_id, status){
 }
 
 function status_change_ws_callback(message) {
-    console.log(message);
-    var data = null;
-    if ('data' in message && message.data != null && message.data[0] == "{") {
-        data = JSON.parse(message.data);
-        var job_id = null;
-        if ("id" in data) {
-            job_id = data.id;
-            if (job_id in id_reverse_map) {
-                var job_dom_id = id_reverse_map[job_id];
-                id_status_map[job_dom_id] = data.status;
-                status_change_update_dom(job_dom_id, data.status);
-                if(data.status === "Done" || data.status === "Stopped"){
-                    $("#stopjob"+job_dom_id).hide();
-                    $("#resetjob"+job_dom_id).hide();
-                    $("#trashjob"+job_dom_id).show();
-                }
-                else if(data.status === "Error"){
-                    $("#stopjob"+job_dom_id).hide();
-                    $("#resetjob"+job_dom_id).show();
-                }
-                else if (!(data.status in JOB_CAN_TERMINATE) || !(data.status in JOB_CAN_NOT_TERMINATE)){
-                    $("#stopjob"+job_dom_id).hide();
-                    $("#resetjob"+job_dom_id).hide();
+    var data_list = null;
+    var data;
+    if ('data' in message && message.data != null && message.data[0] === "[") {
+        data_list = JSON.parse(message.data);
+        for (var i in data_list){
+            data = data_list[i];
+            var job_id = null;
+            if ("id" in data) {
+                job_id = data.id;
+                if (job_id in id_reverse_map) {
+                    var job_dom_id = id_reverse_map[job_id];
+                    id_status_map[job_dom_id] = data.status;
+                    status_change_update_dom(job_dom_id, data.status);
+                    if(data.status === "Done" || data.status === "Stopped"){
+                        $("#stopjob"+job_dom_id).hide();
+                        $("#resetjob"+job_dom_id).hide();
+                        $("#trashjob"+job_dom_id).show();
+                    }
+                    else if(data.status === "Error"){
+                        $("#stopjob"+job_dom_id).hide();
+                        $("#resetjob"+job_dom_id).show();
+                    }
+                    else if (!(data.status in JOB_CAN_TERMINATE) || !(data.status in JOB_CAN_NOT_TERMINATE)){
+                        $("#stopjob"+job_dom_id).hide();
+                        $("#resetjob"+job_dom_id).hide();
+                    }
+                } else {
+                    if(exec_int === 1) {
+                        status_deferred_updates.push(data);
+                    }
                 }
             }
         }
     }
 }
+function respool_deferred_status_changes(){
+    var respool = [];
+    while (status_deferred_updates.length > 0){
+        respool.push(status_deferred_updates.shift())
+    }
+    status_change_ws_callback({data: JSON.stringify(respool)});
+}
 
 function files_change_ws_callback(message){
-    if (message.data.length > 0 && message.data[0] == "{"){
+    if (message.data.length > 0 && message.data[0] === "{"){
         $("#upload_files_need_refreshed").show();
     }
 
 }
 
 function plugins_change_ws_callback(message){
-    if (message.data.length > 0 && message.data[0] == "{"){
+    if (message.data.length > 0 && message.data[0] === "{"){
         $("#plugins_need_refreshed").show();
     }
 }
 function telemetry_change_ws_callback(message){
-    if (message.data.length > 0 && message.data[0] == "{"){
+    if (message.data.length > 0 && message.data[0] === "{"){
         var data_js = JSON.parse(message.data);
         $("#target_row"+target_id_map[data_js.id])[0].title = recursive_pretty_print(data_js.Optional);
     }
@@ -2134,6 +2149,8 @@ function execute_sequence(){
                 console.log("ERROR @ execute_sequence function")
             },
             complete: function(data){
+                console.warn("spoolling changes");
+                respool_deferred_status_changes();
                 exec_int = 0;
             }
         })
@@ -2288,7 +2305,7 @@ function execute_sequence_output(specific_id, counter=0, backoff=2000){
                 num_jobs_to_ex = [];
             }
 
-            if (data != 0){  // returns query
+            if (data !== 0){  // returns query
                 render_job_output_to_page(specific_id, data);
             } else {  // doesn't return query
                 render_job_output_timeout(specific_id);
@@ -2369,6 +2386,22 @@ function make_one_terminal_command(secondary_output_domid, cmd_string, out_strin
 }
 
 function terminal_opener(event) {
+    console.log(w3_highlighted_array);
+    if(w3_highlighted_array.length > 0){
+        sequences[active_sequence].forEach(function(value) {
+            if (w3_highlighted_array.includes(Number(value))){
+                var job_row_var = $("#jobrow"+value);
+                job_row_var.removeClass('selected');
+                w4_output_collapse2(job_row_var[0].rowIndex);
+                var w3_content_row = w3_highlighted_array.indexOf(job_row_var[0].rowIndex);
+                if(w3_content_row > -1){
+                    w3_highlighted_array.splice(w3_content_row, 1);
+                }
+            }
+        });
+    }
+    console.log(w3_highlighted_array);
+
     var button = $(event.relatedTarget); // Button that triggered the modal
     var terminal_data = button.data('terminaldata'); // Extract info from data-* attributes
     var history = $("#terminal-active-history");
