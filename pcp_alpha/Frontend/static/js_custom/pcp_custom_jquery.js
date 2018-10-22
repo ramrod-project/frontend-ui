@@ -482,9 +482,8 @@ function status_change_update_dom(job_dom_id, status){
 function status_change_ws_callback(message) {
     var data_list = null;
     var data;
-    if ('data' in message && message.data != null && message.data[0] == "[") {
+    if ('data' in message && message.data != null && message.data[0] === "[") {
         data_list = JSON.parse(message.data);
-        //console.log(data_list);
         for (var i in data_list){
             data = data_list[i];
             var job_id = null;
@@ -508,14 +507,16 @@ function status_change_ws_callback(message) {
                         $("#resetjob"+job_dom_id).hide();
                     }
                 } else {
-                    status_deferred_updates.push(data);
+                    if(exec_int === 1) {
+                        status_deferred_updates.push(data);
+                    }
                 }
             }
         }
     }
 }
 function respool_deferred_status_changes(){
-    var respool = []
+    var respool = [];
     while (status_deferred_updates.length > 0){
         respool.push(status_deferred_updates.shift())
     }
@@ -523,19 +524,19 @@ function respool_deferred_status_changes(){
 }
 
 function files_change_ws_callback(message){
-    if (message.data.length > 0 && message.data[0] == "{"){
+    if (message.data.length > 0 && message.data[0] === "{"){
         $("#upload_files_need_refreshed").show();
     }
 
 }
 
 function plugins_change_ws_callback(message){
-    if (message.data.length > 0 && message.data[0] == "{"){
+    if (message.data.length > 0 && message.data[0] === "{"){
         $("#plugins_need_refreshed").show();
     }
 }
 function telemetry_change_ws_callback(message){
-    if (message.data.length > 0 && message.data[0] == "{"){
+    if (message.data.length > 0 && message.data[0] === "{"){
         var data_js = JSON.parse(message.data);
         $("#target_row"+target_id_map[data_js.id])[0].title = recursive_pretty_print(data_js.Optional);
     }
@@ -2385,6 +2386,9 @@ function make_one_terminal_command(secondary_output_domid, cmd_string, out_strin
 }
 
 function terminal_opener(event) {
+    if(w3_highlighted_array.length > 0){
+        job_select_table.$("tr.selected").removeClass('selected');
+    }
     var button = $(event.relatedTarget); // Button that triggered the modal
     var terminal_data = button.data('terminaldata'); // Extract info from data-* attributes
     var history = $("#terminal-active-history");
