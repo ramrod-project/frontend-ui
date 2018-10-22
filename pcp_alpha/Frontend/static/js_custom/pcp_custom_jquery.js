@@ -2386,9 +2386,6 @@ function make_one_terminal_command(secondary_output_domid, cmd_string, out_strin
 }
 
 function terminal_opener(event) {
-    if(w3_highlighted_array.length > 0){
-        job_select_table.$("tr.selected").removeClass('selected');
-    }
     var button = $(event.relatedTarget); // Button that triggered the modal
     var terminal_data = button.data('terminaldata'); // Extract info from data-* attributes
     var history = $("#terminal-active-history");
