@@ -86,7 +86,7 @@ function get_interfaces(hostos_filter=false){
             }
         },
         error: function (data) {
-            console.log("ERROR @ update_interfaces ajax function");
+            console.warn("ERROR @ update_interfaces ajax function");
         }
     });
 }
@@ -103,7 +103,6 @@ function checked_plugin_list(plugin_id, plugin_checkbox_num) {
             }
         }
     }
-    console.log(checked_plugin_list_array);
 }
 
 // Modify function for future activate, restart, and stop plugin task
@@ -121,7 +120,7 @@ function desired_plugin_state(desired_state) {
             console.log(data);
         },
         error: function (data) {
-            console.log("ERROR @ activate_plugin ajax function");
+            console.warn("ERROR @ activate_plugin ajax function");
         }
     });
 }
@@ -210,7 +209,7 @@ function get_plugin_list() {
             plugin_list_refresh.removeClass("fa-spin");
         },
         error: function (data) {
-            console.log("ERROR @ get_plugin_list function");
+            console.warn("ERROR @ get_plugin_list function");
             plugin_list_refresh.removeClass("fa-spin");
         }
     });
@@ -271,7 +270,6 @@ function verify_plugin_name(){
 }
 
 function verify_desired_state(){
-    console.log("verify_desired_state");
     var plugin_desired_option = $("#plugin-desired option");
     if(plugin_desired_option[0].selected === true) {
         $("#plugin-save")[0].disabled = true;
@@ -285,7 +283,6 @@ function verify_desired_state(){
 }
 
 function verify_plugin_interface(){
-    console.log("verify_plugin_interface");
     var plugin_interface = $("#plugin-interface"),
         helper_checker = 0;
     $("#plugin-os").val(interface_map[plugin_interface.val()].OS);
@@ -322,7 +319,6 @@ function verify_plugin_external_ports(){
 }
 
 function verify_plugin_environment(){
-    console.log("verify_plugin_environment");
     var plugin_environment = $("#plugin-environment"),
         content = plugin_environment[0].value;
     if(!env_rgx.test(content)){

@@ -331,7 +331,7 @@ def del_file_from_list(request, file_id):
     :return:
     """
     if request.method == 'GET':
-        print("delete this Brain.Files field id == {}".format(file_id))
+        # print("delete this Brain.Files field id == {}".format(file_id))
         del_file_upload_from_brain(file_id)
     return HttpResponse()
 
