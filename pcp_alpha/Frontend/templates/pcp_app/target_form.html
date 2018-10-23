@@ -30,7 +30,7 @@
                                 <select class="form-control service_name" id="service_name" name="service_name" onchange="update_target_form()">
                                     <option value="" disabled selected > Service Name </option>
                                     {% for plugin_item in plugin_list %}
-                                        <option id="{{ forloop.counter }}" value="{{ plugin_item }}">{{ plugin_item.ServiceName }}</option>
+                                        <option id="{{ forloop.counter }}" value="{{ plugin_item.as_json }}">{{ plugin_item.ServiceName }}</option>
                                     {% endfor %}
                                 </select>
                                 <span id="fg_service_name_help" class="help-block">Select a Service Name</span>

@@ -205,6 +205,7 @@ def new_target_form(request):
 
     for item in plugins:
         if item['ServiceID']:
+            item['as_json'] = json.dumps(item)
             plugin_service_list.append(item)
     return HttpResponse(template.render(
         context={'plugin_list': plugin_service_list, },
@@ -259,6 +260,7 @@ def edit_target_form(request, target_id):
     brain_connection = brain.connect()
     get_brain_target = brain.r.db("Brain").table("Targets").filter(
         {"id": str(target_id)}).run(brain_connection)
+    print("\nget_brain_target:\n{}\n".format(get_brain_target))
     return HttpResponse(template.render(
         context={"edit_target_dict": get_brain_target,
                  'plugin_list': get_plugin_list_query(), },
@@ -377,6 +379,7 @@ def get_plugin_list(request):
     #     json_plugin_list_return = get_plugin_list_query()
     #     return HttpResponse(json.dumps(json_plugin_list_return),
     #                         content_type='application/json')
+    # print(get_plugin_list_query)
     return cc_helper_function_one(request, "GET", get_plugin_list_query)
 
 
