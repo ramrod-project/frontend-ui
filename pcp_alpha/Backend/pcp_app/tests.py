@@ -750,7 +750,7 @@ class TestDataHandling(object):
             "Extra": True,
         }
         RPP.insert({"Interface": "1.1.1.1", "TCPPorts": ["2"]}).run(connect())
-        response = post_test(url_var, plugin_data, update_plugin, rf)
+        response = post_test(url_var, plugin_data, update_plugin, rf, target_id="NEW")
         assert response.status_code == 400
 
     @staticmethod
@@ -774,5 +774,5 @@ class TestDataHandling(object):
             "Extra": True,
         }
         RPP.insert({"Interface": "1.1.1.1", "TCPPorts": ["2"]}).run(connect())
-        response = post_test(url_var, plugin_data, update_plugin, rf)
+        response = post_test(url_var, plugin_data, update_plugin, rf, target_id="NEW")
         assert response.status_code == 200
