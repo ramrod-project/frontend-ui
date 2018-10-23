@@ -1,3 +1,5 @@
+"""Queries file"""
+
 import json
 import brain.queries
 from brain.binary import put_buffer, list_dir, get, delete
@@ -156,8 +158,8 @@ def insert_new_target(plugin_name, location_num, port_num, optional_char):
         "Optional": {"init": optional_char}
     }
     inserted_new_target = brain.queries.insert_target(target_dict)
-    print("log: db New target was inserted to Brain.Targets")
-    print("{}\n".format(inserted_new_target))
+    # print("log: db New target was inserted to Brain.Targets")
+    # print("{}\n".format(inserted_new_target))
     return inserted_new_target
 
 
