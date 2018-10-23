@@ -638,6 +638,7 @@ function filter_w2() {
             $(".tooltipHeader").empty();
             $(".tooltipContent").empty();
             $(".theContentArgument").empty();
+            $("#boxtwofooterid").empty();
         } else {
             $(to_filter[0].children[row_i]).css("display", "none");
         }
@@ -851,6 +852,7 @@ function get_commands_func(){
                 $(".tooltipHeader").empty();
                 $(".tooltipContent").empty();
                 $(".theContentArgument").empty();
+                $("#boxtwofooterid").empty();
             }
 
         	$("#theContent").empty();
@@ -906,12 +908,16 @@ function get_commands_func(){
 
                 //footer
                 $(".theContentArgument").empty();
+                $("#boxtwofooterid").empty();
                 $(".theContentArgument")
                     .append($("<div id='commandIdBuilder'/>")
                         .text($(this)[0].text));
                 // JSON development data on W2 footer
-                $(".theContentArgument")
+                $("#boxtwofooterid")
                     .append($("<div id='JSON_Command_DATA'/>")
+                        .attr({"draggable": "true",
+                            "ondragstart": "drag_command(event)",
+                            "ondragend": "drag_end_command(event)"})
                         .addClass("text-muted small")
                         .text(JSON.stringify(current_command_template)));
 
@@ -967,6 +973,7 @@ function close_command_loader(){
     $("#w2_namer").hide();
     $(".tooltipHeader").empty();
     $(".theContentArgument").empty();
+    $("#boxtwofooterid").empty();
     $(".tooltipContent").empty();
     $("#w2_save_feedback").hide();
     $("#w2_persist_button").hide();
@@ -983,8 +990,12 @@ function load_command_from_cloud(){
     $("#w2_loader_button").hide();
     $("#w2_builder_saved_command_list").show();
     $(".theContentArgument")
-        .append($("<div id='commandIdBuilder'/>"))
+        .append($("<div id='commandIdBuilder'/>"));
+    $("#boxtwofooterid")
         .append($("<div id='JSON_Command_DATA'/>")
+            .attr({"draggable": "true",
+                "ondragstart": "drag_command(event)",
+                "ondragend": "drag_end_command(event)"})
             .addClass("text-muted small"));
     $("#savedContent").empty();
     load_command_for_plugin_from_cloud(current_selected_plugin);
