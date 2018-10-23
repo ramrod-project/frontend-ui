@@ -1,3 +1,5 @@
+"""Queries file"""
+
 import json
 import brain.queries
 from brain.binary import put_buffer, list_dir, get, delete
