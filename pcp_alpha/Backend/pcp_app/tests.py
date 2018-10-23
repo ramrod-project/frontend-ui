@@ -744,9 +744,12 @@ class TestDataHandling(object):
             "DesiredState": "",
             "OS": "all",
             "Interface": "1.1.1.1",
-            "Environment": ["STAGE=DEV", "NORMAL=3"],
+            "Environment": [],
+            "Environment[]": "",
             "ExternalPorts": ["2/tcp"],
+            "ExternalPorts[]": "2/tcp",
             "InternalPorts": ["2/tcp"],
+            "InternalPorts[]": "2/tcp",
             "Extra": True,
         }
         RPP.insert({"Interface": "1.1.1.1", "TCPPorts": ["2"]}).run(connect())
@@ -768,11 +771,14 @@ class TestDataHandling(object):
             "DesiredState": "",
             "OS": "all",
             "Interface": "1.1.1.1",
-            "Environment": ["STAGE=DEV", "NORMAL=3"],
+            "Environment": [],
+            "Environment[]": "",
             "ExternalPorts": ["12/tcp"],
+            "ExternalPorts[]": "12/tcp",
             "InternalPorts": ["12/tcp"],
+            "InternalPorts[]": "12/tcp",
             "Extra": True,
         }
-        RPP.insert({"Interface": "1.1.1.1", "TCPPorts": ["2"]}).run(connect())
+        RPP.insert({"Interface": "1.1.1.1", "TCPPorts": ["11"]}).run(connect())
         response = post_test(url_var, plugin_data, update_plugin, rf, target_id="NEW")
         assert response.status_code == 200
