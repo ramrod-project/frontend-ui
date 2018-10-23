@@ -2133,7 +2133,7 @@ function execute_sequence(){
                         unselect_job_row(dom_id, 0);
                         num_jobs_to_ex.push(index);
                     } else {
-                        if ($("#jobstatusid"+dom_id + " span").text() == INITIAL_JOB_STATUS){
+                        if (!id_map.hasOwnProperty(dom_id) && dom_id in sequences[active_sequence]){
                             id_status_map[dom_id] = "Error";
                             status_change_update_dom(dom_id, "Error");
                             notification_function("command ", "not appropriate for target", "", "danger");
