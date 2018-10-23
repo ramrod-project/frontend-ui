@@ -764,6 +764,7 @@ class TestDataHandling(object):
         """
         url_var = "/update_plugin/NEW/"
         plugin_data = {
+            "id": "NEW",
             "Name": "Plugin3",
             "ServiceName": "Plugin3-4243tcp",
             "ServiceID": "cheeto3",
