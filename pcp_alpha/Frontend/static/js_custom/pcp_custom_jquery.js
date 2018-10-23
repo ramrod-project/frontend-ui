@@ -2094,7 +2094,7 @@ function execute_sequence(){
                 sequence_start_time = parseInt(sequence_starttime_map[active_sequence]);
                 for (var index = 0; index < job_ids.length; ++index) {
                     var dom_id = index+1;
-                    if (job_ids[index] != "invalid-job"){
+                    if (job_ids[index] !== "invalid-job"){
                         var job_row_var = $("#jobrow"+dom_id);
                         id_reverse_map[job_ids[index]] = dom_id;
                         id_map[index+1] = job_ids[index];
@@ -2121,7 +2121,7 @@ function execute_sequence(){
                         unselect_job_row(dom_id, 0);
                         num_jobs_to_ex.push(index);
                     } else {
-                        if ($("#jobstatusid"+dom_id + " span").text() == INITIAL_JOB_STATUS){
+                        if (!id_map.hasOwnProperty(dom_id) && dom_id in sequences[active_sequence]){
                             id_status_map[dom_id] = "Error";
                             status_change_update_dom(dom_id, "Error");
                             notification_function("command ", "not appropriate for target", "", "danger");
