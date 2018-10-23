@@ -75,7 +75,7 @@ function get_interfaces(hostos_filter=false){
             iface.empty();
             for (var i=0; i<data.length; i++){
                 interface_map[data[i].Interface] = data[i];
-                if (!hostos_filter || data[i].OS == hostos_filter){
+                if (!hostos_filter || data[i].OS === hostos_filter){
                     iface.append($("<option/>")
                         .val(data[i].Interface)
                         .text(data[i].Interface + " " + data[i].NodeHostName + " (" + data[i].OS + ")")
