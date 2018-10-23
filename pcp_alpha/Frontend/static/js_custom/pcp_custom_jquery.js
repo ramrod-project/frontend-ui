@@ -1415,6 +1415,15 @@ function hide_current_sequence(e){
     sequences[active_sequence] = new Set();
     synchronize_sequence_tab_rows(active_sequence);
 }
+function delay_goto_tab(next_tab, delay_ms){
+    setTimeout(
+        function() {
+            synchronize_job_sequence_tabs(next_tab);
+            synchronize_output_sequence_tabs(next_tab);
+        }
+        , delay_ms
+    );
+}
 function add_sequence_tab(clear=true){
     var next_tab =  $("#jobq_tabs").children().length;
     if (clear){
@@ -1434,28 +1443,30 @@ function add_sequence_tab(clear=true){
         .append('<li id="outB_'+next_tab+'" onclick="synchronize_output_sequence_tabs('+next_tab+')"><a href="#outq_'+next_tab+'" data-toggle="tab">'+next_tab+'</a></li>');
     $('#outq_content')
         .append('<div class="tab-pane" id="outq_'+next_tab+'"></div>');
-
-    setTimeout(
-        function() {
-            synchronize_job_sequence_tabs(next_tab);
-            synchronize_output_sequence_tabs(next_tab);
-        }
-        , 33
-    );
+    delay_goto_tab(next_tab, 33);
 }
+
 function synchronize_job_sequence_tabs(tab_id){
-    active_sequence = tab_id;
-    var other_tab = $('#output_tabs a[href="#outq_'+tab_id+'"]');
-    other_tab.tab('show');
-    synchronize_sequence_tab_rows(tab_id);
-    as_checker_func(active_sequence);
+    if (exec_int === 1){
+        delay_goto_tab(active_sequence, 5);
+    } else {
+        active_sequence = tab_id;
+        var other_tab = $('#output_tabs a[href="#outq_'+tab_id+'"]');
+        other_tab.tab('show');
+        synchronize_sequence_tab_rows(tab_id);
+        as_checker_func(active_sequence);
+    }
 }
 function synchronize_output_sequence_tabs(tab_id){
-    active_sequence = tab_id;
-    var other_tab = $('#jobq_tabs a[href="#jobq_'+tab_id+'"]');
-    other_tab.tab('show');
-    synchronize_sequence_tab_rows(tab_id);
-    as_checker_func(active_sequence);
+    if (exec_int === 1){
+        delay_goto_tab(active_sequence, 5);
+    } else {
+        active_sequence = tab_id;
+        var other_tab = $('#jobq_tabs a[href="#jobq_' + tab_id + '"]');
+        other_tab.tab('show');
+        synchronize_sequence_tab_rows(tab_id);
+        as_checker_func(active_sequence);
+    }
 }
 function synchronize_sequence_tab_rows(sequence_id){
     var _dt = new Date(Number(sequence_starttime_map[sequence_id]) * 1000);
@@ -2075,11 +2086,12 @@ function final_countdown_function(start_time, dom_id) {
 
 // Execute Sequence function down below are for w3+w4
 function execute_sequence(){
-    exec_int = 1;
     hide_drop_all();
     var desired_start = Number(sequence_starttime_map[active_sequence]);
     var desired_expire = Number(sequence_expiretime_map[active_sequence]);
     if (desired_start < desired_expire){
+        exec_int = 1;
+        $("#execute_button").attr({"disabled":true});
         var jobs = prepare_jobs_list();
         var jobs_json = JSON.stringify(jobs);
         var sequence_start_time;
@@ -2121,7 +2133,7 @@ function execute_sequence(){
                         unselect_job_row(dom_id, 0);
                         num_jobs_to_ex.push(index);
                     } else {
-                        if ($("#jobstatusid"+dom_id + " span").text() == INITIAL_JOB_STATUS){
+                        if (!id_map.hasOwnProperty(dom_id) && dom_id in sequences[active_sequence]){
                             id_status_map[dom_id] = "Error";
                             status_change_update_dom(dom_id, "Error");
                             notification_function("command ", "not appropriate for target", "", "danger");
@@ -2137,6 +2149,7 @@ function execute_sequence(){
                 console.warn("spoolling changes");
                 respool_deferred_status_changes();
                 exec_int = 0;
+                $("#execute_button").attr({"disabled":false});
             }
         })
     } else {
