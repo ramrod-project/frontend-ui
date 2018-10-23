@@ -236,11 +236,13 @@ function onclick_plugin_save(event){
         success: function(data) {
             get_plugin_list();
             $("#plugin-save").attr({"disabled":false});
+            $("#plugin-response").removeClass("ui-state-error");
             $("#plugin-response").addClass("btn-pcp_button_color1");
-            $("#plugin-response").text("Changes Successful - May now close window - "+JSON.stringify(data))
+            $("#plugin-response").text("Changes Successful - May now close window - "+data.responseText)
         },
         error: function (data) {
-            $("#plugin-response").text("Changes Failed - "+JSON.stringify(data));
+            $("#plugin-response").text("Changes Failed - "+data.responseJSON.first_error);
+            $("#plugin-response").removeClass("btn-pcp_button_color1");
             $("#plugin-response").addClass("ui-state-error");
             $("#plugin-save").attr({"disabled":false});
         }

@@ -13,7 +13,7 @@ from Backend.db_dir.custom_queries import get_specific_commands, insert_brain_jo
     persist_jobs_state, load_jobs_state, upload_file_to_brain, del_file_upload_from_brain, \
     get_brain_files, get_brain_file, get_plugin_list_query, desired_plugin_state_brain, \
     get_interface_list, update_plugin_to_brain, update_brain_stop_job, db_get_state_names, \
-    db_get_saved_command_list, db_put_saved_command
+    db_get_saved_command_list, db_put_saved_command, plugin_is_acceptable
 from Backend.backend_help_func import cc_helper_function_one
 
 from .forms import TargetForm
@@ -412,11 +412,15 @@ def update_plugin(request, plugin_id):
                 plugin_data['Environment'].append(env_kv)
         del plugin_data["ExternalPorts[]"]
         del plugin_data["Environment[]"]
-
-        output = update_plugin_to_brain(plugin_data)
+        if plugin_is_acceptable(plugin_data):
+            output = update_plugin_to_brain(plugin_data)
+        else:
+            output["errors"] = 1
+            output['first_error'] = "Plugin has port conflict"
         if output['errors'] > 0:
             response.status_code = 400
-        response.status_code = 200
+        else:
+            response.status_code = 200
     else:
         response.status_code = 405
     response.write(json.dumps(output))
