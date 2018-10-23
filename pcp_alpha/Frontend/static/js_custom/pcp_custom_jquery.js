@@ -2075,11 +2075,12 @@ function final_countdown_function(start_time, dom_id) {
 
 // Execute Sequence function down below are for w3+w4
 function execute_sequence(){
-    exec_int = 1;
     hide_drop_all();
     var desired_start = Number(sequence_starttime_map[active_sequence]);
     var desired_expire = Number(sequence_expiretime_map[active_sequence]);
     if (desired_start < desired_expire){
+        exec_int = 1;
+        $("#execute_button").attr({"disabled":true});
         var jobs = prepare_jobs_list();
         var jobs_json = JSON.stringify(jobs);
         var sequence_start_time;
@@ -2137,6 +2138,7 @@ function execute_sequence(){
                 console.warn("spoolling changes");
                 respool_deferred_status_changes();
                 exec_int = 0;
+                $("#execute_button").attr({"disabled":false});
             }
         })
     } else {
