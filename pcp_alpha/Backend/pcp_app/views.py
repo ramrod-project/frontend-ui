@@ -205,6 +205,7 @@ def new_target_form(request):
 
     for item in plugins:
         if item['ServiceID']:
+            item['as_json'] = json.dumps(item)
             plugin_service_list.append(item)
     return HttpResponse(template.render(
         context={'plugin_list': plugin_service_list, },
@@ -288,7 +289,7 @@ def val_edit_target_form(request, target_id):
                 {"PluginName": str(edit_plugin_name),
                  "Location": str(edit_location_num),
                  "Port": str(edit_port_num),
-                 "Optional": str(edit_optional_char)}).run(brain_connection)
+                 "Optional": {'init': str(edit_optional_char)}}).run(brain_connection)
             return redirect('/')
     else:
         form = TargetForm()
@@ -377,6 +378,7 @@ def get_plugin_list(request):
     #     json_plugin_list_return = get_plugin_list_query()
     #     return HttpResponse(json.dumps(json_plugin_list_return),
     #                         content_type='application/json')
+    # print(get_plugin_list_query)
     return cc_helper_function_one(request, "GET", get_plugin_list_query)
 
 
