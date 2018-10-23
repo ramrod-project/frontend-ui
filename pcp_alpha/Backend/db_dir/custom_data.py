@@ -51,7 +51,7 @@ def gen_logs_data(param_num):
         data_logs_list.append({"rt": time_generator(),
                                "Severity": randint(1, 10),
                                "msg": "Random msg #{}".format(i),
-                               "msgDoc": {"a":"Random msgDoc #{}".format(i)},
+                               "msgDoc": {"a": "Random msgDoc #{}".format(i)},
                                "shost": "host {}".format(randint(1, 10)),
                                "sourceServiceName": random_container()})
 

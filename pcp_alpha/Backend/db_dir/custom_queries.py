@@ -1,10 +1,12 @@
+"""Queries file"""
+
 import json
 import brain.queries
 from brain.binary import put_buffer, list_dir, get, delete
 from brain.jobs import InvalidStateTransition, STOP, transition
 from brain.static import STATUS_FIELD
 import brain
-
+from uuid import uuid4
 from .project_db import connect, rtdb
 from .custom_state_change_queries import *
 RBX = rtdb.db("Brain")
@@ -69,18 +71,25 @@ def get_specific_command(w3_plugin_name, w3_command_name):
     return command
 
 
-def insert_brain_job_if_ok(response_refernece, param_item):
-    plugin = param_item['JobTarget']['PluginName']
-    command = param_item['JobCommand']['CommandName']
-    if brain.queries.plugin_exists(plugin) and brain.queries.get_plugin_command(plugin, command):
-        print("param_item:\n{}\n".format(param_item))
-        attempted = brain.queries.insert_jobs([param_item], verify_jobs=False)
-        new_keys = attempted["generated_keys"]
-        response_refernece["generated_keys"].extend(new_keys)
-        response_refernece["inserted"] += 1
-    else:
-        response_refernece["generated_keys"].append("invalid-job")
+def get_command_namespace(param_item):
+    try:
+        plugin = param_item['JobTarget']['PluginName']
+        command = param_item['JobCommand']['CommandName']
+    except KeyError:
+        return ("x-x","x","x")
+    return ("{}-{}".format(plugin, command),
+            plugin,
+            command)
 
+
+def acceptable_command_namespace(cache, cmd_ns, plugin, command):
+    if cmd_ns not in cache:
+        if brain.queries.plugin_exists(plugin) \
+                and brain.queries.get_plugin_command(plugin, command):
+            cache[cmd_ns] = True
+        else:
+            cache[cmd_ns] = False
+    return cache[cmd_ns]
 
 def insert_brain_jobs_w3(w3_jobs):
     """
@@ -91,15 +100,23 @@ def insert_brain_jobs_w3(w3_jobs):
     assert isinstance(w3_jobs, list)
     inserted = {"generated_keys": [],
                 "inserted": 0}
+    command_cache = {}
+    insertable_jobs = []
     for param_item in w3_jobs:
-        if not param_item:
-            # fake an ID
-            inserted["generated_keys"].append("invalid-job")
+        cmd_ns, plugin, cmd = get_command_namespace(param_item)
+        if acceptable_command_namespace(command_cache,
+                                          cmd_ns,
+                                          plugin,
+                                          cmd):
+            param_item['id'] = str(uuid4())
+            inserted['generated_keys'].append(param_item['id'])
+            insertable_jobs.append(param_item)
         else:
-            insert_brain_job_if_ok(inserted, param_item)
-
-    print("log: db job from W3 was inserted to Brain.Jobs")
-    print("inserted:\n{}\n".format(inserted))
+            inserted["generated_keys"].append("invalid-job")
+    result = brain.queries.insert_jobs(insertable_jobs, verify_jobs=True)
+    inserted['inserted'] += result['inserted']
+    #print("log: db job from W3 was inserted to Brain.Jobs")
+    #print("inserted:\n{}\n".format(inserted))
     return inserted
 
 
@@ -141,8 +158,8 @@ def insert_new_target(plugin_name, location_num, port_num, optional_char):
         "Optional": {"init": optional_char}
     }
     inserted_new_target = brain.queries.insert_target(target_dict)
-    print("log: db New target was inserted to Brain.Targets")
-    print("{}\n".format(inserted_new_target))
+    # print("log: db New target was inserted to Brain.Targets")
+    # print("{}\n".format(inserted_new_target))
     return inserted_new_target
 
 
