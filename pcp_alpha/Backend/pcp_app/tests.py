@@ -7,7 +7,7 @@ import os
 import signal
 import pytest
 from brain import connect, r, binary
-
+from brain.queries import RPP
 from copy import deepcopy
 
 from test.test_w4_switch_to_done import switch_to_done
@@ -25,7 +25,7 @@ from pcp_alpha.Backend.pcp_app.views import get_commands_controller, \
     delete_specific_target, file_upload_list, persist_job_state, load_job_state, \
     del_file_from_list, get_file_listing, get_file, get_interfaces, stop_job, \
     get_state_names, get_saved_command_list, put_saved_command, \
-    desired_plugin_state_controller
+    desired_plugin_state_controller, update_plugin
 
 ECHO_JOB_ID = str(uuid4())
 NOW = time()
@@ -727,4 +727,54 @@ class TestDataHandling(object):
         assert "replaced" in str(response.content)
         assert request_id.replace('"', '') == plugins[4]['id']
         assert rf.get(url_var).GET['desired_state'] == desired_state
+        assert response.status_code == 200
+
+    @staticmethod
+    def test_add_plugin_dupplicate_port(rf):
+        """
+        This test is replicating when the user clicks on
+        'Execute Sequence' button at the bottom right of w3.
+        """
+        url_var = "/update_plugin/NEW/"
+        plugin_data = {
+            "Name": "Plugin3",
+            "ServiceName": "Plugin3-4243tcp",
+            "ServiceID": "cheeto3",
+            "State": "Stopped",
+            "DesiredState": "",
+            "OS": "all",
+            "Interface": "1.1.1.1",
+            "Environment": ["STAGE=DEV", "NORMAL=3"],
+            "ExternalPorts": ["2/tcp"],
+            "InternalPorts": ["2/tcp"],
+            "Extra": True,
+        }
+        RPP.insert({"Interface": "1.1.1.1", "TCPPorts": ["2"]}).run(connect())
+        plugin_json = json.dumps(plugin_data)
+        response = post_test(url_var, plugin_json, update_plugin, rf)
+        assert response.status_code == 400
+
+    @staticmethod
+    def test_add_plugin_ok(rf):
+        """
+        This test is replicating when the user clicks on
+        'Execute Sequence' button at the bottom right of w3.
+        """
+        url_var = "/update_plugin/NEW/"
+        plugin_data = {
+            "Name": "Plugin3",
+            "ServiceName": "Plugin3-4243tcp",
+            "ServiceID": "cheeto3",
+            "State": "Stopped",
+            "DesiredState": "",
+            "OS": "all",
+            "Interface": "1.1.1.1",
+            "Environment": ["STAGE=DEV", "NORMAL=3"],
+            "ExternalPorts": ["12/tcp"],
+            "InternalPorts": ["12/tcp"],
+            "Extra": True,
+        }
+        RPP.insert({"Interface": "1.1.1.1", "TCPPorts": ["2"]}).run(connect())
+        plugin_json = json.dumps(plugin_data)
+        response = post_test(url_var, plugin_json, update_plugin, rf)
         assert response.status_code == 200
