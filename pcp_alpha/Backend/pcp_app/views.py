@@ -260,6 +260,7 @@ def edit_target_form(request, target_id):
     brain_connection = brain.connect()
     get_brain_target = brain.r.db("Brain").table("Targets").filter(
         {"id": str(target_id)}).run(brain_connection)
+    print("\nget_brain_target:\n{}\n".format(get_brain_target))
     return HttpResponse(template.render(
         context={"edit_target_dict": get_brain_target,
                  'plugin_list': get_plugin_list_query(), },
