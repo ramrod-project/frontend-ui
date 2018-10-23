@@ -2180,14 +2180,30 @@ function w4_output_collapse2(job_row){
 
 function w4_output_collapse(){
     // w4 output un-collapse by click on w4 output job
-    $(this)[0].classList.toggle("active2");
-    var w4_content = $(this)[0].nextSibling;
-    var w4_pre_tag = $(this)[0].nextSibling.firstChild;
+    var this_var = $(this),
+        job_num = this_var[0].innerText.split("Job Output ")[1],
+        job_row_var = $("#jobrow"+job_num),
+        w4_content = this_var[0].nextSibling,
+        w4_pre_tag = this_var[0].nextSibling.firstChild;
+    this_var[0].classList.toggle("active2");
 
     if (w4_content.style.maxHeight) {
         w4_content.style.maxHeight = null;
     } else {
         w4_content.style.maxHeight = (w4_pre_tag.scrollHeight+35) + "px";
+    }
+    // checking if job row is highlighted.
+    if (w3_highlighted_array.includes(Number(job_num))){
+        job_row_var.removeClass('selected');
+        var w3_content_row = w3_highlighted_array.indexOf(job_row_var[0].rowIndex);
+        if(w3_content_row > -1){
+            w3_highlighted_array.splice(w3_content_row, 1);
+            as_highlighted_checker[active_sequence] = 0;
+        }
+    } else {
+        job_row_var.addClass('selected');
+        w3_highlighted_array.push(job_row_var[0].rowIndex);
+        as_highlighted_checker[active_sequence] = 1;
     }
 }
 
@@ -2221,7 +2237,7 @@ function render_job_output_to_page(job_guid, data){
         render_job_output_to_secondary(id_replication_map[updateid], data);
     }
     // w4 output un-collapse by click on w4 output job
-    // $("#w4_output_collapsible_button"+updateid).click(w4_output_collapse);
+    $("#w4_output_collapsible_button"+updateid).click(w4_output_collapse);
 }
 
 function render_job_output_to_secondary(secondary_id, data)
