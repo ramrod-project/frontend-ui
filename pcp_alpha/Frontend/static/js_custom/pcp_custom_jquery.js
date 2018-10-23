@@ -1415,6 +1415,15 @@ function hide_current_sequence(e){
     sequences[active_sequence] = new Set();
     synchronize_sequence_tab_rows(active_sequence);
 }
+function delay_goto_tab(next_tab, delay_ms){
+    setTimeout(
+        function() {
+            synchronize_job_sequence_tabs(next_tab);
+            synchronize_output_sequence_tabs(next_tab);
+        }
+        , delay_ms
+    );
+}
 function add_sequence_tab(clear=true){
     var next_tab =  $("#jobq_tabs").children().length;
     if (clear){
@@ -1434,28 +1443,30 @@ function add_sequence_tab(clear=true){
         .append('<li id="outB_'+next_tab+'" onclick="synchronize_output_sequence_tabs('+next_tab+')"><a href="#outq_'+next_tab+'" data-toggle="tab">'+next_tab+'</a></li>');
     $('#outq_content')
         .append('<div class="tab-pane" id="outq_'+next_tab+'"></div>');
-
-    setTimeout(
-        function() {
-            synchronize_job_sequence_tabs(next_tab);
-            synchronize_output_sequence_tabs(next_tab);
-        }
-        , 33
-    );
+    delay_goto_tab(next_tab, 33);
 }
+
 function synchronize_job_sequence_tabs(tab_id){
-    active_sequence = tab_id;
-    var other_tab = $('#output_tabs a[href="#outq_'+tab_id+'"]');
-    other_tab.tab('show');
-    synchronize_sequence_tab_rows(tab_id);
-    as_checker_func(active_sequence);
+    if (exec_int === 1){
+        delay_goto_tab(active_sequence, 5);
+    } else {
+        active_sequence = tab_id;
+        var other_tab = $('#output_tabs a[href="#outq_'+tab_id+'"]');
+        other_tab.tab('show');
+        synchronize_sequence_tab_rows(tab_id);
+        as_checker_func(active_sequence);
+    }
 }
 function synchronize_output_sequence_tabs(tab_id){
-    active_sequence = tab_id;
-    var other_tab = $('#jobq_tabs a[href="#jobq_'+tab_id+'"]');
-    other_tab.tab('show');
-    synchronize_sequence_tab_rows(tab_id);
-    as_checker_func(active_sequence);
+    if (exec_int === 1){
+        delay_goto_tab(active_sequence, 5);
+    } else {
+        active_sequence = tab_id;
+        var other_tab = $('#jobq_tabs a[href="#jobq_' + tab_id + '"]');
+        other_tab.tab('show');
+        synchronize_sequence_tab_rows(tab_id);
+        as_checker_func(active_sequence);
+    }
 }
 function synchronize_sequence_tab_rows(sequence_id){
     var _dt = new Date(Number(sequence_starttime_map[sequence_id]) * 1000);
