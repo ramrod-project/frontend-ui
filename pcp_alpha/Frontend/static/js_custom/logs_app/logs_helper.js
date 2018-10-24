@@ -19,7 +19,7 @@ function get_data_logs(page_location="home"){
         datatype: 'json',
         success: function(data){
             for (var count=0; count<data.length; count++){
-                if (data[count].Severity >= 30) {
+                if (data[count].Severity >= 30 || data[count].Severity === undefined) {
                     sidebar_log_list("danger",
                     right_side_panel_log_msg_format(date_time_test(data[count].rt),
                         data[count].shost,
