@@ -5,7 +5,7 @@ This file was created for project pcp any js file that needs anything related to
 */
 function right_side_panel_log_msg_format(rt, sh, ss, sev, msg){
     var bp = "<br/>";
-    return "RT: "+ rt + bp + 
+    return "RT: "+ rt + bp +
         "SourceHost: "+ sh + bp +
         "SourceServiceName: "+ ss + bp +
         "Severity: "+ sev + bp +
@@ -19,14 +19,16 @@ function get_data_logs(page_location="home"){
         datatype: 'json',
         success: function(data){
             for (var count=0; count<data.length; count++){
-                sidebar_log_list("danger",
+                if (data[count].Severity >= 30 || data[count].Severity === undefined) {
+                    sidebar_log_list("danger",
                     right_side_panel_log_msg_format(date_time_test(data[count].rt),
                         data[count].shost,
                         data[count].sourceServiceName,
                         data[count].Severity,
                         data[count].msg
                     )
-                );
+                    );
+                }
 
                 if (page_location === "logs"){
                     update_logs_data_table(
