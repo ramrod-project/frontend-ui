@@ -638,6 +638,7 @@ function filter_w2() {
             $(".tooltipHeader").empty();
             $(".tooltipContent").empty();
             $(".theContentArgument").empty();
+            $("#boxtwofooterid").empty();
         } else {
             $(to_filter[0].children[row_i]).css("display", "none");
         }
@@ -851,6 +852,7 @@ function get_commands_func(){
                 $(".tooltipHeader").empty();
                 $(".tooltipContent").empty();
                 $(".theContentArgument").empty();
+                $("#boxtwofooterid").empty();
             }
 
         	$("#theContent").empty();
@@ -906,12 +908,16 @@ function get_commands_func(){
 
                 //footer
                 $(".theContentArgument").empty();
+                $("#boxtwofooterid").empty();
                 $(".theContentArgument")
                     .append($("<div id='commandIdBuilder'/>")
                         .text($(this)[0].text));
                 // JSON development data on W2 footer
-                $(".theContentArgument")
+                $("#boxtwofooterid")
                     .append($("<div id='JSON_Command_DATA'/>")
+                        .attr({"draggable": "true",
+                            "ondragstart": "drag_command(event)",
+                            "ondragend": "drag_end_command(event)"})
                         .addClass("text-muted small")
                         .text(JSON.stringify(current_command_template)));
 
@@ -967,6 +973,7 @@ function close_command_loader(){
     $("#w2_namer").hide();
     $(".tooltipHeader").empty();
     $(".theContentArgument").empty();
+    $("#boxtwofooterid").empty();
     $(".tooltipContent").empty();
     $("#w2_save_feedback").hide();
     $("#w2_persist_button").hide();
@@ -983,8 +990,12 @@ function load_command_from_cloud(){
     $("#w2_loader_button").hide();
     $("#w2_builder_saved_command_list").show();
     $(".theContentArgument")
-        .append($("<div id='commandIdBuilder'/>"))
+        .append($("<div id='commandIdBuilder'/>"));
+    $("#boxtwofooterid")
         .append($("<div id='JSON_Command_DATA'/>")
+            .attr({"draggable": "true",
+                "ondragstart": "drag_command(event)",
+                "ondragend": "drag_end_command(event)"})
             .addClass("text-muted small"));
     $("#savedContent").empty();
     load_command_for_plugin_from_cloud(current_selected_plugin);
@@ -1415,6 +1426,15 @@ function hide_current_sequence(e){
     sequences[active_sequence] = new Set();
     synchronize_sequence_tab_rows(active_sequence);
 }
+function delay_goto_tab(next_tab, delay_ms){
+    setTimeout(
+        function() {
+            synchronize_job_sequence_tabs(next_tab);
+            synchronize_output_sequence_tabs(next_tab);
+        }
+        , delay_ms
+    );
+}
 function add_sequence_tab(clear=true){
     var next_tab =  $("#jobq_tabs").children().length;
     if (clear){
@@ -1434,28 +1454,30 @@ function add_sequence_tab(clear=true){
         .append('<li id="outB_'+next_tab+'" onclick="synchronize_output_sequence_tabs('+next_tab+')"><a href="#outq_'+next_tab+'" data-toggle="tab">'+next_tab+'</a></li>');
     $('#outq_content')
         .append('<div class="tab-pane" id="outq_'+next_tab+'"></div>');
-
-    setTimeout(
-        function() {
-            synchronize_job_sequence_tabs(next_tab);
-            synchronize_output_sequence_tabs(next_tab);
-        }
-        , 33
-    );
+    delay_goto_tab(next_tab, 33);
 }
+
 function synchronize_job_sequence_tabs(tab_id){
-    active_sequence = tab_id;
-    var other_tab = $('#output_tabs a[href="#outq_'+tab_id+'"]');
-    other_tab.tab('show');
-    synchronize_sequence_tab_rows(tab_id);
-    as_checker_func(active_sequence);
+    if (exec_int === 1){
+        delay_goto_tab(active_sequence, 5);
+    } else {
+        active_sequence = tab_id;
+        var other_tab = $('#output_tabs a[href="#outq_'+tab_id+'"]');
+        other_tab.tab('show');
+        synchronize_sequence_tab_rows(tab_id);
+        as_checker_func(active_sequence);
+    }
 }
 function synchronize_output_sequence_tabs(tab_id){
-    active_sequence = tab_id;
-    var other_tab = $('#jobq_tabs a[href="#jobq_'+tab_id+'"]');
-    other_tab.tab('show');
-    synchronize_sequence_tab_rows(tab_id);
-    as_checker_func(active_sequence);
+    if (exec_int === 1){
+        delay_goto_tab(active_sequence, 5);
+    } else {
+        active_sequence = tab_id;
+        var other_tab = $('#jobq_tabs a[href="#jobq_' + tab_id + '"]');
+        other_tab.tab('show');
+        synchronize_sequence_tab_rows(tab_id);
+        as_checker_func(active_sequence);
+    }
 }
 function synchronize_sequence_tab_rows(sequence_id){
     var _dt = new Date(Number(sequence_starttime_map[sequence_id]) * 1000);
@@ -2122,7 +2144,7 @@ function execute_sequence(){
                         unselect_job_row(dom_id, 0);
                         num_jobs_to_ex.push(index);
                     } else {
-                        if ($("#jobstatusid"+dom_id + " span").text() == INITIAL_JOB_STATUS){
+                        if (!id_map.hasOwnProperty(dom_id) && dom_id in sequences[active_sequence]){
                             id_status_map[dom_id] = "Error";
                             status_change_update_dom(dom_id, "Error");
                             notification_function("command ", "not appropriate for target", "", "danger");
@@ -2182,14 +2204,30 @@ function w4_output_collapse2(job_row){
 
 function w4_output_collapse(){
     // w4 output un-collapse by click on w4 output job
-    $(this)[0].classList.toggle("active2");
-    var w4_content = $(this)[0].nextSibling;
-    var w4_pre_tag = $(this)[0].nextSibling.firstChild;
+    var this_var = $(this),
+        job_num = this_var[0].innerText.split("Job Output ")[1],
+        job_row_var = $("#jobrow"+job_num),
+        w4_content = this_var[0].nextSibling,
+        w4_pre_tag = this_var[0].nextSibling.firstChild;
+    this_var[0].classList.toggle("active2");
 
     if (w4_content.style.maxHeight) {
         w4_content.style.maxHeight = null;
     } else {
         w4_content.style.maxHeight = (w4_pre_tag.scrollHeight+35) + "px";
+    }
+    // checking if job row is highlighted.
+    if (w3_highlighted_array.includes(Number(job_num))){
+        job_row_var.removeClass('selected');
+        var w3_content_row = w3_highlighted_array.indexOf(job_row_var[0].rowIndex);
+        if(w3_content_row > -1){
+            w3_highlighted_array.splice(w3_content_row, 1);
+            as_highlighted_checker[active_sequence] = 0;
+        }
+    } else {
+        job_row_var.addClass('selected');
+        w3_highlighted_array.push(job_row_var[0].rowIndex);
+        as_highlighted_checker[active_sequence] = 1;
     }
 }
 
@@ -2223,7 +2261,7 @@ function render_job_output_to_page(job_guid, data){
         render_job_output_to_secondary(id_replication_map[updateid], data);
     }
     // w4 output un-collapse by click on w4 output job
-    // $("#w4_output_collapsible_button"+updateid).click(w4_output_collapse);
+    $("#w4_output_collapsible_button"+updateid).click(w4_output_collapse);
 }
 
 function render_job_output_to_secondary(secondary_id, data)
