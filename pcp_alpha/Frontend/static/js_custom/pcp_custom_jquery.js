@@ -2232,28 +2232,31 @@ function w4_output_collapse(){
 }
 
 function render_job_output_to_page(job_guid, data){
-    var updateid = id_reverse_map[job_guid];
+    var updateid = id_reverse_map[job_guid],
+        updateid_selector = $("#updateid"+updateid),
+        updatestatus_selector = $("#updatestatusid"+updateid),
+        jobstatus_selector = $("#jobstatusid"+updateid),
+        download_link = $('<a>[Download]</a>');
     clearInterval(start_timer_map[updateid]);
-    $("#updateid"+updateid).empty();
-    $("#updateid"+updateid).attr({"class": ""});
+    updateid_selector.empty();
+    updateid_selector.attr({"class": ""});
     $("#update_spin"+updateid).remove();
     $('<button class="w4_output_collapsible_button" id="w4_output_collapsible_button'+updateid+'">Job Output '+updateid+'</button>')
         .appendTo("#updateid"+updateid);
     $('<div class="w4_output_content" id="w4_output_content'+updateid+'"></div>').appendTo("#updateid"+updateid);
     $('<pre id="updatecontent'+updateid+'"></pre>').appendTo("#w4_output_content"+updateid);
     $("#updatecontent"+updateid).text(data['Content']);
-    var download_link = $('<a>[Download]</a>');
     download_link.attr({"href": "/action/get_full_output_data/?job_id="+job_guid+"&job_number="+updateid});
     $("#w4_output_content"+updateid)
         .append($("<div/>").attr({"id": "download_link_id"+updateid})
             .append(download_link));
-    $("#updatestatusid"+updateid).empty();
-    $("#updatestatusid"+updateid)
+    updatestatus_selector.empty();
+    updatestatus_selector
         .append($("<span/>")
             .attr({"class": "label label-Done"})
             .text("Done"));
-    $("#jobstatusid"+updateid).empty();
-    $("#jobstatusid"+updateid)
+    jobstatus_selector.empty();
+    jobstatus_selector
         .append($("<span/>")
             .attr({"class": "label label-Done"})
             .text("Done"));
