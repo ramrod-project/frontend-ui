@@ -58,6 +58,8 @@ script:
   - bash <(curl -s https://raw.githubusercontent.com/ramrod-project/integration-stack/$TRAVIS_BRANCH/scripts/e2e.sh)
 
 after_success:
+  - docker rmi $(docker images -q)
+  - docker build -t ramrodpcp/frontend-ui:test .
   - docker tag ramrodpcp/frontend-ui:test ramrodpcp/frontend-ui:$TAG
   - if [[ "$TRAVIS_PULL_REQUEST" == "false" ]];
     then echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin; fi
