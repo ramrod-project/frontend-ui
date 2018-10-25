@@ -5,6 +5,7 @@
 var PLUGIN_STATE = "State";
 var PLUGIN_DESIRED_STATE = "DesiredState";
 var PLUGIN_OS = "OS";
+var PLUGIN_EXTRA = "Extra";
 var PLUGIN_NAME = "Name";
 var PLUGIN_INTERFACE = "Interface";
 var PLUGIN_ENVIRONMENT = "Environment";
@@ -52,6 +53,13 @@ function handle_selected_plugin_change(new_plugin_name){
     if (required_os == "all") {
         required_os = false;  // if it doesn't matter, it doesn't matter
     }
+    if (selected_plugin.hasOwnProperty("Extra") &&
+        selected_plugin.Extra){
+        $("#plugin-extra").val("true");
+    } else {
+
+        $("#plugin-extra").val("false");
+    }
     get_interfaces(required_os);
 }
 
@@ -67,7 +75,7 @@ function get_interfaces(hostos_filter=false){
             iface.empty();
             for (var i=0; i<data.length; i++){
                 interface_map[data[i].Interface] = data[i];
-                if (!hostos_filter || data[i].OS == hostos_filter){
+                if (!hostos_filter || data[i].OS === hostos_filter){
                     iface.append($("<option/>")
                         .val(data[i].Interface)
                         .text(data[i].Interface + " " + data[i].NodeHostName + " (" + data[i].OS + ")")
@@ -78,7 +86,7 @@ function get_interfaces(hostos_filter=false){
             }
         },
         error: function (data) {
-            console.log("ERROR @ update_interfaces ajax function");
+            console.warn("ERROR @ update_interfaces ajax function");
         }
     });
 }
@@ -95,7 +103,6 @@ function checked_plugin_list(plugin_id, plugin_checkbox_num) {
             }
         }
     }
-    console.log(checked_plugin_list_array);
 }
 
 // Modify function for future activate, restart, and stop plugin task
@@ -113,7 +120,7 @@ function desired_plugin_state(desired_state) {
             console.log(data);
         },
         error: function (data) {
-            console.log("ERROR @ activate_plugin ajax function");
+            console.warn("ERROR @ activate_plugin ajax function");
         }
     });
 }
@@ -202,7 +209,7 @@ function get_plugin_list() {
             plugin_list_refresh.removeClass("fa-spin");
         },
         error: function (data) {
-            console.log("ERROR @ get_plugin_list function");
+            console.warn("ERROR @ get_plugin_list function");
             plugin_list_refresh.removeClass("fa-spin");
         }
     });
@@ -219,6 +226,7 @@ function onclick_plugin_save(event){
     plugin[PLUGIN_NAME] = $("#plugin-name").val();
     plugin[PLUGIN_INTERFACE] = $("#plugin-interface").val();
     plugin[PLUGIN_OS] = $("#plugin-os").val();
+    plugin[PLUGIN_EXTRA] = $("#plugin-extra").val();
     plugin[PLUGIN_ENVIRONMENT] = $("#plugin-environment").val().split(ITEM_SPLITTER);
     $.ajax({
         type: "POST",
@@ -228,11 +236,13 @@ function onclick_plugin_save(event){
         success: function(data) {
             get_plugin_list();
             $("#plugin-save").attr({"disabled":false});
+            $("#plugin-response").removeClass("ui-state-error");
             $("#plugin-response").addClass("btn-pcp_button_color1");
-            $("#plugin-response").text("Changes Successful - May now close window - "+JSON.stringify(data))
+            $("#plugin-response").text("Changes Successful - May now close window - "+data.responseText)
         },
         error: function (data) {
-            $("#plugin-response").text("Changes Failed - "+JSON.stringify(data));
+            $("#plugin-response").text("Changes Failed - "+data.responseJSON.first_error);
+            $("#plugin-response").removeClass("btn-pcp_button_color1");
             $("#plugin-response").addClass("ui-state-error");
             $("#plugin-save").attr({"disabled":false});
         }
@@ -262,7 +272,6 @@ function verify_plugin_name(){
 }
 
 function verify_desired_state(){
-    console.log("verify_desired_state");
     var plugin_desired_option = $("#plugin-desired option");
     if(plugin_desired_option[0].selected === true) {
         $("#plugin-save")[0].disabled = true;
@@ -276,7 +285,6 @@ function verify_desired_state(){
 }
 
 function verify_plugin_interface(){
-    console.log("verify_plugin_interface");
     var plugin_interface = $("#plugin-interface"),
         helper_checker = 0;
     $("#plugin-os").val(interface_map[plugin_interface.val()].OS);
@@ -313,7 +321,6 @@ function verify_plugin_external_ports(){
 }
 
 function verify_plugin_environment(){
-    console.log("verify_plugin_environment");
     var plugin_environment = $("#plugin-environment"),
         content = plugin_environment[0].value;
     if(!env_rgx.test(content)){
@@ -404,6 +411,7 @@ $('#controller-modal').on('show.bs.modal', function (event) {
       .text("")
       .removeClass("ui-state-error")
       .removeClass("btn-pcp_button_color1");
+  $("#pf_extra").hide();
   modal.find('.plugin-id').val(plugin_list_map[plugin_id]["id"]);
   modal.find('.modal-title').text('Plugin: ' + plugin_list_map[plugin_id]["Name"]);
   modal.find('.plugin-name').val(plugin_list_map[plugin_id]["Name"]);

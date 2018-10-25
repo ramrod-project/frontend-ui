@@ -163,6 +163,9 @@
             transition: max-height 0.7s ease-out;
             background-color: #f1f1f1;
         }
+        pre {
+            white-space: pre-wrap;
+        }
 
     </style>
     {% block styles %}{% endblock %}
@@ -313,18 +316,18 @@ desired effect
                     {% if host_dict %}
                       {% for items in host_dict %}
                         <tr role="row" class="odd" id="target_row{{ forloop.counter0 }}">
-                          <td id="name_tag_id{{ forloop.counter0 }}" class="clickable-row-col1" onclick="" style="width: 42.5%;">
+                          <td id="name_tag_id{{ forloop.counter0 }}" class="clickable-row-col1" onclick="" style="width: 40.5%;">
                             <a href="#">
                               <span style="display:none" id="nameidjson{{ forloop.counter0 }}">{{ items.json }}</span>
                               <span>{{ items.PluginName }}</span>
                             </a>
                           </td>
-                          <td id="address_tag_id{{ forloop.counter0 }}" class="clickable-row-col2" onclick="" style="width: 42.5%;">
+                          <td id="address_tag_id{{ forloop.counter0 }}" class="clickable-row-col2" onclick="" style="width: 40.5%;">
                             <a href="#">
                               <span>{{ items.Location }}</span>
                             </a>
                           </td>
-                          <td id="action_tad_id{{ forloop.counter0 }}" style="text-align: center; width: 15%;" class="clickable-row-col3" onclick="">
+                          <td id="action_tad_id{{ forloop.counter0 }}" style="text-align: center; width: 19%;" class="clickable-row-col3" onclick="">
                             <span id="edit_target_id">
                               <a href="/edit_target_form/{{ items.id }}/" target="_blank" class="btn btn-social-icon btn-bitbucket btn-xs" data-toggle="tooltip" title="Edit Target">
                                 <i class="fa fa-edit"></i>
@@ -422,7 +425,8 @@ desired effect
             <!--/W2 Body-->
 
             <!--W2 Footer-->
-            <div class="box-footer theContentArgument" onclick="" draggable="true" ondragstart="drag_command(event)" ondragend="drag_end_command(event)" id="boxtwofooterid"></div>
+            <!--<div class="box-footer theContentArgument" onclick="" draggable="true" ondragstart="drag_command(event)" ondragend="drag_end_command(event)" id="boxtwofooterid"></div>-->
+            <div class="box-footer theContentArgument" onclick="" id="boxtwofooterid"></div>
             <!--/W2 Footer-->
 
           </div>
@@ -479,15 +483,15 @@ desired effect
                                   <table id="job_table" class="table table-bordered table-hover dataTable display gridSelect2" role="grid" aria-describedby="job_table_info">
                                       <thead>
                                           <tr role="row">
-                                              <th rowspan="1" colspan="1">
+                                              <th rowspan="1" colspan="1" style="width: 10%;">
                                                   Job #</th>
-                                              <th rowspan="1" colspan="1">
+                                              <th rowspan="1" colspan="1" style="width: 30%;">
                                                   Plugin Name</th>
-                                              <th rowspan="1" colspan="1">
+                                              <th rowspan="1" colspan="1" style="width: 22%;">
                                                   Host</th>
-                                              <th rowspan="1" colspan="1">
+                                              <th rowspan="1" colspan="1" style="width: 30%;">
                                                   Command</th>
-                                              <th rowspan="1" colspan="1">
+                                              <th rowspan="1" colspan="1" style="width: 8%;">
                                                   Status</th>
                                           </tr>
                                       </thead>
@@ -757,7 +761,15 @@ desired effect
             <select class="form-control plugin-name" id="plugin-name">
             </select>
             <span id="pf_name_help" class="help-block">Select a Plugin Name</span>
-          <input type="text" class="form-control plugin-id" disabled id="plugin-id">
+            <input type="text" class="form-control plugin-id" disabled id="plugin-id">
+          </div>
+          <div id="pf_extra" class="form-group">
+            <label for="plugin-extra" class="control-label">Extra Features:</label>
+            <select class="form-control plugin-extra" id="plugin-extra">
+                <option value="true">true</option>
+                <option value="false">false</option>
+            </select>
+            <span id="pf_extra_help" class="help-block">Extra features is determined at container export </span>
           </div>
           <div class="form-group">
             <label for="plugin-state" class="control-label">State:</label>

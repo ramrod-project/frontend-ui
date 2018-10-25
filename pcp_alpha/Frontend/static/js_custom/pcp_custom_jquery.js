@@ -15,6 +15,7 @@ var sequence_starttime_map = {"1":  Math.floor((new Date().valueOf())/1000).toSt
 var sequence_expiretime_map = {"1": undefined};
 var id_map = {};
 var id_status_map = {};
+var status_deferred_updates = [];
 var id_reverse_map = {};
 var id_replication_map = {};
 var target_id_map = {};
@@ -128,10 +129,7 @@ $(document).ready(function() {
     target_row_selection.on('select', function(e, dt, type, indexes) {  // user clicks on target row to start drag
         var selected_var = $(".gridSelect tbody tr.selected");
         if(selected_var.length > 0){
-            console.log("draggable object for more than one object");
             drag_target();
-        } else {
-            console.log("draggable object for one object");
         }
     });
 
@@ -479,49 +477,63 @@ function status_change_update_dom(job_dom_id, status){
 }
 
 function status_change_ws_callback(message) {
-    console.log(message);
-    var data = null;
-    if ('data' in message && message.data != null && message.data[0] == "{") {
-        data = JSON.parse(message.data);
-        var job_id = null;
-        if ("id" in data) {
-            job_id = data.id;
-            if (job_id in id_reverse_map) {
-                var job_dom_id = id_reverse_map[job_id];
-                id_status_map[job_dom_id] = data.status;
-                status_change_update_dom(job_dom_id, data.status);
-                if(data.status === "Done" || data.status === "Stopped"){
-                    $("#stopjob"+job_dom_id).hide();
-                    $("#resetjob"+job_dom_id).hide();
-                    $("#trashjob"+job_dom_id).show();
-                }
-                else if(data.status === "Error"){
-                    $("#stopjob"+job_dom_id).hide();
-                    $("#resetjob"+job_dom_id).show();
-                }
-                else if (!(data.status in JOB_CAN_TERMINATE) || !(data.status in JOB_CAN_NOT_TERMINATE)){
-                    $("#stopjob"+job_dom_id).hide();
-                    $("#resetjob"+job_dom_id).hide();
+    var data_list = null;
+    var data;
+    if ('data' in message && message.data != null && message.data[0] === "[") {
+        data_list = JSON.parse(message.data);
+        for (var i in data_list){
+            data = data_list[i];
+            var job_id = null;
+            if ("id" in data) {
+                job_id = data.id;
+                if (job_id in id_reverse_map) {
+                    var job_dom_id = id_reverse_map[job_id];
+                    id_status_map[job_dom_id] = data.status;
+                    status_change_update_dom(job_dom_id, data.status);
+                    if(data.status === "Done" || data.status === "Stopped"){
+                        $("#stopjob"+job_dom_id).hide();
+                        $("#resetjob"+job_dom_id).hide();
+                        $("#trashjob"+job_dom_id).show();
+                    }
+                    else if(data.status === "Error"){
+                        $("#stopjob"+job_dom_id).hide();
+                        $("#resetjob"+job_dom_id).show();
+                    }
+                    else if (!(data.status in JOB_CAN_TERMINATE) || !(data.status in JOB_CAN_NOT_TERMINATE)){
+                        $("#stopjob"+job_dom_id).hide();
+                        $("#resetjob"+job_dom_id).hide();
+                    }
+                } else {
+                    if(exec_int === 1) {
+                        status_deferred_updates.push(data);
+                    }
                 }
             }
         }
     }
 }
+function respool_deferred_status_changes(){
+    var respool = [];
+    while (status_deferred_updates.length > 0){
+        respool.push(status_deferred_updates.shift())
+    }
+    status_change_ws_callback({data: JSON.stringify(respool)});
+}
 
 function files_change_ws_callback(message){
-    if (message.data.length > 0 && message.data[0] == "{"){
+    if (message.data.length > 0 && message.data[0] === "{"){
         $("#upload_files_need_refreshed").show();
     }
 
 }
 
 function plugins_change_ws_callback(message){
-    if (message.data.length > 0 && message.data[0] == "{"){
+    if (message.data.length > 0 && message.data[0] === "{"){
         $("#plugins_need_refreshed").show();
     }
 }
 function telemetry_change_ws_callback(message){
-    if (message.data.length > 0 && message.data[0] == "{"){
+    if (message.data.length > 0 && message.data[0] === "{"){
         var data_js = JSON.parse(message.data);
         $("#target_row"+target_id_map[data_js.id])[0].title = recursive_pretty_print(data_js.Optional);
     }
@@ -538,18 +550,18 @@ function logs_change_ws_callback(message){
 // ** TESTING ONLY **
 // Testing the websocket - for job status
 function test_ws_callback(message) {
-    console.log(message);
+    // console.log(message);
     var data = {};
     if ('data' in message) {
         data = JSON.parse(message.data);
     }
-    console.log(data);
+    // console.log(data);
     var job_id = null;
     if ("id" in data) {
         job_id = data.id;
     }
-    console.log(job_id);
-    console.log(id_reverse_map);
+    // console.log(job_id);
+    // console.log(id_reverse_map);
     if (job_id in id_reverse_map) {
          console.log("In map!");
     }
@@ -626,6 +638,7 @@ function filter_w2() {
             $(".tooltipHeader").empty();
             $(".tooltipContent").empty();
             $(".theContentArgument").empty();
+            $("#boxtwofooterid").empty();
         } else {
             $(to_filter[0].children[row_i]).css("display", "none");
         }
@@ -839,6 +852,7 @@ function get_commands_func(){
                 $(".tooltipHeader").empty();
                 $(".tooltipContent").empty();
                 $(".theContentArgument").empty();
+                $("#boxtwofooterid").empty();
             }
 
         	$("#theContent").empty();
@@ -894,12 +908,16 @@ function get_commands_func(){
 
                 //footer
                 $(".theContentArgument").empty();
+                $("#boxtwofooterid").empty();
                 $(".theContentArgument")
                     .append($("<div id='commandIdBuilder'/>")
                         .text($(this)[0].text));
                 // JSON development data on W2 footer
-                $(".theContentArgument")
+                $("#boxtwofooterid")
                     .append($("<div id='JSON_Command_DATA'/>")
+                        .attr({"draggable": "true",
+                            "ondragstart": "drag_command(event)",
+                            "ondragend": "drag_end_command(event)"})
                         .addClass("text-muted small")
                         .text(JSON.stringify(current_command_template)));
 
@@ -924,7 +942,7 @@ function get_commands_func(){
             });
         },
         error: function (data) {
-        	console.log("ERROR @ get_commands_func function");
+        	console.warn("ERROR @ get_commands_func function");
         }
     })
 }
@@ -955,6 +973,7 @@ function close_command_loader(){
     $("#w2_namer").hide();
     $(".tooltipHeader").empty();
     $(".theContentArgument").empty();
+    $("#boxtwofooterid").empty();
     $(".tooltipContent").empty();
     $("#w2_save_feedback").hide();
     $("#w2_persist_button").hide();
@@ -971,8 +990,12 @@ function load_command_from_cloud(){
     $("#w2_loader_button").hide();
     $("#w2_builder_saved_command_list").show();
     $(".theContentArgument")
-        .append($("<div id='commandIdBuilder'/>"))
+        .append($("<div id='commandIdBuilder'/>"));
+    $("#boxtwofooterid")
         .append($("<div id='JSON_Command_DATA'/>")
+            .attr({"draggable": "true",
+                "ondragstart": "drag_command(event)",
+                "ondragend": "drag_end_command(event)"})
             .addClass("text-muted small"));
     $("#savedContent").empty();
     load_command_for_plugin_from_cloud(current_selected_plugin);
@@ -1385,7 +1408,6 @@ function quick_action_function(source, source_widget_id, source_widget){
 }
 
 function add_target_to_job_sc_button(){
-    // console.log("add_target_to_job_sc");  // debug
     var w1_target_row_id = $(this)[0].parentElement.parentElement.parentElement.id.substring(10, $(this)[0].id.length),
         row_js_str = $("#nameidjson" + w1_target_row_id)[0].innerText;
     quick_action_function(row_js_str, "pluginid", "target");
@@ -1395,7 +1417,6 @@ function add_target_to_job_sc_button(){
 }
 
 function add_command_to_job_sc_button(){
-    // console.log("add_command_to_job_sc_button");
     var command_temp_str = JSON.stringify(current_command_template);  // command template as a string
     quick_action_function(command_temp_str,"commandid", "command");
     set_w3_job_status();  // setting w3 job status
@@ -1404,6 +1425,15 @@ function add_command_to_job_sc_button(){
 function hide_current_sequence(e){
     sequences[active_sequence] = new Set();
     synchronize_sequence_tab_rows(active_sequence);
+}
+function delay_goto_tab(next_tab, delay_ms){
+    setTimeout(
+        function() {
+            synchronize_job_sequence_tabs(next_tab);
+            synchronize_output_sequence_tabs(next_tab);
+        }
+        , delay_ms
+    );
 }
 function add_sequence_tab(clear=true){
     var next_tab =  $("#jobq_tabs").children().length;
@@ -1424,7 +1454,7 @@ function add_sequence_tab(clear=true){
         .append('<li id="outB_'+next_tab+'" onclick="synchronize_output_sequence_tabs('+next_tab+')"><a href="#outq_'+next_tab+'" data-toggle="tab">'+next_tab+'</a></li>');
     $('#outq_content')
         .append('<div class="tab-pane" id="outq_'+next_tab+'"></div>');
-
+    // delay_goto_tab(next_tab, 33);
     setTimeout(
         function() {
             synchronize_job_sequence_tabs(next_tab);
@@ -1433,7 +1463,18 @@ function add_sequence_tab(clear=true){
         , 33
     );
 }
+
 function synchronize_job_sequence_tabs(tab_id){
+    // if (exec_int === 1){
+    //     delay_goto_tab(active_sequence, 5);
+    // } else {
+    //     active_sequence = tab_id;
+    //     var other_tab = $('#output_tabs a[href="#outq_'+tab_id+'"]');
+    //     other_tab.tab('show');
+    //     synchronize_sequence_tab_rows(tab_id);
+    //     as_checker_func(active_sequence);
+    // }
+
     active_sequence = tab_id;
     var other_tab = $('#output_tabs a[href="#outq_'+tab_id+'"]');
     other_tab.tab('show');
@@ -1441,8 +1482,18 @@ function synchronize_job_sequence_tabs(tab_id){
     as_checker_func(active_sequence);
 }
 function synchronize_output_sequence_tabs(tab_id){
+    // if (exec_int === 1){
+    //     delay_goto_tab(active_sequence, 5);
+    // } else {
+    //     active_sequence = tab_id;
+    //     var other_tab = $('#jobq_tabs a[href="#jobq_' + tab_id + '"]');
+    //     other_tab.tab('show');
+    //     synchronize_sequence_tab_rows(tab_id);
+    //     as_checker_func(active_sequence);
+    // }
+
     active_sequence = tab_id;
-    var other_tab = $('#jobq_tabs a[href="#jobq_'+tab_id+'"]');
+    var other_tab = $('#jobq_tabs a[href="#jobq_' + tab_id + '"]');
     other_tab.tab('show');
     synchronize_sequence_tab_rows(tab_id);
     as_checker_func(active_sequence);
@@ -1490,7 +1541,6 @@ function add_new_plugin_location_job_row(id_parameter, num_parameter){
 
 // Add new job
 function add_new_job(){
-    // console.log("add_new_job");
     inc++;
     $("#addjob_button")[0].value = inc;
 
@@ -1645,7 +1695,6 @@ function clear_new_jobs(){
 
 // DRAG
 function drag_target(){
-   // console.log("drag_target");
 	$(".gridSelect tbody tr").draggable({
         // appendTo: $("#third_box_content"),
         appendTo: "body",
@@ -1683,7 +1732,6 @@ function drag_target(){
 	});
 }
 function display_drop_all(){
-    // console.log("display_drop_all");
     $("#w3_drop_target_to_all").css("display", "");
     // hover_int = 1;
 }
@@ -1693,7 +1741,6 @@ function hide_drop_all(){
 }
 
 function hover_w3_for_target(){
-//    console.log("hover_w3_for_target");
     $("#w3_drop_target_to_all").mouseover(hover_drop);
     $("#w3_drop_target_to_all").mouseover(hover_leave);
     $("#third_box_content tr").mouseover(hover_drop);
@@ -1702,12 +1749,10 @@ function hover_w3_for_target(){
 
 //    future animation
 function hover_leave(){
-//    console.log("hover_leave");  // debug
     hover_int = 0;
 }
 
 function hover_drop(){
-    // console.log("hover_drop");
     hover_int = 1;
     var hover_object = $(this);
     var hover_object_id = hover_object[0].id;
@@ -1731,14 +1776,13 @@ function hover_drop(){
     if (hover_int != 0){
         drop_target(hover_object);
     } else {
-        console.log("not dragging the object over a validated job row");
+        // console.log("not dragging the object over a validated job row");
         hover_int = 0;
     }
 }
 
 // Drop target to W3
 function drop_target(hover_object){
-    // console.log("drop_target");  // debug
     // hover_object is the row that is being hovered over
     // selected_var.length == # of targets dragging
     // hover_object.nextUntil().length == # of rows of every sequence in W3 - 1
@@ -1830,7 +1874,6 @@ function drag_end_command(event){
 }
 
 function drop_command(ev) {
-//    console.log("drop_command");  // debug
     ev.preventDefault();
     var command_json = ev.dataTransfer.getData("text");
     $("#w3_drop_to_all").css("display", "none");
@@ -1885,14 +1928,13 @@ function set_w3_job_status(full_update=false){
                 .append($("<span/>")
                     .attr({"class": "label label-Invalid"})
                     .text("Invalid"));
-            console.log("Status is done and plugin and command are filled up in the job row");
+            // console.log("Status is done and plugin and command are filled up in the job row");
         }
     }
 }
 
 
 function drop_command_to_multiple(ev) {
-   // console.log("drop_command_to_multiple");  // debug
     ev.preventDefault();
     var command_json = ev.dataTransfer.getData("text");
     $("#w3_drop_to_all").css("display", "none");
@@ -2074,12 +2116,12 @@ function final_countdown_function(start_time, dom_id) {
 
 // Execute Sequence function down below are for w3+w4
 function execute_sequence(){
-   // console.log("execute_sequence function has been called");  // debug
-    exec_int = 1;
     hide_drop_all();
     var desired_start = Number(sequence_starttime_map[active_sequence]);
     var desired_expire = Number(sequence_expiretime_map[active_sequence]);
     if (desired_start < desired_expire){
+        exec_int = 1;
+        $("#execute_button").attr({"disabled":true});
         var jobs = prepare_jobs_list();
         var jobs_json = JSON.stringify(jobs);
         var sequence_start_time;
@@ -2094,7 +2136,7 @@ function execute_sequence(){
                 sequence_start_time = parseInt(sequence_starttime_map[active_sequence]);
                 for (var index = 0; index < job_ids.length; ++index) {
                     var dom_id = index+1;
-                    if (job_ids[index] != "invalid-job"){
+                    if (job_ids[index] !== "invalid-job"){
                         var job_row_var = $("#jobrow"+dom_id);
                         id_reverse_map[job_ids[index]] = dom_id;
                         id_map[index+1] = job_ids[index];
@@ -2121,7 +2163,7 @@ function execute_sequence(){
                         unselect_job_row(dom_id, 0);
                         num_jobs_to_ex.push(index);
                     } else {
-                        if ($("#jobstatusid"+dom_id + " span").text() == INITIAL_JOB_STATUS){
+                        if (!id_map.hasOwnProperty(dom_id) && dom_id in sequences[active_sequence]){
                             id_status_map[dom_id] = "Error";
                             status_change_update_dom(dom_id, "Error");
                             notification_function("command ", "not appropriate for target", "", "danger");
@@ -2131,10 +2173,13 @@ function execute_sequence(){
                 }
             },
             error: function (data) {
-                console.log("ERROR @ execute_sequence function")
+                console.warn("ERROR @ execute_sequence function")
             },
             complete: function(data){
+                console.warn("spoolling changes");
+                respool_deferred_status_changes();
                 exec_int = 0;
+                $("#execute_button").attr({"disabled":false});
             }
         })
     } else {
@@ -2178,40 +2223,59 @@ function w4_output_collapse2(job_row){
 
 function w4_output_collapse(){
     // w4 output un-collapse by click on w4 output job
-    $(this)[0].classList.toggle("active2");
-    var w4_content = $(this)[0].nextSibling;
-    var w4_pre_tag = $(this)[0].nextSibling.firstChild;
+    var this_var = $(this),
+        job_num = this_var[0].innerText.split("Job Output ")[1],
+        job_row_var = $("#jobrow"+job_num),
+        w4_content = this_var[0].nextSibling,
+        w4_pre_tag = this_var[0].nextSibling.firstChild;
+    this_var[0].classList.toggle("active2");
 
     if (w4_content.style.maxHeight) {
         w4_content.style.maxHeight = null;
     } else {
         w4_content.style.maxHeight = (w4_pre_tag.scrollHeight+35) + "px";
     }
+    // checking if job row is highlighted.
+    if (w3_highlighted_array.includes(Number(job_num))){
+        job_row_var.removeClass('selected');
+        var w3_content_row = w3_highlighted_array.indexOf(job_row_var[0].rowIndex);
+        if(w3_content_row > -1){
+            w3_highlighted_array.splice(w3_content_row, 1);
+            as_highlighted_checker[active_sequence] = 0;
+        }
+    } else {
+        job_row_var.addClass('selected');
+        w3_highlighted_array.push(job_row_var[0].rowIndex);
+        as_highlighted_checker[active_sequence] = 1;
+    }
 }
 
 function render_job_output_to_page(job_guid, data){
-    var updateid = id_reverse_map[job_guid];
+    var updateid = id_reverse_map[job_guid],
+        updateid_selector = $("#updateid"+updateid),
+        updatestatus_selector = $("#updatestatusid"+updateid),
+        jobstatus_selector = $("#jobstatusid"+updateid),
+        download_link = $('<a>[Download]</a>');
     clearInterval(start_timer_map[updateid]);
-    $("#updateid"+updateid).empty();
-    $("#updateid"+updateid).attr({"class": ""});
+    updateid_selector.empty();
+    updateid_selector.attr({"class": ""});
     $("#update_spin"+updateid).remove();
     $('<button class="w4_output_collapsible_button" id="w4_output_collapsible_button'+updateid+'">Job Output '+updateid+'</button>')
         .appendTo("#updateid"+updateid);
     $('<div class="w4_output_content" id="w4_output_content'+updateid+'"></div>').appendTo("#updateid"+updateid);
     $('<pre id="updatecontent'+updateid+'"></pre>').appendTo("#w4_output_content"+updateid);
     $("#updatecontent"+updateid).text(data['Content']);
-    var download_link = $('<a>[Download]</a>');
     download_link.attr({"href": "/action/get_full_output_data/?job_id="+job_guid+"&job_number="+updateid});
     $("#w4_output_content"+updateid)
         .append($("<div/>").attr({"id": "download_link_id"+updateid})
             .append(download_link));
-    $("#updatestatusid"+updateid).empty();
-    $("#updatestatusid"+updateid)
+    updatestatus_selector.empty();
+    updatestatus_selector
         .append($("<span/>")
             .attr({"class": "label label-Done"})
             .text("Done"));
-    $("#jobstatusid"+updateid).empty();
-    $("#jobstatusid"+updateid)
+    jobstatus_selector.empty();
+    jobstatus_selector
         .append($("<span/>")
             .attr({"class": "label label-Done"})
             .text("Done"));
@@ -2219,12 +2283,11 @@ function render_job_output_to_page(job_guid, data){
         render_job_output_to_secondary(id_replication_map[updateid], data);
     }
     // w4 output un-collapse by click on w4 output job
-    // $("#w4_output_collapsible_button"+updateid).click(w4_output_collapse);
+    $("#w4_output_collapsible_button"+updateid).click(w4_output_collapse);
 }
 
 function render_job_output_to_secondary(secondary_id, data)
 {
-    console.log(data);
     var replica = $("#"+secondary_id);
     replica.empty();
     replica
@@ -2279,7 +2342,6 @@ function execute_sequence_output(specific_id, counter=0, backoff=2000){
                "truncate": trunc_output_size},
         datatype: 'json',
         success: function(data) {
-            console.log("SUCCESS @ execute_sequence_output  function");
             unselect_job_row(updateid);
             job_row_checker++;
             if (job_row_checker >= num_jobs_to_ex.length){
@@ -2288,7 +2350,7 @@ function execute_sequence_output(specific_id, counter=0, backoff=2000){
                 num_jobs_to_ex = [];
             }
 
-            if (data != 0){  // returns query
+            if (data !== 0){  // returns query
                 render_job_output_to_page(specific_id, data);
             } else {  // doesn't return query
                 render_job_output_timeout(specific_id);
@@ -2300,12 +2362,12 @@ function execute_sequence_output(specific_id, counter=0, backoff=2000){
             // re-call execute_sequence_output function again
 
 //            It's waiting for data in W4
-            console.log("ERROR @ execute_sequence_output function");
+            console.warn("ERROR @ execute_sequence_output function");
             $("#updateid"+updateid).empty();
             $("#updateid"+updateid).attr({"class": "fa fa-refresh fa-spin"});
         }
     }).fail(function(data){
-        console.log("FAIL @ execute_sequence_output  function");
+        console.warn("FAIL @ execute_sequence_output  function");
 
         var status = data.status;
         if(counter >= MAX_MANUAL_CHECK_COUNT){
@@ -2369,6 +2431,21 @@ function make_one_terminal_command(secondary_output_domid, cmd_string, out_strin
 }
 
 function terminal_opener(event) {
+    if(w3_highlighted_array.length > 0){
+        sequences[active_sequence].forEach(function(value) {
+            if (w3_highlighted_array.includes(Number(value))){
+                as_highlighted_checker[active_sequence] = 0;
+                var job_row_var = $("#jobrow"+value);
+                job_row_var.removeClass('selected');
+                w4_output_collapse2(job_row_var[0].rowIndex);
+                var w3_content_row = w3_highlighted_array.indexOf(job_row_var[0].rowIndex);
+                if(w3_content_row > -1){
+                    w3_highlighted_array.splice(w3_content_row, 1);
+                }
+            }
+        });
+    }
+
     var button = $(event.relatedTarget); // Button that triggered the modal
     var terminal_data = button.data('terminaldata'); // Extract info from data-* attributes
     var history = $("#terminal-active-history");

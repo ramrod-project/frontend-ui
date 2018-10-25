@@ -20,7 +20,7 @@ plugins = [{
     "Interface": "",
     "Environment": [],
     "ExternalPorts": [],
-    "InternalPorts": []
+    "InternalPorts": [],
 },
 {
     "id": "1-1-A-AAA",
@@ -33,7 +33,8 @@ plugins = [{
     "Interface": "",
     "Environment": [],
     "ExternalPorts": [],
-    "InternalPorts": []
+    "InternalPorts": [],
+    "Extra": False
 },
 {
     "id": "1-1-A-A",
@@ -46,7 +47,8 @@ plugins = [{
     "Interface": "",
     "Environment": [],
     "ExternalPorts": [],
-    "InternalPorts": []
+    "InternalPorts": [],
+    "Extra": True,
 },
 {
     "id": "1-1-A",
@@ -59,7 +61,8 @@ plugins = [{
     "Interface": "192.16.5.240",
     "Environment": ["STAGE=DEV", "NORMAL=1"],
     "ExternalPorts": ["9999/tcp"],
-    "InternalPorts": ["9999/tcp"]
+    "InternalPorts": ["9999/tcp"],
+    "Extra": False,
 }, {
     "id": "2-2-B",
     "Name": "Plugin2",
@@ -71,7 +74,8 @@ plugins = [{
     "Interface": "10.10.10.10",
     "Environment": ["STAGE=DEV", "NORMAL=2"],
     "ExternalPorts": ["4242/tcp"],
-    "InternalPorts": ["4242/tcp"]
+    "InternalPorts": ["4242/tcp"],
+    "Extra": True,
 }, {
     "id": "3-3-C",
     "Name": "Plugin3",
@@ -83,7 +87,8 @@ plugins = [{
     "Interface": "192.16.5.240",
     "Environment": ["STAGE=DEV", "NORMAL=3"],
     "ExternalPorts": ["4243/udp"],
-    "InternalPorts": ["4243/udp"]
+    "InternalPorts": ["4243/udp"],
+    "Extra": True,
 }]
 
 

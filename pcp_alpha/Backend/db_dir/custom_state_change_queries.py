@@ -8,6 +8,34 @@ import brain
 from .project_db import connect, rtdb
 RBX = rtdb.db("Brain")
 
+
+PROTOCOL_MAP = {"tcp": "TCPPorts", "udp": "UDPPorts"}
+
+def interface_has_port_available(interface, port_protocol):
+    """
+    might also check in here that
+    ports are in the range of 20-65000
+    :return:
+    """
+    result = True
+    port, protocol = port_protocol.split("/")
+    protocol_key = PROTOCOL_MAP[protocol]
+    if_filter = {"Interface": interface}
+    cur = brain.static.RPP.filter(if_filter).run(connect())
+    for doc in cur:
+        if port in doc[protocol_key]:
+            result = False
+    return result
+
+
+def plugin_is_acceptable(plugin):
+    result = True
+    for port_proto in plugin['ExternalPorts']:
+        result &= interface_has_port_available(plugin["Interface"],
+                                               port_proto)
+    return result
+
+
 def update_plugin_to_brain(plugin):
     """
 
@@ -17,9 +45,11 @@ def update_plugin_to_brain(plugin):
     response = None
     if plugin["id"] == "NEW":
         all_ports = "-".join(plugin['ExternalPorts']).replace("/", "")
+        interface_str = plugin['Interface'].replace(".","_")
         del (plugin['id'])  # allow database to generate a new id
-        plugin["ServiceName"] = "{}-{}".format(plugin["Name"],
-                                               all_ports)
+        plugin["ServiceName"] = "{}-{}-{}".format(plugin["Name"],
+                                                  interface_str,
+                                                  all_ports)
         plugin["InternalPorts"] = plugin['ExternalPorts']
         plugin["State"] = "Available"
         plugin["ServiceID"] = "NEW"

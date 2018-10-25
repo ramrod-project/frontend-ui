@@ -3,6 +3,7 @@ Docstrings
 """
 import ast
 import pytest
+import json
 import random
 from pcp_alpha.Backend.pcp_app.views import get_plugin_list, update_plugin, \
     desired_plugin_state_controller
@@ -39,7 +40,7 @@ class TestPluginData(object):
         """
         url_var = "get_plugin_list/"
         response = get_test(url_var, get_plugin_list, rf)
-        db_plugins = ast.literal_eval(response.content.decode())
+        db_plugins = json.loads(response.content)
         for key, value in db_plugins[0].items():
             if value == SAMPLE_GOOD_PLUGIN_ID:
                 assert value == SAMPLE_GOOD_PLUGIN_ID
@@ -53,7 +54,7 @@ class TestPluginData(object):
         """
         url_var = "get_plugin_list/"
         response = get_test(url_var, get_plugin_list, rf)
-        db_plugins = ast.literal_eval(response.content.decode())
+        db_plugins = json.loads(response.content)
         for key, value in db_plugins[0].items():
             if value != SAMPLE_BAD_PLUGIN_ID:
                 assert value != SAMPLE_BAD_PLUGIN_ID
@@ -84,7 +85,8 @@ class TestPluginData(object):
                        'Interface': '10.10.10.10',
                        'OS': 'posix',
                        'ExternalPorts[]': ['1111/tcp'],
-                       'Environment[]': ['STAGE=DEV', 'NORMAL=2']}
+                       'Environment[]': ['STAGE=DEV', 'NORMAL=2'],
+                       'Extra': True}
         response = post_test(url_var, update_data, update_plugin, rf, target_id="2-2-B")
         assert response.status_code == 200
 
@@ -103,7 +105,8 @@ class TestPluginData(object):
                        'Interface': '10.10.10.10',
                        'OS': 'posix',
                        'ExternalPorts[]': ['4242/tcp'],
-                       'Environment[]': ['STAGE=DEV', 'NORMAL=2']}
+                       'Environment[]': ['STAGE=DEV', 'NORMAL=2'],
+                       'Extra': True}
         response = post_test(url_var, update_data, update_plugin, rf, target_id="NEW")
         assert response.status_code == 200
 
