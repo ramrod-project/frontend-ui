@@ -38,7 +38,7 @@ function logs_change_ws_callback(message){
     );
     // update the right side panel
     var message_data = message.data;
-    if(message_data.includes("{")){
+    if(message_data.includes("{") && log_data_js.Severity >= 30){
         sidebar_log_list("danger", sidebar_log_prep(message_data));
     }
 }

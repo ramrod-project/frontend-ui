@@ -1454,30 +1454,49 @@ function add_sequence_tab(clear=true){
         .append('<li id="outB_'+next_tab+'" onclick="synchronize_output_sequence_tabs('+next_tab+')"><a href="#outq_'+next_tab+'" data-toggle="tab">'+next_tab+'</a></li>');
     $('#outq_content')
         .append('<div class="tab-pane" id="outq_'+next_tab+'"></div>');
-    delay_goto_tab(next_tab, 33);
+    // delay_goto_tab(next_tab, 33);
+    setTimeout(
+        function() {
+            synchronize_job_sequence_tabs(next_tab);
+            synchronize_output_sequence_tabs(next_tab);
+        }
+        , 33
+    );
 }
 
 function synchronize_job_sequence_tabs(tab_id){
-    if (exec_int === 1){
-        delay_goto_tab(active_sequence, 5);
-    } else {
-        active_sequence = tab_id;
-        var other_tab = $('#output_tabs a[href="#outq_'+tab_id+'"]');
-        other_tab.tab('show');
-        synchronize_sequence_tab_rows(tab_id);
-        as_checker_func(active_sequence);
-    }
+    // if (exec_int === 1){
+    //     delay_goto_tab(active_sequence, 5);
+    // } else {
+    //     active_sequence = tab_id;
+    //     var other_tab = $('#output_tabs a[href="#outq_'+tab_id+'"]');
+    //     other_tab.tab('show');
+    //     synchronize_sequence_tab_rows(tab_id);
+    //     as_checker_func(active_sequence);
+    // }
+
+    active_sequence = tab_id;
+    var other_tab = $('#output_tabs a[href="#outq_'+tab_id+'"]');
+    other_tab.tab('show');
+    synchronize_sequence_tab_rows(tab_id);
+    as_checker_func(active_sequence);
 }
 function synchronize_output_sequence_tabs(tab_id){
-    if (exec_int === 1){
-        delay_goto_tab(active_sequence, 5);
-    } else {
-        active_sequence = tab_id;
-        var other_tab = $('#jobq_tabs a[href="#jobq_' + tab_id + '"]');
-        other_tab.tab('show');
-        synchronize_sequence_tab_rows(tab_id);
-        as_checker_func(active_sequence);
-    }
+    // if (exec_int === 1){
+    //     delay_goto_tab(active_sequence, 5);
+    // } else {
+    //     active_sequence = tab_id;
+    //     var other_tab = $('#jobq_tabs a[href="#jobq_' + tab_id + '"]');
+    //     other_tab.tab('show');
+    //     synchronize_sequence_tab_rows(tab_id);
+    //     as_checker_func(active_sequence);
+    // }
+
+    active_sequence = tab_id;
+    var other_tab = $('#jobq_tabs a[href="#jobq_' + tab_id + '"]');
+    other_tab.tab('show');
+    synchronize_sequence_tab_rows(tab_id);
+    as_checker_func(active_sequence);
 }
 function synchronize_sequence_tab_rows(sequence_id){
     var _dt = new Date(Number(sequence_starttime_map[sequence_id]) * 1000);
@@ -2117,7 +2136,7 @@ function execute_sequence(){
                 sequence_start_time = parseInt(sequence_starttime_map[active_sequence]);
                 for (var index = 0; index < job_ids.length; ++index) {
                     var dom_id = index+1;
-                    if (job_ids[index] != "invalid-job"){
+                    if (job_ids[index] !== "invalid-job"){
                         var job_row_var = $("#jobrow"+dom_id);
                         id_reverse_map[job_ids[index]] = dom_id;
                         id_map[index+1] = job_ids[index];
@@ -2232,28 +2251,31 @@ function w4_output_collapse(){
 }
 
 function render_job_output_to_page(job_guid, data){
-    var updateid = id_reverse_map[job_guid];
+    var updateid = id_reverse_map[job_guid],
+        updateid_selector = $("#updateid"+updateid),
+        updatestatus_selector = $("#updatestatusid"+updateid),
+        jobstatus_selector = $("#jobstatusid"+updateid),
+        download_link = $('<a>[Download]</a>');
     clearInterval(start_timer_map[updateid]);
-    $("#updateid"+updateid).empty();
-    $("#updateid"+updateid).attr({"class": ""});
+    updateid_selector.empty();
+    updateid_selector.attr({"class": ""});
     $("#update_spin"+updateid).remove();
     $('<button class="w4_output_collapsible_button" id="w4_output_collapsible_button'+updateid+'">Job Output '+updateid+'</button>')
         .appendTo("#updateid"+updateid);
     $('<div class="w4_output_content" id="w4_output_content'+updateid+'"></div>').appendTo("#updateid"+updateid);
     $('<pre id="updatecontent'+updateid+'"></pre>').appendTo("#w4_output_content"+updateid);
     $("#updatecontent"+updateid).text(data['Content']);
-    var download_link = $('<a>[Download]</a>');
     download_link.attr({"href": "/action/get_full_output_data/?job_id="+job_guid+"&job_number="+updateid});
     $("#w4_output_content"+updateid)
         .append($("<div/>").attr({"id": "download_link_id"+updateid})
             .append(download_link));
-    $("#updatestatusid"+updateid).empty();
-    $("#updatestatusid"+updateid)
+    updatestatus_selector.empty();
+    updatestatus_selector
         .append($("<span/>")
             .attr({"class": "label label-Done"})
             .text("Done"));
-    $("#jobstatusid"+updateid).empty();
-    $("#jobstatusid"+updateid)
+    jobstatus_selector.empty();
+    jobstatus_selector
         .append($("<span/>")
             .attr({"class": "label label-Done"})
             .text("Done"));

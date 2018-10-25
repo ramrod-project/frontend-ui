@@ -49,7 +49,7 @@ def gen_logs_data(param_num):
     data_logs_list = []
     for i in range(param_num):
         data_logs_list.append({"rt": time_generator(),
-                               "Severity": randint(1, 10),
+                               "Severity": randint(1, 50),
                                "msg": "Random msg #{}".format(i),
                                "msgDoc": {"a": "Random msgDoc #{}".format(i)},
                                "shost": "host {}".format(randint(1, 10)),
