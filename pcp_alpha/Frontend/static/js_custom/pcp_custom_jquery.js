@@ -764,7 +764,8 @@ function synch_widget_collapse(widget){
 
 function add_intput_to_command_builder(input_id, input_i, template_key){
     var new_input = document.createElement("input"),
-        input_val = current_command_template[template_key][input_i]['Value'];;
+        input_val = current_command_template[template_key][input_i]['Value'];
+    new_input = document.createElement("input");
     // if input.type == file_list
     if (current_command_template[template_key][input_i]['Type'] === 'file_list'){
         var file_list = $(".upload_file_list li div label"),
