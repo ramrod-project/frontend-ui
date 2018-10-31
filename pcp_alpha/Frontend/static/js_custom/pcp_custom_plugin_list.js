@@ -2,18 +2,17 @@
 
 
 //See The Brain Documentation
-var PLUGIN_STATE = "State";
-var PLUGIN_DESIRED_STATE = "DesiredState";
-var PLUGIN_OS = "OS";
-var PLUGIN_EXTRA = "Extra";
-var PLUGIN_NAME = "Name";
-var PLUGIN_INTERFACE = "Interface";
-var PLUGIN_ENVIRONMENT = "Environment";
-var PLUGIN_EXTERNAL_PORTS = "ExternalPorts";
-var PLUGIN_INTERNAL_PORTS = "InternalPorts";
-var ITEM_SPLITTER = ",";
-
-var BLANK_PLUGIN = {
+var PLUGIN_STATE = "State",
+    PLUGIN_DESIRED_STATE = "DesiredState",
+    PLUGIN_OS = "OS",
+    PLUGIN_EXTRA = "Extra",
+    PLUGIN_NAME = "Name",
+    PLUGIN_INTERFACE = "Interface",
+    PLUGIN_ENVIRONMENT = "Environment",
+    PLUGIN_EXTERNAL_PORTS = "ExternalPorts",
+    PLUGIN_INTERNAL_PORTS = "InternalPorts",
+    ITEM_SPLITTER = ",",
+    BLANK_PLUGIN = {
     "id": "NEW",
     "Name": "Name",
     "State": "",
@@ -23,20 +22,17 @@ var BLANK_PLUGIN = {
     "Environment":[],
     "ExternalPorts": [],
     "InternalPorts": []
-};
-
-var plugin_list_map = {};
-var plugin_name_map = {};
-var interfaces = [];
-var interface_map = {};
-var plugin_names = [];
-var num_plugins = [];
-var checked_plugin_list_map = {};
-var checked_plugin_list_array = [];
-
-var env_rgx = /^([0-9a-zA-Z_]{2,100}=[0-9a-zA-Z_]{2,100},{0,1}){0,10}$|^$/;
-var port_rgx2 = /^(\d{2,4}\/(tcp|udp),{0,1}){1,10}$/;
-
+},
+    plugin_list_map = {},
+    plugin_name_map = {},
+    interfaces = [],
+    interface_map = {},
+    plugin_names = [],
+    num_plugins = [],
+    checked_plugin_list_map = {},
+    checked_plugin_list_array = [],
+    env_rgx = /^([0-9a-zA-Z_]{2,100}=[0-9a-zA-Z_]{2,100},{0,1}){0,10}$|^$/,
+    port_rgx2 = /^(\d{2,4}\/(tcp|udp),{0,1}){1,10}$/;
 
 
 function add_plugin_name(name){
@@ -48,9 +44,9 @@ function add_plugin_name(name){
     }
 }
 function handle_selected_plugin_change(new_plugin_name){
-    var selected_plugin = plugin_name_map[new_plugin_name];
-    var required_os = selected_plugin.OS;
-    if (required_os == "all") {
+    var selected_plugin = plugin_name_map[new_plugin_name],
+        required_os = selected_plugin.OS;
+    if (required_os === "all") {
         required_os = false;  // if it doesn't matter, it doesn't matter
     }
     if (selected_plugin.hasOwnProperty("Extra") &&
@@ -141,7 +137,8 @@ function display_plugin_list(plugin_data, plugin_index) {
                                             "data-toggle":"modal",
                                             "data-target":"#controller-modal",
                                             "data-whatever": plugin_data['id'],
-                                            "whatever": "/update_plugin/"+plugin_data['id']+"/"})
+                                            "whatever": "/update_plugin/"+plugin_data['id']+"/",
+                                            "style": "width: 129px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"})
                         .text(plugin_data.ServiceName)
                         .tooltip({
                             classes: {"ui-tooltip": "ui-corner-all ui-widget-shadow ui-state-highlight"},
@@ -217,8 +214,10 @@ function get_plugin_list() {
 
 
 function onclick_plugin_save(event){
-    var plugin = {};
-    $("#plugin-save").attr({"disabled":true});
+    var plugin = {},
+        plugin_response_selector = $("#plugin-response"),
+        plugin_save_selector = $("#plugin-save");
+    plugin_save_selector.attr({"disabled":true});
     plugin["id"] = $("#plugin-id").val();
     plugin[PLUGIN_DESIRED_STATE] = $("#plugin-desired").val();
     plugin[PLUGIN_EXTERNAL_PORTS] =  $("#plugin-external-ports").val().split(ITEM_SPLITTER);
@@ -235,16 +234,16 @@ function onclick_plugin_save(event){
         datatype: 'json',
         success: function(data) {
             get_plugin_list();
-            $("#plugin-save").attr({"disabled":false});
-            $("#plugin-response").removeClass("ui-state-error");
-            $("#plugin-response").addClass("btn-pcp_button_color1");
-            $("#plugin-response").text("Changes Successful - May now close window - "+data.responseText)
+            plugin_save_selector.attr({"disabled":false});
+            plugin_response_selector.removeClass("ui-state-error");
+            plugin_response_selector.addClass("btn-pcp_button_color1");
+            plugin_response_selector.text("Changes Successful - May now close window - "+data.responseText)
         },
         error: function (data) {
-            $("#plugin-response").text("Changes Failed - "+data.responseJSON.first_error);
-            $("#plugin-response").removeClass("btn-pcp_button_color1");
-            $("#plugin-response").addClass("ui-state-error");
-            $("#plugin-save").attr({"disabled":false});
+            plugin_response_selector.text("Changes Failed - "+data.responseJSON.first_error);
+            plugin_response_selector.removeClass("btn-pcp_button_color1");
+            plugin_response_selector.addClass("ui-state-error");
+            plugin_save_selector.attr({"disabled":false});
         }
     });
 }
@@ -252,8 +251,8 @@ function onclick_plugin_save(event){
 function verify_plugin_name(){
     var plugin_name = $("#plugin-name"),
         content = plugin_name[0].value,
-        helper_checker = 0;
-    var plugin_name_option = $("#plugin-name option:selected");
+        helper_checker = 0,
+        plugin_name_option = $("#plugin-name option:selected");
     if(plugin_name_option.length > 0) {
         $("#plugin-save")[0].disabled = false;
         helper_checker = 1;

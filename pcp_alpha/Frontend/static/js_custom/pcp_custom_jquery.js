@@ -2226,8 +2226,8 @@ function w4_output_collapse2(job_row){
     if ($("#updateid"+job_row)[0].children.length > 0 && $("#updatestatusid"+job_row)[0].innerText !== "Error") {
         var w4_output_var = $("#w4_output_collapsible_button"+job_row);
         w4_output_var[0].classList.toggle("active2");
-        var w4_content = w4_output_var[0].nextSibling;
-        var w4_pre_tag = w4_output_var[0].nextSibling.firstChild;
+        var w4_content = w4_output_var[0].nextSibling,
+            w4_pre_tag = w4_output_var[0].nextSibling.firstChild;
         if (w4_content.style.maxHeight) {
             w4_content.style.maxHeight = null;
         } else {
