@@ -126,7 +126,7 @@ def get_specific_brain_output(job_id):
     if the status is done this function will return data for W4
     :return: Brain.Outputs Content if Status is Done or 0 if the data set doesn't exists
     """
-    return brain.queries.is_job_done(job_id)
+    return brain.queries.is_job_complete(job_id)
 
 
 def get_brain_output_content(job_id, max_size=1024):
@@ -136,7 +136,7 @@ def get_brain_output_content(job_id, max_size=1024):
     :return: Brain.Outputs Content if Status is Done or 0 if the data set doesn't exists
     """
     content = None
-    if brain.queries.is_job_done(job_id):
+    if brain.queries.is_job_complete(job_id):
         content = brain.queries.get_output_content(job_id, max_size=max_size)
     return content
 
