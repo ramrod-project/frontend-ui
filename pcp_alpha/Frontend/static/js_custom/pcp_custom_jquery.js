@@ -1076,13 +1076,15 @@ function save_command_to_cloud(){
 
 
 function save_command_by_name(event){
-    var source = event.target || event.srcElement;
-    var plugin_name = current_selected_plugin;
-    var user_completed_command = current_command_template;
-    var save_name = $("#w2_namer").val();
-    $("#w2_up_check_button i").removeClass("fa-check");
-    $("#w2_up_check_button i").addClass("fa-hourglass-end");
-    $("#w2_save_feedback").hide();
+    var source = event.target || event.srcElement,
+        plugin_name = current_selected_plugin,
+        user_completed_command = current_command_template,
+        w2_checkbutton_selector = $("#w2_up_check_button i"),
+        w2_savefeedback_selector = $("#w2_save_feedback"),
+        save_name = $("#w2_namer").val();
+    w2_checkbutton_selector.removeClass("fa-check");
+    w2_checkbutton_selector.addClass("fa-hourglass-end");
+    w2_savefeedback_selector.hide();
     if (save_name.length > 0){
         $.ajax({
             type: "POST",
@@ -1093,25 +1095,25 @@ function save_command_by_name(event){
             },
             datatype: 'json',
             success: function (data) {
-                $("#w2_up_check_button i").removeClass("fa-hourglass-end");
-                $("#w2_up_check_button i").addClass("fa-money");
+                w2_checkbutton_selector.removeClass("fa-hourglass-end");
+                w2_checkbutton_selector.addClass("fa-money");
                 if (data.errors > 0){
-                    $("#w2_save_feedback").text(data.first_error);
-                    $("#w2_save_feedback").show();
+                    w2_savefeedback_selector.text(data.first_error);
+                    w2_savefeedback_selector.show();
                 } else {
-                    var msg1 = "Saved command: ";
-                    var msg2 = save_name;
-                    var msg3 = plugin_name + " / ";
+                    var msg1 = "Saved command: ",
+                        msg2 = save_name,
+                        msg3 = plugin_name + " / ";
                     notification_function(msg1, msg2, msg3);
                 }
                 setTimeout( function() {
-                    $("#w2_up_check_button i").removeClass("fa-money");
-                    $("#w2_up_check_button i").addClass("fa-check");
+                    w2_checkbutton_selector.removeClass("fa-money");
+                    w2_checkbutton_selector.addClass("fa-check");
                 }, 2000);
             },
             error(data){
-                $("#w2_save_feedback").text(data);
-                $("#w2_save_feedback").show();
+                w2_savefeedback_selector.text(data);
+                w2_savefeedback_selector.show();
             }
         });
     }
@@ -1186,9 +1188,10 @@ function close_state_loader(){
 }
 
 function load_job_state_by_name(){
-    $("#download_status").removeClass("fa-cloud-download");
-    $("#download_status").removeClass("fa-money");
-    $("#download_status").addClass("fa-hourglass-end");
+    var download_status_selector = $("#download_status");
+    download_status_selector.removeClass("fa-cloud-download");
+    download_status_selector.removeClass("fa-money");
+    download_status_selector.addClass("fa-hourglass-end");
     $.ajax({
         type: "GET",
         url: "/action/load_state/",
@@ -1226,11 +1229,11 @@ function load_job_state_by_name(){
             set_w3_job_status(full_update=true);
             synchronize_job_sequence_tabs(active_sequence);
             synchronize_output_sequence_tabs(active_sequence);
-            $("#download_status").removeClass("fa-hourglass-end");
-            $("#download_status").addClass("fa-money");
+            download_status_selector.removeClass("fa-hourglass-end");
+            download_status_selector.addClass("fa-money");
             setTimeout( function() {
-                $("#download_status").removeClass("fa-money");
-                $("#download_status").addClass("fa-cloud-download");
+                download_status_selector.removeClass("fa-money");
+                download_status_selector.addClass("fa-cloud-download");
                 close_state_loader();
                 }, 3000);
         }
@@ -1259,12 +1262,13 @@ function save_job_state(){
 
 
 function save_job_state_by_name(){
-    $("#upload_status").removeClass("fa-cloud-upload");
-    $("#upload_status").removeClass("fa-money");
-    $("#upload_status").addClass("fa-hourglass-end");
-    var state_name = $("#w3_namer").val();
-    var local_sequences = JSON.parse(JSON.stringify(sequences, json_set_to_list));
-    var data_package = {"id": state_name,
+    var upload_status_selector = $("#upload_status");
+    upload_status_selector.removeClass("fa-cloud-upload");
+    upload_status_selector.removeClass("fa-money");
+    upload_status_selector.addClass("fa-hourglass-end");
+    var state_name = $("#w3_namer").val(),
+        local_sequences = JSON.parse(JSON.stringify(sequences, json_set_to_list)),
+        data_package = {"id": state_name,
                         "id_map": id_map,
                         "id_reverse_map": id_reverse_map,
                         "id_status_map": id_status_map,
@@ -1272,19 +1276,19 @@ function save_job_state_by_name(){
                         "sequence_expiretime_map": sequence_expiretime_map,
                         "jobs": [],
                         "sequences": local_sequences,
-                        "active_sequence": active_sequence};
-    var num_jobs = $("#addjob_button")[0].value;
+                        "active_sequence": active_sequence},
+        num_jobs = $("#addjob_button")[0].value;
     for (var i = 1; i <= Number(num_jobs); i++){
-        var plugin_name = $("#pluginid"+i)[0].innerText;
-        var plugin_target = $("#pluginid"+i+" span")[0].innerText;
-        var address = $("#addressid"+i)[0].innerText;
-        var job_cell = $("#commandid"+i+" div");
-        var job_str = undefined;
-        var job_js = null;
+        var plugin_name = $("#pluginid"+i)[0].innerText,
+            plugin_target = $("#pluginid"+i+" span")[0].innerText,
+            address = $("#addressid"+i)[0].innerText,
+            job_cell = $("#commandid"+i+" div"),
+            job_str = undefined,
+            job_js = null;
 
         if (job_cell.length >= 1){
             job_str = job_cell[0].innerText;
-            if (job_str != undefined){
+            if (job_str !== undefined){
                 job_js = JSON.parse(job_str);
             }
         }
@@ -1300,11 +1304,11 @@ function save_job_state_by_name(){
         datatype: 'json',
         success: function(data) {
             var job_ids = data;
-            $("#upload_status").removeClass("fa-hourglass-end");
-            $("#upload_status").addClass("fa-money");
+            upload_status_selector.removeClass("fa-hourglass-end");
+            upload_status_selector.addClass("fa-money");
             setTimeout( function() {
-                $("#upload_status").removeClass("fa-money");
-                $("#upload_status").addClass("fa-cloud-upload");
+                upload_status_selector.removeClass("fa-money");
+                upload_status_selector.addClass("fa-cloud-upload");
                 close_state_loader();
                 }, 3000 );
         }
@@ -1335,8 +1339,8 @@ function quick_action_function(source, source_widget_id, source_widget){
     source_widget = target or command
      */
 
-    var BreakException= {};
-    var highlighted_job_row = w3_highlighted_array,
+    var BreakException= {},
+        highlighted_job_row = w3_highlighted_array,
         command_temp_str = JSON.stringify(current_command_template),
         new_job_row_arry_checker = [];
 
@@ -1460,8 +1464,8 @@ function add_sequence_tab(clear=true){
     if (clear){
         sequences[next_tab] = new Set();
     }
-    var new_tab_start_time =  Math.floor((new Date().valueOf()) / 1000);
-    var new_tab_expire_time = new_tab_start_time + 3 * 24 * 60* 60;
+    var new_tab_start_time =  Math.floor((new Date().valueOf()) / 1000),
+        new_tab_expire_time = new_tab_start_time + 3 * 24 * 60* 60;
     sequence_starttime_map[next_tab] = new_tab_start_time.toString();
     sequence_expiretime_map[next_tab] = new_tab_expire_time.toString();
     $('#new_jobq_button')
@@ -2539,5 +2543,16 @@ function anchor_w4_output(job_row){
                 element.scrollIntoView({behavior: "smooth"});
             }
         }, 500);
+    }
+}
+
+function insert_addJob_num(ev){
+    if(ev.keyCode === 13){
+        ev.preventDefault();
+        var input_job_num = document.getElementById("insertAddJobNum"),
+            i;
+        for(i=0; i<input_job_num.value; i++){
+            add_new_job();
+        }
     }
 }
