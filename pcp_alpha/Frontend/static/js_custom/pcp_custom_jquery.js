@@ -3,45 +3,45 @@
 This file was created for project pcp to add jquery functionality and other javascript resources.
 -----------------------------------------------------------------------------------------------------
 */
-var MAX_MANUAL_CHECK_COUNT = 30;
-var INITIAL_JOB_STATUS = "Waiting";
-var JOB_CAN_TERMINATE = {"Waiting":true, "Ready":true};
-var JOB_CAN_NOT_TERMINATE = {"Pending":true, "Active":true};
-var inc = 0;
-var hover_int = 0;
-var active_sequence = "1";
-var sequences = {"1": new Set()};
-var sequence_starttime_map = {"1":  Math.floor((new Date().valueOf())/1000).toString()};
-var sequence_expiretime_map = {"1": undefined};
-var id_map = {};
-var id_status_map = {};
-var status_deferred_updates = [];
-var id_reverse_map = {};
-var id_replication_map = {};
-var target_id_map = {};
-var current_plugin_commands = [];
-var current_saved_commands = {};
-var current_selected_plugin = "";
-var ws_map = {};
-var exec_int = 0;
-var job_select_table;
-var ignoreScrollEvents = false;
-var w3_highlighted_row,
+var MAX_MANUAL_CHECK_COUNT = 30,
+    INITIAL_JOB_STATUS = "Waiting",
+    JOB_CAN_TERMINATE = {"Waiting":true, "Ready":true},
+    JOB_CAN_NOT_TERMINATE = {"Pending":true, "Active":true},
+    inc = 0,
+    hover_int = 0,
+    active_sequence = "1",
+    sequences = {"1": new Set()},
+    sequence_starttime_map = {"1":  Math.floor((new Date().valueOf())/1000).toString()},
+    sequence_expiretime_map = {"1": undefined},
+    id_map = {},
+    id_status_map = {},
+    status_deferred_updates = [],
+    id_reverse_map = {},
+    id_replication_map = {},
+    target_id_map = {},
+    current_plugin_commands = [],
+    current_saved_commands = {},
+    current_selected_plugin = "",
+    ws_map = {},
+    exec_int = 0,
+    job_select_table,
+    ignoreScrollEvents = false,
+    w3_highlighted_row,
     w3_content_index,
     w3_highlighted_array = [],
     as_highlighted_checker = {},
     start_timer_interval,
     countdown_map = {},
-    start_timer_map = {};
-var scroll_position = 0,
-    scroll_checker = 0;
-var num_jobs_to_ex = [];
-var job_row_checker = 0;
-var debug_msg_checker = 0;
-
-var timer_on = 1,
+    start_timer_map = {},
+    scroll_position = 0,
+    scroll_checker = 0,
+    num_jobs_to_ex = [],
+    job_row_checker = 0,
+    debug_msg_checker = 0,
+    timer_on = 1,
     time_var,
     test_server = 'ws://' + window.location.hostname + ':3000/monitor',
+    former_command_list = [],
     test_ws = new WebSocket(test_server);
 as_highlighted_checker[active_sequence] = 0;
 
@@ -208,9 +208,9 @@ $(document).ready(function() {
 });
 
 function sidebar_log_list(param_type, notification_msg){
-    var wrapper_height = $("#content-wrapper-id").height();
-    var log_header_height =- $("#debug_sidebar_id ").height();
-    var sub_height = $(".main-header").height() + $("#sidebar-tabs-id").height() +
+    var wrapper_height = $("#content-wrapper-id").height(),
+        log_header_height =- $("#debug_sidebar_id ").height(),
+        sub_height = $(".main-header").height() + $("#sidebar-tabs-id").height() +
         log_header_height + $(".control-sidebar-heading").height(); // which is 120
     var sidebar_max_height = wrapper_height - sub_height;
     $("#div-sidebar-log-id").css({'max-height': ''+sidebar_max_height,
@@ -232,8 +232,8 @@ function sidebar_log_list(param_type, notification_msg){
 
     }
     // if the length is more than 10 start deleting the first index
-    var log_list_len = $("#control-sidebar-menu-id.control-sidebar-menu li").length;
-    var log_list_id = $("#control-sidebar-menu-id");
+    var log_list_len = $("#control-sidebar-menu-id.control-sidebar-menu li").length,
+        log_list_id = $("#control-sidebar-menu-id");
     if (log_list_len > 10){
         // start deleting the older messages
         log_list_id[0].children[10].remove();
@@ -309,9 +309,10 @@ function unselect_job_row(job_num, param2=1){
 function ex_seq_unselect(param=1){
     // once sequence is executed it will
     // de-select all job rows if selected.
+    var job_table_body_selector = $('#job_table tbody');
     if (param ===1){
-        $('#job_table tbody').off('click');
-        $('#job_table tbody').on( 'click', 'tr', function () {
+        job_table_body_selector.off('click');
+        job_table_body_selector.on( 'click', 'tr', function () {
             var row_index = $(this)[0].rowIndex;
             w4_output_collapse2(row_index);
             if ($(this).hasClass('selected')) {
@@ -332,20 +333,20 @@ function ex_seq_unselect(param=1){
             }
         });
     } else {
-        $('#job_table tbody').off('click');
+        job_table_body_selector.off('click');
     }
 }
 
 function datetext_to_unix_time(dateText){
-     var date_split = dateText.split(" ");
-     var mdy = date_split[0].split("/");
-     var hm = date_split[1].split(":");
-     var dt_obj = new Date(Number(mdy[2]),
+     var date_split = dateText.split(" "),
+         mdy = date_split[0].split("/"),
+         hm = date_split[1].split(":"),
+         dt_obj = new Date(Number(mdy[2]),
                            Number(mdy[0])-1,
                            mdy[1],
                            hm[0],
-                           hm[1], 0, 0);
-     var py_dt = Math.floor(dt_obj.getTime()/1000).toString();
+                           hm[1], 0, 0),
+         py_dt = Math.floor(dt_obj.getTime()/1000).toString();
      return py_dt;
 }
 $(window).scroll(function () {
@@ -436,8 +437,8 @@ function start_ping_pong(){
 
 function open_websocket(selection, callback) {
     // Create a new websocket
-    var server = 'ws://' + window.location.hostname + ':3000/monitor';
-    var ws = new WebSocket(server);
+    var server = 'ws://' + window.location.hostname + ':3000/monitor',
+        ws = new WebSocket(server);
     console.log("Created new websocket to " + server);
 
     // Handle connection opening
@@ -477,8 +478,8 @@ function status_change_update_dom(job_dom_id, status){
 }
 
 function status_change_ws_callback(message) {
-    var data_list = null;
-    var data;
+    var data_list = null,
+        data;
     if ('data' in message && message.data != null && message.data[0] === "[") {
         data_list = JSON.parse(message.data);
         for (var i in data_list){
@@ -550,18 +551,14 @@ function logs_change_ws_callback(message){
 // ** TESTING ONLY **
 // Testing the websocket - for job status
 function test_ws_callback(message) {
-    // console.log(message);
     var data = {};
     if ('data' in message) {
         data = JSON.parse(message.data);
     }
-    // console.log(data);
     var job_id = null;
     if ("id" in data) {
         job_id = data.id;
     }
-    // console.log(job_id);
-    // console.log(id_reverse_map);
     if (job_id in id_reverse_map) {
          console.log("In map!");
     }
@@ -766,14 +763,13 @@ function synch_widget_collapse(widget){
 
 
 function add_intput_to_command_builder(input_id, input_i, template_key){
-    var new_input;
-    var new_selector;
+    var new_input = document.createElement("input"),
+        input_val = current_command_template[template_key][input_i]['Value'];
     new_input = document.createElement("input");
     // if input.type == file_list
     if (current_command_template[template_key][input_i]['Type'] === 'file_list'){
-        var file_list = $(".upload_file_list li div label");
-        // file list dropdown
-        new_selector = $("<select/>")
+        var file_list = $(".upload_file_list li div label"),
+            new_selector = $("<select/>")
             .attr({"class": "form-control mySelect",
                    "style": "width:250px"})
             .attr("id", "argumentid_"+input_id)
@@ -782,7 +778,12 @@ function add_intput_to_command_builder(input_id, input_i, template_key){
         $("#commandIdBuilder")
             .append($("<div/>")
                 .attr({"class": "form-group"})
-                .append(new_selector.css("display", "")));
+                .append($("<span/>")
+                .attr({"class": "control-label col-sm-2"})
+                .text(input_val+":"))
+                .append($("<div/>")
+                    .attr({"class": "col-sm-10"})
+                    .append(new_selector.css("display", ""))));  // new_selector.css("display", "")
 
         for (var n=0; n<file_list.length; n++){
             current_command_template[template_key][input_i]['Value'] = file_list[n].innerText;
@@ -796,14 +797,24 @@ function add_intput_to_command_builder(input_id, input_i, template_key){
     }
     // if input.type == textbox
     else {
+        // var input_val = current_command_template[template_key][input_i]['Value'];
+        if(input_val === ""){
+            input_val = "Input Box "+input_i;
+        }
         new_input.label = "argumentid_("+input_i+")";
         new_input.id = "argumentid_"+input_id;
         new_input.title = current_command_template[template_key][input_i]["Tooltip"];
         new_input.onchange = update_argument;
         new_input.onkeyup = update_argument;
-        new_input.placeholder = current_command_template[template_key][input_i]['Value'];
+        new_input.placeholder = input_val;
 
-        var new_input_holder = $("<div/>").append(new_input);
+        var new_input_holder = $("<div/>").append(
+            $("<span/>")
+                .attr({"class": "control-label col-sm-2"})
+                .text(input_val+":"))
+            .append($("<div/>")
+                .attr({"class": "col-sm-10"})
+                .append(new_input));
         $("#commandIdBuilder").append(new_input_holder);
         $("#"+new_input.id).tooltip({
                                       classes: {"ui-tooltip": "highlight"},
@@ -822,14 +833,14 @@ function add_intput_to_command_builder(input_id, input_i, template_key){
 
 function get_commands_func(){
     // plugin name the user clicked
-    var row_id = $(this)[0].parentElement.id.substring(10, $(this)[0].id.length);
-    var plugin_name_var = $("#name_tag_id"+row_id+" a span")[1].innerText;
+    var row_id = $(this)[0].parentElement.id.substring(10, $(this)[0].id.length),
+        plugin_name_var = $("#name_tag_id"+row_id+" a span")[1].innerText,
+        tooltipColumn_selector = $("#tooltipColumn");
     current_selected_plugin = plugin_name_var;
-    var check_content_var = false;
-    var quick_action_button;
-    var argid = 0;
-    if ($("#tooltipColumn").hasClass("fixed_tooltip")) {
-        $("#tooltipColumn").removeClass("fixed_tooltip");
+    var check_content_var = false,
+        argid = 0;
+    if (tooltipColumn_selector.hasClass("fixed_tooltip")) {
+        tooltipColumn_selector.removeClass("fixed_tooltip");
     }
     close_command_loader();
     $.ajax({
@@ -838,38 +849,46 @@ function get_commands_func(){
         data: {"plugin_name": plugin_name_var},
         datatype: 'json',
         success: function(data) {
+            var int,
+                tooltipHeader_selector = $(".tooltipHeader"),
+                tooltipContent_selector = $(".tooltipContent"),
+                contentArgument_selector = $(".theContentArgument"),
+                boxfooterid_selector = $("#boxtwofooterid"),
+                theContent_selector = $("#theContent");
             // check if w2 should re-render or not
             current_plugin_commands = data;
-            if($(".theContent li a").length > 0 && $(".theContent li a").length === data.length){
-                for(var int = 0; int < $(".theContent li a").length; int++){
-                    if(data[0].CommandName == $(".theContent li a")[int].text){
+            if(former_command_list.length > 0 && former_command_list.length === data.length){
+                for(int = 0; int < former_command_list.length; int++){
+                    if(former_command_list.includes(data[int].CommandName)){
                         check_content_var = true;
                     }
                 }
             }
             // empty content in w2 if different plugin name was clicked previously
             if (!check_content_var){
-                $(".tooltipHeader").empty();
-                $(".tooltipContent").empty();
-                $(".theContentArgument").empty();
-                $("#boxtwofooterid").empty();
+                tooltipHeader_selector.empty();
+                tooltipContent_selector.empty();
+                contentArgument_selector.empty();
+                boxfooterid_selector.empty();
             }
 
-        	$("#theContent").empty();
+            former_command_list = [];
+        	theContent_selector.empty();
 
             // display command(s) in w2
-            if (data.length == 1){
-                $(".theContent").append($("<li/>").text(data));
+            if (data.length === 1){
+                theContent_selector.append($("<li/>").text(data));
             } else {  // no commands for plugin
                 for(var i = 0; i < data.length; i++) {
-                    $(".theContent")
-                        .append($("<li id='commandid' class='commandclass' onclick='#'/>")
+                    theContent_selector
+                        .append($("<li/>").attr({"id": "commandid"+(i+1), "class": "commandclass", "onclick": "#"})
                             .append($("<a/>")
                                 .attr({"id": "acommandid"+(i+1), "class": "acommandclass", "href": "#"})
                                 .text(data[i].CommandName)));
+                    former_command_list.push(data[i].CommandName);
                 }
             }
-            // $(".theContent")
+            // theContent_selector
             //     .append("<div/>")
             //     .attr({"style": "width:250px"});
             $("#theContentHeader")
@@ -881,25 +900,25 @@ function get_commands_func(){
                 $("#w2_persist_button").show();
                 //Compare user selection of command to query
                 for(var i2 = 0; i2 < data.length; i2++) {
-                    if(data[i2].CommandName == $(this)[0].text){
+                    if(data[i2].CommandName === $(this)[0].text){
                         arg_int = data[i2].Inputs.length;
                         current_command_template = data[i2];
                     }
                 }
                 //tooltip
-                $(".tooltipHeader").empty();
-                $(".tooltipHeader")
+                tooltipHeader_selector.empty();
+                tooltipHeader_selector
                     .append($("<p/>")
                         .append($("<b/>")
                             .text("Tooltip:")));
-                $(".tooltipContent").empty();
+                tooltipContent_selector.empty();
                 $("#preToolTipContent").empty();
-                $(".tooltipContent")
+                tooltipContent_selector
                     .append("<pre id='preToolTipContent'>" + current_command_template.Tooltip + "</pre>");
 
                 // $("#toolTipTest")
-                var header = document.getElementById("toolTipTest");
-                var sticky = header.offsetTop;
+                var header = document.getElementById("toolTipTest"),
+                    sticky = header.offsetTop;
                   if (window.pageYOffset > sticky) {
                       header.classList.add("sticky");
                   } else {
@@ -907,13 +926,13 @@ function get_commands_func(){
                   }
 
                 //footer
-                $(".theContentArgument").empty();
-                $("#boxtwofooterid").empty();
-                $(".theContentArgument")
-                    .append($("<div id='commandIdBuilder'/>")
-                        .text($(this)[0].text));
+                contentArgument_selector.empty();
+                boxfooterid_selector.empty();
+                contentArgument_selector
+                    .append($("<div id='commandIdBuilder'/>").append($("<b/>")
+                        .text("Command: "+$(this)[0].text)));
                 // JSON development data on W2 footer
-                $("#boxtwofooterid")
+                boxfooterid_selector
                     .append($("<div id='JSON_Command_DATA'/>")
                         .attr({"draggable": "true",
                             "ondragstart": "drag_command(event)",
@@ -922,7 +941,7 @@ function get_commands_func(){
                         .text(JSON.stringify(current_command_template)));
 
                 // quick action button to add command template to a highlighted job row
-                quick_action_button = $("<a/>")
+                var quick_action_button = $("<a/>")
                         .attr({"href": "#",
                             "id": "add_command_to_job_id",
                             "class":"btn btn-social-icon btn-linkedin btn-xs pull-right"})
@@ -948,9 +967,9 @@ function get_commands_func(){
 }
 
 function update_argument(event){
-    var source = event.target || event.srcElement;
-    var cmditem = get_number_from_id(source.id, "argumentid_");
-    var assumed_input = "Inputs";
+    var source = event.target || event.srcElement,
+        cmditem = get_number_from_id(source.id, "argumentid_"),
+        assumed_input = "Inputs";
     if (Number(cmditem) >= current_command_template[assumed_input].length){
         cmditem = cmditem - current_command_template[assumed_input].length;
         assumed_input = "OptionalInputs";
@@ -1002,8 +1021,9 @@ function load_command_from_cloud(){
 }
 
 function render_command_to_json_display(event){
-    var source = event.target || event.srcElement;
-    var saved_cmd_name = source.innerHTML;
+    var source = event.target || event.srcElement,
+        commandIdBuilder_selector = $("#commandIdBuilder"),
+        saved_cmd_name = source.innerHTML;
     current_command_template = current_saved_commands[saved_cmd_name];
     var quick_action_button = $("<a/>")
                         .attr({"href": "#",
@@ -1011,9 +1031,9 @@ function render_command_to_json_display(event){
                             "class":"btn btn-social-icon btn-linkedin btn-xs pull-right"})
                         .append($("<i/>").attr({"id": "add_command_to_job_id2" ,"class": "fa fa-tasks"}));
     $("#JSON_Command_DATA").text(JSON.stringify(current_saved_commands[saved_cmd_name]));
-    $("#commandIdBuilder").empty();
-    $("#commandIdBuilder").text(saved_cmd_name);
-    $("#commandIdBuilder").append(quick_action_button);
+    commandIdBuilder_selector.empty();
+    commandIdBuilder_selector.text(saved_cmd_name);
+    commandIdBuilder_selector.append(quick_action_button);
     $("a#add_command_to_job_id").click(add_command_to_job_sc_button);
 }
 
@@ -1754,16 +1774,16 @@ function hover_leave(){
 
 function hover_drop(){
     hover_int = 1;
-    var hover_object = $(this);
-    var hover_object_id = hover_object[0].id;
-    var hover_object_num = hover_object_id.substring(6, hover_object_id.length);
+    var hover_object = $(this),
+        hover_object_id = hover_object[0].id,
+        hover_object_num = hover_object_id.substring(6, hover_object_id.length);
 
     // status box
-    var plugin_name_text = hover_object[0].children[1].innerText;
-    var location_text = hover_object[0].children[2].innerText;
-    var command_text = hover_object[0].children[3].innerText;
-    var status_td = hover_object[0].children[4];
-    var status_text = false;
+    var plugin_name_text = hover_object[0].children[1].innerText,
+        location_text = hover_object[0].children[2].innerText,
+        command_text = hover_object[0].children[3].innerText,
+        status_td = hover_object[0].children[4],
+        status_text = false;
     if (status_td != undefined){
         status_text = hover_object[0].children[4].innerText;
     }
@@ -2206,8 +2226,8 @@ function w4_output_collapse2(job_row){
     if ($("#updateid"+job_row)[0].children.length > 0 && $("#updatestatusid"+job_row)[0].innerText !== "Error") {
         var w4_output_var = $("#w4_output_collapsible_button"+job_row);
         w4_output_var[0].classList.toggle("active2");
-        var w4_content = w4_output_var[0].nextSibling;
-        var w4_pre_tag = w4_output_var[0].nextSibling.firstChild;
+        var w4_content = w4_output_var[0].nextSibling,
+            w4_pre_tag = w4_output_var[0].nextSibling.firstChild;
         if (w4_content.style.maxHeight) {
             w4_content.style.maxHeight = null;
         } else {
