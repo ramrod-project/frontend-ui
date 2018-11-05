@@ -764,7 +764,8 @@ function synch_widget_collapse(widget){
 
 function add_intput_to_command_builder(input_id, input_i, template_key){
     var new_input = document.createElement("input"),
-        input_val = current_command_template[template_key][input_i]['Value'];
+        input_val = current_command_template[template_key][input_i]['Value'],
+        input_name = current_command_template[template_key][input_i]['Name'];
     new_input = document.createElement("input");
     // if input.type == file_list
     if (current_command_template[template_key][input_i]['Type'] === 'file_list'){
@@ -780,7 +781,7 @@ function add_intput_to_command_builder(input_id, input_i, template_key){
                 .attr({"class": "form-group"})
                 .append($("<span/>")
                 .attr({"class": "control-label col-sm-2"})
-                .text(input_val+":"))
+                .text(input_name+":"))
                 .append($("<div/>")
                     .attr({"class": "col-sm-10"})
                     .append(new_selector.css("display", ""))));  // new_selector.css("display", "")
@@ -795,11 +796,9 @@ function add_intput_to_command_builder(input_id, input_i, template_key){
                         .text(file_list[n].innerText));
         }
     }
-    // if input.type == textbox
     else {
-        // var input_val = current_command_template[template_key][input_i]['Value'];
-        if(input_val === ""){
-            input_val = "Input Box "+input_i;
+        if(input_name === ""){
+            input_name = "Input Box "+input_i;
         }
         new_input.label = "argumentid_("+input_i+")";
         new_input.id = "argumentid_"+input_id;
@@ -811,7 +810,7 @@ function add_intput_to_command_builder(input_id, input_i, template_key){
         var new_input_holder = $("<div/>").append(
             $("<span/>")
                 .attr({"class": "control-label col-sm-2"})
-                .text(input_val+":"))
+                .text(input_name+":"))
             .append($("<div/>")
                 .attr({"class": "col-sm-10"})
                 .append(new_input));
