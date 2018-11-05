@@ -293,12 +293,13 @@ function notification_function(msg1, msg2, msg3 = "directed to Job #", param_typ
 
 function unselect_job_row(job_num, param2=1){
     var job_row_var = $("#jobrow"+job_num);
-    if ($("#jobrow"+job_num).hasClass('selected')){
-        $("#jobrow"+job_num).removeClass('selected');
+    if (job_row_var.hasClass('selected')){
+        job_row_var.removeClass('selected');
         // remove selected and from the selected list
         var w3_content_row = w3_highlighted_array.indexOf(job_row_var[0].rowIndex);
         if(w3_content_row > -1){
             w3_highlighted_array.splice(w3_content_row, 1);
+            as_highlighted_checker[active_sequence] = 0;
         }
         if(param2 !== 1){
             ex_seq_unselect(0);
@@ -880,7 +881,7 @@ function get_commands_func(){
             } else {  // no commands for plugin
                 for(var i = 0; i < data.length; i++) {
                     theContent_selector
-                        .append($("<li/>").attr({"id": "commandid"+(i+1), "class": "commandclass", "onclick": "#"})
+                        .append($("<li/>").attr({"id": "licommandid"+(i+1), "class": "commandclass", "onclick": "#"})
                             .append($("<a/>")
                                 .attr({"id": "acommandid"+(i+1), "class": "acommandclass", "href": "#"})
                                 .text(data[i].CommandName)));
@@ -2035,7 +2036,7 @@ function prepare_jobs_list(){
             continue;
         }
         var w3_status = w3_rows[j].children[4].innerText;
-        if(w3_status == false){
+        if(w3_status === false){
             $("#updatestatusid"+(j+1))
                 .append($("<span/>")
                     .attr({"class": "label label-danger"})
@@ -2045,7 +2046,7 @@ function prepare_jobs_list(){
                     .attr({"class": "label label-danger"})
                     .text("Error"));
             jobs.push({});
-        } else if (w3_status == "Valid") {
+        } else if (w3_status === "Valid") {
             $(".gridSelect, #jobrow"+(j+1)).droppable({
                 disabled: true
             });
