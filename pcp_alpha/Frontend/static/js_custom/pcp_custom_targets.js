@@ -115,14 +115,10 @@ function update_target_form(){
     var double_quotes_str = str_target.replace(/'/g, '"');
     JSON.stringify(double_quotes_str);
     var json_object = JSON.parse(double_quotes_str);
-    $("#plugin_name")[0].innerHTML = json_object['Name'];
-    $("#plugin_name")[0].innerText = json_object['Name'];
-    $("#plugin_name")[0].value = json_object['Name'];
+    $("#plugin_name").val(json_object.Name);
 
     var target_json_port = json_object['ExternalPorts'][0];
     var target_port = target_json_port.split("/")[0];
 
-    $("#port_num")[0].innerHTML = target_port;
-    $("#port_num")[0].innerText = target_port;
-    $("#port_num")[0].value = target_port;
+    $("#port_num").val(target_port);
 }

@@ -1,5 +1,4 @@
 from random import randint, randrange
-# import datetime
 import time
 
 
