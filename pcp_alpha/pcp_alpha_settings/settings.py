@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/dev/ref/settings/
 """
 
 import os
-import socket
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -26,15 +25,7 @@ SECRET_KEY = 'b@f^m5hng9-mwsp-(gxw0re*ym8%-k5gq5rg%-)9k^(%1-fx!j'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-
-# Will add host ip address to ALLOWED_HOST list
-s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-s.connect(("8.8.8.8", 80))
-
-
-ALLOWED_HOSTS = ['frontend', '127.0.0.1', ''.join(s.getsockname()[0]), '192.168.43.83', '192.168.1.13']
-s.close()
-
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 PREREQ_APPS = [
