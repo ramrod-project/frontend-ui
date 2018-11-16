@@ -6,8 +6,9 @@ from rethinkdb.errors import ReqlOpFailedError
 
 def switch_to_error():
     connection_var = connect()
-    query_obj = rtdb.db("Brain").table("Jobs").filter(
-        rtdb.row["Status"].ne("Error")).changes().run(connection_var)
+    query_obj = rtdb.db("Brain").table("Jobs").filter((
+        rtdb.row["Status"].ne("Error") &
+        rtdb.row["Status"].ne("Done"))).changes().run(connection_var)
     for query_item in query_obj:
         if query_item and query_item.get("new_val") and query_item['new_val'].get("id"):
             print(query_item['new_val']['id'])
@@ -16,6 +17,8 @@ def switch_to_error():
                 {"OutputJob": query_item['new_val'],
                  "Content": "data\noutput\n{}\n\n".format(query_item['new_val']["JobCommand"]["Inputs"][0]["Value"])}).
                   run(connection_var))
+            print(rtdb.db("Brain").table("Jobs").get(
+                query_item['new_val']['id']).update({"Status": "Done"}).run(connection_var))
             print(rtdb.db("Brain").table("Jobs").get(
                 query_item['new_val']['id']).update({"Status": "Error"}).run(connection_var))
 
