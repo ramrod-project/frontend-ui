@@ -475,6 +475,7 @@ function status_change_update_dom(job_dom_id, status){
         $("#update_spin"+job_dom_id).remove();
         // $("#updateid"+job_dom_id).empty();
         // $("#updateid"+job_dom_id).append($("<span/>").text(status));
+        execute_sequence_output(id_map[job_dom_id]);
     }
 }
 
