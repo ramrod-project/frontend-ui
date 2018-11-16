@@ -2161,6 +2161,7 @@ function execute_sequence(){
                         var job_row_var = $("#jobrow"+dom_id);
                         id_reverse_map[job_ids[index]] = dom_id;
                         id_map[index+1] = job_ids[index];
+                        $("#trashjob"+dom_id).append("&nbsp;");
                         $("#trashjob"+dom_id)
                             .parent()
                             // stop job
