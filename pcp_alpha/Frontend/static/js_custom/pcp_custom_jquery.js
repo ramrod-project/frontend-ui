@@ -1677,6 +1677,7 @@ function reset_job_from_w3(event){
         drop_target_into_job_row(inc, row_js, job_target_row_json[0].textContent);
         drop_command_into_hole(row_command_js, row_command_str_js, $("tr td#commandid"+inc), "" + inc);
     }
+    set_w3_job_status();
 }
 
 // Clear job content in w3
@@ -2160,6 +2161,7 @@ function execute_sequence(){
                         var job_row_var = $("#jobrow"+dom_id);
                         id_reverse_map[job_ids[index]] = dom_id;
                         id_map[index+1] = job_ids[index];
+                        $("#trashjob"+dom_id).append("&nbsp;");
                         $("#trashjob"+dom_id)
                             .parent()
                             // stop job
