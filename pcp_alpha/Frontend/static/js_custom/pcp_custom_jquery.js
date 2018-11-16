@@ -473,8 +473,8 @@ function status_change_update_dom(job_dom_id, status){
         clearInterval(start_timer_map[job_dom_id]);
         clearInterval(countdown_map[job_dom_id]);
         $("#update_spin"+job_dom_id).remove();
-        $("#updateid"+job_dom_id).empty();
-        $("#updateid"+job_dom_id).append($("<span/>").text(status));
+        // $("#updateid"+job_dom_id).empty();
+        // $("#updateid"+job_dom_id).append($("<span/>").text(status));
     }
 }
 
@@ -2289,16 +2289,16 @@ function render_job_output_to_page(job_guid, data){
     $("#w4_output_content"+updateid)
         .append($("<div/>").attr({"id": "download_link_id"+updateid})
             .append(download_link));
-    updatestatus_selector.empty();
-    updatestatus_selector
-        .append($("<span/>")
-            .attr({"class": "label label-Done"})
-            .text("Done"));
-    jobstatus_selector.empty();
-    jobstatus_selector
-        .append($("<span/>")
-            .attr({"class": "label label-Done"})
-            .text("Done"));
+    // updatestatus_selector.empty();
+    // updatestatus_selector
+    //     .append($("<span/>")
+    //         .attr({"class": "label label-Done"})
+    //         .text("Done"));
+    // jobstatus_selector.empty();
+    // jobstatus_selector
+    //     .append($("<span/>")
+    //         .attr({"class": "label label-Done"})
+    //         .text("Done"));
     if (id_replication_map.hasOwnProperty(updateid)){
         render_job_output_to_secondary(id_replication_map[updateid], data);
     }
