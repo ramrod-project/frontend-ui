@@ -12,6 +12,8 @@ RUN apk add --no-cach python3 libmagic && \
 
 RUN apk add supervisor
 RUN apk add nginx
+RUN mkdir /run/nginx
+RUN chown nginx /run/nginx
 
 RUN pip3 install --upgrade django==2.0.1 docker rethinkdb ramrodbrain ua-parser
 
