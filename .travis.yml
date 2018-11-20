@@ -48,6 +48,7 @@ script:
   - docker run -d --rm --name frontend -p 8080:8080 -e "STAGE=QA" -e "LOGLEVEL=DEBUG"
     --network test ramrodpcp/frontend-ui:test
   - sleep 10
+  - docker exec -ti frontend ps au 
   - curl http://127.0.0.1:8080
   - docker ps
   - docker logs frontend

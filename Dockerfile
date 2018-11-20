@@ -20,7 +20,7 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 WORKDIR /srv/app/pcp_alpha
 
-EXPOSE 8081 8080
+EXPOSE 8080
 
 ENTRYPOINT [ "/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 #ENTRYPOINT python3 manage.py runserver 0.0.0.0:8080
