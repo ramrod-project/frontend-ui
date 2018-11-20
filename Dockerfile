@@ -1,5 +1,7 @@
 FROM alpine:3.7
 
+RUN apk update
+
 RUN apk add --no-cach python3 libmagic && \
     python3 -m ensurepip && \
     rm -r /usr/lib/python*/ensurepip && \
@@ -18,6 +20,7 @@ WORKDIR /srv/app
 COPY . .
 
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY nginx.conf /etc/nginx/nginx.conf
 
 WORKDIR /srv/app/pcp_alpha
 
