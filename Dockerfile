@@ -23,6 +23,7 @@ COPY . .
 
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY nginx.conf /etc/nginx/nginx.conf
+COPY pcp_alpha/certs/* /etc/nginx/
 
 WORKDIR /srv/app/pcp_alpha
 
