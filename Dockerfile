@@ -16,7 +16,7 @@ WORKDIR /srv/app
 
 COPY . .
 
-COPY .supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 WORKDIR /srv/app/pcp_alpha
 
