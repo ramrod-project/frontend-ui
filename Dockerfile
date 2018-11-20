@@ -8,14 +8,19 @@ RUN apk add --no-cach python3 libmagic && \
     if [[ ! -e /usr/bin/python ]]; then ln -sf /usr/bin/python3 /usr/bin/python; fi && \
     rm -r /root/.cache
 
+RUN apk add supervisor
+
 RUN pip3 install --upgrade django==2.0.1 docker rethinkdb ramrodbrain ua-parser
 
 WORKDIR /srv/app
 
 COPY . .
 
+COPY .supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
 WORKDIR /srv/app/pcp_alpha
 
-EXPOSE 8080
+EXPOSE 8081 8080
 
-ENTRYPOINT python3 manage.py runserver 0.0.0.0:8080
+ENTRYPOINT [ "/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+#ENTRYPOINT python3 manage.py runserver 0.0.0.0:8080
